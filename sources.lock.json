@@ -2,7 +2,7 @@
   "schema_version": 1,
   "vllm-ascend": {
     "repository": "vllm-project/vllm-ascend",
-    "revision": "799801feef347469d5e9b39374b9210e0d4f7431"
+    "revision": "d4d2957e5208c2f464d4625c05920bd29ea233cb"
   },
   "vllm": {
     "repository": "vllm-project/vllm",
