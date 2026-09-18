@@ -1,7 +1,0 @@
-{
-  "version": 1,
-  "generated_on": "2026-09-11",
-  "note": "No accepted missing-path exceptions remain after deleting the obsolete CLI snapshot. Current references must resolve; fixed exceptions must be removed.",
-  "accepted": [],
-  "accepted_counts_by_attribution": {}
-}

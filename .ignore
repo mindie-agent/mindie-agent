@@ -1,3 +1,0 @@
-# Source repositories stay visible to native ripgrep searches. Their own ignores apply.
-!vllm/
-!vllm-ascend/

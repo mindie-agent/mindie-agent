@@ -1,4 +1,0 @@
-interface:
-  display_name: "vLLM Ascend Validation Report"
-  short_description: "Summarize change validation evidence and coverage"
-  default_prompt: "Use $vllm-ascend-change-validation to produce a report from this diff and the supplied validation evidence, explaining coverage and limitations."

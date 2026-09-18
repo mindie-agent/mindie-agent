@@ -1,4 +1,0 @@
-interface:
-  display_name: "Ascend Triton Evidence Report"
-  short_description: "Summarize existing Triton stage evidence"
-  default_prompt: "Use $ascend-triton-workflow to consolidate the supplied operator stage evidence into a report and explain its coverage."

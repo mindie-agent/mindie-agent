@@ -1,5 +1,0 @@
-interface:
-  display_name: vLLM Ascend Distributed Debug
-  short_description: Diagnose multi-rank and collective failures
-  default_prompt: Use $vllm-ascend-distributed-debug to diagnose failures whose behavior
-    depends on ranks, nodes, process groups, collectives or distributed endpoints.

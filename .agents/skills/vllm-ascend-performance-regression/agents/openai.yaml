@@ -1,6 +1,0 @@
-interface:
-  display_name: vLLM Ascend Performance Regression
-  short_description: Run controlled baseline and candidate performance comparisons
-  default_prompt: Use $vllm-ascend-performance-regression to run or analyze a controlled
-    baseline-versus-candidate serving experiment and apply metric-specific regression
-    thresholds.

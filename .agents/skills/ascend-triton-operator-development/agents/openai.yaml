@@ -1,5 +1,0 @@
-interface:
-  display_name: Ascend Triton Operator Development
-  short_description: Develop or migrate a correct Ascend Triton kernel
-  default_prompt: Use $ascend-triton-operator-development to implement a first correct
-    Ascend Triton operator or migrate an existing GPU Triton kernel.

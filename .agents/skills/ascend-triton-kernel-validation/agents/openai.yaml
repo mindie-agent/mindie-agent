@@ -1,4 +1,0 @@
-interface:
-  display_name: "Ascend Triton Kernel Validation"
-  short_description: "Run Triton wrappers against real reference cases"
-  default_prompt: "Use $ascend-triton-kernel-validation to run my Triton wrapper against its reference over the actual input cases needed by its consumers."

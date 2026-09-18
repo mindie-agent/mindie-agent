@@ -1,97 +1,46 @@
-# vllm-ascend-workspace
+# MindIE Agent
 
-**中文** | **[English](README.en.md)**
+通过领域上下文、稳定的远端工具，以及知识与经验反馈闭环，帮助 Agent 完成 Ascend 开发任务。
 
-完全面向 Agent 的 [vLLM](https://github.com/vllm-project/vllm) 与 [vLLM Ascend](https://github.com/vllm-project/vllm-ascend) 开发工作区。人表达目标、决定实质取舍；Agent 完成代码修改、环境准备、实验执行和证据整理。
+**使用入口：[Codex Plugin](https://github.com/mindie-agent/mindie-agent-codex)。**
+在自己的业务仓库或 Codex 原生任务中使用插件。Codex、知识服务、收集整理和裁判在本机运行；远端通过 remote-dev 提供 NPU 执行环境。
 
-## 架构与关键特性
+## 当前进展
 
-![VAWS 总体架构](docs/architecture/svg/00-overview.svg)
+首个领域为 vLLM / vLLM-Ascend：一个入口 Skill，三个知识工具与十一个 remote-dev 核心工具。
+已完成 Hook 收集、独立整理、授权分发、独立任务复用及使用效果裁判。
+两个原生 Codex CLI 任务完成了 16 项真实 NPU 算子检查和反馈传播验收。
 
-按需介入、输入可追溯、有效成果复用、资源与执行受管、经验随用随取、问题有迹可循。
+[实机验收记录](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/real-acceptance-2026-09-18.md)记录了证据与边界。
+Grok PR 事件投递尚未通过，每日增量维护保留为兜底；跨领域 Desktop 会话控制和其他 Harness 尚未验收。
 
-[查看完整架构图册](docs/architecture/README.md)：总体架构、关键特性，以及 workspace、remote-dev、coordinator、knowledge、top、diagnostics 的组件架构与职责说明，附 SVG 和高清 PNG。
+## 仓库分工
 
-## 从任务开始
+| 仓库 | 职责 |
+|---|---|
+| [mindie-agent](https://github.com/mindie-agent/mindie-agent) | 架构、领域边界与交付入口 |
+| [mindie-agent-codex](https://github.com/mindie-agent/mindie-agent-codex) | Codex Plugin、Hook 和原生任务接入 |
+| [knowledge](https://github.com/mindie-agent/knowledge) | 知识与经验运行时、收集、分发、裁判和反馈 |
+| [knowledge-vllm-ascend](https://github.com/mindie-agent/knowledge-vllm-ascend) | vLLM-Ascend 领域内容 |
+| [remote-dev](https://github.com/mindie-agent/remote-dev) | 远端文件、命令、作业与产物 |
+| [coordinator](https://github.com/mindie-agent/coordinator) | 受管环境、资源与执行 |
+| [diagnostics](https://github.com/mindie-agent/diagnostics) | 组件诊断 |
+| [npu-top](https://github.com/mindie-agent/npu-top) | 可选 NPU 观测 |
 
-在 Agent 客户端中打开工作区，直接说明目标，例如：
+当前正式 feed 仍在 [knowledge 的 knowledge/vllm-ascend 分支](https://github.com/mindie-agent/knowledge/tree/knowledge/vllm-ascend)。
+把该 feed 与既有领域内容统一到 knowledge-vllm-ascend，是下一轮内容整理；改名本身不代表该迁移已完成。
 
-> Review 这个 PR，重点检查错误处理和兼容性。
+## 架构与下一步
 
-> 这次用指定机器上的现有容器 `repro-case`，代码在 `/work/vllm`，按 `/work/start-case.sh` 复现问题。
+[Issue #195](https://github.com/mindie-agent/mindie-agent/issues/195) 为架构基线，遵循[设计原则](docs/design-principles.md)。[目标架构](docs/architecture.md)与[后续迭代](docs/next-steps.md)在本仓库维护。
+一会话一个主要领域，用户持续直接指导；跨域使用同一 Harness 中可直接交互的独立任务。
 
-PR review 直接使用原生 Git 和文件工具。已有容器任务直接把 host、container、cwd 和原启动命令交给 remote-dev，保留容器内代码和环境；无需先绑定模式、同步源码、拉起受管服务或准备知识库。两类任务都不因缺少 GitHub 身份配置而要求初始化。知识按需参考，缺失或未就绪不阻止独立工作。容器调用示例和边界见 [remote-dev 消费说明](docs/remote-dev-consumption.md)。
+下一轮优先完成可分发安装/更新、统一领域内容发布入口和经验发布策略，再用一个真实跨域任务验证会话隔离与通信。
 
-需要完整开发配置时，再明确提出：
+本仓库由 VAWS 原地更名，保留正常 Git 历史和既有材料。
+旧 workspace/bootstrap、源码托管、自动更新器、客户端 Hook/MCP 接线与自动加载的业务 Skill 已从当前树删除。
+各组件直接使用新包名、导入名和配置，不提供旧名别名或旧安装通道。
+业务方法后续按领域重新整理进插件与知识库，旧实现仅保留在 Git 历史中。
+历史验证只证明其记录的版本与范围。
 
-> 初始化这个工作区，配好 vLLM Ascend 的开发环境。
-
-初始化复用已有配置，按需准备源码与锁定依赖，并一次配置已安装的 Codex、Cursor、Claude、Grok 和 Kimi。需要完整多仓编辑时，准备整个独立目录：VAWS、`vllm/` 和 `vllm-ascend/` 都是普通独立 clone，同卷可复用对象硬链接，不依赖 alternates 或父 worktree 的清理行为。已有实际源码和准备结果直接复用，普通 Review 和直接 endpoint 任务不调用 `vaws_start`。恢复会话沿用原目录、来源和环境。版本选择见[源码合同](docs/source-workspace.md)，客户端实际目录能力见[编辑隔离合同](docs/native-workspace-isolation.md)；历史[验收记录](docs/unified-session-validation-2026-09-13.md)不代表新布局已在全部客户端通过。安装与平台行为见 [dependency-plane.md](docs/dependency-plane.md) 和 [platform-contract.md](docs/platform-contract.md)。
-
-日常工作只需说明目标和影响结果的输入，例如：
-
-- 用这份模型权重和启动参数拉一个四卡推理服务。
-- 比较这两个 baseline/candidate 工作树的吞吐。
-- 为这个 workload 采集 profiling，分析耗时算子。
-- 找出 graph 与 eager 输出首次分歧的位置。
-- 拉起本地 NPU 集群监控页面。
-
-Agent 按任务选择工具或技能；执行引用、状态推进和报告由工具根据实际结果生成。缺失证据保留为未知或无法下结论。
-
-## 设计与职责
-
-后续变更以[九条设计原则](docs/design-principles.md)为依据：
-
-- 代码与命令入口完全围绕 Agent 使用设计。
-- 封闭世界故障进入所属组件代码与回归测试；有用经验可用普通 Markdown 留存，保留条件、证据和不确定性。知识按需参考，查库和录入不成为任务步骤。
-- 生命周期、校验和记录在各 owner 内部完成；业务入口接收业务输入和真实证据。
-- 从完整任务衡量简化效果。未正式发布的接口直接替换，删除旧入口与兼容别名。
-
-工作区负责项目材料、客户端接线和业务技能。`remote-dev` 负责明确 endpoint 的远程 I/O，`vaws-coordinator` 负责托管源码、环境、NPU 与执行，`vaws-knowledge` 负责 Markdown 知识查询和捕获，`vaws-top` 负责集群观察。观察不分配设备；任务身份来自原生客户端关联。已有容器和无关工作树继续保留。
-
-知识库面向 vLLM-Ascend、vLLM、NPU、AI 和推理基础设施。外部资料导入、PR 经验整理、专题研究和跨次摘要由独立工具或 Grok Bot 维护；普通任务仍然按需查询、阅读原文或留存 Markdown。图片和扫描件优先使用 Agent 自身能力，任务启动不加载新的多模态模型。能力与资源边界见[知识维护说明](docs/knowledge-maintenance.md)，VAWS 工具自身的验证证据见[独立归档](docs/validation/README.md)。
-
-## 日志与问题定位
-
-工具自动记录调用、分段耗时、运行时选择和失败因果；正常任务无需额外登记。默认日志等级为 `INFO`，需要细节时可为启动进程设置 `VAWS_LOG_LEVEL=DEBUG`。日志写入平台用户目录：Windows 为 `%LOCALAPPDATA%/vaws/diagnostics`，Linux 为 `$XDG_STATE_HOME/vaws/diagnostics`（未设置时使用 `~/.local/state/vaws/diagnostics`）；`VAWS_DIAGNOSTICS_ROOT` 可覆盖该位置。MCP stdout 保持协议专用，诊断输出不会混入工具结果。
-
-提交 issue 时，可以用已选择的 Python 执行工作区绝对路径下的 `.agents/scripts/vaws_diagnose.py bundle --root <diagnostics-root> --output <support.json>`，生成有界、脱敏的本地诊断材料；可加返回的 `--operation-id` 缩小范围。该命令不重跑业务、不连接远端、不自动上传。独立的上报 worker 按安装配置运行，不给每个任务增加步骤。日志存储失败不会改写业务结果；未观察到的退出或清理保留为未知。等级、容量和上报边界见[诊断系统](docs/diagnostics-system.md)。
-
-## 业务技能
-
-首次仓库设置见一次性 [repo-init](.agents/bootstrap/repo-init/SKILL.md)；本地监控生命周期使用[监控命令](docs/npu-fleet-monitor.md)。两者均不进入业务 Skill 自动发现。
-
-| 技能                       | 用途                                             | 何时使用               |
-| ------------------------ | ---------------------------------------------- | ------------------ |
-| **modelscope**           | 下载、续传、查看进度并 SHA256 校验 ModelScope 模型权重                  | 需要把模型权重下载到明确目录时 |
-| **vllm-ascend-serving**  | 在远程容器上一键拉起 vLLM Ascend 推理服务，由 coordinator 管理执行和资源 | 需要在远程机器上起推理服务时     |
-| **vllm-ascend-benchmark** | 在远程容器上运行 `vllm bench serve` 性能基准测试，支持多轮预热和统计聚合     | 需要测量吞吐或延迟时 |
-| **ascend-memory-profiling** | 采集并分析昇腾 NPU 的 HBM 显存占用，按组件拆分并溯源 | 需要分析 vLLM 推理服务的显存占用时 |
-| **ascend-profiling-collection** | 采集 Ascend torch profiler：起服务、控制 profile 窗口、运行 workload、远端 analyse 并写 manifest | 需要采集 kernel_details/trace_view 时 |
-| **ascend-profiling-analysis** | 分析已采集的 profiler root/manifest，生成 step/layer/operator/cross-rank 诊断报告 | 需要分析 profiling 结果或生成报告时 |
-| **vllm-ascend-graph-debug** | 定位图编译、捕获、重放及 graph/eager 正确性分歧 | 图模式失败或与 eager 结果不一致时 |
-| **vllm-ascend-correctness-validation** | 对比 baseline/candidate、eager/graph、离线/在线和 AISBench 正确性 | 需要精度验证或输出对拍时 |
-| **vllm-ascend-change-validation** | 对照代码 diff 汇总已执行的验证证据和报告 | 明确要求汇总验证结果或生成正式报告时 |
-| **vllm-ascend-performance-regression** | 运行交替 A/B 实验并分析波动和回退阈值 | 判断吞吐或延迟是否回退时 |
-| **vllm-ascend-distributed-debug** | 从拓扑、端点、collective 和逐 rank 事件诊断分布式故障 | 故障依赖多卡、多机或 rank 时 |
-| **ascend-tensor-dump** | 有界采集中间张量并定位首个数值分叉的 stage，覆盖 eager 与图模式 | 输出错误或两个配置结果不一致，需要定位到层、stage 或单算子时 |
-| **ascend-operator-debug** | 将模型故障缩减为单算子并运行 dtype/shape/layout/mode 矩阵 | 需要最小化算子复现时 |
-| **ascend-triton-operator-development** | 从 PyTorch 或 GPU Triton 语义生成首个正确的 Ascend Triton 实现 | 新建或迁移 Triton 算子时 |
-| **ascend-triton-kernel-validation** | 检测 PyTorch fallback 并执行显式正确性矩阵 | 验证 Triton 候选实现时 |
-| **ascend-triton-kernel-optimization** | 根据正确性和 profiler 证据优化已选 kernel | 优化已正确的 Triton kernel 时 |
-| **ascend-triton-workflow** | 汇总已有 Triton 阶段证据并检查关联 | 明确要求阶段汇总报告时 |
-| **vllm-ascend-pd-serving** | 启动和观察一个 prefill/decode 拓扑，并做 HTTP smoke | 部署 PD 分离服务时 |
-
-技能按任务选用。详细输入和方法位于对应 `SKILL.md` 的参考资料；普通本地文件与 Git 操作使用原生工具。[AGENTS.md](AGENTS.md) 是客户端入口，[文档索引](docs/README.md) 区分当前契约和历史验收证据。
-
-## 仓库与本地状态
-
-规范仓库是 `vllm-ascend-workspace/vllm-ascend-workspace`。`vllm/`、`vllm-ascend/` 是按需准备的普通独立 Git 仓库，仍可直接查看和修改。`sources.lock.json` 固定官方来源与精确组合：默认 `development` 使用同一 Ascend SHA 声明的 verified vLLM commit，`release` 使用其发布 tag 对应的完整 SHA；后者不代表完整稳定 Ascend 发布栈。人可以分别运行 `git -C vllm diff` 和 `git -C vllm-ascend diff`，父 status 不能代表内仓修改。
-
-首次进入 fresh clone 时，AGENTS 引导一次性的 [repo-init](.agents/bootstrap/repo-init/SKILL.md)：复用已确认的 GitHub 用户名，独立询问个人 Fork、可选 Star 和[社区协作](docs/community-collaboration.md)。支持 `gh` 登录与 token；后续任务复用选择和已完成步骤，不重新询问。首次只准备主仓和工具，业务源码按任务需要准备。关闭协作保留中央知识读取与本地日志，停止自动上传和贡献。开发 Fork 属于个人账号，`origin` 指向个人 Fork，`upstream` 保留官方来源。
-
-需要独立编辑或受管准备时，新任务一次选择精确主仓、组件与实际源码，准备入口和 native attachment 自动展开 sources；显式 `sources={}` 保持优先。MCP gateway 固定该任务的组件环境，恢复时不改版本。原生 launcher 在实际目录启动进程；Codex/Cursor worktree 回调只能返回实际 workspace 并接通 scope，不能声称替父 UI 切换目录。人可打开返回目录查看源码，Agent 使用实际 cwd 和绝对路径。知识配置、内容和模型/index 缓存按明确的工程关联复用。见[个人 Fork 与自动更新](docs/forks-and-updates.md)。共享 root 下的容器命名、留言和算子产物缓存由组件处理，权重沿用服务器现有路径，无需 Agent 填写身份或登记成果。见[身份与协调](docs/identity-and-agent-coordination.md)。
-
-`.agents/skills/` 保存业务技能，`.agents/lib/` 保存共享消费代码，`.agents/scripts/` 保存客户端接线和维护工具。客户端投影统一指向规范技能。运行状态和私人配置放在未跟踪的 `.vaws-local/`，凭据不入库。公开知识只使用包生成的脱敏副本。
-
-工作区许可证独立于两个业务仓库；它们分别遵循各自上游许可证。
+[English](README.en.md)

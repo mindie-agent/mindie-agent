@@ -1,112 +1,14 @@
-# vllm-ascend-workspace
+# MindIE Agent
 
-**[中文](README.md)** | **English**
+Domain context, remote execution tools, and a knowledge/experience/usefulness feedback loop for Ascend development.
 
-An Agent-only workspace for developing [vLLM](https://github.com/vllm-project/vllm) and [vLLM Ascend](https://github.com/vllm-project/vllm-ascend). People express goals and make substantive choices; the Agent edits code, prepares environments, runs experiments and reports evidence.
+Start with the [Codex plugin](https://github.com/mindie-agent/mindie-agent-codex) in your own business repository.
+Codex and the knowledge loop run locally; remote-dev provides remote NPU execution.
 
-## Architecture and key features
+This repository contains [architecture](docs/architecture.md), [design principles](docs/design-principles.md)
+and [next steps](docs/next-steps.md). Component ownership and current evidence are listed in the [Chinese README](README.md).
 
-![VAWS architecture overview (Chinese)](docs/architecture/svg/00-overview.svg)
-
-Capabilities used on demand, traceable inputs, reuse of valid work, managed resources and execution, optional knowledge, and observable operations.
-
-[Explore the architecture atlas (Chinese)](docs/architecture/README.md) for the overview, key features, and architecture and responsibilities of workspace, remote-dev, coordinator, knowledge, top and diagnostics. Editable SVGs and high-resolution PNGs are included.
-
-## Start with a task
-
-Open this checkout in an Agent client and describe the task:
-
-> Review this PR for error handling and compatibility.
-
-> Use the existing container `repro-case` on the specified host, with code in `/work/vllm`, and reproduce the issue using `/work/start-case.sh`.
-
-PR review uses native Git and file tools. Existing-container work passes host, container, cwd and the original command directly to remote-dev, preserving that code and environment. Neither task needs a mode binding, source sync, managed execution, knowledge preparation or GitHub identity setup. Knowledge is optional reference. See [remote-dev consumption](docs/remote-dev-consumption.md) for examples and explicit limitations.
-
-When you need the complete development configuration, ask:
-
-> Initialize this workspace for vLLM Ascend development.
-
-Initialization reuses configuration, installs locked packages and runs `vaws_client_setup.py --client all --apply` to configure installed Codex, Cursor, Claude, Grok and Kimi clients together. Users need neither manually invoke a Skill nor install a personal client build. When independent local editing or managed preparation is needed, short project guidance selects a fixed revision, prepares the required sources and component environment, and reuses an existing preparation. Ordinary review and direct endpoint work skip `vaws_start`. Users keep working in their usual client, and resume retains the original directory and environment. See [workspace isolation](docs/native-workspace-isolation.md) and [source workspaces](docs/source-workspace.md) for the current contracts; [the session acceptance record](docs/unified-session-validation-2026-09-13.md) records the scope verified at that revision. Installation and platform behavior are in [dependency-plane.md](docs/dependency-plane.md) and [platform-contract.md](docs/platform-contract.md).
-
-For daily work, describe the outcome and the inputs that matter:
-
-- Start a four-card inference service with these model weights and engine options.
-- Compare throughput between these baseline and candidate worktrees.
-- Collect a profile for this workload and identify the slow operators.
-- Locate the first stage where graph and eager outputs diverge.
-- Start the local fleet dashboard.
-
-The Agent selects the relevant tool or skill. Tools generate execution references, state transitions and reports from actual results. Missing evidence remains unknown or inconclusive.
-
-## Ownership and design
-
-[The nine design principles](docs/design-principles.md) govern subsequent changes:
-
-- Agent consumption is the design target for every code and command entry.
-- Deterministic failures belong in component code and regression tests. Useful lessons may be saved as ordinary Markdown with their conditions, evidence and uncertainty. Knowledge is optional reference; lookup and capture add no required task steps.
-- Each runtime owner handles its own lifecycle, validation and records. Business calls accept business inputs and evidence.
-- Simplification is measured across the whole task. Unreleased APIs may change directly; retired interfaces have no compatibility aliases.
-
-The workspace owns project materials, client wiring and business skills. `remote-dev` owns explicit endpoint I/O; `vaws-coordinator` owns managed sources, environments, NPUs and execution; `vaws-knowledge` owns Markdown lookup and capture; `vaws-top` owns fleet observation. Observation does not allocate devices. Native attachments establish task identity. Existing containers and unrelated worktrees are preserved.
-
-## Logs and issue diagnostics
-
-Tools automatically record operations and phase timings at `INFO` level. Set
-`VAWS_LOG_LEVEL=DEBUG` for additional diagnostic detail. Logs use the platform
-user state directory (`LOCALAPPDATA/vaws/diagnostics` on Windows or
-`XDG_STATE_HOME/vaws/diagnostics` on POSIX); `VAWS_DIAGNOSTICS_ROOT` overrides it.
-MCP stdout remains protocol data; diagnostics use bounded, rotated JSONL files
-and stderr. Missing diagnostics or log write failures do not block business work.
-
-To attach a sanitized local support file to an issue, run the following using
-the selected runtime interpreter and the absolute workspace script path:
-
-```text
-python /path/to/W/.agents/scripts/vaws_diagnose.py bundle --root /path/to/diagnostics --output /path/to/support.json
-```
-
-The command reads existing local evidence. It does not upload, replay a task or
-contact a remote host. Automatic reporting is configured separately at
-installation; normal tools only write logs. Missing cleanup or timing evidence
-stays unknown. See the [diagnostics contract](docs/diagnostics-system.md).
-
-## Business skills
-
-First-use setup follows the one-time [repo-init reference](.agents/bootstrap/repo-init/SKILL.md); local monitor lifecycle uses [monitor commands](docs/npu-fleet-monitor.md). Neither participates in automatic business Skill discovery.
-
-| Skill                  | Purpose                                                                                      | When to use                                                |
-| ---------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **modelscope**       | Download, resume, status-check, and SHA256-verify ModelScope model weights                  | When model weights need to be downloaded into an explicit local directory |
-| **vllm-ascend-serving** | Launch a vLLM Ascend inference service on a remote container, through coordinator-owned execution | When you need an inference service on a remote machine |
-| **vllm-ascend-benchmark** | Run `vllm bench serve` performance benchmarks on a remote container, with multi-run warmup and statistical aggregation | When measuring throughput/latency; use performance-regression for code comparisons |
-| **ascend-memory-profiling** | Profile and attribute HBM memory usage on Ascend NPU, with per-component breakdown and evidence chains | When you need to analyze memory consumption of a vLLM serving workload |
-| **ascend-profiling-collection** | Collect Ascend torch-profiler data: start service, bracket profile window, run workload, remote analyse, and write a manifest | When you need kernel_details/trace_view captures |
-| **ascend-profiling-analysis** | Analyze collected profiler roots/manifests and generate step/layer/operator/cross-rank reports | When you need to analyze profiling output |
-| **vllm-ascend-graph-debug** | Diagnose graph compile, capture, replay, and graph/eager correctness divergence | When graph mode fails or diverges from eager mode |
-| **vllm-ascend-correctness-validation** | Compare baseline/candidate, eager/graph, offline/online, and AISBench correctness | When validating accuracy or normalized outputs |
-| **vllm-ascend-change-validation** | Consolidate experimental validation evidence against a code diff | When explicitly consolidating validation evidence or producing a formal report |
-| **vllm-ascend-performance-regression** | Run alternating A/B experiments and assess variance and regression thresholds | When deciding whether throughput or latency regressed |
-| **vllm-ascend-distributed-debug** | Diagnose topology, endpoint, collective, and per-rank distributed failures | When a failure depends on ranks, nodes, or parallel topology |
-| **ascend-tensor-dump** | Capture bounded intermediate tensor dumps and locate the first divergent stage, in eager or graph mode | When output is wrong or two configurations disagree and the divergence must be localized |
-| **ascend-operator-debug** | Reduce a model failure to one operator and run an explicit input/mode matrix | When building an isolated operator reproducer |
-| **ascend-triton-operator-development** | Produce a first correct Ascend Triton candidate from PyTorch or GPU Triton semantics | When creating or migrating a Triton operator |
-| **ascend-triton-kernel-validation** | Detect PyTorch fallback and execute an explicit correctness matrix | When validating an Ascend Triton candidate |
-| **ascend-triton-kernel-optimization** | Optimize the selected kernel using correctness and profiler evidence | When tuning a correct Ascend Triton kernel |
-| **ascend-triton-workflow** | Consolidate existing Triton stage evidence and check its associations | When a stage summary report is requested |
-| **vllm-ascend-pd-serving** | Start and observe one prefill/decode topology with HTTP smoke checks | When deploying disaggregated PD serving |
-
-Skill selection follows the task. Detailed inputs and procedures live beside the relevant `SKILL.md`; ordinary local files and Git use native tools. [AGENTS.md](AGENTS.md) is the client entry and [the documentation index](docs/README.md) separates current contracts from dated evidence.
-
-## Repository and local state
-
-The canonical repository is `vllm-ascend-workspace/vllm-ascend-workspace`. `vllm/` and `vllm-ascend/` are ordinary independent Git repositories prepared on demand. `sources.lock.json` fixes their official sources and exact revision pair: `development` uses the verified vLLM commit declared by the selected Ascend revision; `release` uses the full commit behind its declared vLLM release tag. Both use the same Ascend revision, so `release` does not mean a complete stable Ascend stack. Each repository can be inspected and edited directly; parent Git status does not report child changes.
-
-First entry to a fresh clone follows the one-time [repo-init reference](.agents/bootstrap/repo-init/SKILL.md): reuse the confirmed GitHub username and independently ask about a personal Fork, optional Star and [community collaboration](docs/community-collaboration.md). Both `gh` login and token authentication are supported. Later tasks reuse choices and completed stages. Setup prepares the workspace and tools; business sources are prepared on demand. Declining collaboration retains central reference reads and local logs while disabling automatic uploads and contributions. Development forks belong to personal users, with `origin` pointing to the personal fork and `upstream` retaining the official source.
-
-A new task needing independent editing or managed preparation uses the local fixed commit and a matching ready cache. `--latest` explicitly checks upstream; ordinary startup does not pull main or update the personal fork. Startup and native attachments expand the selected sources automatically, while explicit `sources={}` takes precedence. The MCP gateway routes calls to the task's fixed environment, and resume retains those versions. See [forks and updates](docs/forks-and-updates.md).
-
-The returned `workspace` is W, the root for task configuration, Skills and environment. Business shell and Git operations use the returned `cwd` and `repository`, which identify the commit target; the default is the selected Ascend repository. VAWS scripts and Skills remain under W and use absolute paths. Complete task directories use independent clones for the workspace and its business repositories. Native launchers start in the actual selected directory; a worktree callback returning a path does not prove the parent client UI switched directories. Related workspaces reuse knowledge configuration, content and model/index state through their explicit project association. See [source workspaces](docs/source-workspace.md).
-
-`.agents/skills/` contains business skills, `.agents/lib/` contains shared consumer code, and `.agents/scripts/` contains client wiring and maintenance tools. Client projections route to canonical skills. Runtime state and private configuration stay under untracked `.vaws-local/`; credentials are never committed. Public knowledge uses only package-prepared redacted copies.
-
-The workspace license is independent of the two business repositories, which retain their upstream licenses.
+The former workspace bootstrap, updater, source management, client wiring and automatically exposed Skills
+have been removed. No legacy aliases or installation path are provided. Git history retains prior work.
+The first implementation covers one domain and a real NPU reuse/feedback loop; it does not establish
+cross-domain Desktop interaction, other Harness support or reliable Grok PR event delivery.
