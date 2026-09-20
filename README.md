@@ -3,16 +3,13 @@
 通过领域上下文、稳定的远端工具，以及知识与经验反馈闭环，帮助 Agent 完成 Ascend 开发任务。
 
 **使用入口：[Codex Plugin](https://github.com/mindie-agent/mindie-agent-codex)。**
-在自己的业务仓库或 Codex 原生任务中使用插件。Codex、知识服务、收集整理和裁判在本机运行；远端通过 remote-dev 提供 NPU 执行环境。
+在自己的业务仓库或 Harness 原生任务中显式调用插件。知识服务以及启用贡献后的整理脱敏在本机运行；远端通过 remote-dev 提供执行环境。当前仍是发布前重构，默认不采集。
 
 ## 当前进展
 
-首个领域为 vLLM / vLLM-Ascend：一个入口 Skill，三个知识工具与十一个 remote-dev 核心工具。
-已完成 Hook 收集、独立整理、授权分发、独立任务复用及使用效果裁判。
-两个原生 Codex CLI 任务完成了 16 项真实 NPU 算子检查和反馈传播验收。
+首个领域为 vLLM / vLLM-Ascend。共享知识生命周期重构已合入，Codex 的原生只读使用及跨版本任务/远端作业接续已验证；Kimi 和 Claude Code 在独立仓库开发和实机验收。
 
-[实机验收记录](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/real-acceptance-2026-09-18.md)记录了证据与边界。
-Grok PR 事件投递尚未通过，每日增量维护保留为兜底；跨领域 Desktop 会话控制和其他 Harness 尚未验收。
+[统一实施进度](docs/implementation-status.md)区分实现、原生宿主、真实发布和新任务使用证据。历史 NPU 验收不自动证明当前重构版本；三个适配器仍有最终 Hook/贡献链路和 Windows 实机工作待完成。
 
 ## 仓库分工
 
@@ -20,22 +17,23 @@ Grok PR 事件投递尚未通过，每日增量维护保留为兜底；跨领域
 |---|---|
 | [mindie-agent](https://github.com/mindie-agent/mindie-agent) | 架构、领域边界与交付入口 |
 | [mindie-agent-codex](https://github.com/mindie-agent/mindie-agent-codex) | Codex Plugin、Hook 和原生任务接入 |
-| [knowledge](https://github.com/mindie-agent/knowledge) | 知识与经验运行时、收集、分发、裁判和反馈 |
+| [mindie-agent-kimi](https://github.com/mindie-agent/mindie-agent-kimi) | Kimi 原生插件、Hook、任务身份和本地模型适配 |
+| [mindie-agent-cc](https://github.com/mindie-agent/mindie-agent-cc) | Claude Code 原生插件、Hook、任务身份和本地模型适配 |
+| [knowledge](https://github.com/mindie-agent/knowledge) | 共享知识与经验运行时、可选贡献、分发和反馈 |
 | [knowledge-vllm-ascend](https://github.com/mindie-agent/knowledge-vllm-ascend) | vLLM-Ascend 领域内容 |
 | [remote-dev](https://github.com/mindie-agent/remote-dev) | 远端文件、命令、作业与产物 |
 | [coordinator](https://github.com/mindie-agent/coordinator) | 受管环境、资源与执行 |
 | [diagnostics](https://github.com/mindie-agent/diagnostics) | 组件诊断 |
 | [npu-top](https://github.com/mindie-agent/npu-top) | 可选 NPU 观测 |
 
-当前正式 feed 仍在 [knowledge 的 knowledge/vllm-ascend 分支](https://github.com/mindie-agent/knowledge/tree/knowledge/vllm-ascend)。
-把该 feed 与既有领域内容统一到 knowledge-vllm-ascend，是下一轮内容整理；改名本身不代表该迁移已完成。
+当前正式 feed 是 [knowledge-vllm-ascend/main](https://github.com/mindie-agent/knowledge-vllm-ascend/tree/main)。插件及知识库目前跟踪各自远端主分支；后续再切换 release。
 
 ## 架构与下一步
 
 [Issue #195](https://github.com/mindie-agent/mindie-agent/issues/195) 为架构基线，遵循[设计原则](docs/design-principles.md)。[目标架构](docs/architecture.md)与[后续迭代](docs/next-steps.md)在本仓库维护。
 一会话一个主要领域，用户持续直接指导；跨域使用同一 Harness 中可直接交互的独立任务。
 
-下一轮优先完成可分发安装/更新、统一领域内容发布入口和经验发布策略，再用一个真实跨域任务验证会话隔离与通信。
+当前优先完成三个适配器的入口、Hook/MCP、更新和知识闭环实机验收；旧业务 Skill 与 profiling 暂缓。所有设计取舍优先遵守九条原则，常规任务不承担额外强制流程。
 
 本仓库由 VAWS 原地更名，保留正常 Git 历史和既有材料。
 旧 workspace/bootstrap、源码托管、自动更新器、客户端 Hook/MCP 接线与自动加载的业务 Skill 已从当前树删除。
