@@ -9,6 +9,8 @@ client hook, MCP server, Skill catalogue, dependency lock or business source che
 Use the user's business repository and the selected Harness plugin for actual tasks.
 
 Follow [design principles](docs/design-principles.md) and the [architecture](docs/architecture.md).
+MindIE Agent inherits all nine VAWS design principles; retiring the old runtime
+does not retire or replace those principles.
 Keep implementation status distinct from the target design and real acceptance evidence.
 Do not add old VAWS aliases or an alternative legacy installation path.
 Do not alter the user's unrelated skills, plugins or MCP configuration.
