@@ -18,4 +18,4 @@ MindIE Agent 完整继承 VAWS 的以下九条设计原则。产品更名、Plug
 
 这些原则不预先决定包的数量、命令的数量、必须有多强的 session，或是否建立统一 Core。具体方案需要说明它减少了哪种已经发生或有依据的任务成本。已有正确实现和有效验证证据也是可复用成果。
 
-当前运行合同见 [target-state.md](target-state.md)，受管执行入口见 [coordinator-consumption.md](coordinator-consumption.md)。
+当前产品边界见[架构](architecture.md)，授权、更新和本地状态见[Harness 生命周期](harness-boundary-and-lifecycle.md)，实际完成情况见[统一实施进度](implementation-status.md)。
