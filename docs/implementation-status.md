@@ -1,46 +1,68 @@
 # 统一实施进度
 
-2026-09-21，三个适配器已合入 main。本文记录代码合入和实际验收范围，不是首版发布通过结论。Windows 按用户安排在合入后使用专门机器推进。
+2026-09-21，本轮已完成的 P0/P1 修正已合入共享运行时、三个适配器与知识仓库。macOS 已有原生使用、实际 OS 定时投递、知识撤下和反馈自动提 PR 的证据；最终业务经验的发布、Bot 审阅合入与新任务使用仍在推进。本文不作为首版全部验收通过的结论。Windows 仍在首版支持目标内，按用户安排在合入后使用专门机器验收。
 
-主任务统一负责设计、文档、跨仓审核、进度和最终验收；具体代码实现交给本地 Kimi/Grok，Claude Code 适配由专门子代理协调。常规取舍优先遵守[九条原则](design-principles.md)，不额外增加每任务审批和收尾负担。宿主明确要求的用户信任确认仍由用户完成。
+MindIE Agent 完整继承[九条原则](design-principles.md)。主任务负责设计、文档、跨仓审核和最终验收；具体代码实现交给本地 Kimi/Grok，Claude Code 适配由专门子代理协调。检查范围与实际变化相称，不增加每任务必查、必写、必投票或额外审批流程。宿主要求的信任确认仍由用户完成。
 
-## 实现与真实证据分列
+## 当前合入状态
 
-| 范围 | 实现进展 | 已有真实证据 | 尚未完成 |
-| --- | --- | --- | --- |
-| 共享知识运行时 | [PR45](https://github.com/mindie-agent/knowledge/pull/45) 已合入：持久授权、原子空闲判断、单次尝试、精确回执及提交后清理 | 对真实已合并知识 PR 的未知结果核对、准确版本正文恢复；Codex 原生读取与跨版本接续实际消费新接口 | 最终适配器的贡献闭环复验；组件 CI 不代替这一项 |
-| Codex | [PR3](https://github.com/mindie-agent/mindie-agent-codex/pull/3) 已合入，main `8ffc72d`；安装配置绑定、持久授权、完整版本切换 | Luna/max 原生只读与完整正文读取；同任务更新后旧入口和原远端作业仍可用；无继承配置环境变量或临时 MCP 配置的原生安装验收；真实安装后注入结果丢失，4.47 秒恢复旧包并回读；本地整理器 53.3 秒保留已有 NPU 数值和不确定性 | 新 Stop Hook 的原生信任及最终贡献闭环；可选反馈；OS 定时触发 |
-| Kimi | [独立仓库 PR1](https://github.com/mindie-agent/mindie-agent-kimi/pull/1) 已合入，main `421e22b`；安装代码独立保留，MCP/Hook/调度器绑定配置 | 2.0.2 / K3 max：原生回读两 MCP、两 Hook、七命令；显式只读；同任务及旧 MCP 跨更新保留授权并清理原作业；移走源码、清除配置环境变量仍可读取；真实安装结果丢失后 6.92 秒恢复旧包并回读 | 整理质量仍有未经证实的执行时序推断；最终贡献闭环；当前宿主 fork 补验；OS 定时触发 |
-| Claude Code | [独立仓库 PR1](https://github.com/mindie-agent/mindie-agent-cc/pull/1) 已合入，main `d8545a3`；原生身份、显式启用及共享组件适配 | 2.1.269 / deepseek-flash high：通用 remote、只读启用及正文读取；跨真实更新同任务、旧 MCP、授权和原作业仍可用；新任务及原生 fork 拒绝继承授权；关闭贡献时 Stop 无采集；开启后真实 Stop 调用本地整理器一次，隐私扫描拦截两候选，无发布；12.96 秒完成真实原生回滚 | 有效领域经验生成及发布/清理/新任务复用闭环；默认审批路径；OAuth-only 整理器；OS 定时触发 |
-| 知识分发和 Bot | 正式内容源为 [knowledge-vllm-ascend/main](https://github.com/mindie-agent/knowledge-vllm-ascend/tree/main)；使用现有 Grok Bot 软件 | 先前候选有真实 PR、Bot 定时补查合入、新任务/NPU 消费证据 | 最终重构版本必须重新核对；原生 PR 事件投递不由定时补查成功推定 |
+| 范围 | 本轮合入 | 解决的问题 |
+| --- | --- | --- |
+| 共享知识运行时 | [PR46](https://github.com/mindie-agent/knowledge/pull/46)，main `40063ebf` | 已发送正文清理后保留轻量原条目线索，后续选择续写时准确恢复；修正合法知识引用及明确 Python 数字切片被误脱敏；成功同步清除旧错误 |
+| Codex | [PR4](https://github.com/mindie-agent/mindie-agent-codex/pull/4)，main `b6c9a88b` | 经验按实际过程与现象整理；逐知识源如实报告失败、等待与恢复；更新共享组件依赖 |
+| Kimi | [PR2](https://github.com/mindie-agent/mindie-agent-kimi/pull/2)，main `d076b942` | 同上；调度器使用当前完整版本的入口，避免选到保留的旧 bootstrap |
+| Claude Code | [PR2](https://github.com/mindie-agent/mindie-agent-cc/pull/2)，main `65500b6` | 同上；保留用户当前 DSV4/provider 配置，通过本机实际模型整理 |
+| 知识分发 | [PR14](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/14)，main `be39fd9` | 发布校验使用已审查的共享组件，内容仍作为不可信数据处理；本 PR 未重写既有经验 |
 
-共享运行时 Linux/macOS/Windows CI 已通过；三端均有开发检查及上述范围的原生证据。代码修正后只复验受影响的范围，不以测试数量作为产品通过依据。实际 Claude Code 模型是本机配置的 deepseek-flash，不能称为 Anthropic 基础模型验收。
+合入、开发检查和真实环境验收分别判断。CI 不证明原生工具实际加载、Hook 交付、模型内容正确或 Bot 事件投递。下文复用前一轮已通过的安装、任务接续及回滚证据；不把旧版本验收自动扩展成所有新路径通过。
 
-## 本次合入与更新检查
+## 已有真实环境证据
 
-三个 PR 的最终提交均完成审核并退出草稿状态，2026-09-21 已分别合入各自 main。Codex 和 Kimi 的最终 PR CI 通过；Claude Code 未配置 CI，有 35 项开发检查和上表原生证据。九条原则不变，未为这些合入添加额外候选配额或 Windows 前置要求。
-
-合入后在已有隔离安装中直接调用实际 updater check，未注入候选 SHA、未调用模型、未设置新的 OS 定时器：
-
-| 宿主 | 实际远端 main 检查结果 |
+| 范围 | 已证实的行为与边界 |
 | --- | --- |
-| Codex | 7.15 秒解析并安装 `8ffc72d`，原生版本 `0.1.0+codex.20260921004020185845` 回读 installed/enabled；知识 feed 同步成功 |
-| Kimi | 10.31 秒解析并切换到 `421e22b`，实际原生安装及资源回读成功；知识 feed 同步成功 |
-| Claude Code | 17.48 秒解析并安装 `d8545a3`，原生版本 `0.1.0+mindie.d8545a3c7c99` 及两个 MCP 的完整新 generation 准确回读；正式知识源 `eb311496`，2 条记录、unchanged |
+| Codex 原生使用 | Luna/max 显式只读启用、检索和正文读取；同任务跨更新保留授权，旧入口及原远端作业仍可用；安装独立于临时配置环境变量；真实安装结果丢失后恢复旧包并准确回读。生产现已安装 `b6c9a88b`，原生 Hook 为 trusted；新 Luna/max 任务实际触发新版 Stop，48 毫秒完成。该任务未启用贡献，不将这次触发称为采集发布验收 |
+| Kimi 原生使用 | 2.0.2 / K3 max 实际加载两 MCP、两 Hook、七命令；只读及跨更新任务/作业接续；移走源码和清除配置环境变量仍可读取；真实安装结果丢失后回滚。新增原生 fork 只发起一次 query，因未显式启用被拒绝，未继承原任务授权、未自动激活或重试 |
+| Claude Code 日常使用 | 2.1.269 / `deepseek-flash` high：从干净隔离配置实际安装，首次给出推荐贡献、只读、稍后三个选项；只读选择持久化。原生默认审批模式下 query 和 explain 各经一次交互确认，返回两条引用与完整正文。贡献关闭时无采集、整理或发布；另有新任务/fork 隔离、跨更新接续及真实回滚证据 |
+| 三端 macOS 定时检查 | 使用生产注册逻辑生成入口，仅隔离 label、路径和验收间隔；`RunAtLoad=false`，实际等待 launchd 投递，未手动触发 check。修正后 Codex、Kimi、CC 均记录首轮 `runs=1 / exit=0`，随后移除测试定时器。证明当前版本选择及真实投递，不代表三个最新包均发生了一次升级，也不代表 Windows |
+| 同步错误可观察性 | 三端实际访问正式 GitHub 源及不存在的源、竞争真实本地锁、移除锁后恢复；分别报告 degraded、deferred、ok，并保留原知识正文。共享组件的实际同 commit 恢复清除旧失败信息。此项是无模型的运行时/Git 集成验收 |
 
-这些结果证明 main 解析、准备、安装与同步的实际执行路径，不证明 OS 定时器已自行触发。用户的生产 Codex 配置和 Hook 信任未被修改。
+Claude Code 使用用户明确保留的 DSV4/provider 栈，实际模型别名为 `deepseek-flash`，不能称为 Anthropic 基础模型验收。用户已取消 OAuth-only 要求，未将它列为缺口。关闭贡献仍可按需运行只读知识服务；这与采集、整理任务材料是不同边界。
 
-Claude Code 的旧隔离 fixture 还保留 `local/unconfigured` 占位源，其同步报 repository not found；updater 汇总仍写 `feed_sync=ok`，因此不能用该汇总推定每个 feed 都成功。正式源成功与占位源失败已分别留证。后续需修正按 feed 汇总错误的可观察性；这项合入后发现的问题不应被主分支安装成功掩盖。
+真实失败记录仍保留：Kimi 旧调度入口不接受 `--config`，首次验收在发现前发生三次 OS 投递并退出 2；修正选择当前版本后首轮成功。旧 CC 隔离源 `local/unconfigured` 失败却被汇总成成功的问题，已由本轮逐源状态修正，并通过实际失败/恢复路径验收。修复不覆盖原失败证据。
 
-## 合入后继续推进
+## 经验内容、续写和贡献边界
 
-1. 完成有用经验的 Stop → 本地整理脱敏 → GitHub PR → Bot 审阅合入 → 新任务读取和使用路径。保留准确性、实际作用和失败记录，不为制造 PR 重复提交实验变体。Kimi 最近整理保留数值但过度推断初值未执行；Claude Code 候选含配置流水；二者均不计为内容质量通过。
-2. 核对启用/关闭贡献、失败暂停、未知提交恢复、确认提交后清理和后续补充；可选反馈及下库也需真实证据。
-3. 验收 OS 实际定时触发和必要的原生 Hook 信任，复用已通过的安装、原生回滚及任务/作业接续证据。
-4. 用户在专门 Windows 机器上基于已合入 main 推进，三个适配器可分别进行，不必等待上述所有 macOS 工作完成。Windows 仍在首版目标范围；CI 不能替代实机。
+三端整理提示现要求忠实记录材料中实际发生的过程和现象，未交代的直接省略；不强制提炼教训、编造失败到成功的故事、补未知清单或增加因果结论。`title`、`summary` 用于检索；可选 `conditions` 只记录已有版本或 commit，实验参数与细节放正文。只有配置和状态流水时可以返回零条。
 
-旧业务 Skill、profiling 分析、自动 Skill 提炼、进一步领域和 Harness 扩展保持暂缓。旧 profiling PR76 不在本轮合入范围。模型测试每次都有明确边界，不因失败自动新开任务或反复重试。实现合入与发布验收分列，未完成项目不会因 PR 合并而自动标记通过。
+本地实际整理器重放了同一份既有 NPU 任务公开记录：Codex Luna/max、Kimi K3/max 和 CC deepseek-flash/high 均生成一条，保留原数值、dtype-rounded CPU reference 和原范围限制，未把设备设置从 8 改为 0 推断为“8 已运行失败”。CC 对当天真实首次配置材料返回零条。四次调用均无自动重试。这证明这些材料上的整理质量，不是新 NPU 测量或 Stop 到发布的全链路证明。Codex 的实际产物已符合最终省略语义，最终提示措辞调整后未仅为重复结果另跑模型；Kimi 与 CC 使用最终提示。
 
-## 证据解释
+随后一个全新的 CC 原生任务实际完成 `[9,512]` 的 RMSNorm 非连续视图/连续副本检查，FP16/BF16 两路均通过各自 CPU reference 比较，直接输出比较均相等。首次脚本提议在写入和执行前被审批反馈纠正返回元组的处理；修正版只执行一次，237.93 秒内正常结束。原生 Stop 触发后台整理，生成正文 4,321 字节的一条经验，忠实记录了这次执行前纠正，未虚构运行失败。默认静默窗口随后自动生成 [知识 PR16](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/16)，head `058873408d30216635c1b33acf7de32afe772da9`，两项发布检查均通过。未手写经验、调用发布器或手动派发 Bot 审查。确认远端接收后，该条本地草稿正文已清理，准确 PR/head/ref 回执保留，批次缩为 570 字节；随后正常关闭本项目贡献和验收服务。此项已证明真实工作到自动提 PR 与提交后清理，Bot opened 事件及新任务消费仍待证实。
 
-2026-09-18 的 NPU 与闭环记录只证明当时版本，保留为历史材料。安装 API 返回成功不代表 MCP 已加载；原生列表、实际调用、Hook 交付和内容复用分别判断。遇到失败保留实际原因，修复后只补相应范围的证据。实际案例包括 Kimi 安装列表“enabled”但零 MCP，以及 Claude updater 在真实下载前拒绝整数 argv；修正后的结果未覆盖失败记录。详细记录见 [Codex 验收](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/acceptance-lifecycle-2026-09-21.md)、[Kimi 验收](https://github.com/mindie-agent/mindie-agent-kimi/blob/main/docs/acceptance.md)和 [Claude Code 验收](https://github.com/mindie-agent/mindie-agent-cc/blob/main/docs/acceptance.md)。
+真实 PR13 的已确认发布状态用于核对清理与续写：GitHub 准确 head 确认后，已发送正文被清理，仅保留轻量回执；无需等待合并才清理。Kimi 原生整理器通过正常上下文自行选中原条目 ID，运行时从回执记录的 GitHub head/path 恢复并校验原文后追加。没有手动指定返回 ID，也未重新发布这份验收副本。已发送内容可清理，不意味着丢弃尚未发送的增量或未知提交结果。
+
+贡献关闭再开启的本地实际设置与撤销路径已验证：新 generation 不接收旧材料；已有未发送续写候选从一条变为零，旧回执和只读检索仍保留。此项证明共享运行时边界，不单独证明三个宿主全部开关事件的交付。上述续写使用既有任务的真实复核材料，不能声称新增了一次独立 NPU 实验。
+
+## 反馈、下库与 Bot
+
+CC 在实际默认审批任务中对已读取的经验给出一次可选 `up` 反馈，后台自动产生 [知识 PR15](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/15)，准确提交 head 为 `057e0ea51a0de75fd081be68771d4fe353344b4c`。Grok Bot 使用已审查的 `40063ebf` 校验器完成维护者发起的补查，并于 09:58:35Z 合入，merge 为 `ab600a16`；GitHub connector 已独立确认。这证明原生反馈自动提 PR 及 Bot 审阅合入，尚非新经验发布。
+
+此前 GitHub MCP 连接可用，但平台仓库事件访问未建立；用户已完成 Cursor App 授权，Bot 收到仓库访问通知，三条 routine 仍只面向知识仓。PR15 的 opened 事件发生在授权前，其补查不能算原生 opened 投递。合入后 Bot 只读回报原生 `pr-merged` routine 已 succeeded，复用已有结论核对合入状态，无额外写入；运行状态与事件类型来自 Bot 的平台回执。下一条新经验 PR 仍需验证真实 opened 事件触发的审阅合入。
+
+真实下库通过专用 GitHub 分支验证，未改生产 main、未造经验、未提交 PR：从 `eb311496` 创建分支，仅删除一条既有 case，实际删除 commit 为 [`858fbffa`](https://github.com/mindie-agent/knowledge-vllm-ascend/commit/858fbffa68173a1abd116506c71be93127687375)。隔离 Feed 同步后，普通检索不再返回该条目；旧 exact ref 仍能读取相同正文，并明确 `withdrawn=true`。另一隔离 Store 仅复用同一公开正文和本地测试票，确认旧草稿/票不再进入待发布选择。没有模型、发布器或投票外发。此项证明真实远端撤下到 Feed/Store 的行为，不是 Bot 自行作出撤下决定的证明。
+
+点赞、点踩仍是宽松的参考指标，既不强制每任务反馈，也不按票数自动删除。经验是否修正或撤下由维护者/Bot 结合内容处理；不另设候选数量、每轮写入数等产品配额。
+
+## 仍在推进
+
+1. 生产 Codex 已升级并验证新版 Hook 触发。旧开发控制器把新合同误记为 incompatible，本次使用已审核安装器显式升级；旧尝试历史、旧入口和用户贡献配置保留，后续由新版定时控制器接管。这是一次真实修复安装，不称为旧控制器自动更新通过。
+2. 完成本轮真实 NPU 新增观察的 Stop → 本地整理脱敏 → PR → Bot 审阅合入 → 新任务读取和使用。Kimi 的直接比较已实测完成：FP16/BF16 两路 `torch.equal=true`，输出间最大差为零；但 Stop 没有产生新采集。现已定位三端更新器停止原知识服务后未恢复的共同缺口，修复设计已审查，代码尚未完成。该次真实 Stop claim 早于任务结束，不能归因为验收器提前结束宿主。随后明确恢复当前服务，新一轮实际加载已保存张量也核对成功，但最终模型回复超过 360 秒验收预算，进程按时终止，未到达 Stop；这与前述服务缺口是不同失败。两次结果都不算新经验发布通过。此前失败读请求还发生一次模型自行重试，失败记录保留，不能将整段称为零重试。
+3. 仓库访问已补齐，PR15 补查合入和后续原生 merged 事件回读完成；新经验 PR16 已自动生成，继续验证它的 opened 事件审阅合入和全新任务消费。Mac 再次锁定时无法查看 Bot 原生运行回执；不能据此推断平台事件已成功或失败。反馈自动提 PR、此前已有内容消费、当前整理器重放均不能合并推定最新业务闭环完成。
+4. 在用户提供的专门 Windows 机器上验收三个适配器。Windows 不作为本轮已完成合入的前置门槛，仍是首版目标范围的未验收项。
+
+旧业务 Skill、profiling 分析、自动 Skill 提炼及进一步领域/Harness 扩展保持暂缓。模型调用按明确边界执行，失败后不自动新开任务或反复重试。未完成项目不会因代码合并或 CI 通过而自动标记通过。
+
+## 证据入口
+
+公开适配器记录见 [Codex P0/P1 验收](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/acceptance-p0p1-2026-09-21.md)、[Kimi P0/P1 验收](https://github.com/mindie-agent/mindie-agent-kimi/blob/main/docs/acceptance-p0p1-2026-09-21.md)及 [Claude Code P0/P1 验收](https://github.com/mindie-agent/mindie-agent-cc/blob/main/docs/acceptance-p0p1-2026-09-21.md)。原生任务 ID、模型、准确版本、失败与清理记录按各报告保留，不上传原始 transcript 或隐藏思考。
+
+本轮本地审计目录 `mindie-p0p1-20260921` 中，`reports/cc-daily-acceptance.md`、`kimi-daily-acceptance.md`、`codex-os-timer-acceptance.md`、`knowledge-withdrawal-acceptance.md` 记录对应实机/远端结果；`faithful-records/review.md`、`sync-review/REPORT.md`、`acceptance/core-receipt-boundaries/review.md` 记录内容、同步和回执边界；`acceptance/cc-feedback/automatic-pr.json` 记录 PR15 的准确提交；`reports/cc-npu-producer-acceptance.md` 记录独立真实 NPU 任务、原生 Stop、自动 PR16 和本地清理。历史记录只证明当时版本，本轮未复验的路径不扩展结论。
