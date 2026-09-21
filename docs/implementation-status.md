@@ -36,6 +36,8 @@ Claude Code 使用用户明确保留的 DSV4/provider 栈，实际模型别名�
 
 本地实际整理器重放了同一份既有 NPU 任务公开记录：Codex Luna/max、Kimi K3/max 和 CC deepseek-flash/high 均生成一条，保留原数值、dtype-rounded CPU reference 和原范围限制，未把设备设置从 8 改为 0 推断为“8 已运行失败”。CC 对当天真实首次配置材料返回零条。四次调用均无自动重试。这证明这些材料上的整理质量，不是新 NPU 测量或 Stop 到发布的全链路证明。Codex 的实际产物已符合最终省略语义，最终提示措辞调整后未仅为重复结果另跑模型；Kimi 与 CC 使用最终提示。
 
+随后一个全新的 CC 原生任务实际完成 `[9,512]` 的 RMSNorm 非连续视图/连续副本检查，FP16/BF16 两路均通过各自 CPU reference 比较，直接输出比较均相等。首次脚本提议在写入和执行前被审批反馈纠正返回元组的处理；修正版只执行一次，237.93 秒内正常结束。原生 Stop 触发后台整理，生成正文 4,321 字节的一条经验，忠实记录了这次执行前纠正，未虚构运行失败。默认静默窗口随后自动生成 [知识 PR16](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/16)，head `058873408d30216635c1b33acf7de32afe772da9`，两项发布检查均通过。未手写经验、调用发布器或手动派发 Bot 审查。确认远端接收后，该条本地草稿正文已清理，准确 PR/head/ref 回执保留，批次缩为 570 字节；随后正常关闭本项目贡献和验收服务。此项已证明真实工作到自动提 PR 与提交后清理，Bot opened 事件及新任务消费仍待证实。
+
 真实 PR13 的已确认发布状态用于核对清理与续写：GitHub 准确 head 确认后，已发送正文被清理，仅保留轻量回执；无需等待合并才清理。Kimi 原生整理器通过正常上下文自行选中原条目 ID，运行时从回执记录的 GitHub head/path 恢复并校验原文后追加。没有手动指定返回 ID，也未重新发布这份验收副本。已发送内容可清理，不意味着丢弃尚未发送的增量或未知提交结果。
 
 贡献关闭再开启的本地实际设置与撤销路径已验证：新 generation 不接收旧材料；已有未发送续写候选从一条变为零，旧回执和只读检索仍保留。此项证明共享运行时边界，不单独证明三个宿主全部开关事件的交付。上述续写使用既有任务的真实复核材料，不能声称新增了一次独立 NPU 实验。
@@ -54,7 +56,7 @@ CC 在实际默认审批任务中对已读取的经验给出一次可选 `up` �
 
 1. 生产 Codex 已升级并验证新版 Hook 触发。旧开发控制器把新合同误记为 incompatible，本次使用已审核安装器显式升级；旧尝试历史、旧入口和用户贡献配置保留，后续由新版定时控制器接管。这是一次真实修复安装，不称为旧控制器自动更新通过。
 2. 完成本轮真实 NPU 新增观察的 Stop → 本地整理脱敏 → PR → Bot 审阅合入 → 新任务读取和使用。Kimi 的直接比较已实测完成：FP16/BF16 两路 `torch.equal=true`，输出间最大差为零；但 Stop 没有产生新采集。现已定位三端更新器停止原知识服务后未恢复的共同缺口，修复设计已审查，代码尚未完成。该次真实 Stop claim 早于任务结束，不能归因为验收器提前结束宿主。随后明确恢复当前服务，新一轮实际加载已保存张量也核对成功，但最终模型回复超过 360 秒验收预算，进程按时终止，未到达 Stop；这与前述服务缺口是不同失败。两次结果都不算新经验发布通过。此前失败读请求还发生一次模型自行重试，失败记录保留，不能将整段称为零重试。
-3. 仓库访问已补齐，PR15 补查合入和后续原生 merged 事件回读完成；继续验证新经验 opened 事件的自动审阅合入。反馈自动提 PR、此前已有内容消费、当前整理器重放均不能合并推定最新业务闭环完成。
+3. 仓库访问已补齐，PR15 补查合入和后续原生 merged 事件回读完成；新经验 PR16 已自动生成，继续验证它的 opened 事件审阅合入和全新任务消费。Mac 再次锁定时无法查看 Bot 原生运行回执；不能据此推断平台事件已成功或失败。反馈自动提 PR、此前已有内容消费、当前整理器重放均不能合并推定最新业务闭环完成。
 4. 在用户提供的专门 Windows 机器上验收三个适配器。Windows 不作为本轮已完成合入的前置门槛，仍是首版目标范围的未验收项。
 
 旧业务 Skill、profiling 分析、自动 Skill 提炼及进一步领域/Harness 扩展保持暂缓。模型调用按明确边界执行，失败后不自动新开任务或反复重试。未完成项目不会因代码合并或 CI 通过而自动标记通过。
@@ -63,4 +65,4 @@ CC 在实际默认审批任务中对已读取的经验给出一次可选 `up` �
 
 公开适配器记录见 [Codex P0/P1 验收](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/acceptance-p0p1-2026-09-21.md)、[Kimi P0/P1 验收](https://github.com/mindie-agent/mindie-agent-kimi/blob/main/docs/acceptance-p0p1-2026-09-21.md)及 [Claude Code P0/P1 验收](https://github.com/mindie-agent/mindie-agent-cc/blob/main/docs/acceptance-p0p1-2026-09-21.md)。原生任务 ID、模型、准确版本、失败与清理记录按各报告保留，不上传原始 transcript 或隐藏思考。
 
-本轮本地审计目录 `mindie-p0p1-20260921` 中，`reports/cc-daily-acceptance.md`、`kimi-daily-acceptance.md`、`codex-os-timer-acceptance.md`、`knowledge-withdrawal-acceptance.md` 记录对应实机/远端结果；`faithful-records/review.md`、`sync-review/REPORT.md`、`acceptance/core-receipt-boundaries/review.md` 记录内容、同步和回执边界；`acceptance/cc-feedback/automatic-pr.json` 记录 PR15 的准确提交。历史记录只证明当时版本，本轮未复验的路径不扩展结论。
+本轮本地审计目录 `mindie-p0p1-20260921` 中，`reports/cc-daily-acceptance.md`、`kimi-daily-acceptance.md`、`codex-os-timer-acceptance.md`、`knowledge-withdrawal-acceptance.md` 记录对应实机/远端结果；`faithful-records/review.md`、`sync-review/REPORT.md`、`acceptance/core-receipt-boundaries/review.md` 记录内容、同步和回执边界；`acceptance/cc-feedback/automatic-pr.json` 记录 PR15 的准确提交；`reports/cc-npu-producer-acceptance.md` 记录独立真实 NPU 任务、原生 Stop、自动 PR16 和本地清理。历史记录只证明当时版本，本轮未复验的路径不扩展结论。
