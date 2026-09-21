@@ -93,7 +93,7 @@ Detailed lifecycle semantics are in [Harness boundaries and lifecycle](harness-b
 
 Codex, Kimi and Claude Code have independent repositories and native acceptance. Codex model tests use gpt-5.6-luna / max. The user authorized Kimi K3 / max for Kimi native acceptance. Claude Code runs on the local configured model, which must be named accurately in evidence.
 
-macOS is the active hardware environment. Windows is part of the intended first release, with real Windows hardware supplied later by the user. CI passing on Windows does not complete that acceptance.
+macOS is the active hardware environment. Windows is part of the intended first release, with real Windows hardware supplied by the user after the adapter changes merge into main. Windows acceptance is not a gate for merging the pre-release implementation. CI passing on Windows does not complete that acceptance.
 
 Development checks, native installation, real Hook delivery, a real public PR/Bot merge, and usefulness in a new task are recorded separately. A registry success, connected MCP panel or old revision's evidence cannot stand for the final implementation.
 

@@ -2,14 +2,14 @@
 
 通过领域上下文、稳定的远端工具，以及知识与经验反馈闭环，帮助 Agent 完成 Ascend 开发任务。
 
-**使用入口：[Codex Plugin](https://github.com/mindie-agent/mindie-agent-codex)。**
+**使用入口：[Codex](https://github.com/mindie-agent/mindie-agent-codex)、[Kimi Code](https://github.com/mindie-agent/mindie-agent-kimi)、[Claude Code](https://github.com/mindie-agent/mindie-agent-cc)。**
 在自己的业务仓库或 Harness 原生任务中显式调用插件。知识服务以及启用贡献后的整理脱敏在本机运行；远端通过 remote-dev 提供执行环境。当前仍是发布前重构，默认不采集。
 
 ## 当前进展
 
-首个领域为 vLLM / vLLM-Ascend。共享知识生命周期重构已合入，Codex 的原生只读使用及跨版本任务/远端作业接续已验证；Kimi 和 Claude Code 在独立仓库开发和实机验收。
+首个领域为 vLLM / vLLM-Ascend。共享知识生命周期和三个独立适配器的重构均已合入各自 main。三端已具备 macOS 原生使用、跨版本任务/远端作业接续及安装失败回滚的实际证据。
 
-[统一实施进度](docs/implementation-status.md)区分实现、原生宿主、真实发布和新任务使用证据。历史 NPU 验收不自动证明当前重构版本；三个适配器仍有最终 Hook/贡献链路和 Windows 实机工作待完成。
+[统一实施进度](docs/implementation-status.md)区分代码合入、原生宿主、真实发布和新任务使用证据。完整贡献链路和经验质量仍需继续验收；Windows 由用户在合入后的 main 上使用专门机器推进。合入不等于首版发布通过。
 
 ## 仓库分工
 
