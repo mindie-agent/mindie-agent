@@ -1,7 +1,8 @@
 # MindIE Agent
 
 This repository owns architecture, domain boundaries and product entry documentation.
-The supported Codex implementation is `mindie-agent/mindie-agent-codex`.
+Native implementations live in `mindie-agent/mindie-agent-codex`,
+`mindie-agent/mindie-agent-kimi` and `mindie-agent/mindie-agent-cc`.
 Shared runtime components live in their own repositories under `mindie-agent`.
 
 Use native local tools for this repository. It has no bootstrap, workspace manager,
