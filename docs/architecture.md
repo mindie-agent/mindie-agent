@@ -83,7 +83,7 @@ Adapters track remote `main` commits now; release tracking is a later change. An
 
 Actual in-flight work blocks switching. An idle authorized task or an old unknown PR receipt does not. The runtime's idle decision and admission freeze must be atomic. The original task must still control its existing remote job after an update.
 
-When switching requires stopping a live local knowledge service, the updater preserves that fact and restores service under the selected generation if valid explicit task authorization remains. It does not start a service that was absent before the update. Successful switches and rollback use the same bounded transaction; failure to restore is reported rather than concealed as success. Stop hooks remain short notifications and do not start a service or model.
+When switching requires stopping a live local knowledge service, the updater preserves that fact and restores service under the selected generation if valid explicit task authorization remains. Restoration binds the selected Harness profile and its existing model configuration; process readiness alone does not establish that later organization can use that model. It does not start a service that was absent before the update. Successful switches and rollback use the same bounded transaction; failure to restore is reported rather than concealed as success. Stop hooks remain short notifications and do not start a service or model.
 
 Keep necessary old entrypoints and rollback data while a host may still use them. Installed files, definitions loaded into a live task, and Hook trust are separate facts. A host-required trust review is never bypassed or silently granted by an updater.
 
