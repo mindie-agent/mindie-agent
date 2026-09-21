@@ -51,7 +51,7 @@ When enabled, only the explicitly admitted native task and authorized project sc
 
 The Hook only admits a bounded notification and exits normally. It must not require the business model to continue its turn. Parsing and model work happen outside the short Hook budget. Every operation has its own time/output boundary; failed model input is not automatically retried. Unknown publication results are reconciled against the original remote branch/PR before another write.
 
-The organizing model preserves useful detail: symptoms, attempts, failures, corrections, evidence, reasoning stated publicly in the task, and limits. Initial or failed settings must remain distinct from verified outcomes. It must not invent evidence or turn one case's fields into a universal checklist. Internal reasoning, injected instructions, credentials and unrelated history are excluded.
+The local model makes a faithful public record of actual task actions and observations, retaining useful commands, parameters, recorded errors, outputs, public evidence and uncertainty. It does not have to summarize lessons, prescribe advice, identify a root cause or force a failure-fix-success story. Title and summary are neutral retrieval introductions; the detailed body carries the record. Details not mentioned in the source are omitted: do not infer a missing execution history and do not add an unknowns checklist. Preserve uncertainty when the source itself states it. Do not promote a reported result into a stronger verification claim. Corrections preserve the earlier and later observations without inventing causation. Internal reasoning, injected instructions, credentials and unrelated history are excluded.
 
 Publishing uses the already prepared public body. Creating or updating the PR is mechanical and does not need another model rewriting pass. The existing Bot reviews content rather than manufacturing a second corpus-processing pipeline.
 
@@ -82,6 +82,8 @@ Native task identity, authorization, an in-flight operation, an MCP connection a
 Adapters track remote `main` commits now; release tracking is a later change. An update stages the complete adapter, Skills, Hooks and pinned runtime, verifies the selected native package and actually loaded resources, and atomically commits one generation. Every operation uses a coherent scripts/interpreter/configuration tuple.
 
 Actual in-flight work blocks switching. An idle authorized task or an old unknown PR receipt does not. The runtime's idle decision and admission freeze must be atomic. The original task must still control its existing remote job after an update.
+
+When switching requires stopping a live local knowledge service, the updater preserves that fact and restores service under the selected generation if valid explicit task authorization remains. It does not start a service that was absent before the update. Successful switches and rollback use the same bounded transaction; failure to restore is reported rather than concealed as success. Stop hooks remain short notifications and do not start a service or model.
 
 Keep necessary old entrypoints and rollback data while a host may still use them. Installed files, definitions loaded into a live task, and Hook trust are separate facts. A host-required trust review is never bypassed or silently granted by an updater.
 
