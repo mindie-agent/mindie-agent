@@ -96,3 +96,31 @@ CC 在实际默认审批任务中对已读取的经验给出一次可选 `up` �
 公开适配器记录见 [Codex P0/P1 验收](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/acceptance-p0p1-2026-09-21.md)、[Kimi P0/P1 验收](https://github.com/mindie-agent/mindie-agent-kimi/blob/main/docs/acceptance-p0p1-2026-09-21.md)及 [Claude Code P0/P1 验收](https://github.com/mindie-agent/mindie-agent-cc/blob/main/docs/acceptance-p0p1-2026-09-21.md)。原生任务 ID、模型、准确版本、失败与清理记录按各报告保留，不上传原始 transcript 或隐藏思考。
 
 本轮本地审计目录 `mindie-p0p1-20260921` 中，`reports/cc-daily-acceptance.md`、`kimi-daily-acceptance.md`、`codex-os-timer-acceptance.md`、`knowledge-withdrawal-acceptance.md` 记录对应实机/远端结果；`faithful-records/review.md`、`sync-review/REPORT.md`、`acceptance/core-receipt-boundaries/review.md` 记录内容、同步和回执边界；`acceptance/cc-feedback/automatic-pr.json` 记录 PR15 的准确提交；`reports/cc-npu-producer-acceptance.md` 记录独立真实 NPU 任务、原生 Stop、自动 PR16 和本地清理；`reports/cc-npu-consumer-acceptance.md` 记录主分支同步、新任务具体采用内容、真实 NPU 结果及人工纠正边界。服务交接审计目录 `mindie-service-continuity-20260921` 记录真实 daemon、三端原生切换、失败及清理；公开代码仓库的 `docs/service-continuity.md` 保留对应证据边界。历史记录只证明当时版本，本轮未复验的路径不扩展结论。
+
+
+## 2026-09-22：工具故障上报与 DFX
+
+新增独立于知识贡献的故障上报选择；默认关闭。自有工具失败返回可定位的
+incident，原错误和业务结果保留。日志限量保留并保护未读片段，上报无模型，
+每候选最多三轮，未知提交只核对；不新增任务级必做流程或业务重试。
+
+本轮真实验收已覆盖本机日志写入/SQLite 锁/轮转恢复、有限子进程与取消清理，
+macOS 独立服务启动、崩溃不自启、明确恢复、关闭与移除，以及真实 GitHub
+[验收 Issue 8](https://github.com/mindie-agent/diagnostics/issues/8) 的创建、回读、关闭和跨授权核对。
+Codex Luna/max 与 Claude Code DSV4/high 均实际调用候选 MCP 一次并获得匹配诊断；
+没有 SSH、知识采集或业务重放。CC 曾误述只读状态用途，入口提示已明确区分查询和上传。
+Kimi 首次实际调用在工具执行前被 OAuth 拒绝；用户重新登录后，K3/max 在新隔离验收中
+完成一次原生工具调用，诊断编号与本地唯一记录一致，无工具重试、SSH、知识采集或上传。
+模型能给出定位入口，但末句“业务状态未受影响”超出工具所述的未确认结果；工具链通过，
+该回答不能标记为完全忠实。Windows 实机继续后置。
+
+共享 diagnostics 已通过 macOS/Linux/Windows 的 CI 并合入
+[PR 9](https://github.com/mindie-agent/diagnostics/pull/9)。随后从主分支准确提交
+`4a7e50622492c92089c2318d80dbd2a24d41f145` 非 editable 安装，实际启动独立 macOS
+上报器，回读运行进程的包来源与运行目录一致，再关闭并移除测试服务。此项是最终包的
+安装与服务证据；Windows CI 不替代 Windows 用户机器验收，三个原生模型的候选脚本
+证据也不替代最终适配器安装回读。
+
+实现边界见[DFX 设计](diagnostics-and-reporting.md)。日志总量由离线维护控制，
+不承诺任意并发下的瞬时全局硬配额；共享报告运行时可从状态核对版本，明确的 ensure
+负责选择和恢复它。该上报器不启用旧 Grok CLI，知识审核仍由外部 Grok Bot 软件负责。
