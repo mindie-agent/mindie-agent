@@ -121,6 +121,29 @@ Kimi 首次实际调用在工具执行前被 OAuth 拒绝；用户重新登录�
 安装与服务证据；Windows CI 不替代 Windows 用户机器验收，三个原生模型的候选脚本
 证据也不替代最终适配器安装回读。
 
+随后 Kimi 和 Claude Code 都从官方精确提交完成非 editable 依赖安装、原生插件安装及
+两个 MCP 入口回读；Kimi 同时验证未配置上报时可只读定位既有诊断，CC 的 72 项适配器
+检查通过。两者使用隔离原生配置，未安装到用户默认配置、未启动模型或上报服务。
+依赖为 knowledge `87deb071`、remote-dev `fb441aa1`、diagnostics `4a7e5062`。
+对应共享组件已分别合入 [knowledge PR 50](https://github.com/mindie-agent/knowledge/pull/50)
+和 [remote-dev PR 21](https://github.com/mindie-agent/remote-dev/pull/21)；
+三端初次集成也已合入各自主分支。
+
+Codex 的实际定时更新器从旧版安装新主分支后，发现旧打包器不会生成新增诊断版本文件。
+这项升级缺口经[Codex PR 9](https://github.com/mindie-agent/mindie-agent-codex/pull/9)
+修正：从当前加载包自己的 manifest 与匹配安装回执读取版本，不猜提交、不改写已安装文件。
+实际定时器已安装主分支 `0f17d8e4`，原生版本为
+`0.1.0+codex.20260922125204298352`；实际包、依赖提交及诊断元数据均已回读。
+截至本次核对，生产 Stop Hook 原生信任状态仍为 `modified`，超时 2 秒；
+已请用户审阅信任，尚未将新版原生 Stop 触发标为通过。生产故障上传保持未配置。
+
+复查也确认 Kimi/CC 旧打包器只复制原有启动依赖，首次升级可能遗漏新诊断模块。
+[Kimi PR 7](https://github.com/mindie-agent/mindie-agent-kimi/pull/7) 已修复并合入；
+实际旧控制器安装和升级用时 5.249 秒，原生回读及两个 MCP 握手通过，贡献关闭时
+Stop 在 0.112 秒返回，未改写旧启动目录。CC 已通过对应旧打包器的启动、原生切换和
+两个 MCP 验收，但旧包还会遗漏新增上报命令的 Hook matcher，正在补充更新器的
+有限原生包刷新及完整声明回读。全新安装通过不能替代旧版到新版升级。
+
 实现边界见[DFX 设计](diagnostics-and-reporting.md)。日志总量由离线维护控制，
 不承诺任意并发下的瞬时全局硬配额；共享报告运行时可从状态核对版本，明确的 ensure
 负责选择和恢复它。该上报器不启用旧 Grok CLI，知识审核仍由外部 Grok Bot 软件负责。
