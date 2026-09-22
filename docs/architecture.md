@@ -22,6 +22,7 @@ The current domain is vLLM / vLLM-Ascend. A task uses its selected domain's know
 | Public domain knowledge repository | Reviewed Markdown content, versions and distribution through GitHub |
 | Existing Grok Bot application | Review proposed public content for sensitive or impermissible material and trigger appropriate merges, corrections or removal |
 | remote-dev | Remote files, commands, jobs, cancellation and artifacts, independent of knowledge activation |
+| diagnostics | Bounded local logs, actionable fault references and independently authorized, finite GitHub Issue reporting; shared by all adapters |
 | coordinator and other existing tools | Their own bounded execution or diagnostic duties, only when the actual task needs them |
 
 Adapters reuse the same knowledge and remote-dev implementations. Native identity and transcript formats stay in adapters. A shared runtime must not import a host-specific lease table or guess a task from the latest session or working directory. Adapter separation does not justify a second knowledge database or publishing protocol.
@@ -90,6 +91,14 @@ Keep necessary old entrypoints and rollback data while a host may still use them
 Native identity binding must use verified host evidence. Missing metadata can be bridged by an exact one-shot native tool event binding, never by guessing from content, timestamps or the latest task. A remote tool's job `session_id` alias is not a native task credential.
 
 Detailed lifecycle semantics are in [Harness boundaries and lifecycle](harness-boundary-and-lifecycle.md).
+
+## Diagnostics and fault reporting
+
+Original component failures carry a local diagnostic reference and useful recovery facts. Logging has byte, count and age limits; offline maintenance protects live writers and every registered reader. Logging or reporting failure never changes the original business outcome or replays the operation.
+
+Automatic tool-fault reporting is an independent optional user choice, separate from knowledge contribution. One shared reporter publishes only allowlisted code and execution facts, without transcripts, command arguments, raw output or model analysis. Expected caller, configuration, cancellation, connectivity and ordinary remote command failures do not automatically become product bug Issues. Stable fingerprints deduplicate across tasks; finite persisted processing budgets also cover readback and crashes. Unknown writes reconcile without automatic reposting.
+
+The native adapters expose configuration and status; service installation runs outside short Hooks. They do not add a global all-task failure Hook or separate reporter per host. See [diagnostics and reporting](diagnostics-and-reporting.md) for the implementation contract and acceptance boundaries.
 
 ## Delivery and acceptance
 

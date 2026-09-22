@@ -96,3 +96,64 @@ CC 在实际默认审批任务中对已读取的经验给出一次可选 `up` �
 公开适配器记录见 [Codex P0/P1 验收](https://github.com/mindie-agent/mindie-agent-codex/blob/main/docs/acceptance-p0p1-2026-09-21.md)、[Kimi P0/P1 验收](https://github.com/mindie-agent/mindie-agent-kimi/blob/main/docs/acceptance-p0p1-2026-09-21.md)及 [Claude Code P0/P1 验收](https://github.com/mindie-agent/mindie-agent-cc/blob/main/docs/acceptance-p0p1-2026-09-21.md)。原生任务 ID、模型、准确版本、失败与清理记录按各报告保留，不上传原始 transcript 或隐藏思考。
 
 本轮本地审计目录 `mindie-p0p1-20260921` 中，`reports/cc-daily-acceptance.md`、`kimi-daily-acceptance.md`、`codex-os-timer-acceptance.md`、`knowledge-withdrawal-acceptance.md` 记录对应实机/远端结果；`faithful-records/review.md`、`sync-review/REPORT.md`、`acceptance/core-receipt-boundaries/review.md` 记录内容、同步和回执边界；`acceptance/cc-feedback/automatic-pr.json` 记录 PR15 的准确提交；`reports/cc-npu-producer-acceptance.md` 记录独立真实 NPU 任务、原生 Stop、自动 PR16 和本地清理；`reports/cc-npu-consumer-acceptance.md` 记录主分支同步、新任务具体采用内容、真实 NPU 结果及人工纠正边界。服务交接审计目录 `mindie-service-continuity-20260921` 记录真实 daemon、三端原生切换、失败及清理；公开代码仓库的 `docs/service-continuity.md` 保留对应证据边界。历史记录只证明当时版本，本轮未复验的路径不扩展结论。
+
+
+## 2026-09-22：工具故障上报与 DFX
+
+新增独立于知识贡献的故障上报选择；默认关闭。自有工具失败返回可定位的
+incident，原错误和业务结果保留。日志限量保留并保护未读片段，上报无模型，
+每候选最多三轮，未知提交只核对；不新增任务级必做流程或业务重试。
+
+本轮真实验收已覆盖本机日志写入/SQLite 锁/轮转恢复、有限子进程与取消清理，
+macOS 独立服务启动、崩溃不自启、明确恢复、关闭与移除，以及真实 GitHub
+[验收 Issue 8](https://github.com/mindie-agent/diagnostics/issues/8) 的创建、回读、关闭和跨授权核对。
+Codex Luna/max 与 Claude Code DSV4/high 均实际调用候选 MCP 一次并获得匹配诊断；
+没有 SSH、知识采集或业务重放。CC 曾误述只读状态用途，入口提示已明确区分查询和上传。
+Kimi 首次实际调用在工具执行前被 OAuth 拒绝；用户重新登录后，K3/max 在新隔离验收中
+完成一次原生工具调用，诊断编号与本地唯一记录一致，无工具重试、SSH、知识采集或上传。
+模型能给出定位入口，但末句“业务状态未受影响”超出工具所述的未确认结果；工具链通过，
+该回答不能标记为完全忠实。Windows 实机继续后置。
+
+共享 diagnostics 已通过 macOS/Linux/Windows 的 CI 并合入
+[PR 9](https://github.com/mindie-agent/diagnostics/pull/9)。随后从主分支准确提交
+`4a7e50622492c92089c2318d80dbd2a24d41f145` 非 editable 安装，实际启动独立 macOS
+上报器，回读运行进程的包来源与运行目录一致，再关闭并移除测试服务。此项是最终包的
+安装与服务证据；Windows CI 不替代 Windows 用户机器验收，三个原生模型的候选脚本
+证据也不替代最终适配器安装回读。
+
+随后 Kimi 和 Claude Code 都从官方精确提交完成非 editable 依赖安装、原生插件安装及
+两个 MCP 入口回读；Kimi 同时验证未配置上报时可只读定位既有诊断，CC 的 72 项适配器
+检查通过。两者使用隔离原生配置，未安装到用户默认配置、未启动模型或上报服务。
+依赖为 knowledge `87deb071`、remote-dev `fb441aa1`、diagnostics `4a7e5062`。
+对应共享组件已分别合入 [knowledge PR 50](https://github.com/mindie-agent/knowledge/pull/50)
+和 [remote-dev PR 21](https://github.com/mindie-agent/remote-dev/pull/21)；
+三端初次集成也已合入各自主分支。
+
+Codex 的实际定时更新器从旧版安装新主分支后，发现旧打包器不会生成新增诊断版本文件。
+这项升级缺口经[Codex PR 9](https://github.com/mindie-agent/mindie-agent-codex/pull/9)
+修正：从当前加载包自己的 manifest 与匹配安装回执读取版本，不猜提交、不改写已安装文件。
+实际定时器已安装主分支 `0f17d8e4`，原生版本为
+`0.1.0+codex.20260922125204298352`；实际包、依赖提交及诊断元数据均已回读。
+截至本次核对，生产 Stop Hook 原生信任状态仍为 `modified`，超时 2 秒；
+已请用户审阅信任，尚未将新版原生 Stop 触发标为通过。生产故障上传保持未配置。
+
+复查也确认 Kimi/CC 旧打包器只复制原有启动依赖，首次升级可能遗漏新诊断模块。
+[Kimi PR 7](https://github.com/mindie-agent/mindie-agent-kimi/pull/7) 已修复并合入；
+实际旧控制器安装和升级用时 5.249 秒，原生回读及两个 MCP 握手通过，贡献关闭时
+Stop 在 0.112 秒返回，未改写旧启动目录。CC 的旧打包器还会遗漏新增上报命令的 Hook
+matcher；[CC PR 7](https://github.com/mindie-agent/mindie-agent-cc/pull/7) 补充下一次既有
+检查中的有限原生包刷新及完整声明回读。最终产品提交 `a2f30a89` 的真实验收从保留的旧
+启动入口进入检查，在 7.153 秒完成刷新；宿主缓存持有 9 个准确命令入口、两个 MCP，
+贡献关闭时 Stop 正常返回，旧包和启动文件均未改写。复用的官方依赖没有重建；该检查
+使用隔离的本地 Git main，不能扩称新增 OS 定时器投递证明。
+
+随后仅一次 Claude Code / deepseek-flash high 原生 `/mindie-agent:reporting-status`
+在 2.526 秒完成，实际 UserPromptExpansion Hook 成功，返回值与本地只读查询一致，
+无工具调用、上传、知识激活或重试；临时配置已恢复，无残留进程。模型却将上报未配置
+推断为未采集日志，并误述为项目级配置，超出了字段含义；原生入口通过，回答不能标记
+为完全忠实。入口提示随后澄清共享用户级上传设置与本地日志独立，未为该措辞重跑模型。
+全新安装、旧版升级、原生事件及模型回答分别保留证据，不互相代替。
+
+实现边界见[DFX 设计](diagnostics-and-reporting.md)。日志总量由离线维护控制，
+不承诺任意并发下的瞬时全局硬配额；共享报告运行时可从状态核对版本，明确的 ensure
+负责选择和恢复它。该上报器不启用旧 Grok CLI，知识审核仍由外部 Grok Bot 软件负责。
