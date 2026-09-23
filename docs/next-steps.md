@@ -19,12 +19,15 @@ All three adapters now pin the same reviewed shared commits, including the
 organizer, updater and installation-document changes: Codex `6146d862`,
 Kimi `d258d144`, and Claude Code `c909363f`. Their CI passed.
 
-The remaining order is:
+The final generations have now passed native installation readback on macOS:
+Codex through its existing production timer, and Kimi/Claude Code in isolated
+native profiles. Codex's unchanged Stop entry remains trusted; CC's native MCP
+health check connects to both servers. These facts do not imply that all current
+tasks reloaded their definitions, or complete model/Hook/contribution acceptance.
 
-1. Install and read back the resulting official generations on macOS. Reuse
-   completed baseline/path and OS-control evidence; check the final distribution
-   and changed integration paths without rerunning unrelated business experiments.
-2. Use Kimi K3/max for actual operator development on the user's authorized NPU
+The remaining work is:
+
+1. Continue the running Kimi K3/max operator development on the user's authorized NPU
    environment, with community contribution enabled, and observe natural Stop,
    faithful content, automatic PR and actual use by a fresh session. Keep the old
    incomplete case closed and reuse its actual observations as background. Do not
