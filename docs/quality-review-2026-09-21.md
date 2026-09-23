@@ -27,7 +27,7 @@ coordinator、npu-top 和 diagnostics 的独立 issue 上报 worker 是可选组
 | 远端异常经过适配层后丢失确定性类别 | 实际 EndpointError、caller/not_sent 及受控 uncertain 异常只剩通用文本 | Codex PR7、Kimi PR5、CC PR5 保留固定枚举 category/submission_state/retryable 和原 job 引用，未知任意分类不外泄 |
 | npu-top 把 allow_remote=0 当成开启 | 实际本机进程接受了明确的 0；未向外部地址发送 HTTP | [npu-top PR11](https://github.com/mindie-agent/npu-top/pull/11) 已合入，只接受文档约定的显式 1；unset/0/1 本机进程验证通过 |
 | 存活日志 writer 被当作过期文件删除 | 真实存活进程在日志被 unlink 后继续写入且未报错，后续内容无法按路径发现；已有 cursor 到 EOF 也不等于 writer 完成 | [diagnostics PR7](https://github.com/mindie-agent/diagnostics/pull/7) 已合入；只删除已证实退出的 writer 文件，活跃/未知/权限不足保留 |
-| 本地日志跨短进程总量无默认清理入口 | 目前每进程文件可轮转，总量 prune 只由可选上报 worker 调用 | 尚未关闭：需要连接现有的本地维护机会，且不能因未开启上报就无限积累或清除活跃日志 |
+| 本地日志跨短进程总量无默认清理入口 | 审查时每进程文件可轮转，总量 prune 只由可选上报 worker 调用 | 2026-09-22 已接入现有更新维护机会，上报关闭时也执行离线维护；保护活跃/未知 writer 和所有登记 reader。见[后续 DFX 完成证据](implementation-status.md#2026-09-22工具故障上报与-dfx) |
 
 状态快照是有界、无模型的现有状态读取；原生 MCP 调用仍按既有协议记录一次性身份绑定回执，不应把快照只读表述为整个协议零写入。SQLite mode=ro 可能创建正常的 WAL reader sidecar，主数据和业务状态保持不变：不得为了 status 初始化数据库、导入 transcript、启动服务或整理器、重放失败材料。任务视图只包含该任务的记录；全局暂停等共享状态明确标为共享。后台发布是否成功不能由 sharing.enabled 推断。
 
@@ -69,6 +69,6 @@ CC 正式 `a9ae74a4` 在既有隔离原生 profile 安装为 `0.1.0+mindie.a9ae7
 
 修复首先重复原故障的实际本机进程/锁/SQLite 场景，验证可诊断且无额外动作，再在必要的原生入口上验证 Agent 能发现并使用这些信息。组件检查只保护代码契约。任何 PR 合入、CI 成功或服务 ready 都不会自动关闭完整原生验收项。
 
-自动总量日志维护仍未接入：除确认 writer 退出外，还须从现有配置找到该 root 对应的所有 reporter cursors，未知绑定保留；不通过新建常驻服务或忽略未消费日志解决。下一次独立真实业务继续补 Kimi 完整贡献和 Bot 无提醒审阅；不重放已消费输入或制造经验。
+上述日志维护缺口已在 2026-09-22 DFX 工作关闭，不能将本报告的历史 baseline 当作当前未修复状态。后续仍需通过独立真实业务补 Kimi 完整贡献和 Bot 无提醒审阅；不重放已消费输入或制造经验。下一轮范围见[首版使用流程收敛](release-readiness-2026-09-22.md)。
 
 Windows 仍按用户安排由专门机器验证。profiling、旧 Skill 迁移、自动 Skill 提炼和新增宿主保持暂缓。
