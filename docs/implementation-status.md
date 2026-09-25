@@ -4,6 +4,33 @@
 
 MindIE Agent 完整继承[九条原则](design-principles.md)。主任务负责设计、文档、跨仓审核和最终验收；开发通过本地模型与专门子代理协作，个别已明确授权的定点修复由主任务接手。检查范围与实际变化相称，不增加每任务必查、必写、必投票或额外审批流程。宿主要求的信任确认仍由用户完成。
 
+## 2026-09-25：续写、规模与静默恢复修订
+
+本节优先于下文历史安装与待办状态。当天 GitHub 回读确认 knowledge
+[PR52](https://github.com/mindie-agent/knowledge/pull/52)、Kimi
+[PR9](https://github.com/mindie-agent/mindie-agent-kimi/pull/9)、Claude Code
+[PR9](https://github.com/mindie-agent/mindie-agent-cc/pull/9) 已合入，main 合入点分别为
+`9b3a0acb`、`8b5aee89`、`0568fb09`。知识内容
+[PR17](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/17) 已合入 `de12953c`。
+上一轮保存的实际证据包括 Kimi 正常 Stop、自动经验 PR、Bot 原生事件审阅合入，
+以及新 Claude Code 任务读取并使用该经验；这些证据不覆盖本轮新增修复。
+
+Codex [PR11](https://github.com/mindie-agent/mindie-agent-codex/pull/11) 仍 open，
+head `2fd63469`。实际 `hooks/list` 回读已安装版本
+`0.1.0+codex.20260924044302442170` 的 Stop 仍为 `modified`，超时 2 秒。
+原生 Stop 验收未完成，生产更新调度仍需在候选合入后恢复；不能沿用下文旧版
+trusted 状态作为当前结论。
+
+用户已授权修复累计经验正文/整库容量门槛、旧全文与远端改稿冲突、导出占位中断、
+临时网络错误永久耗尽以及 Codex 管理入口错代。Kimi K3/max 实现共享核心，
+Grok 4.7/xhigh 实现适配器更新恢复；主任务负责设计和审核。采用独立 worktree，
+不修改旧的业务工作区。设计要求是后台自动恢复和远端正文为准，不增加逐篇放弃、
+用户分批、显式 CLI 恢复或新的调度平台。具体合同见
+[架构](architecture.md)与[生命周期](harness-boundary-and-lifecycle.md)。
+
+本节记录已授权的实施范围；实现提交、测试与本轮实机验收结果在实际完成后更新。
+Windows 仍由用户在合入后推进，旧业务 Skill 与 profiling 继续暂缓。
+
 ## 2026-09-23：安装维护与内容质量收敛
 
 共享组件已合入：diagnostics 0.4.0 `7c56f6b5`、knowledge 0.8.2 `e822fba4`、

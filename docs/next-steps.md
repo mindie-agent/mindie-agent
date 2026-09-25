@@ -1,50 +1,37 @@
 # Next steps
 
-The current work and evidence are maintained in [Unified implementation status](implementation-status.md).
-The authorized 2026-09-22 development and acceptance scope is in
-[Release readiness](release-readiness-2026-09-22.md): reporter version handoff,
-truthful schedule removal, retirement of the legacy CLI bot, ordinary-user
-installation guidance, native reporting controls and a new Kimi business contribution.
-The ongoing [2026-09-23 acceptance](release-acceptance-2026-09-23.md) separates
-completed native control checks from the remaining Kimi contribution-loop evidence.
-Follow the [nine design principles](design-principles.md) and [current architecture](architecture.md).
+Updated 2026-09-25. Follow the [nine design principles](design-principles.md),
+[architecture](architecture.md) and [lifecycle contract](harness-boundary-and-lifecycle.md).
+[Implementation status](implementation-status.md) separates completed evidence
+from work in progress. Earlier release reports retain their historical results.
 
-The shared readiness changes are merged: diagnostics 0.4.0 at `7c56f6b5`,
-knowledge 0.8.2 at `e822fba4`, and remote-dev 0.9.5 at `28213bf3`.
-All corresponding CI jobs passed; this does not substitute for native acceptance.
-The five legacy files are removed, and the complete remaining diagnostics suite
-passes (246 passed, 3 platform skips, no excluded test files).
+The authorized implementation now focuses on three existing mechanisms:
 
-All three adapters now pin the same reviewed shared commits, including the
-organizer, updater and installation-document changes: Codex `6146d862`,
-Kimi `d258d144`, and Claude Code `c909363f`. Their CI passed.
+1. Keep submitted knowledge authoritative on the remote. Retain only unsent
+   additions locally, apply them to the current own PR or merged main, and never
+   resurrect a Bot-redacted passage or withdrawn entry from an old full draft.
+   Distinguish locally staged material from confirmed remote delivery.
+2. Recover transient publication, feed and plugin-update failures through existing
+   background workers and schedules. Persist backoff and reconcile unknown writes
+   before retrying. Do not require a CLI, another business turn, or another model
+   call. Content rejection remains separate from a recoverable network failure.
+   Stable adapter management commands must select the installed generation.
+3. Let long tasks and growing knowledge continue. Remove cumulative-body and
+   whole-corpus rejection thresholds while bounding individual operations and
+   using incremental processing. Do not introduce user-managed batches,
+   compulsory draft administration or a new scheduling service.
 
-The final generations have now passed native installation readback on macOS:
-Codex through its existing production timer, and Kimi/Claude Code in isolated
-native profiles. Codex's unchanged Stop entry remains trusted; CC's native MCP
-health check connects to both servers. These facts do not imply that all current
-tasks reloaded their definitions, or complete model/Hook/contribution acceptance.
+Use real macOS environments to verify disconnection/recovery, continued work after
+remote redaction, long records and contribution-off behavior. Component tests are
+supporting evidence, not native acceptance. Codex uses gpt-5.6-luna/max, Kimi uses
+K3/max, and Claude Code uses the user's configured DSV4 stack. Preserve original
+failures and do not manufacture public experience or Bot events to claim a pass.
 
-The remaining work is:
+Codex [PR11](https://github.com/mindie-agent/mindie-agent-codex/pull/11) was still
+open at `2fd63469` when checked on 2026-09-25; its native Stop acceptance and
+temporarily held production updater must be resolved explicitly before declaring
+release completion. A historical trusted Hook does not prove a changed Hook is trusted.
 
-1. Continue the running Kimi K3/max operator development on the user's authorized NPU
-   environment, with community contribution enabled, and observe natural Stop,
-   faithful content, automatic PR and actual use by a fresh session. Keep the old
-   incomplete case closed and reuse its actual observations as background. Do not
-   recreate its capture or rerun completed remote commands to manufacture a pass.
-   Normal iterative development, debugging, recompilation and retesting are allowed.
-   The requested half-day check is a progress review, not a termination deadline.
-
-The previous 600-second limit was a local acceptance-controller choice, not a
-product or Kimi requirement. It counted setup and operator approval delays inside
-the business allowance, then killed the host while an approval was pending.
-The next task uses the host's supported automatic-approval mode for the user's
-authorized work. Distinguish setup/approval/business/
-publication timing, and let the business turn finish naturally. Retain bounded
-individual operations, cancellation and no automatic replay; do not replace the
-600-second rule with another arbitrary universal task limit. A caller's failure to
-handle approval is not evidence of a Hook, remote command or model failure.
-
-The lifecycle implementation is merged on main in the independent Codex, Kimi and Claude Code repositories. Continue real optional contribution and reuse-loop acceptance, content quality, and OS-triggered scheduling; the user advances Windows on a dedicated real machine after merge. Windows remains part of the first-release target, not an outstanding gate for these completed merges. Old business Skills and profiling stay deferred.
-
-Further domains, coordinator recipes and Harness expansion require a concrete useful task; they are not prerequisites for routine plugin use.
+Windows remains part of the first-release target; the user will perform dedicated
+Windows hardware acceptance after merge. Old business Skills, profiling analysis,
+automatic Skill extraction and additional domains/Harnesses remain deferred.
