@@ -11,6 +11,12 @@
 
 ## 当前进展
 
+2026-10-04 的[系统性设计](docs/systematic-knowledge-design-2026-10-04.md)统一了
+Codex 产品组合、公开任务包与 Bot 契约，定义块级读取和引用归组。
+实现与验证状态见该文档；旧版原生验收不自动覆盖这次接口变更。
+[用户须知](https://github.com/mindie-agent/mindie-agent-codex/blob/main/plugins/mindie-agent/skills/mindie-agent/references/user-notice.md)
+说明完整材料、规则脱敏与公开 Git 历史，不增加新的授权步骤。
+
 首个领域为 vLLM / vLLM-Ascend。共享知识生命周期和三个独立适配器的重构均已合入各自 main。三端已具备 macOS 原生使用、跨版本任务/远端作业接续及安装失败回滚的实际证据。
 
 [统一实施进度](docs/implementation-status.md)区分代码合入、原生宿主、真实发布和新任务使用证据。当前在用户的 Windows 机器上验证 PowerShell 和 WSL，优先完成 Codex 的公开对话贡献链路；Kimi 模型验收暂缓。合入不等于首版发布通过。

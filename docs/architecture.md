@@ -1,6 +1,6 @@
 # MindIE Agent architecture
 
-Current design, revised 2026-09-29. This replaces the earlier implementation plan from Issue #195; history remains in Git. The [nine inherited VAWS principles](design-principles.md) govern every adapter. [Implementation status](implementation-status.md) records evidence separately; the simplifications below are requirements, not claims of completed acceptance.
+Current design, revised 2026-10-04. The [knowledge delivery and consumption contract](systematic-knowledge-design-2026-10-04.md) specifies the current Codex package, block-reading and citation semantics. This replaces the earlier implementation plan from Issue #195; history remains in Git. The [nine inherited VAWS principles](design-principles.md) govern every adapter. [Implementation status](implementation-status.md) records evidence separately; the simplifications below are requirements, not claims of completed acceptance.
 
 ## Product and normal use
 
@@ -38,9 +38,8 @@ flowchart LR
     R --> C
     C -->|Configured and enabled| H["Bounded Stop notification<br/>public task increment only"]
     H --> L["Harness parser selects public messages<br/>local rules redact and save the body"]
-    L --> P["Automatically propose a GitHub PR"]
-    L -.-> M["Adapter-owned summary model<br/>title and retrieval summary only"]
-    M -.-> P
+    L --> M["Adapter-owned index model<br/>new block titles, summaries and navigation"]
+    M --> P["Complete indexed package<br/>automatically propose a GitHub PR"]
     P --> B["Existing Grok Bot reviews and merges"]
     B --> K["Public Markdown domain repository"]
     K --> S["Local synchronization and rebuildable index"]
@@ -66,22 +65,26 @@ storage, model input or publication; repository review cannot undo a secret
 uploaded in an earlier commit. Rule scanning cannot establish the publicness of
 proprietary meaning, so existing project authorization remains necessary.
 
-Only the title and retrieval summary may come from an adapter-owned model.
-The adapter maintains its model and effort choice (currently GPT-6-Luna with
-low effort for Codex); users do not configure a separate summary model. It cannot
-write the body, inherit the business model's reasoning settings or block capture/publication. With no supported channel,
-the introduction is a labeled source excerpt. Large summary input may use
-explicitly labeled first/last excerpts; the full body stays intact. One settled
-body version gets at most one summary attempt, including across restarts.
-Claims remain attributed and uncertainty is preserved. Other harnesses require
-their own projection and acceptance; their existing implementation is not proof
-that this Codex path works.
+The complete mechanically redacted body is stored as immutable ordered blocks.
+An adapter-owned model produces only each new block's fallible title/summary and
+current task navigation, using prior navigation as context. It cannot rewrite
+body bytes or replace the middle of a long task with a first/last excerpt.
+Incremental indexing is required before public packaging. A failed index attempt
+preserves local material and reports the unfinished stage; it is not a completed
+publication. Returned model output survives local apply failures so recovery does
+not repeat the model call. Publication, synchronization and retrieval invoke no
+model. Codex supplies the current summary-worker protocol; Kimi and Claude Code
+require independent worker integration and acceptance.
 
 Publishing uses the already prepared public body. Creating or updating the PR is mechanical and does not need another model rewriting pass. The existing Bot reviews content rather than manufacturing a second corpus-processing pipeline.
 
 ## Public records and lightweight local state
 
-Public entries are ordinary Markdown. Keep a clear title, retrieval summary and the knowledge/experience distinction. Optional `conditions` holds relevant software versions or source commits; absent values are allowed. Device choices, shapes, seeds, tolerances and command details belong in the body.
+Public material is a complete `tasks/<task_id>/` Markdown package: a
+`mindie-material-task/1` manifest embeds a `mindie-entry/3` header and binds
+ordered `mindie-material-block/1` files. A block's body is immutable under its
+identity; replacing body text requires a new identity and updated manifest.
+Keep a clear title, retrieval summary and the knowledge/experience distinction. Optional `conditions` holds relevant software versions or source commits; absent values are allowed. Device choices, shapes, seeds, tolerances and command details belong in the body.
 
 Local ownership, session provenance, retry bookkeeping, authorization and receipts remain local. Do not expose internal producer IDs, empty source arrays or routine lifecycle fields as public content. An entry's identity must support reference and feedback, but its exact storage belongs to the knowledge component contract; changing a title is not a required lifecycle step.
 
@@ -92,6 +95,20 @@ Unknown write outcomes retain the minimum reconciliation material and are checke
 Contribution remains a persistent opt-in choice. Routine work needs no per-entry approval, discard decision or batch management. Confirmed submission cleanup and minimum duplicate-prevention receipts are internal responsibilities.
 
 Public Git caches and indexes are rebuildable. SQLite may provide small transactions/indexes; replacing it with an equally complex JSON database would not simplify the product.
+
+Reading a task reference returns current navigation. Reading a block reference
+returns exactly that current member block, its file hash and adjacent references.
+An unchanged block remains readable after task append or metadata updates. Removal,
+withdrawal and corrupt required files are distinct outcomes; readers never silently
+substitute another version. Query and explain return a separate observed revision
+reference for optional feedback. No historical-body archive is required.
+
+Literal citations in block bodies support retrieval grouping only when the current
+source body independently matches the query and covers the citing block's matched
+terms. Groups expose the source and the strongest related observation's own excerpt
+and block reference. Citation counts are not independent confirmations or authority.
+Historical citations retain their literal identity; any current source is labeled
+separately. Novel terms, multiple sources and unresolved citations stay discoverable.
 
 ## Feedback and maintenance
 
@@ -105,7 +122,19 @@ Repeated useful experience may suggest a Skill, but automatic Skill extraction i
 
 Native task identity, authorization, an in-flight operation, an MCP connection and a remote job have different lifetimes. Explicit authorization persists until disabled or changed in scope. It does not expire merely because time passes or the runtime directory changes.
 
-Adapters track remote `main` commits now; release tracking is a later change. An update stages the complete adapter, Skills, Hooks and pinned runtime, verifies the selected native package and actually loaded resources, and atomically commits one generation. Every operation uses a coherent scripts/interpreter/configuration tuple.
+The immutable Codex adapter commit, its sole runtime dependency pins and its
+`product-contract.json` identify one tested product combination. The public domain
+repository declares schemas, exact validator and Bot review rules in
+`publication-contract.json`. Setup, update, publication and feed intake verify the
+exact declaration. Ordinary content updates under the same declaration need no
+plugin release; a changed contract requires a matching combination. Intermediate
+cross-repository deployment states fail visibly and retain prior valid state.
+Runtime, content/Bot contract and adapter are published in that order; Git does not
+provide a transaction across repositories.
+
+The candidate's interpreter runs its own runtime validator. The running updater
+checks source identity and a bounded receipt protocol without importing its own
+version's private knowledge APIs. An update stages the complete adapter, Skills, Hooks and pinned runtime, verifies the selected native package and actually loaded resources, and atomically commits one generation. Every operation uses a coherent scripts/interpreter/configuration tuple.
 
 Actual in-flight work blocks switching. An idle authorized task or an old unknown PR receipt does not. The runtime's idle decision and admission freeze must be atomic. The original task must still control its existing remote job after an update.
 
@@ -129,7 +158,7 @@ The native adapters expose configuration and status; service installation runs o
 
 ## Delivery and acceptance
 
-Codex, Kimi and Claude Code have independent repositories and native acceptance. Current Codex business tests use gpt-6-luna / max in Windows PowerShell and WSL. This business setting never selects metadata effort: Codex body capture calls no model, and optional title/summary generation uses the adapter's internal GPT-6-Luna / low policy, with no user configuration. This metadata policy has completed real calls on both platforms. Kimi model acceptance is currently deferred; Claude Code's configured model must be named accurately in its own evidence.
+Codex, Kimi and Claude Code have independent repositories and native acceptance. Current Codex business tests use gpt-6-luna / max in Windows PowerShell and WSL. This business setting never selects metadata effort: Codex body capture calls no model, and incremental index generation uses the adapter's internal model policy, with no separate user model configuration. Earlier metadata calls on both platforms do not establish acceptance of the new incremental package protocol. Kimi model acceptance is currently deferred; Claude Code's configured model must be named accurately in its own evidence.
 
 Windows hardware is available for current PowerShell and WSL acceptance. Earlier macOS evidence remains scoped to its recorded versions and behavior. Windows CI does not prove native Stop delivery, actual NPU execution or public contribution: those boundaries require the controlled native run.
 
