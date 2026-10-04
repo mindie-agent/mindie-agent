@@ -84,11 +84,11 @@ The reviewed implementation is split by repository ownership:
 
 | Component | Exact commit | Responsibility |
 | --- | --- | --- |
-| Knowledge runtime | `f32821ea7d0209f1c9b90fd8cd367a6930e7aa3d` | Publication declaration validation, block reads, observed feedback, citation grouping, safe continuation. |
-| Public content | `19bd5f2658ef8e321e9755fbf9549a1399071c4e` | Contract and trusted-base CI; existing task and feedback bytes remain unchanged. |
-| Codex adapter | `210656a4736d0f4d41847db576f0b134a739a69d` | Candidate-owned validation, exact runtime/content pins, shared configuration projection, tool contract and user notice. |
+| Knowledge runtime | `f5d9b4374ebe8323c465da0b916d8408ee5f0f2f` | Publication declaration validation, block reads, observed feedback, citation grouping, safe continuation. |
+| Public content | `f855cb0dd7b9098ad94e00c0daa239c35ba317d3` | Contract and trusted-base CI; existing task and feedback bytes remain unchanged. |
+| Codex adapter | `9b4203dfefeca44fa538432edde5a1b746ae3913` | Candidate-owned validation, exact runtime/content pins, shared configuration projection, tool contract and user notice. |
 
-The content declaration digest is `63fa56e67b87b657a234ca2d648e633f993f0e9e160ccc84075c625769ae158b`. The adapter also pins remote-dev `3c1a3543322a6d3a954715642a679336b0c5f830`. These identities are review evidence; runtime requirements and the product declaration remain the operational authority.
+The content declaration digest is `959cdd2ff79886b21755e3806fa4484209a77d7e66295899e5bb59baf526d742`. The adapter also pins remote-dev `3c1a3543322a6d3a954715642a679336b0c5f830`. These identities are review evidence; runtime requirements and the product declaration remain the operational authority.
 
 Local validation in an isolated Python 3.13 environment:
 
@@ -98,7 +98,7 @@ Local validation in an isolated Python 3.13 environment:
 - YAML and all three embedded workflow scripts parse. The trusted-contract and validation scripts also ran against an isolated local Git source. A real Codex preflight fetched the public content commit and verified its declaration digest and installed runtime commits.
 - A public-corpus exercise covered 20 tasks and 22 blocks. The query `Qwen3-0.6B NPU` returned 13 groups from 20 block matches; a more specific `Qwen3-0.6B token 1.201` query returned 10 groups from 17 matches. Source anchors retained the citing blocks' own excerpts and continuation reached the remaining related match. Exact lookup remained exact, and returned block bodies matched their public bytes. This checks navigation behavior, not the truth of any NPU or performance claim.
 
-The full local suites preceded a final test-only CI correction: the existing 10 MiB capture test waited eight seconds while the production scanner alone permits 30 seconds. Its wait is now bounded at 60 seconds, with unchanged complete-text, cursor and export assertions; the failing case passed locally afterward. Production runtime code is unchanged. The resulting revision and declaration pins above were revalidated by real preflight. Remote CI remains separately observable on the PR heads.
+The full local suites preceded a final test-only CI correction: the existing 10 MiB capture test waited eight seconds while the production scanner alone permits 30 seconds. Its wait is now bounded at 60 seconds, with unchanged complete-text, cursor and export assertions; the failing case passed locally afterward. Windows also exposed newline conversion in byte-bound contract fixtures; their writes now preserve exact UTF-8 bytes. The runtime correctly rejected the mismatched fixture, and its strict hash rules remain unchanged. The repaired fixtures passed 28 focused checks and 9 checks with simulated Windows CRLF. Production runtime code is unchanged. The resulting revision and declaration pins above were revalidated by real preflight. Remote CI remains separately observable on the PR heads.
 
 Independent review covered all nine current design principles, including the task-supplied expanded error requirements (document blob `9b21e6ae87ac96ff8bdacc3f4f546384e111a184`, SHA256 `15b4b58385846051464c27d06922ad0353bdd6a4031b619ff248c3a65c179741`). Review found and fixed:
 
