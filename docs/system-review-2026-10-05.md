@@ -34,7 +34,7 @@
 
 | 组件 | 审查候选与交付位置 | 证据与限制 |
 | --- | --- | --- |
-| knowledge | `4dbe83896b66a6c21afffc5d057a4573c303bcb3`，[PR 61](https://github.com/mindie-agent/knowledge/pull/61) | 最终 package/Linux/macOS CI 各 868 passed / 9 skipped，Windows 尚在执行；最终 Git 安装组合从 source tree 外运行相关回归 124 passed / 0 skipped，52 个运行时模块来自 site-packages |
+| knowledge | `4dbe83896b66a6c21afffc5d057a4573c303bcb3`，[PR 61](https://github.com/mindie-agent/knowledge/pull/61) | 最终 package/Linux/macOS CI 各 868 passed / 9 skipped；Windows 被30分钟CI预算取消，已记录617 passed / 27 skipped、0 failures/errors，233项未完成；最终 Git 安装组合从 source tree 外运行相关回归 124 passed / 0 skipped，52 个运行时模块来自 site-packages |
 | remote-dev | `9c8ae5ef70687ce55d77e85b2dbdd79a0844f013`，[PR 26](https://github.com/mindie-agent/remote-dev/pull/26) | 当前五项 CI 成功，包含 Linux 进程归属；真实 OpenSSH loopback 新增 workflow 尚未发布、三个 opt-in 用例未执行 |
 | diagnostics | `210e96dcbbde364f13a6cd45a4f50488226a8a29`，[PR 13](https://github.com/mindie-agent/diagnostics/pull/13) | 当前 14 项 CI 成功（push/PR 两套）；主体本地 275 passed / 3 skipped，最终坏路径相关 83 passed；未知 POST 不自动重发，坏授权不清空 pending |
 | npu-top | `96ff1291f5f7b659ddc93dafedabb1bfa1ca13ad`，[PR 15](https://github.com/mindie-agent/npu-top/pull/15) | 当前六项 CI 全部成功，覆盖 Linux/Windows 两版 Python、前端和完整 wheel；旧主体 Windows 两版各 141 passed / 5 build-only skips / 25 subtests。最终完整 wheel 正常依赖安装后，实际 HTTP health/overview、静态资源哈希与 schema 2 已验；没有真实 NPU/SSH bootstrap 验收 |
@@ -61,7 +61,7 @@ Coordinator 最终 `b14321a` 已由公开 Git SHA 正常安装，source tree 外
 
 1024 块、16,384,000 正文 bytes 的实际 select/freeze/reload/validate/scan/apply，Python retained 2,901,898 bytes、peak 15,053,494 bytes。该测量不是进程 RSS 上限、模型质量证明或允许截断正文的阈值。长任务正文保持完整；导航摘要仍是可错的定位材料。
 
-GitHub 拒绝当前 Git 凭据写 workflow 后，真实 SSH CI 与内容 validation 时限修正保留本地；没有通过替换凭据、API 或其他触发路径绕过。内容依赖与 Codex 最终更新据此暂不提交。真实 SSH/NPU、原生宿主 Hook 信任及首轮/fork 派发、在线模型质量/费用、公开上传与外部 Bot 采纳仍各自未验收，不能以本地安装或现有 CI 代替。
+GitHub 拒绝当前 Git 凭据写 workflow 后，真实 SSH CI、内容 validation 时限修正，以及仅将 Windows CI 预算由30改为60分钟的补丁保留本地；没有通过替换凭据、API 或其他触发路径绕过。Windows日志持续推进，本轮16项坏路径/marker/独立DFX直接回归和19项DFX相关测试均已通过。取消不是测试断言失败，但完整Windows验收没有完成；60分钟仅为CI预算调整，尚未执行，不影响产品业务执行期限。内容依赖与 Codex 最终更新据此暂不提交。真实 SSH/NPU、原生宿主 Hook 信任及首轮/fork 派发、在线模型质量/费用、公开上传与外部 Bot 采纳仍各自未验收，不能以本地安装或现有 CI 代替。
 
 此前消费者评估保留原结论：12 次正常任务没有调用参考入口，不能证明复用收益；两个强制读取是额外探索。此前公开合成 Stop→PR→Bot→独立消费属于旧版本，仍有价值但不能认证本轮。
 
