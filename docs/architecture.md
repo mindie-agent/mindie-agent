@@ -29,6 +29,8 @@ The current domain is vLLM / vLLM-Ascend. A task uses its selected domain's know
 
 Adapters reuse the same knowledge and remote-dev implementations. Native identity and transcript formats stay in adapters. A shared runtime must not import a host-specific lease table or guess a task from the latest session or working directory. Adapter separation does not justify a second knowledge database or publishing protocol.
 
+The current implementation target is Codex. Kimi and Claude Code still use earlier pinned combinations and require separate ports and native acceptance. Coordinator and npu-top are optional tools with their own execution and observation contracts; installing the Codex plugin does not implicitly start them.
+
 Grok Bot means the installed bot application, not Grok CLI. There is no routine-wide one-merge quota, arbitrary candidate count or mandatory twenty-minute review window.
 
 ## Contribution and reuse loop
@@ -113,6 +115,8 @@ Contribution remains a persistent opt-in choice. Routine work needs no per-entry
 
 Markdown files are the body authority. SQLite holds small cursor, queue and outcome transactions; ReMe owns derived file/chunk/BM25 retrieval in the same process. Derived caches may contain material text and are rebuildable; no raw Harness transcript archive or second body database is introduced. LangMem is used as a function, without another graph store or background service.
 
+Existing authority state must be validated before initialization or recovery writes. A missing/empty required database, absent table, invalid schema or interrupted initialization is a visible failure, not an empty first use. It must preserve body files and uncertain external-operation receipts. An empty or incomplete metadata snapshot cannot authorize deletion of valid material. Ownership markers identify initialization/generation only; they do not reconstruct business data. Candidate synchronization validates the full input before committing a new current corpus.
+
 Reading a task reference returns current navigation. Reading a block reference
 returns exactly that current member block, its file hash and adjacent references.
 An unchanged block remains readable after task append or metadata updates. Removal,
@@ -155,6 +159,8 @@ version's private knowledge APIs. An update stages the complete adapter, Skills,
 
 Actual in-flight work blocks switching. An idle authorized task or an old unknown PR receipt does not. The runtime's idle decision and admission freeze must be atomic. The original task must still control its existing remote job after an update.
 
+The knowledge runtime owns generation retirement under its startup lock, keyed to the exact selected configuration. This also rejects an old wake helper that was spawned before the switch but has not started its service yet. The adapter uses this boundary instead of inferring safety from a temporarily missing endpoint or process lock. Rollback restores only the corresponding retired configuration; completed stop/install facts remain separate from later cleanup or restore faults.
+
 When switching requires stopping a live local knowledge service, the updater preserves that fact and restores service under the selected generation if valid explicit task authorization remains. Restoration binds the selected Harness profile and its existing model configuration; process readiness alone does not establish that later organization can use that model. A durable admitted Stop notification can request a bounded wake outside the Hook; it does not start a business turn or replay a missing event. Query and wake paths reconcile the actual endpoint and generation before starting one owned service. An interrupted handoff remains observable and may resume through these existing paths after rechecking authorization and process ownership; it must not require the user to discover a CLI command.
 
 Plugin and feed updates classify failures. Temporary connectivity, rate limits and interrupted IO back off through the existing scheduler, honoring server retry guidance; three such failures must not permanently exclude an otherwise valid commit. Invalid content or incompatible generations remain isolated while the last working version stays available. Each attempt stays bounded; a later background network attempt is not another model attempt. Status records the last success, fault category and next recovery time. Authentication or native trust failures request the one necessary external action; routine connectivity failures do not wake the user or business model. Stable management entrypoints dispatch to the selected generation rather than an outdated installer copy.
@@ -175,13 +181,13 @@ The native adapters expose configuration and status; service installation runs o
 
 ## Delivery and acceptance
 
-Codex, Kimi and Claude Code have independent repositories and native acceptance. Current Codex business tests use gpt-6-luna / max in Windows PowerShell and WSL. This business setting never selects metadata effort: Codex body capture calls no model, and incremental index generation uses the adapter's internal model policy, with no separate user model configuration. Earlier metadata calls on both platforms do not establish acceptance of the new incremental package protocol. Kimi model acceptance is currently deferred; Claude Code's configured model must be named accurately in its own evidence.
+Codex, Kimi and Claude Code have independent repositories and native acceptance. The recorded Windows PowerShell and WSL Codex business tests used gpt-6-luna / max; those runs retain their original revisions and do not certify this candidate combination. This business setting never selects metadata effort: Codex body capture calls no model, and incremental index generation uses the adapter's internal model policy, with no separate user model configuration. Earlier metadata calls on both platforms do not establish acceptance of the new incremental package protocol. Kimi model acceptance is currently deferred; Claude Code's configured model must be named accurately in its own evidence.
 
-Windows hardware is available for current PowerShell and WSL acceptance. Earlier macOS evidence remains scoped to its recorded versions and behavior. Windows CI does not prove native Stop delivery, actual NPU execution or public contribution: those boundaries require the controlled native run.
+Earlier Windows PowerShell, WSL and macOS evidence remains scoped to its recorded revisions and behavior. Availability of hardware for a new acceptance run must be established when that run is requested. Windows CI does not prove native Stop delivery, actual NPU execution or public contribution: those boundaries require the controlled native run.
 
 Development checks, native installation, real Hook delivery, a real public PR/Bot merge, and usefulness in a new task are recorded separately. A registry success, connected MCP panel or old revision's evidence cannot stand for the final implementation.
 
-The current work prioritizes the lifecycle and knowledge loop across these three adapters. Old business Skills, profiling analysis, automatic Skill extraction and further domain/Harness expansion remain deferred. Cross-domain work may reuse native tasks and existing tools when needed; there is no compulsory domain router or new conversation framework.
+The current work prioritizes Codex and its upstream/downstream lifecycle and knowledge contracts. Kimi and Claude Code require separate later ports and native acceptance. Old business Skills, profiling analysis, automatic Skill extraction and further domain/Harness expansion remain deferred. Cross-domain work may reuse native tasks and existing tools when needed; there is no compulsory domain router or new conversation framework.
 
 The old VAWS bootstrap, source/worktree manager and legacy installation path remain retired. This permission to rewrite product internals does not authorize deletion of unrelated user repositories, private material or running resources.
 

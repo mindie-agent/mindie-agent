@@ -1,43 +1,10 @@
 # Next steps
 
-Updated 2026-09-29. Follow the [nine design principles](design-principles.md),
-[architecture](architecture.md) and [lifecycle contract](harness-boundary-and-lifecycle.md).
-[Implementation status](implementation-status.md) separates completed evidence
-from work in progress. Earlier release reports retain their historical results.
+Updated 2026-10-05. The [architecture](architecture.md), [lifecycle contract](harness-boundary-and-lifecycle.md) and [nine principles](design-principles.md) define current behavior. [Implementation status](implementation-status.md) distinguishes current work from historical acceptance.
 
-The [Codex public-transcript acceptance](codex-public-transcript-acceptance-2026-09-29.md)
-records the implemented Windows/WSL work, exact candidate commits and remaining
-limits. Preserve the following existing mechanisms:
+1. Resolve the explicitly reported GitHub workflow-permission blocker for the prepared real-SSH CI and publication-validation changes. The source review and fixes are recorded in the [system review](system-review-2026-10-05.md); an unpublished local candidate is not a delivered release.
+2. After authorized publication, repeat only the affected remote acquisition and final contract checks. Preserve the exact installed-package, process, state and local native-entrypoint evidence already obtained. Keep native host Stop trust/dispatch, real SSH/NPU, online-model quality/cost and external Bot acceptance separate; do not count previous revisions as the current combination.
+3. Publish only through the existing reviewed repository and update paths. Preserve unknown write identities, current valid material and unrelated user configuration. A development PR is not an instruction to merge, enable contribution for a new project, or switch a production install.
+4. Evaluate optional reuse with observable actual consumption and a task that distinguishes relevant corrections or conditions. Existing ordinary consumers made zero reference calls, so they establish no reuse benefit. Do not repeat that experiment without changing the measurement question; do not add mandatory retrieval to manufacture a positive result.
 
-1. Keep submitted knowledge authoritative on the remote. Retain only unsent
-   additions locally, apply them to the current own PR or merged main, and never
-   resurrect a Bot-redacted passage or withdrawn entry from an old full draft.
-   Distinguish locally staged material from confirmed remote delivery.
-2. Recover transient publication, feed and plugin-update failures through existing
-   background workers and schedules. Persist backoff and reconcile unknown writes
-   before retrying. Do not require a CLI, another business turn, or another model
-   call. Content rejection remains separate from a recoverable network failure.
-   Stable adapter management commands must select the installed generation.
-3. Let long tasks and growing knowledge continue. Remove cumulative-body and
-   whole-corpus rejection thresholds while bounding individual operations and
-   using incremental processing. Do not introduce user-managed batches,
-   compulsory draft administration or a new scheduling service.
-
-Codex body processing now uses deterministic public-message selection and local
-redaction. Do not reintroduce a model into body capture or increase its timeout
-to handle larger transcripts. Optional title/summary generation selects its model
-and effort separately; GPT-6-Luna/low has completed real metadata calls in both
-PowerShell and WSL. Unsupported or failed calls retain labeled source excerpts.
-Real native business tasks use gpt-6-luna/max.
-
-Review and merge the recorded core and Codex candidates before checking ordinary
-main-branch update delivery. The isolated candidate profile deliberately uses a
-manual update schedule, so it does not establish current Windows/WSL OS scheduler
-delivery. Keep native Hook trust, automatic contribution and feed synchronization
-as separately observed boundaries. A historical trusted Hook does not prove a
-changed Hook is trusted.
-
-Kimi native model acceptance is deferred; Grok has no adapter in this scope.
-Other harnesses need their own transcript projection and native evidence.
-Earlier macOS and Claude results retain their original scope. Old business Skills,
-profiling analysis, automatic Skill extraction and additional domains remain deferred.
+Kimi and Claude Code need independent ports to the current body/index/package and lifecycle contracts. Their existing native evidence remains scoped to older pins. Kimi model acceptance is deferred; Grok is the existing public-content Bot, not another adapter in this scope. Old business Skills, profiling analysis, automatic Skill extraction and additional domains remain deferred.
