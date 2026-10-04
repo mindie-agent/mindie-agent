@@ -24,6 +24,7 @@
 | 协调与等待 | coordinator 仍有默认执行、准备和排队期限；缺损主库可失去 attachment/租约 | None 默认贯穿各层；保留健康租约；严格主库及已知结果/记录失败边界 |
 | 观测与界面 | 坏 inventory 变空清单；详情失败沿用旧值；HTTP 失败被 UI 当空图或成功；不完整 wheel 构建成功 | 完整配置验证、部分观测显式状态、界面显示实际失败、完整 package 构建 |
 | Windows 状态标记 | 文本写入的 CRLF 与固定 LF 字节校验冲突，刚创建的 Admission 也被拒绝 | 写入 canonical bytes；仍严格拒绝坏 marker、丢失约束和身份替换，适配器内置副本同步 |
+| 缺失与损坏路径 | Windows 将普通文件子路径报告为 FileNotFoundError，DFX 和 status 也可能把坏父目录视为未配置/无故障 | 只在可访问目录下确认真实缺失；文件祖先、不可访问根目录和悬空链接明确报错；Core/DFX 保留有效目录链接支持，diagnostics 沿用禁止软链策略；真缺失读取不创建状态 |
 | 配置与绑定 | 通过旧错误文案判断无绑定，导致配置成功误报 degraded；部分故障 JSON 仍退出 0 | 复用 core 的结构化 active_lease；无绑定不建库，损坏仍失败；保留 configuration_status 并返回失败退出码 |
 | 准备末次观测 | 第一条观测即 quiet 时，解析出的 stage timings 没有再次保存 | 已知完成先保存、新计时再保存、最后输出回调；保存/输出失败保留真实退出结果，不重放准备 |
 
@@ -33,28 +34,28 @@
 
 | 组件 | 审查候选与交付位置 | 证据与限制 |
 | --- | --- | --- |
-| knowledge | `ff4bc4aa82e651a4205ba805be2310042946af76`，[PR 61](https://github.com/mindie-agent/knowledge/pull/61) | 主体全套 840 passed / 9 Windows-only skipped；最终 marker/authority/Admission/发布/DFX 115 passed。最终安装使用下面精确组合，不能将旧依赖源码测试冒充它 |
-| remote-dev | `5dae65cb2501caabba5c42b47268abfcd403cff8`，[PR 26](https://github.com/mindie-agent/remote-dev/pull/26) | 当前五项 CI 成功，包含 Linux 进程归属；真实 OpenSSH loopback 新增 workflow 尚未发布、三个 opt-in 用例未执行 |
-| diagnostics | `7eed6cdb9935f2922b5b280e9d78ad8eb823f5ce`，[PR 13](https://github.com/mindie-agent/diagnostics/pull/13) | 当前 CI 成功；本地 275 passed / 3 skipped；未知 POST 不自动重发，坏授权不清空 pending |
-| npu-top | `0f052e6e211dd92b549aa7c468ebb5ad506bff3a`，[PR 15](https://github.com/mindie-agent/npu-top/pull/15) | 当前六项 CI 成功；Windows 两版 Python 各 141 passed / 5 build-only skips / 25 subtests。完整 wheel 正常依赖安装后，实际 HTTP health/overview、静态资源哈希与 schema 2 已验；没有真实 NPU/SSH bootstrap 验收 |
-| coordinator | `492555c5b08a8938f89b5f40ed1bc3f8759204d3`，[PR 40](https://github.com/mindie-agent/coordinator/pull/40) | 默认执行/排队期限、authority、远端结果保留已修；完整源码 1327 passed / 28 skipped / 52 subtests，正常安装后的相关 134 passed / 2 skipped / 20 subtests。实际 CI 发现首条 quiet 观测的计时未保存，已修正并经真实子进程回归和相关 57 passed / 5 Linux-only skips 验证；最终 CI 另列，计数不可相加 |
-| Codex | 本地 `4924c43b144980b0ea46f19246dbb83fb78de519`，[PR 19](https://github.com/mindie-agent/mindie-agent-codex/pull/19) 暂仍为较早提交 | 完整最终套件 376 tests / 12 平台 skips，其余通过，90.484 秒；新 updater、进程结果和投递实现连同最终 pins 留本地，等待内容候选可发布；现有 PR 旧 CI 不替代本地新 head 验收 |
-| 公开内容 | 本地 `c41b29d99de81a05a5323769e86672b57449e5f4`，[PR 38](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/38) 暂仍为较早提交 | installed core 验证 21 entries / 1 feedback / 249215 bytes，四项变更均属 development；neutral 开发检查不授予自动内容合并 |
+| knowledge | `4dbe83896b66a6c21afffc5d057a4573c303bcb3`，[PR 61](https://github.com/mindie-agent/knowledge/pull/61) | 最终 package/Linux/macOS CI 各 868 passed / 9 skipped，Windows 尚在执行；最终 Git 安装组合从 source tree 外运行相关回归 124 passed / 0 skipped，52 个运行时模块来自 site-packages |
+| remote-dev | `9c8ae5ef70687ce55d77e85b2dbdd79a0844f013`，[PR 26](https://github.com/mindie-agent/remote-dev/pull/26) | 当前五项 CI 成功，包含 Linux 进程归属；真实 OpenSSH loopback 新增 workflow 尚未发布、三个 opt-in 用例未执行 |
+| diagnostics | `210e96dcbbde364f13a6cd45a4f50488226a8a29`，[PR 13](https://github.com/mindie-agent/diagnostics/pull/13) | 当前 14 项 CI 成功（push/PR 两套）；主体本地 275 passed / 3 skipped，最终坏路径相关 83 passed；未知 POST 不自动重发，坏授权不清空 pending |
+| npu-top | `96ff1291f5f7b659ddc93dafedabb1bfa1ca13ad`，[PR 15](https://github.com/mindie-agent/npu-top/pull/15) | 当前六项 CI 全部成功，覆盖 Linux/Windows 两版 Python、前端和完整 wheel；旧主体 Windows 两版各 141 passed / 5 build-only skips / 25 subtests。最终完整 wheel 正常依赖安装后，实际 HTTP health/overview、静态资源哈希与 schema 2 已验；没有真实 NPU/SSH bootstrap 验收 |
+| coordinator | `b14321a45467b509199bef97324a9c0f65b29069`，[PR 40](https://github.com/mindie-agent/coordinator/pull/40) | 默认执行/排队期限、authority、远端结果保留已修；完整源码 1327 passed / 28 skipped / 52 subtests，正常安装后的相关 134 passed / 2 skipped / 20 subtests。实际 CI 发现首条 quiet 观测的计时未保存，已修正并经真实子进程回归和相关 57 passed / 5 Linux-only skips 验证；最终四项 CI（Linux/macOS/Windows/wheel）全部成功，计数不可相加 |
+| Codex | 本地 `123909e922056d43992baff2a848dcd356ed2f33`，[PR 19](https://github.com/mindie-agent/mindie-agent-codex/pull/19) 暂仍为较早提交 | 完整最终套件 379 tests / 12 平台 skips，其余通过，90.851 秒；preflight 和完整 run_ci 均 exit 0；新 updater、进程结果和投递实现连同最终 pins 留本地，等待内容候选可发布；现有 PR 旧 CI 不替代本地新 head 验收 |
+| 公开内容 | 本地 `d4e7e8edf0539565284fde545518eacfb719bacc`，[PR 38](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/38) 暂仍为较早提交 | installed core 验证 21 entries / 1 feedback / 249215 bytes，四项变更均属 development；neutral 开发检查不授予自动内容合并 |
 | 组织入口 | `f48f015217d4075b67ccab410c54f191933dd31f`，[PR 9](https://github.com/mindie-agent/.github/pull/9) | 当前入口指向架构/主线内容，完整正文与可选复用、Codex 与旧版 Kimi/Claude Code 边界一致；仅文档，不声称运行验收 |
 
 上述测试计数覆盖不同提交和重叠测试，不合计为独立用例总数。每个 PR 的九原则记录绑定实际审查提交；新增 CI 发现的缺陷必须修正后再更新记录。
 
 ### 精确安装组合
 
-全新隔离 venv 通过正常 Git 依赖安装，未用 `--no-deps`、editable 或 `PYTHONPATH` 冒充已安装版本。`direct_url.json` 核对 knowledge `ff4bc4a`、remote-dev `5dae65c`、diagnostics `7eed6cd`。Codex 声明绑定内容完整候选 `c41b29d`，合同 SHA256 为 `f2dd4f82ea2ce9a883d696a6039cde0ad3ebf21bbe5544c477e810c56ea439ff`。
+隔离 venv 通过正常 Git 依赖安装与更新，未用 `--no-deps`、editable 或 `PYTHONPATH` 冒充已安装版本。`direct_url.json` 核对 knowledge `4dbe838`、remote-dev `9c8ae5e`、diagnostics `210e96d`。Codex 声明绑定内容完整候选 `d4e7e8e`，合同 SHA256 为 `783b415b1027dd8878b97a4e6548093da924b06bdad770563098724d5cefd730`。
 
-由于内容候选尚未发布，直接远端 preflight 在 `publication_fetch` 正确失败，没有执行 native 安装。本地组合验证显式将**验收进程内**这一个内容 Git URL 映射到精确提交的只读裸镜像，保留相同声明、完整块、哈希与 validator 检查；其他 runtime 仍从公开 Git SHA 正常安装。这个镜像是隔离验证夹具，不是产品 fallback，也没有修改全局 Git 配置、凭据或用户安装。远端可获取性必须在授权发布后另验。
+此前未发布候选的直接远端 preflight 在 `publication_fetch` 明确失败，未进入 native 安装；该记录不充当最终 `d4e7e8e` 的远端实测。本地组合验证显式将**验收进程内**这一个内容 Git URL 映射到精确提交的只读裸镜像，保留相同声明、完整块、哈希与 validator 检查；其他 runtime 仍从公开 Git SHA 正常安装。这个镜像是隔离验证夹具，不是产品 fallback，也没有修改全局 Git 配置、凭据或用户安装。远端可获取性必须在授权发布后另验。
 
-最终 Codex `4924c43` 在 Codex CLI 0.153.4 的临时原生 profile 中实际安装并启用。候选与原生 cache 每个文件字节一致，发现 3 个 knowledge 和 11 个 remote MCP 工具。包 SHA256 为 `6e16e185fa2094e362306505d251b16e1267537ee3ce167b55d4e000e2de9a27`。这是实际安装与入口验证，不代表宿主已经为真实用户任务派发 Hook。
+最终 Codex `123909e` 在 Codex CLI 0.153.4 的临时原生 profile 中实际安装并启用。候选与原生 cache 每个文件字节一致，发现 3 个 knowledge 和 11 个 remote MCP 工具。包 SHA256 为 `955f205514438bce0792a6188ddca8a041966413be47b0638428c4811cef1c49`。这是实际安装与入口验证，不代表宿主已经为真实用户任务派发 Hook。
 
 通过已安装 Hook 命令输入合成 Stop 缺身份事件，得到中性 shell 输出及真实 `invalid_envelope` 投递。另一项在真实 Core 服务启动后损坏隔离 community JSON，由实际 outbox worker 产生 `knowledge.publish / authorization / authority_unavailable`；下一次已安装 MCP 能力调用收到该故障并 ACK，再次调用没有重复投递。没有直接塞入诊断来冒充后台错误。测试结束时 captures、summary attempts、publication outbox 均为 0，没有创建 Admission；所拥有服务正常退出，临时 profile 已移除。
 
-Coordinator 最终 `492555c` 也由公开 Git SHA 正常安装，source tree 外导入路径及 remote-dev/diagnostics `direct_url.json` 已回读。安装包的真实 subprocess 末次观测与记录/输出故障相关五项测试通过；不是用源码覆盖已安装版本。
+Coordinator 最终 `b14321a` 已由公开 Git SHA 正常安装，source tree 外导入路径、remote-dev `9c8ae5e` / diagnostics `210e96d` 的 `direct_url.json` 及 Requires-Dist 已回读。安装包的真实 subprocess 末次观测与记录/输出故障相关五项测试通过；不是用源码覆盖已安装版本。
 
 ### 资源与外部验收
 
