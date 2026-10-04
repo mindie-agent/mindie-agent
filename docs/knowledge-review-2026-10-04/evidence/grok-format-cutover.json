@@ -1,0 +1,76 @@
+{
+  "schema": "mindie-grok-format-cutover/1",
+  "observed_at": "2026-10-04T15:48:14Z",
+  "scope": "Update existing trusted validator and three existing routines; no PR review, comment or merge in these configuration tasks.",
+  "trusted_pin": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+  "provenance": {
+    "core_pr": 59,
+    "merged_commit": "250fcc9d497989864e2429d422d6c2c79e4d5e71",
+    "source_reachable": true
+  },
+  "routine_readback": {
+    "method": "Parent reloaded the Grok app and reopened each saved routine detail pane after completion.",
+    "stale_before_reload": true,
+    "routines": [
+      {
+        "name": "社区知识 PR 审查",
+        "saved_pin_matches": true,
+        "package_schemas": true,
+        "trigger": "pr-opened, pr-closed, pr-merged",
+        "repository": "mindie-agent/knowledge-vllm-ascend"
+      },
+      {
+        "name": "社区知识漏事件补查",
+        "saved_pin_matches": true,
+        "package_schemas": true,
+        "schedule": "09:06 daily",
+        "timezone": "Asia/Shanghai"
+      },
+      {
+        "name": "社区知识纠错与 Skill 提案",
+        "saved_pin_matches": true,
+        "package_schemas": true,
+        "schedule": "10:03 Saturdays",
+        "timezone": "Asia/Shanghai"
+      }
+    ],
+    "no_new_listener": true,
+    "permissions_change_requested": false,
+    "exact_base_conflict_and_whole_package_withdrawal_visible": true
+  },
+  "validator_installation_reported_by_bot": {
+    "package": "mindie-knowledge",
+    "version": "0.10.0",
+    "editable": false,
+    "installed_source_comparison": "matched exact clean trusted checkout",
+    "old_broken_pip_recoverably_backed_up": true,
+    "ensurepip_repair": true,
+    "pip_check_exit": 1,
+    "missing_runtime_dependencies": [
+      "langmem",
+      "mindie-diagnostics",
+      "reme-ai"
+    ],
+    "full_runtime_installation": false
+  },
+  "actual_validator_execution_reported_by_bot": {
+    "exit_code": 0,
+    "stderr_empty": true,
+    "commit": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a",
+    "entries": 20,
+    "feedback_files": 1,
+    "bytes": 246051,
+    "trusted_python_isolated": true,
+    "candidate_code_executed": false,
+    "candidate_git_hooks_disabled": true,
+    "new_model_calls": 0
+  },
+  "boundaries": {
+    "new_pr_event_delivery": false,
+    "automatic_review_or_merge": false,
+    "public_contribution_scope_selected": false,
+    "full_runtime_dependency_installation": false,
+    "old_main_layout_rejection": "Expected before content migration; not treated as empty feed or validation success."
+  },
+  "model_count_boundary": "Zero new model calls describes the trusted publication validator execution, not Grok conversation billing."
+}

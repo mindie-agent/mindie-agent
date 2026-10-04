@@ -1,0 +1,70 @@
+{
+  "cumulative_history_second_seen_ids": [
+    "second-0",
+    "second-1"
+  ],
+  "failure": {
+    "fake_calls": 1,
+    "propagated_error": "SYNTHETIC_PROVIDER_FAILURE"
+  },
+  "footprint": {
+    "distribution_count": 50,
+    "single_process_import_seconds": 5.306178208000347,
+    "single_process_peak_rss_bytes": 97140736,
+    "site_packages_apparent_bytes_after_import": 46534493
+  },
+  "installed_source_sha256": "53b6cabcf3a64fc9445cb5a2252e8e8ab67de9a726ab04bca5aa1cd35bdd0909",
+  "langmem": "0.0.30",
+  "output_cap": {
+    "actual_summary_units": 200,
+    "max_summary_tokens_argument_units": 64
+  },
+  "over_budget": {
+    "claimed_but_unseen_ids": [
+      "oversized-0",
+      "oversized-1",
+      "oversized-2"
+    ],
+    "claimed_summarized_ids": [
+      "oversized-0",
+      "oversized-1",
+      "oversized-2",
+      "oversized-3"
+    ],
+    "max_tokens_argument_units": 180,
+    "seen_ids": [
+      "oversized-3"
+    ],
+    "seen_input_units_with_fixed_prompt": 143
+  },
+  "python": "3.13.12",
+  "scope": "synthetic mechanism only; no model, provider, database or private history",
+  "two_batches": {
+    "calls_per_batch": [
+      1,
+      1
+    ],
+    "calls_total": 2,
+    "first_seen_ids": [
+      "first-0",
+      "first-1"
+    ],
+    "last_id": "second-1",
+    "second_contains_previous_raw_body": false,
+    "second_contains_previous_summary": true,
+    "second_input_units_with_fixed_prompt": 287,
+    "second_seen_ids": [
+      "second-0",
+      "second-1"
+    ],
+    "state_roundtrip": true,
+    "summary_ids": [
+      "first-0",
+      "first-1",
+      "second-0",
+      "second-1"
+    ]
+  },
+  "unit_warning": "All budget values in this probe are character units, not model tokens.",
+  "zero_threshold_calls": 0
+}

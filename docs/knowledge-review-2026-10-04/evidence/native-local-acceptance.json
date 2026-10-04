@@ -1,0 +1,150 @@
+{
+  "schema": "mindie-native-local-acceptance/1",
+  "scope": "Pure synthetic native Codex tasks, isolated producer and consumer profiles, local bare Git transport only.",
+  "actual_native_revisions": {
+    "codex": "351e9f8aeb422c879fef382d3c9aea784a6008ae",
+    "knowledge": "d07934b6ff6510d9d666c30560e3aa072a75ce60"
+  },
+  "first_producer": {
+    "native_exit_code": 0,
+    "stop_status": "rejected_identity_mismatch",
+    "captures": 0,
+    "pipeline_model_calls": 0,
+    "cause": "Independent nested native process inherited its parent thread/session identity. The envelope check correctly failed closed.",
+    "correction": "Removed inherited parent identities before launching a new independent native process; no fabricated identity or manual Stop replay.",
+    "business_model_usage": {
+      "input_tokens": 124751,
+      "cached_input_tokens": 96256,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 636,
+      "reasoning_output_tokens": 194
+    }
+  },
+  "second_producer": {
+    "native_exit_code": 0,
+    "capture_status": "organized",
+    "captures": 1,
+    "body_model_calls": 0,
+    "summary_status": "complete",
+    "summary_model": "gpt-5.6-luna",
+    "summary_effort": "low",
+    "summary_model_calls": 1,
+    "summary_elapsed_ms": 12857,
+    "summary_usage": {
+      "cached_input_tokens": 0,
+      "input_tokens": 8835,
+      "output_tokens": 232
+    },
+    "business_model_usage": {
+      "input_tokens": 93430,
+      "cached_input_tokens": 67840,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 436,
+      "reasoning_output_tokens": 117
+    }
+  },
+  "local_publication": {
+    "outbox_status": "submitted",
+    "local_pull_number": 1,
+    "public_pr": false,
+    "exact_head": "da8d1cfa0e98702436108eff6300d7b90ca5442f",
+    "validation": {
+      "commit": "da8d1cfa0e98702436108eff6300d7b90ca5442f",
+      "entries": 1,
+      "feedback_files": 0,
+      "bytes": 2876
+    },
+    "main_revision": "da8d1cfa0e98702436108eff6300d7b90ca5442f",
+    "changed_task_files": 2,
+    "task_blocks": 1,
+    "expected_synthetic_facts_retained": true
+  },
+  "first_consumer": {
+    "native_exit_code": 0,
+    "capture": "disabled",
+    "query_results": 0,
+    "explain_calls": 0,
+    "pipeline_model_calls": 0,
+    "business_model_usage": {
+      "input_tokens": 133336,
+      "cached_input_tokens": 119552,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 581,
+      "reasoning_output_tokens": 126
+    },
+    "fixture_gap": "Package/runtime preparation omitted the existing updater owner; no feed synchronization had occurred. The empty result was preserved and was not counted as retrieval success."
+  },
+  "normal_sync_owner": {
+    "entry": "existing auto_update.py check",
+    "scheduler_installed": false,
+    "direct_feed_sync_or_store_write": false,
+    "knowledge_status": "ok",
+    "feed_status": "synced",
+    "feed_revision": "da8d1cfa0e98702436108eff6300d7b90ca5442f",
+    "entries": 1,
+    "plugin_status": "check_failed",
+    "plugin_error": "MindIE runtime failed; not retried",
+    "initial_process_exit_code": 0,
+    "exit_code_bug": "check_failed was absent from the adapter CLI failure set.",
+    "fix_revision": "801d2b4b8020c9d6893f4d3db3d103c445da3e49",
+    "fixed_actual_cli_exit_code": 1,
+    "fixed_feed_status": "unchanged",
+    "fixed_plugin_status": "check_failed",
+    "whole_updater_success": false
+  },
+  "second_consumer": {
+    "native_exit_code": 0,
+    "capture": "disabled",
+    "query_results": 1,
+    "query_origin": "feed",
+    "supplemental": false,
+    "query_ref": "mindie://vllm-ascend/b88215f5d1ca49d790a744d3d4d363c6a8e595faf45a8b156fd6aa60937c5f11@95f786cc23983d8cfab2395f0ce4b52d0ca6014100495924754f7f7e63253132",
+    "explain_ref": "mindie://vllm-ascend/b88215f5d1ca49d790a744d3d4d363c6a8e595faf45a8b156fd6aa60937c5f11@95f786cc23983d8cfab2395f0ce4b52d0ca6014100495924754f7f7e63253132",
+    "explain_content_length": 238,
+    "explain_next_offset": null,
+    "facts_preserved": {
+      "initial_2_shards": true,
+      "corrected_4_shards": true,
+      "hardware_unverified": true
+    },
+    "feed_revision": "da8d1cfa0e98702436108eff6300d7b90ca5442f",
+    "pipeline_counts": {
+      "captures": 0,
+      "material_batches": 0,
+      "transcript_tasks": 0,
+      "material_summary_attempts": 0,
+      "outbox": 0
+    },
+    "sharing_config_present": false,
+    "consent_present": false,
+    "business_model_usage": {
+      "input_tokens": 128894,
+      "cached_input_tokens": 98304,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 811,
+      "reasoning_output_tokens": 160
+    }
+  },
+  "cleanup": {
+    "owned_services_stopped": 2,
+    "owned_services_remaining": 0,
+    "test_plugins_removed": 2,
+    "test_marketplaces_removed": 2,
+    "exact_test_hook_trust_entries_removed": 2,
+    "owned_cache_roots_remaining": 0,
+    "scoped_config_changes_only": true,
+    "formal_plugin_settings_preserved": true,
+    "isolated_evidence_and_config_retained": true,
+    "whole_config_rollback": false
+  },
+  "acceptance_boundaries": {
+    "public_github_write": false,
+    "grok_review": false,
+    "os_scheduler_acceptance": false,
+    "long_session_quality_benchmark": false,
+    "real_hardware_benchmark": false,
+    "body_capture_uses_model": false,
+    "consumer_reindex_uses_model": false
+  },
+  "summary": "Normal native Stop, one real LangMem indexing call, validated local Git publication, existing updater-owner sync, and independent native query/explain completed on synthetic material. Initial launcher/fixture failures and the discovered CLI exit-code defect are preserved separately."
+}

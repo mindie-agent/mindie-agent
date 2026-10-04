@@ -1,0 +1,106 @@
+{
+  "schema": "mindie-formal-install-summary/1",
+  "adapter_merge": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+  "adapter_tree": "17772e776d1b75bcb52683367c1a0974835c4a7c",
+  "tested_pr_head": "783190bac5c387ea3f6918e14d56c7eaaedb09eb",
+  "tested_pr_merge": "832c3f32f34104e53c436495be77ff8842c33241",
+  "core_pin": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+  "initial_normal_owner_outcome": {
+    "current_unchanged": "33de36945e6dd448104c42b7fa49639b00f8ff58",
+    "candidate": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+    "status": "update_failed",
+    "target_attempt_count": 1,
+    "failure": "Old controller runtime probe imported retired MaintenanceBudget symbol; candidate runtime preparation failed before install.",
+    "new_source_public_check_invocations": 0,
+    "new_source_entry": "Stopped at due preflight because existing scheduler advanced next_check."
+  },
+  "explicit_recovery": {
+    "root_authorized": true,
+    "source": "exact merged Git archive",
+    "phase": "complete",
+    "install_calls": 1,
+    "state_status_after": "installed",
+    "current_after": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+    "attempts_preserved": true,
+    "next_check_preserved": true,
+    "journal_after": false,
+    "prepared_runtime_probe": "passed",
+    "native_selection_and_cache_bytes": "passed through existing verify_native",
+    "service_handoff": {
+      "status": "not-needed",
+      "reason": "no-valid-lease"
+    },
+    "launcher_error": null
+  },
+  "native_hook_trust": {
+    "interface": "Codex CLI startup Review hooks (same /hooks browser) > Stop > single formal Hook > t",
+    "ui_exit_code": 0,
+    "business_model_turns": 0,
+    "bypass": false,
+    "current_hash": "sha256:21788b3cd76286dc67efbf4aeb28d361171aad06a5e9aa225fa6a6004711c473",
+    "trusted_hash": "sha256:21788b3cd76286dc67efbf4aeb28d361171aad06a5e9aa225fa6a6004711c473",
+    "status": "trusted",
+    "event": "stop",
+    "timeout_seconds": 5,
+    "source": "installed native cache hooks/hooks.json for exact merged adapter",
+    "hook_file_sha256": "f7902ae45270d13127a57d1280ce59bc079df928a7d1e95a5cb2bbdf0745b765",
+    "enabled": true
+  },
+  "public_content_delivery": {
+    "main": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+    "status": "synced",
+    "entries": 20,
+    "candidate_attempts": 1,
+    "manual_check_invocations": 0,
+    "manual_feed_sync_invocations": 0,
+    "scheduler_runs_before": 117,
+    "scheduler_runs_after": 118,
+    "scheduler_last_exit": 0,
+    "scheduler_interval_seconds": 300,
+    "entry_groups": [
+      {
+        "kind": "experience",
+        "origin": "feed",
+        "feed_active": 1,
+        "count": 20
+      }
+    ],
+    "provenance": "Existing launchd owner runs incremented 117 to 118; updater recorded changed main synced20; no manual public check was invoked. StandardOutPath and StandardErrorPath are not configured, so no separate launchd log claimed.",
+    "knowledge_checked_at": 1791130225.082419,
+    "plugin_status": "up_to_date"
+  },
+  "preserved_configuration": {
+    "settings_sha256": "77283c76611699475944e696a0517faf62a25192608230bd6258430ab48e82eb",
+    "launchd_plist_sha256": "43bf054cad1daca6ea1d981ba569a58d3fcd48c091d514dded61cf5dbc14c5de",
+    "formal_plugin_enabled": true,
+    "community_exists": false,
+    "consent_exists": false
+  },
+  "boundaries": {
+    "new_business_model_calls": 0,
+    "new_history_imports": 0,
+    "new_sharing_consent": false,
+    "full_native_business_loop_on_final_f35": "not rerun; earlier isolated native evidence remains separate actual351/core d079",
+    "read_only_feed_sqlite": "20 active feed entries; not a new native query/explain model acceptance",
+    "automatic_legacy_controller_upgrade": "failed at retired import; explicit recovery required and recorded",
+    "scheduler": "One observed existing scheduler run, not newly installed scheduling or a long-term SLA."
+  },
+  "installed_dependencies": {
+    "mindie-knowledge": {
+      "url": "https://github.com/mindie-agent/knowledge",
+      "vcs_info": {
+        "vcs": "git",
+        "commit_id": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "requested_revision": "929bdcb918f2207aea38b02a14bd8e6219fabac4"
+      }
+    },
+    "remote-dev": {
+      "url": "https://github.com/mindie-agent/remote-dev",
+      "vcs_info": {
+        "vcs": "git",
+        "commit_id": "3c1a3543322a6d3a954715642a679336b0c5f830",
+        "requested_revision": "3c1a3543322a6d3a954715642a679336b0c5f830"
+      }
+    }
+  }
+}

@@ -1,12 +1,14 @@
 # MindIE Agent architecture
 
-Current design, revised 2026-10-04. The [knowledge delivery and consumption contract](systematic-knowledge-design-2026-10-04.md) specifies the current Codex package, block-reading and citation semantics. This replaces the earlier implementation plan from Issue #195; history remains in Git. The [nine inherited VAWS principles](design-principles.md) govern every adapter. [Implementation status](implementation-status.md) records evidence separately; the simplifications below are requirements, not claims of completed acceptance.
+Current design, revised 2026-10-05. The [prerelease runtime contract](prerelease-runtime-design-2026-10-05.md) defines automatic task association, caller-owned execution limits and bounded growth. The [knowledge delivery and consumption contract](systematic-knowledge-design-2026-10-04.md) specifies the current Codex package, block-reading and citation semantics. This replaces the earlier implementation plan from Issue #195; history remains in Git. The [nine inherited VAWS principles](design-principles.md) govern every adapter. [Implementation status](implementation-status.md) records evidence separately; the simplifications below are requirements, not claims of completed acceptance.
+
+The complete-material implementation and its earlier authorized synthetic native acceptance are recorded in [implementation status](implementation-status.md). Those results retain their exact revision boundaries and do not certify the new contracts or prerelease changes described here.
 
 ## Product and normal use
 
 MindIE Agent enhances an existing Harness for NPU and infrastructure work. It does not supply its own foundation model, conversation harness, transcript hosting service or online knowledge API. Users work in their own business repositories and native tasks.
 
-A user explicitly invokes the plugin in a task. The first use fills only missing public destination, account and scope information, reusing prior approval. The configured experience loop runs automatically. Missing configuration, explicit disable and component failures are reported distinctly; none is an alternative read-only product tier. Legacy declined settings remain disabled until explicitly changed. General remote-dev tools work without activating knowledge.
+Installation establishes the existing contribution choice, public destination and project scope. Ordinary tasks use their native workflow. Verified native task identity, transcript ownership and current scope associate eligible work automatically; there is no daily activation command. Missing configuration, explicit disable and component failures remain distinct Agent-facing facts. General remote-dev tools and optional knowledge reads do not require a capture lease.
 
 Knowledge is optional reference material. Agents choose whether to query, read or give a thumbs-up/down after actual use. There is no mandatory retrieval, report, vote or model-driven closing ceremony.
 
@@ -33,12 +35,12 @@ Grok Bot means the installed bot application, not Grok CLI. There is no routine-
 
 ```mermaid
 flowchart LR
-    A["Native task<br/>explicit plugin activation"] --> C{"Destination and task scope configured?"}
-    C -->|Missing| R["Report missing configuration<br/>reuse approved values"]
+    A["Native business task"] --> C{"Existing contribution choice and scope apply?"}
+    C -->|Missing| R["Agent-only configuration diagnostic"]
     R --> C
-    C -->|Configured and enabled| H["Bounded Stop notification<br/>public task increment only"]
+    C -->|Configured and enabled| H["Silent Stop notification<br/>verified task increment only"]
     H --> L["Harness parser selects public messages<br/>local rules redact and save the body"]
-    L --> M["Adapter-owned index model<br/>new block titles, summaries and navigation"]
+L --> M["LangMem through the native small model<br/>index complete new blocks and short navigation"]
     M --> P["Complete indexed package<br/>automatically propose a GitHub PR"]
     P --> B["Existing Grok Bot reviews and merges"]
     B --> K["Public Markdown domain repository"]
@@ -50,11 +52,11 @@ flowchart LR
 
 Missing configuration, explicit disable, scope mismatch and a component fault are distinct states, not successful alternative product modes. Explicit disable and legacy declined settings stop new collection; migration must not silently enable them. Task binding alone never establishes that capture or contribution completed. Retrieval and remote tools remain independently usable.
 
-When enabled, only the explicitly admitted native task and authorized project scope can contribute. Forks and new tasks have separate identities. Disable cancels unsent work; re-enable admits subsequent material, not an automatic replay of old history. Raw transcripts remain local and never become GitHub content.
+When enabled, only the verified native task and existing authorized project scope can contribute. Forks and new tasks have separate identities. Disable cancels unsent work; re-enable admits subsequent material, not an automatic replay of old history. Raw transcripts remain local and never become GitHub content.
 
-The Hook only admits a bounded notification and exits normally. It must not require the business model to continue its turn. Parsing and model work happen outside the short Hook budget. Every operation has its own time/output boundary; failed model input is not automatically retried. Unknown publication results are reconciled against the original remote branch/PR before another write.
+The Hook durably admits a notification and exits with neutral protocol output. It does not request another business-model turn or display MindIE operations messages. Pending failures reach the Agent through the next natural capability call, with bounded references rather than private content. Model work runs in the existing background owner. Healthy operations have no default total execution deadline; only caller-requested limits end business execution. Failed or uncertain model input is not automatically retried. Unknown publication results are reconciled against the original remote branch/PR before another write.
 
-Task length, accumulated experience body size and total corpus size are not admission limits. Long tasks use incremental reads, saved progress and bounded individual model calls; the component must continue through all admitted material without truncating the remainder or requiring a new user task. Bound the memory, concurrency and time of each operation, not the lifetime of useful work. Internal processing chunks and submission coalescing are implementation details, not user-managed batches or fixed experience counts.
+Task length, accumulated experience body size and total corpus size are not admission limits. Long tasks use incremental reads, saved progress and bounded model input/output; the component must continue through all admitted material without truncating the remainder or requiring a new user task. Bound memory and concurrency at the operation boundary; process/connection health and cancellation govern liveness. Elapsed time or silence does not establish failure. Internal processing chunks and submission coalescing are implementation details, not user-managed batches or fixed experience counts.
 
 The body is the ordered, locally redacted public conversation. Codex implements
 this first: user input, public assistant progress and final answers survive;
@@ -76,6 +78,14 @@ not repeat the model call. Publication, synchronization and retrieval invoke no
 model. Codex supplies the current summary-worker protocol; Kimi and Claude Code
 require independent worker integration and acceptance.
 
+Live Stop intake and explicit historical import share the same projection,
+redaction, incremental queue and package logic. History import requires an
+explicitly selected source and reuses existing contribution scope; it does not
+activate historical sessions or discover unrelated history. Consumers reuse
+producer headers and build only local ReMe indexes, without another model call.
+Claims remain attributed and uncertain. Other Harnesses require their own
+adapter update and acceptance; this Codex implementation does not establish that evidence.
+
 Publishing uses the already prepared public body. Creating or updating the PR is mechanical and does not need another model rewriting pass. The existing Bot reviews content rather than manufacturing a second corpus-processing pipeline.
 
 ## Public records and lightweight local state
@@ -88,13 +98,20 @@ Keep a clear title, retrieval summary and the knowledge/experience distinction. 
 
 Local ownership, session provenance, retry bookkeeping, authorization and receipts remain local. Do not expose internal producer IDs, empty source arrays or routine lifecycle fields as public content. An entry's identity must support reference and feedback, but its exact storage belongs to the knowledge component contract; changing a title is not a required lifecycle step.
 
-A confirmed PR head/path/content receipt is sufficient to compact the submitted local body and capture material; do not wait for merge. Preserve newer unsent observations. The remote owns the submitted body: later additions first reconcile the current PR state/head or merged main, then apply only the unsent observations to that remote version. Restoring an old submitted body can reintroduce a passage the Bot redacted and is not a valid continuation strategy. Keep a small per-entry receipt and continuation cue, not a parallel long-lived draft history. Feed refresh replaces the published local cache without erasing unsent observations.
-
-Unknown write outcomes retain the minimum reconciliation material and are checked before another write. Transient network and local staging failures resume quietly through the existing background worker with durable backoff, per-attempt timeouts and stable operation identities. A local export reservation is not a sent receipt and must not permanently consume material before an outbox exists. Neither recovery nor plugin update resets the capture boundary or permits replay of failed model work. Content rejection and deliberate remote removal are not transient failures: do not reopen or republish the rejected content automatically.
+A submission receipt records the exact PR head and complete package. Current
+local material remains available until the confirmed public feed supplies that
+revision; resolved frozen-send payloads can then be retired without another
+publication. Later additions use the current valid feed package and append only
+new admitted material. Independent remote changes are checked at the exact
+head; conflicting packages require review and are never silently rewritten or
+merged by a second model. Keep current authority files and necessary unresolved
+send payloads, not a per-revision body archive. Withdrawn material is unavailable
+and superseded fixed references expire explicitly.
+Unknown write outcomes retain the minimum reconciliation material and are checked before another write. Known transient network and local staging failures resume quietly through the existing background worker with durable backoff and stable operation identities. Connection health and owner cancellation govern a live attempt; a healthy operation has no default execution deadline. A local export reservation is not a sent receipt and must not permanently consume material before an outbox exists. Neither recovery nor plugin update resets the capture boundary or permits replay of failed model work. Content rejection and deliberate remote removal are not transient failures: do not reopen or republish the rejected content automatically.
 
 Contribution remains a persistent opt-in choice. Routine work needs no per-entry approval, discard decision or batch management. Confirmed submission cleanup and minimum duplicate-prevention receipts are internal responsibilities.
 
-Public Git caches and indexes are rebuildable. SQLite may provide small transactions/indexes; replacing it with an equally complex JSON database would not simplify the product.
+Markdown files are the body authority. SQLite holds small cursor, queue and outcome transactions; ReMe owns derived file/chunk/BM25 retrieval in the same process. Derived caches may contain material text and are rebuildable; no raw Harness transcript archive or second body database is introduced. LangMem is used as a function, without another graph store or background service.
 
 Reading a task reference returns current navigation. Reading a block reference
 returns exactly that current member block, its file hash and adjacent references.
@@ -118,7 +135,7 @@ Negative feedback gives an unhelpful entry an exit path. Maintenance can correct
 
 Repeated useful experience may suggest a Skill, but automatic Skill extraction is a future capability requiring a concrete useful example. Do not prebuild confidence ladders, promotion thresholds, compulsory judging calls or a second evaluation service. Skills mainly explain capabilities and methods; knowledge stays advisory.
 
-## Activation, execution and updates
+## Task association, execution and updates
 
 Native task identity, authorization, an in-flight operation, an MCP connection and a remote job have different lifetimes. Explicit authorization persists until disabled or changed in scope. It does not expire merely because time passes or the runtime directory changes.
 
@@ -167,3 +184,5 @@ Development checks, native installation, real Hook delivery, a real public PR/Bo
 The current work prioritizes the lifecycle and knowledge loop across these three adapters. Old business Skills, profiling analysis, automatic Skill extraction and further domain/Harness expansion remain deferred. Cross-domain work may reuse native tasks and existing tools when needed; there is no compulsory domain router or new conversation framework.
 
 The old VAWS bootstrap, source/worktree manager and legacy installation path remain retired. This permission to rewrite product internals does not authorize deletion of unrelated user repositories, private material or running resources.
+
+Stable installation-level launchers select the current scripts under the switch lock and hold an OS generation lease until process exit. Generation cleanup retains the current config pointer, committed state, candidate, unresolved transaction and every leased generation. Missing or inconsistent state fails cleanup; untracked old paths are reported and preserved. Cleanup errors remain separate from already completed installation or business results.

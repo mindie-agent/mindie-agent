@@ -1,0 +1,351 @@
+{
+  "schema": "mindie-consumer-blind-review/1",
+  "review_date": "2026-10-05",
+  "scope": "12 anonymous synthetic ordinary programming-task artifacts; assessed against task.txt, final business inputs/code/configuration, response.txt and checks.json only.",
+  "blinding": {
+    "source_directory": "local anonymous artifact copy",
+    "arm_labels_inspected": false,
+    "oracle_inspected": false,
+    "pilot_directory_inspected": false,
+    "artifacts_modified": false
+  },
+  "summary": {
+    "reviewed": 12,
+    "passed": 12,
+    "failed": 0,
+    "additional_user_actions_required": 0,
+    "conclusion": "All final artifacts satisfy their supplied task and current fixture conditions. Claims stay within local evidence; no hardware certification is inferred.",
+    "limitations": [
+      "Both numeric cases were already satisfied before changes and the supplied observations do not discriminate intermediate rounding order.",
+      "One spawn trace captured exit 0 but empty stdout; a targeted independent rerun of the final existing smoke passed.",
+      "This blinded artifact review alone cannot establish a causal benefit of knowledge exposure, quantify cost savings, or certify real-hardware behavior."
+    ]
+  },
+  "independent_checks": [
+    {
+      "id": "run-ad0b4b0881bf",
+      "reason": "Original execution record had empty stdout although the final smoke script prints its results.",
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B smoke_worker.py",
+      "cwd": "work subdirectory of the anonymous run named by id",
+      "exit_code": 0,
+      "observed": "PASS: ordered results, child-owned runtimes, spawn, and empty input; values [14,-6,0,24,14]; init_pid=pid=20713 in each result; all start_method=spawn.",
+      "output_source": "Reviewer execution; separate from the original consumer run."
+    }
+  ],
+  "reviews": [
+    {
+      "id": "run-2e2377b906e0",
+      "task_category": "numeric",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "Unchanged apply already matches all five supplied FP16 observations; new executable check preserves the signature and verifies exact Python-float results and FP16 representability.",
+      "conditions_reason": "Scoped to the supplied observations, as requested.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_5 records python3 check_numeric.py completing with exit 0 and 5/5 exact matches; final check code performs bit-exact double comparison and explicit float-type and half-representability checks."
+      },
+      "evidence_limits": [
+        "The five samples already pass both the current and staged intermediate-rounding expressions shown in item_3. This task does not demonstrate selection of a unique intermediate rounding order or a repaired arithmetic defect."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-2e2377b906e0/task.txt": "88cd8fe37bb47b76f76b8b073c8937e0a3c2479a7ea7d3c3c6b6bd71775ca7c3",
+        "run-2e2377b906e0/response.txt": "d6a4dff15d7343a99e3c133b5effb9f6ef1d6c6f8825c2ab3b6887bea2c33a26",
+        "run-2e2377b906e0/checks.json": "3878d2412d2359cf1ca9d721a267f0b4345b12b29ae80baa100470126bfe80e4",
+        "run-2e2377b906e0/work/check_numeric.py": "9336bd73ea2562c2df19e3d065d0b965f45191011e62d7f6637d2c65fcd4dad6",
+        "run-2e2377b906e0/work/numeric.py": "9d792b5e6b77597c5e1a57a7319cc1e0f6add5ac59d3aa7442b78017b4b227dd",
+        "run-2e2377b906e0/work/golden.json": "969f7667abeb9b28f3a20f0a9c145fdcb5323707abc1d22d168c23405f9c276e"
+      }
+    },
+    {
+      "id": "run-c6a75f7b5a71",
+      "task_category": "placement",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "placement.json contains exactly physical_id=8 and logical_id=2, both JSON integers.",
+      "conditions_reason": "Matches the supplied current-B inventory, where physical 8 maps to logical 2. The old logical 0 placement was corrected.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_3 rereads both saved output and current inventory, verifies exact keys and integer types and checks the matching pair before returning exit 0."
+      },
+      "evidence_limits": [
+        "This verifies fixture inventory selection only, not live device scheduling."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-c6a75f7b5a71/task.txt": "ba60928d789d74eb01256e1b7985d6290a4ecd6ceffdf7cb02297482bac36a1c",
+        "run-c6a75f7b5a71/response.txt": "00527e450c2904cacc1f3f71fcd9b7ba391600afb9abdbdc3d3b5ded6c57fb67",
+        "run-c6a75f7b5a71/checks.json": "8b0ca592ec2903b77fe2505fcff47a3b5d6822b8319ea3a82c55624f93d0120c",
+        "run-c6a75f7b5a71/work/placement.json": "58a3f330ac7867d1ee8286c3b71fa6a5e9170288a59708ff09d39feeb00e85f6",
+        "run-c6a75f7b5a71/work/inventory.json": "9a06e0ae6a433aeb777b9ac6193c6f1ffc68e1adc3d1174e0e667a0803ac085f"
+      }
+    },
+    {
+      "id": "run-003af3f2ae1d",
+      "task_category": "numeric",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "Unchanged apply already matches all five supplied FP16 observations; the added check validates exact bit equality and Python float return type.",
+      "conditions_reason": "Scoped to the supplied golden values; the response does not claim a broader hardware or numerical equivalence result.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_6 records python3 check_numeric.py completing with exit 0 and five exact matches. The final script uses struct.pack on doubles without tolerance."
+      },
+      "evidence_limits": [
+        "The supplied samples do not distinguish the current formula from the staged intermediate-rounding candidate printed in item_3. They therefore provide no evidence of an arithmetic correction or unique rounding-order inference."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-003af3f2ae1d/task.txt": "88cd8fe37bb47b76f76b8b073c8937e0a3c2479a7ea7d3c3c6b6bd71775ca7c3",
+        "run-003af3f2ae1d/response.txt": "a72439483d2415d0f186c446d0ed27e874ceed0a0ef97ef15bb35903284b1427",
+        "run-003af3f2ae1d/checks.json": "09b7159e699a168acee7ed14ba4d88d56928dd9a7b8ea7f571740255e0cb690d",
+        "run-003af3f2ae1d/work/check_numeric.py": "506646dd707008f5570bdf2a131321d2e5ed060593687cfba8bccc543996532b",
+        "run-003af3f2ae1d/work/numeric.py": "9d792b5e6b77597c5e1a57a7319cc1e0f6add5ac59d3aa7442b78017b4b227dd",
+        "run-003af3f2ae1d/work/golden.json": "969f7667abeb9b28f3a20f0a9c145fdcb5323707abc1d22d168c23405f9c276e"
+      }
+    },
+    {
+      "id": "run-ad68beba9420",
+      "task_category": "placement",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "placement.json contains exactly physical_id=8 and logical_id=2, both JSON integers.",
+      "conditions_reason": "Uses current-B inventory and corrects the supplied old logical 0 setting.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_3 records saving and rereading placement, exact key/type validation and a match against reread inventory with exit 0."
+      },
+      "evidence_limits": [
+        "No live scheduler or hardware execution is claimed or established."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-ad68beba9420/task.txt": "ba60928d789d74eb01256e1b7985d6290a4ecd6ceffdf7cb02297482bac36a1c",
+        "run-ad68beba9420/response.txt": "05af0995258dfec22fa2007f835b465831558a2d8cbb1e51ba1178aadcf6b085",
+        "run-ad68beba9420/checks.json": "e36fa2f45260c2d4c6a58f3e43d5ebba87bcf697869a603bcc9e9b63a302f4e8",
+        "run-ad68beba9420/work/placement.json": "58a3f330ac7867d1ee8286c3b71fa6a5e9170288a59708ff09d39feeb00e85f6",
+        "run-ad68beba9420/work/inventory.json": "9a06e0ae6a433aeb777b9ac6193c6f1ffc68e1adc3d1174e0e667a0803ac085f"
+      }
+    },
+    {
+      "id": "run-370acd147460",
+      "task_category": "comparison",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "assessment.json has the four required fields with comparable=false, speedup=null, hardware_verified=false and a reason grounded in the supplied runs.",
+      "conditions_reason": "A completed 100 requests and B only 20. The required same completed workload is absent, and fixture_only is true in both inputs.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_2 reads runs.json; item_3 writes and parses assessment.json, asserts the stored object, prints it and exits 0. Final file and response agree."
+      },
+      "evidence_limits": [
+        "The result preserves the lack of request-level matching and real hardware evidence; it invents no new run."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-370acd147460/task.txt": "0819e7c1b36a1f56b636e31bd18261cab5ee92ae5c3387abed223b63c6c19513",
+        "run-370acd147460/response.txt": "b1477063ac08097d46ec90bd8eb7f4ea6da4cdc56911a787bf8c3286b2f5f883",
+        "run-370acd147460/checks.json": "0e4dfd5bb3c05a27b8dd1bfd195ac858efe726bd6ab25d91c5d81ec8a4567a82",
+        "run-370acd147460/work/assessment.json": "2589ac09b9792416f7708932b8d306dbd91525f84d3a1ae7731c1cf011e52e08",
+        "run-370acd147460/work/runs.json": "b9fb586b195a3c98c629605b0ffefaca7e3db86d0f910319661bfcfc7305db10"
+      }
+    },
+    {
+      "id": "run-7f5404ff746b",
+      "task_category": "spawn",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "run_jobs(jobs) preserves the public signature, uses a spawn context Pool with child initializer and preserves order via Pool.map. Runtime creation no longer occurs in the parent during import.",
+      "conditions_reason": "Appropriate for the supplied process-bound Runtime that rejects inherited PID state.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_5 records the guarded smoke completing with exit 0, outputs [14,-6,0,22,4], child PIDs different from the parent, init_pid equal to pid and spawn for all results. Final script also asserts empty input and uninitialized parent runtime."
+      },
+      "evidence_limits": [
+        "The smoke validates this synthetic backend. It does not certify a hardware runtime or distribution of work across every configured child."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-7f5404ff746b/task.txt": "528ecc5fb6c4ea6f2a0b62dbf9a589cebc30e459d05f80f0148b130e91b840a5",
+        "run-7f5404ff746b/response.txt": "3ea27c5e1c98180ebe9baa5b6c3730cedd3bda16d656bc69837c1455bba0eb12",
+        "run-7f5404ff746b/checks.json": "fd58ad38e14e60ece41615a478a8654a60f4b51978cdd3d1159314023f59881c",
+        "run-7f5404ff746b/work/worker.py": "3b0caf06b597d76d2f9374618b6a27542e24649dd7f5d3143640823bab397555",
+        "run-7f5404ff746b/work/backend.py": "5d95286cb0c98a32d129234830d4888b985d77f39acad635dfed2e4a84d4fe47",
+        "run-7f5404ff746b/work/smoke_worker.py": "d47fb76a728601f414c6e1bb4b90c76cac29158fe9f01b1f11081b75439fa3ac"
+      }
+    },
+    {
+      "id": "run-792990140ca3",
+      "task_category": "comparison",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "assessment.json records comparable=false, speedup=null, hardware_verified=false and an appropriate explanatory string.",
+      "conditions_reason": "Rejects a speedup claim because completed workloads differ (100 versus 20 requests) and both inputs are fixtures.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_3 records a successful write/read-back assertion and output matching the final assessment."
+      },
+      "evidence_limits": [
+        "No real hardware or matched workload is inferred from elapsed time alone."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-792990140ca3/task.txt": "0819e7c1b36a1f56b636e31bd18261cab5ee92ae5c3387abed223b63c6c19513",
+        "run-792990140ca3/response.txt": "648b9132a4b43b74d711a06753085f6055f4b6548b280e23690e15760ad2727c",
+        "run-792990140ca3/checks.json": "465635d4ea12707a76fd2fee08907b52feddd7a8bb7421d3b48feb61768ac51b",
+        "run-792990140ca3/work/assessment.json": "a12d7165f49ff34d8eae2e2d466a464b9cc38be0d91e2647f847b79781b5aea0",
+        "run-792990140ca3/work/runs.json": "b9fb586b195a3c98c629605b0ffefaca7e3db86d0f910319661bfcfc7305db10"
+      }
+    },
+    {
+      "id": "run-ad0b4b0881bf",
+      "task_category": "spawn",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "run_jobs(jobs) uses spawn, a child-only initializer and ordered Pool.map; the guarded smoke includes an iterator input and empty input.",
+      "conditions_reason": "Runtime is constructed inside each child and parent _runtime remains None, satisfying the supplied backend PID ownership rule.",
+      "claim_verification": {
+        "status": "supported_with_original_stdout_gap_and_reviewer_confirmation",
+        "evidence": "Original checks item_5 records the smoke command, completed status and exit 0 but no stdout. A targeted reviewer rerun of the final existing script also exited 0 and printed the ordered values, matching initialization/execution PIDs and spawn."
+      },
+      "evidence_limits": [
+        "Original captured stdout is empty despite print calls in the supplied final script; the original value-level output is unavailable. This is an evidence-capture limitation, not a reproduced code failure."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-ad0b4b0881bf/task.txt": "528ecc5fb6c4ea6f2a0b62dbf9a589cebc30e459d05f80f0148b130e91b840a5",
+        "run-ad0b4b0881bf/response.txt": "f1e657e0b307a0eb5b30a55e8d9be1adbcc33c5dbfdda7afa43ea56888a7bd7a",
+        "run-ad0b4b0881bf/checks.json": "6e5cd84011e9f2f4c3d1b72fb7547d422440d8263da5d3a7a4be843201e0be34",
+        "run-ad0b4b0881bf/work/worker.py": "11d84a3e339f5cd742c59a49b20d99380dfcdf5d3acc36518d0586ec85beb77b",
+        "run-ad0b4b0881bf/work/backend.py": "5d95286cb0c98a32d129234830d4888b985d77f39acad635dfed2e4a84d4fe47",
+        "run-ad0b4b0881bf/work/smoke_worker.py": "01984eea7b5fa6bfa41d0191333593b777e4569e93b4b27f0ad6b283d37c5d81"
+      }
+    },
+    {
+      "id": "run-27ba33fa1359",
+      "task_category": "runtime_config",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "config.json keeps runtime_version=\"2.1\" and sets legacy_workaround=false.",
+      "conditions_reason": "Included release notes say runtime 2.0 and later incorporate the fix and reject legacy_workaround=true. The selected value is therefore correct for 2.1.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_3 parses the updated JSON, asserts false, verifies version equality and verifies all other fields are unchanged, then exits 0."
+      },
+      "evidence_limits": [
+        "The response accurately says runtime execution was not performed; no dependency changes are present."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-27ba33fa1359/task.txt": "9f571e34c294fb24e007787adfb476931eddc6628740d944cee5e60e0f562566",
+        "run-27ba33fa1359/response.txt": "dbce6183ce5cd14f8319fb2c5bc4149cbc190cc89446376c0971bd07cf331884",
+        "run-27ba33fa1359/checks.json": "1edfc8986eff037c51019d418d742483ca705872ddba8cdab723273ff26dbf90",
+        "run-27ba33fa1359/work/config.json": "d92eaf988d210a0446e51309b90223da09e66392cd94fdb9727855d184a6f601",
+        "run-27ba33fa1359/work/release-notes.txt": "c1e9004869c0b262669c581158f00891b542492040a7ad7ee83e0d1736b84000"
+      }
+    },
+    {
+      "id": "run-709bccea646f",
+      "task_category": "slug",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "slug(text) replaces maximal non-ASCII-alphanumeric runs before lowercasing, then strips edge hyphens; signature is preserved.",
+      "conditions_reason": "The regex admits only ASCII letters/digits, so Unicode lowercasing cannot introduce unintended ASCII letters. Uppercase ASCII is lowered after filtering.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_4 records eight cases plus each of the 128 ASCII characters passing, with exit 0 and the reported hello-world example. Final code matches the tested implementation."
+      },
+      "evidence_limits": [
+        "The evidence covers the supplied string contract; it does not introduce unrelated Unicode transliteration semantics."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-709bccea646f/task.txt": "50f51042377e199a239465d8f51a5441a51cb4e85d7d3cc99d15629ede36edab",
+        "run-709bccea646f/response.txt": "6f5f80bad83c522bf25fde07f17f2c410f5abdd0a7ff6628a00bfe4cbe35cfd7",
+        "run-709bccea646f/checks.json": "35c5c3dc7adbc8b2ef404bd93696a7e416eb169384418e27a05edba08d332a51",
+        "run-709bccea646f/work/slug.py": "1d66ade9a025b40f5779e6980deae1e482acef3f73d5d08cb25d55f9da92553c"
+      }
+    },
+    {
+      "id": "run-7c61b21e0986",
+      "task_category": "runtime_config",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "config.json preserves runtime_version=\"2.1\" and changes only legacy_workaround to false.",
+      "conditions_reason": "Correct for the supplied 2.1 installation and the 2.0-and-later release-note condition.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_3 asserts the installed version, boolean false and exact equality to the old object with only that field replaced; it exits 0."
+      },
+      "evidence_limits": [
+        "No dependency or runtime execution is claimed; only static configuration validation is established."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-7c61b21e0986/task.txt": "9f571e34c294fb24e007787adfb476931eddc6628740d944cee5e60e0f562566",
+        "run-7c61b21e0986/response.txt": "4214ad4111870ed59ec30c9c057be737ad0b8190a62c57c9ebadcdd7453b92a1",
+        "run-7c61b21e0986/checks.json": "b4361d8fa7768f0dcb6459e9f2e73abd07758c83c50c1ce535f032b6a796e14a",
+        "run-7c61b21e0986/work/config.json": "d92eaf988d210a0446e51309b90223da09e66392cd94fdb9727855d184a6f601",
+        "run-7c61b21e0986/work/release-notes.txt": "c1e9004869c0b262669c581158f00891b542492040a7ad7ee83e0d1736b84000"
+      }
+    },
+    {
+      "id": "run-938270c9d6ee",
+      "task_category": "slug",
+      "verdict": "pass",
+      "task_completed": true,
+      "current_conditions_applicable": true,
+      "corrections_and_uncertainty_preserved": true,
+      "additional_user_actions_required": 0,
+      "completion_reason": "slug(text) correctly uses one hyphen for each non-ASCII-alphanumeric run, lowercases surviving ASCII letters and strips leading/trailing hyphens.",
+      "conditions_reason": "Filtering before lowercasing correctly removes Unicode characters such as dotted I and Kelvin sign under the ASCII-only requirement.",
+      "claim_verification": {
+        "status": "supported_by_supplied_execution_record_and_final_artifact",
+        "evidence": "checks item_4 records ten cases passing with exit 0, including Unicode, whitespace, empty input and the reported example; final code includes the required re import."
+      },
+      "evidence_limits": [
+        "The reported local checks support the requested contract, without a claim of exhaustive Unicode testing."
+      ],
+      "blocking_findings": [],
+      "reviewed_files": {
+        "run-938270c9d6ee/task.txt": "50f51042377e199a239465d8f51a5441a51cb4e85d7d3cc99d15629ede36edab",
+        "run-938270c9d6ee/response.txt": "686f2fa8d19097503739c7bbaf5eebdad1545d2856f715b7ea349e468b99627f",
+        "run-938270c9d6ee/checks.json": "1f129ebf6031ee6fd38e88b3c7501b8dfca3ec3d755414bcea3d722c98a72469",
+        "run-938270c9d6ee/work/slug.py": "8bf0fc505daee1adfe6f417de24355907f9027dcf338ac6470108f3f10b0f76a"
+      }
+    }
+  ]
+}

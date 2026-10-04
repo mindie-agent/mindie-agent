@@ -1,0 +1,189 @@
+{
+  "schema": "mindie-public-consumer-acceptance/1",
+  "status": "passed",
+  "core_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+  "repository": "mindie-agent/knowledge-vllm-ascend",
+  "transport": "public GitHub HTTPS main through normal installed CLI sync",
+  "native_business_model_invocations": 0,
+  "summary_worker_invocations": 0,
+  "scope": "Stage5 synthetic artifact consumer only; native Stop and Grok event provenance are separate parent receipts.",
+  "producer_adapter_commit": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+  "expected_task_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+  "binding_sha256": {
+    "plan.json": "e0acb402ec30c466b343fa49769355036d1c85c3b031bf9f1b611914e77849d8",
+    "queries.json": "67e43f5c220d622281f0c50a3cce5688bdbc252d488f1770deb9a0763837c1e5",
+    "config.json": "285802a25f19bbfc450e5a2a9e9567b49496f495991b37ee0fb2641bf69525f3"
+  },
+  "expected_main": "9b7966f841131d0b942d0f447599b46eddefbef1",
+  "started_at": "2026-10-04T16:45:52.249955+00:00",
+  "stage": "complete",
+  "commands": [
+    {
+      "name": "sync_first",
+      "exit_code": 0
+    },
+    {
+      "name": "published-tree",
+      "exit_code": 0
+    },
+    {
+      "name": "sync_second",
+      "exit_code": 0
+    }
+  ],
+  "sync_first": [
+    {
+      "status": "synced",
+      "repository": "mindie-agent/knowledge-vllm-ascend",
+      "ref": "main",
+      "prefix": "",
+      "commit": "9b7966f841131d0b942d0f447599b46eddefbef1",
+      "entries": 21,
+      "attempts": 1,
+      "checked": 1791132355.58446
+    }
+  ],
+  "community": {
+    "configured": false,
+    "state": "unconfigured",
+    "enabled": false,
+    "generation_set": false,
+    "repository": null,
+    "branch": "main",
+    "project_roots": 0,
+    "idle_seconds": 300,
+    "enabled_at": null,
+    "error": "community_config is not configured",
+    "consent": null
+  },
+  "published_feed": {
+    "commit": "9b7966f841131d0b942d0f447599b46eddefbef1",
+    "feed": "b7c5bd4d68f997d5c714d1f0a783fa2b0be6150dd7bd7de372da2e74ae0abe84"
+  },
+  "public_tree_counts": {
+    "tasks": 21,
+    "blocks": 23,
+    "feedback_files": 1
+  },
+  "queries": [
+    {
+      "query": "2 shards 4 shards hardware unverified",
+      "origin": "feed",
+      "supplemental": false,
+      "pages": 1,
+      "body_utf8_bytes": 375,
+      "body_sha256": "f3d77ea8f976f6eba8691a83bd733ded1162cf9115be3d461743f4abbd322426",
+      "reference": {
+        "domain": "vllm-ascend",
+        "entry_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+        "revision": "c019ce2fb763911e1937205f0cd09451c0895878a85e384750593a15bed64e77"
+      },
+      "query_returned_reference_explained": true
+    }
+  ],
+  "semantic_checks": [
+    {
+      "check": "original_two_shards",
+      "present_in_order": true,
+      "fragment_sha256": "72e6a5d31c7967119a61ed1166a768c50c42ca91d08a37f55b46242747cc1b86"
+    },
+    {
+      "check": "corrected_four_shards",
+      "present_in_order": true,
+      "fragment_sha256": "c5c7a2214be7b52f4b5548cf5a74ddd8a5beb868acbd8b2a38d63a64569db900"
+    },
+    {
+      "check": "hardware_unverified",
+      "present_in_order": true,
+      "fragment_sha256": "4330bacebecc317c0deb55eeda9b0739e26513e87613ada2c040567eb0128dd0"
+    }
+  ],
+  "pipeline_counts_before_repeat": {
+    "captures": {
+      "present": true,
+      "rows": 0
+    },
+    "material_streams": {
+      "present": true,
+      "rows": 0
+    },
+    "material_batches": {
+      "present": true,
+      "rows": 0
+    },
+    "transcript_tasks": {
+      "present": true,
+      "rows": 0
+    },
+    "material_summary_attempts": {
+      "present": false,
+      "rows": 0,
+      "meaning": "Summary ledger was not created"
+    },
+    "outbox": {
+      "present": true,
+      "rows": 0
+    },
+    "owners": {
+      "present": true,
+      "rows": 0
+    }
+  },
+  "sync_second": [
+    {
+      "attempts": 1,
+      "checked": 1791132358.1248589,
+      "commit": "9b7966f841131d0b942d0f447599b46eddefbef1",
+      "entries": 21,
+      "prefix": "",
+      "ref": "main",
+      "repository": "mindie-agent/knowledge-vllm-ascend",
+      "status": "unchanged"
+    }
+  ],
+  "pipeline_counts_final": {
+    "captures": {
+      "present": true,
+      "rows": 0
+    },
+    "material_streams": {
+      "present": true,
+      "rows": 0
+    },
+    "material_batches": {
+      "present": true,
+      "rows": 0
+    },
+    "transcript_tasks": {
+      "present": true,
+      "rows": 0
+    },
+    "material_summary_attempts": {
+      "present": false,
+      "rows": 0,
+      "meaning": "Summary ledger was not created"
+    },
+    "outbox": {
+      "present": true,
+      "rows": 0
+    },
+    "owners": {
+      "present": true,
+      "rows": 0
+    }
+  },
+  "finished_at": "2026-10-04T16:45:58.139323+00:00",
+  "runtime_verification": {
+    "version": "0.10.0",
+    "commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+    "source_files_verified": 5,
+    "editable": false
+  },
+  "execution_count": 1,
+  "manual_direct_feed_sync_calls": 0,
+  "query_interface": "Existing Store.query and Store.explain public APIs after normal installed CLI sync; no direct Feed.sync or database feed writes.",
+  "model_count_boundary": "Zero counts cover controlled consumer commands, configuration and pipeline ledgers; not provider-wide network or billing telemetry.",
+  "private_history_read": false,
+  "publication_normalization": "Machine paths and command locations omitted; actual public references split into domain, entry ID and revision without changing binding.",
+  "driver_sha256": "a4261ae398c58ecf461cdba82ed2332e5b7afa3d2e9fafd59dfd41e2580b872d"
+}

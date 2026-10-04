@@ -1,0 +1,36 @@
+{
+  "schema": "mindie-grok-native-public-stage5/1",
+  "source": "root observed Grok native UI; separate GitHub API readback",
+  "manual_messages_for_pr39": 0,
+  "bot_message_time_local": "2026-10-05 00:44:55 Asia/Shanghai",
+  "bot_report": {
+    "pull_request": 39,
+    "action": "merged",
+    "head_prefix": "bb1cf709",
+    "merge_prefix": "9b7966f",
+    "trusted_validator_prefix": "929bdcb",
+    "publication_check": {
+      "entries": 21,
+      "feedback_files": 1,
+      "bytes": 249215,
+      "reported_result": "passed"
+    },
+    "exact_head_ci_reported": "passed",
+    "parallel_draft_38": "untouched"
+  },
+  "github_verified": {
+    "head": "bb1cf70923b02db2ede69dea112033838d3c0d39",
+    "merge": "9b7966f841131d0b942d0f447599b46eddefbef1",
+    "merged_at": "2026-10-04T16:43:53Z",
+    "tree": "18c0ba36ef5cb67ce7389ff9ca910827f3a09049",
+    "candidate_tree_equals_merge_tree": true,
+    "main_equals_merge": true,
+    "publication": "SUCCESS",
+    "publication-head": "SUCCESS",
+    "review_objects": 0,
+    "comments": 0
+  },
+  "boundary": "Grok routine reported its inspection and merge in chat; GitHub confirms merge and checks. No separate GitHub APPROVE review or comment was created. Config and Working indicators alone were not counted as completion.",
+  "report_recorded_at_utc": "2026-10-04T16:45:56.785719+00:00",
+  "ui_observation_window_utc": "2026-10-04 16:44-16:45 UTC"
+}

@@ -1,0 +1,257 @@
+{
+  "scope": "synthetic input availability only",
+  "native_model_calls": 0,
+  "model_quality": null,
+  "model_cost": null,
+  "retrieval_quality": null,
+  "selector": "knowledge/mindie_knowledge/loop/summary_input.py",
+  "selector_sha256": "ec6deb2b9c7a13b7cc3be30afb1e0ce37ebbfa1b458f1f03604193ce8910ec7b",
+  "fixtures_sha256": "e32c3e6a44bf672c360cb103a4d1216c51b3a6b282503e1c5d8c6ca449e34b86",
+  "cases": [
+    {
+      "id": "short-control",
+      "source_bytes": 167,
+      "request_bytes": 219,
+      "key_fact_selected": true,
+      "terms_selected": 3,
+      "terms_total": 3,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "full",
+        "source_chars": 99,
+        "selected_chars": 99,
+        "ranges": [
+          [
+            0,
+            99
+          ]
+        ]
+      }
+    },
+    {
+      "id": "middle-finding",
+      "source_bytes": 34187,
+      "request_bytes": 12288,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 3,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16109,
+        "selected_chars": 5493,
+        "ranges": [
+          [
+            0,
+            1833
+          ],
+          [
+            12449,
+            16109
+          ]
+        ]
+      }
+    },
+    {
+      "id": "middle-correction",
+      "source_bytes": 34218,
+      "request_bytes": 12288,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 2,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16124,
+        "selected_chars": 5501,
+        "ranges": [
+          [
+            0,
+            1841
+          ],
+          [
+            12464,
+            16124
+          ]
+        ]
+      }
+    },
+    {
+      "id": "failed-experience",
+      "source_bytes": 34235,
+      "request_bytes": 12286,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 3,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16263,
+        "selected_chars": 5517,
+        "ranges": [
+          [
+            0,
+            1858
+          ],
+          [
+            12604,
+            16263
+          ]
+        ]
+      }
+    },
+    {
+      "id": "limited-validation",
+      "source_bytes": 34166,
+      "request_bytes": 12288,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 3,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16106,
+        "selected_chars": 5493,
+        "ranges": [
+          [
+            0,
+            1833
+          ],
+          [
+            12446,
+            16106
+          ]
+        ]
+      }
+    },
+    {
+      "id": "multiple-topics",
+      "source_bytes": 34271,
+      "request_bytes": 12288,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 4,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16153,
+        "selected_chars": 5493,
+        "ranges": [
+          [
+            0,
+            1833
+          ],
+          [
+            12493,
+            16153
+          ]
+        ]
+      }
+    },
+    {
+      "id": "unicode-redaction",
+      "source_bytes": 34269,
+      "request_bytes": 12286,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 2,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16282,
+        "selected_chars": 5517,
+        "ranges": [
+          [
+            0,
+            1858
+          ],
+          [
+            12623,
+            16282
+          ]
+        ]
+      }
+    },
+    {
+      "id": "tail-finding",
+      "source_bytes": 34244,
+      "request_bytes": 12287,
+      "key_fact_selected": true,
+      "terms_selected": 2,
+      "terms_total": 2,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16260,
+        "selected_chars": 5535,
+        "ranges": [
+          [
+            0,
+            1858
+          ],
+          [
+            12583,
+            16260
+          ]
+        ]
+      }
+    },
+    {
+      "id": "late-retraction",
+      "source_bytes": 34237,
+      "request_bytes": 12288,
+      "key_fact_selected": false,
+      "terms_selected": 1,
+      "terms_total": 2,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16133,
+        "selected_chars": 5503,
+        "ranges": [
+          [
+            0,
+            1843
+          ],
+          [
+            12473,
+            16133
+          ]
+        ]
+      }
+    },
+    {
+      "id": "attribution",
+      "source_bytes": 34236,
+      "request_bytes": 12288,
+      "key_fact_selected": false,
+      "terms_selected": 0,
+      "terms_total": 2,
+      "coverage": {
+        "policy": "head-tail/1",
+        "scope": "head-tail",
+        "source_chars": 16124,
+        "selected_chars": 5493,
+        "ranges": [
+          [
+            0,
+            1833
+          ],
+          [
+            12464,
+            16124
+          ]
+        ]
+      }
+    }
+  ],
+  "key_facts_selected": 2,
+  "cases_total": 10,
+  "terms_selected": 6,
+  "terms_total": 26,
+  "limitations": [
+    "Adversarial fixture prevalence is not a production estimate.",
+    "Missing selected input does not prove full-body search failure.",
+    "Available input does not prove a model preserves its meaning."
+  ]
+}

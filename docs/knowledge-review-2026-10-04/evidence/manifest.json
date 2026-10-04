@@ -1,0 +1,1093 @@
+{
+  "schema": "mindie-phased-evidence/1",
+  "date": "2026-10-04",
+  "scope": "Stages 1-4 retain their original research, failure, authorization and deployment observations. Stage5 separately records the later user-authorized new synthetic task completing normal native Stop, indexing, automatic public PR, naturally observed Grok review/merge and independent public HTTPS consumption at exact versions.",
+  "principles": {
+    "sha256": "15b4b58385846051464c27d06922ad0353bdd6a4031b619ff248c3a65c179741",
+    "tracked_head": "c666e597c8690f7f7c141e0c04ae29e9a0484de7",
+    "uses_dirty_worktree_content": true,
+    "git_blob": "9b21e6ae87ac96ff8bdacc3f4f546384e111a184",
+    "workspace_role": "architecture_primary",
+    "relative_path": "docs/design-principles.md"
+  },
+  "initial_research_snapshot": {
+    "stage_order": 1,
+    "time_scope": "2026-10-04 initial read-only research, before implementation and live-model acceptance; no finer timestamp was recorded.",
+    "original_manifest_sha256": "b4f81e5024274331cb75c7048f3e6065ebaa1a0ce98aa87d785977a3fb8e0e47",
+    "manifest": {
+      "date": "2026-10-04",
+      "scope": "Architecture, current implementation review, official framework source research and synthetic probes; no real model, production installation or external write",
+      "principles": {
+        "sha256": "15b4b58385846051464c27d06922ad0353bdd6a4031b619ff248c3a65c179741",
+        "tracked_head": "c666e597c8690f7f7c141e0c04ae29e9a0484de7",
+        "uses_dirty_worktree_content": true,
+        "workspace_role": "architecture_primary",
+        "relative_path": "docs/design-principles.md"
+      },
+      "sources": {
+        "architecture": {
+          "head": "c666e597c8690f7f7c141e0c04ae29e9a0484de7",
+          "status": [
+            " M AGENTS.md",
+            " M README.md",
+            " M docs/README.md",
+            " M docs/architecture.md",
+            " M docs/design-principles.md",
+            " M docs/next-steps.md",
+            "?? assets/",
+            "?? docs/development-dispatch-2026-09-19.md",
+            "?? docs/first-release-readiness-2026-09-19.md",
+            "?? docs/harness-boundary-and-lifecycle.md",
+            "?? docs/implementation-dispatch-2026-09-20.md",
+            "?? docs/knowledge-component-design-2026-09-19.md",
+            "?? docs/knowledge-loop-improvement-2026-09-20.md",
+            "?? docs/knowledge-sharing-design-2026-09-20.md",
+            "?? docs/overdesign-review-2026-09-20.md",
+            "?? docs/workflow-skill-migration-and-evaluation.md"
+          ],
+          "workspace_role": "architecture_primary",
+          "repository": "mindie-agent/mindie-agent",
+          "relative_path": "."
+        },
+        "knowledge_candidate": {
+          "head": "6a9fb51d41f9787122ef61cbdf81df981d12cded",
+          "status": [
+            " M docs/history-import.md",
+            " M docs/public-transcript-capture.md",
+            " M mindie_knowledge/loop/diagnostics.py",
+            " M mindie_knowledge/loop/history_import.py",
+            " M mindie_knowledge/loop/store.py",
+            " M mindie_knowledge/loop/transcript_capture.py",
+            " M tests/test_diagnostic_snapshot.py",
+            " M tests/test_history_import.py",
+            " M tests/test_public_transcript.py",
+            "?? mindie_knowledge/loop/summary_input.py",
+            "?? tests/test_summary_input.py"
+          ],
+          "workspace_role": "knowledge_research_candidate",
+          "repository": "mindie-agent/knowledge",
+          "relative_path": "."
+        },
+        "codex_candidate": {
+          "head": "56f28c39e68f4435c03a007c9906aa7c92ed85ae",
+          "status": [
+            " M README.md",
+            " M docs/history-import.md",
+            " M docs/public-transcript.md",
+            " M plugins/mindie-agent/scripts/agent_worker.py",
+            " M tests/test_organizer_model.py"
+          ],
+          "workspace_role": "codex_research_candidate",
+          "repository": "mindie-agent/mindie-agent-codex",
+          "relative_path": "."
+        }
+      },
+      "live_remote_main": {
+        "mindie-agent/knowledge": "2637ffa848c0a44bde38ee488112150ee9bc0743",
+        "mindie-agent/mindie-agent-codex": "33de36945e6dd448104c42b7fa49639b00f8ff58",
+        "mindie-agent/knowledge-vllm-ascend": "9aab5e1e2f1298f992b1b41e403c2b1e0232d12c"
+      },
+      "artifacts": {
+        "docs/transcript-reuse-architecture-2026-10-04.md": "a18de1c3e8715e1a1ca2533ec8dfbef55f798450bd97c12ffb5e2663616e33ea",
+        "docs/knowledge-experience-design-2026-10-04.md": "1fd9f2bcf8818c17792aedfaad7475102fbbbe3aa60db30c819fe514dd4c4668",
+        "docs/knowledge-experience-evaluation-2026-10-04.md": "49d56b2e3ef38a780dfcff324e4419a764f5dd0e7d7bb9ef56c910069def64b6",
+        "docs/knowledge-experience-review-2026-10-04.md": "08bc4d1b1501706034cd165c091102e44fddd7f090c123cb1250bbdac104135d",
+        "docs/knowledge-framework-selection-2026-10-04.md": "e7a940242349b873da3df4a3c3aad9ef63d55bbcde9cb68d5f7656bd87c83ac4",
+        "docs/knowledge-review-2026-10-04/evidence/delivery/RUN.txt": "267e7fe9398a8eaed88890c78299203769d1f2c251b52defaefa65448eee85ee",
+        "docs/knowledge-review-2026-10-04/evidence/delivery/framework-comparison.md": "15fb4f6e0076748b620f90e88d47b5fc9141e9b0c1d00a64a53b58e58e1b0520",
+        "docs/knowledge-review-2026-10-04/evidence/delivery/probe_delivery.py": "2c9e72a52e72ddfa089cf08fee5d18a11da480c59fb27dfa48ee3d1e230840f1",
+        "docs/knowledge-review-2026-10-04/evidence/delivery/results.json": "c99b4686befde9a50b1b243389e637071af756aa20bd7acd61e11d08b28a9559",
+        "docs/knowledge-review-2026-10-04/evidence/input/probe_input.py": "9ab01b132af7c385b2ca4a839d02db4a48c3f96125b6da96d2385366e2f429ed",
+        "docs/knowledge-review-2026-10-04/evidence/input/results.json": "98e0375c11da9717b0073f63a7136d360932ac0f60f4be2bf0809dd3b3993c6c",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/README.md": "244315a7b2ed8dc820998920ec5ab9db1d375b09907b445f08ec781b8f1b01b9",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/frameworks.md": "6c4a0620ed2dd049031a2c8ecd61f0617f4b6cd81d7eacc65293c77ba886bb2f",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/README.md": "3523a7f069bb6ed3969800af58e2750469327c45346d964ddfab91f3b1489017",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/first-run-results.json": "9dec3c2346e8df6ef53a318f0f46176ecf447bca2e4baf5652bc1cca2ef9e123",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/resolved-requirements.txt": "424c394da45e57f4d3fe987251c6a40f6f774da430b500ae3b7422900f44b541",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/results.json": "5c25f7cd86117f3f765c142921f9b57b1a4ab8f2e893f15260c85e5e2da8d39f",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/spike.py": "b970843cb7deb184fed27aa5abff5343ecc24a9e67d05a90a9d99df9597ade17",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/probes.py": "074d4c57aaa8dd394d03b6360e6975a0428356768c56c4371362603c2a7a0f07",
+        "docs/knowledge-review-2026-10-04/evidence/organizer/results.json": "3163a53cc14a2dfa52c222970321fc03110fb8857bc6257734f9c233d45c26a3",
+        "docs/knowledge-review-2026-10-04/evidence/research-reme-ace-claudemem.md": "9c30ce62b15a6f5e8dc7f8863ea63f35601946f7cdd5937eab1063f611a65167"
+      },
+      "validation": {
+        "json_parse": "passed",
+        "python_ast": "passed",
+        "local_links": []
+      }
+    },
+    "publication_normalization": "Machine-specific source paths are replaced by workspace roles and relative paths. Initial commits, dirty-state descriptions, measured values and original artifact hashes remain unchanged. original_manifest_sha256 identifies the pre-normalization file, not this JSON serialization."
+  },
+  "implementation_snapshot": {
+    "stage_order": 2,
+    "time_scope": "2026-10-04 implemented candidate and local real-material acceptance, before installed native and GitHub/Grok acceptance.",
+    "sources": {
+      "knowledge": {
+        "repository": "mindie-agent/knowledge",
+        "commit": "e13b77b83db9aebf5c2904253565eac633373ca7"
+      },
+      "codex": {
+        "repository": "mindie-agent/mindie-agent-codex",
+        "commit": "493c97e95b4557368155377658ff3f75005db575",
+        "evidence": "docs/knowledge-review-2026-10-04/evidence/organizer/implementation-review.md",
+        "knowledge_pin": "f246baea38247ed9c09e4c62d3d769717378f5b2"
+      },
+      "content": {
+        "repository": "mindie-agent/knowledge-vllm-ascend",
+        "commit": "85a320a377c17d4a863fa3b8aa90f333a83549ff",
+        "state": "Local reviewed commit; no push attempted for this updated validator pin.",
+        "previous_rejected_push": {
+          "commit": "ca16093b5c0383ab486cea13f8b1a22c61d964ed",
+          "reason": "OAuth token lacks workflow scope",
+          "remote_branch_or_pr_created": false,
+          "report_source": "parent task"
+        },
+        "validator_pin": "f246baea38247ed9c09e4c62d3d769717378f5b2"
+      }
+    },
+    "implementation_review": "docs/knowledge-review-2026-10-04/evidence/implementation-review.md",
+    "real_material_acceptance": {
+      "evidence": "knowledge/tests/fixtures/k3-system-acceptance-2026-10-04.json",
+      "source_policy": "Four explicitly selected real K3 development transcripts, read locally; only anonymous measurements are committed.",
+      "host": "macOS arm64",
+      "model": "gpt-5.6-luna",
+      "effort": "low",
+      "real_histories": 4,
+      "blocks": 81,
+      "indexed_blocks": 81,
+      "native_invocations": 35,
+      "native_invocation_definition": "Observed native worker invocations, not independently measured provider-internal requests.",
+      "input_tokens": 658424,
+      "cached_input_tokens": 0,
+      "output_tokens": 33219,
+      "unknown_calls": 0,
+      "retrieval_queries": 12,
+      "retrieval_targets_found": 12,
+      "failures": [
+        {
+          "case": "k3-04",
+          "attempt": 34,
+          "stage": "model-result-validation",
+          "expected_blocks": 3,
+          "returned_indexes": 4,
+          "duplicate_indexes": 1,
+          "model_calls": 1,
+          "input_tokens": 22077,
+          "output_tokens": 1483,
+          "known_billing": true,
+          "automatic_retry": false,
+          "fix": "Native output schema constrains exact array length; identity/order validation still required.",
+          "explicit_retry": "Attempt 35 completed; all prior usage retained."
+        }
+      ],
+      "limitations": [
+        "Rule scanning is not a semantic confidentiality guarantee.",
+        "Twelve task-target retrieval checks do not establish general benchmark recall.",
+        "Local Git consumer result is distinct from later GitHub/Grok acceptance.",
+        "Usage is native reported token counts; no currency price inferred."
+      ],
+      "revision_scope": "The named external artifact commit binds the anonymized measurement record; later platform fixes did not replay these live model calls."
+    },
+    "independent_consumer": {
+      "transport": "local Git file protocol; not GitHub acceptance",
+      "tasks": 4,
+      "queries": 12,
+      "targets_found": 12,
+      "model_calls": 0,
+      "repeat": "unchanged"
+    },
+    "public_content_repackage": {
+      "source_commit": "9aab5e1e2f1298f992b1b41e403c2b1e0232d12c",
+      "content_commit": "85a320a377c17d4a863fa3b8aa90f333a83549ff",
+      "validator_commit": "f246baea38247ed9c09e4c62d3d769717378f5b2",
+      "entries": 20,
+      "blocks": 22,
+      "preserved_body_bytes": 110289,
+      "feedback_files_unchanged": 1,
+      "model_calls": 0,
+      "local_validation": {
+        "entries": 20,
+        "feedback_files": 1,
+        "bytes": 246051
+      },
+      "whitespace_note": "One inherited two-space Markdown hard break remains byte-for-byte; changed CI and documentation pass whitespace checking."
+    },
+    "remaining_acceptance": {
+      "remote_platform_ci": "Current core e13b77b83db9aebf5c2904253565eac633373ca7 has been pushed; its remote CI remains pending. Older 915 Windows failure and other head-specific results remain separate. Codex and content retain their independently tested f246 pins until the final Windows result.",
+      "installed_plugin_and_native_hooks": "pending; the user reported the Mac unlocked at 2026-10-04 13:46 UTC and the parent confirmed CUA access. Host lock is no longer a current blocker; native Hook acceptance has not completed.",
+      "github_publication_and_new_workflow_dispatch": "pending; the workflow-scope authorization rejection remains unresolved and the current workflow/public contribution scope questions await the user response.",
+      "grok_event_review_and_merge": "pending; the existing Grok Bot/routine is accessible, but still uses the observed old trusted validator and mindie-entry/2 contract. No prompt, trigger or permissions were changed.",
+      "environment_boundary": "The earlier host-lock blocker is resolved by user unlock and parent CUA readback. Workflow authorization and public contribution scope remain unresolved; accessibility alone does not establish event/review/merge acceptance."
+    },
+    "receipt_policy": "Later external acceptance must be appended with exact revisions and observed receipts; it must not overwrite this snapshot or the initial research snapshot.",
+    "remote_ci_observed": {
+      "pr_head": "f72445403fe9069f0abaa224306943e7de608500",
+      "checkout": "9de371bf3369d434e7176fba3fac088b2881bf13",
+      "base": "2637ffa848c0a44bde38ee488112150ee9bc0743",
+      "scope": "Partial remote results; these jobs checked out the PR merge commit, not the bare branch head. Overall CI remains pending Windows fixes.",
+      "jobs": [
+        {
+          "job": "Ubuntu contracts",
+          "passed": 622,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 311.54,
+          "log": "/tmp/mindie-f724-linux-passed.log"
+        },
+        {
+          "job": "macOS contracts",
+          "passed": 622,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 446.09,
+          "log": "/tmp/mindie-f724-macos-passed.log"
+        },
+        {
+          "job": "Package checks",
+          "passed": 622,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 391.74,
+          "log": "/tmp/mindie-f724-package-passed.log"
+        }
+      ],
+      "windows": {
+        "status": "failed at f724; production Git newline and visible-failure fixes committed in ec5; later-head outcomes are recorded separately",
+        "known_failure": "Git CRLF package contract",
+        "report_source": "parent task",
+        "partial_counts_before_first_reported_failure": {
+          "passed": 107,
+          "skipped": 23
+        },
+        "final_counts": null
+      },
+      "fix_commit": "ec5f33e9d6a329c0fb48cea67cba66113e70a5b9"
+    },
+    "known_findings": [
+      {
+        "id": "markdown-raw-byte-integrity",
+        "affected_commit": "ec5f33e9d6a329c0fb48cea67cba66113e70a5b9",
+        "status": "resolved in the named fix commit; affected local tests passed",
+        "finding": "Path.read_text newline normalization could hide changed raw Markdown bytes from local export and ReMe pre-validation.",
+        "principle": 9,
+        "report_source": "parent task and delivery reviewer",
+        "fix_commit": "0fa011701f4d73f40709df56c969cc3492eb8fab",
+        "fix": "Six Markdown read/compare sites and ReMe pre-validation now read raw bytes and explicitly decode UTF-8. JSON behavior is unchanged.",
+        "validation": {
+          "affected_tests_passed": 52,
+          "windows_longpath_fixture_tests_passed": 1,
+          "asserted_behavior": "CRLF corruption of a block or manifest fails get/export/search/reinstall without advancing the current pointer or cache.",
+          "scope": "Targeted local validation; not new-head remote CI."
+        }
+      },
+      {
+        "id": "development-transport-git-failure-boundary",
+        "fix_commit": "460dfda1e41018befbdc3b57996977cbefa3ed75",
+        "status": "fixed; targeted local tests passed; current-head remote CI pending",
+        "principle": 9,
+        "finding": "Development FileTransport merge steps did not uniformly apply the managed Git path/newline contract or expose each failed operation; post-push revision reads could obscure an already completed write.",
+        "fix": "Command-local longpaths, autocrlf and eol settings apply to all Git steps. Every step checks timeout and exit status. The validated commit is read before push; push timeout remains UnknownOutcome and is not repeated here.",
+        "validation": {
+          "tests_passed": 5,
+          "seconds": 4.86,
+          "scope": "Targeted local transport tests, reported by the parent task."
+        },
+        "pre_fix_commit": "de8d756b8bcdbbdb2e6df334a0b5c4404d1a31f5"
+      },
+      {
+        "id": "capture-event-material-receipt-at-eof",
+        "fix_commit": "915d3356a25f4197927e35b3f74f7c4592a67244",
+        "status": "fixed; targeted local tests passed; current-head remote CI pending",
+        "principle": 9,
+        "finding": "A capture event could save public material on an early page, then encounter only filtered/noise tail pages and falsely finish as no-new-material. The body was retained; the terminal status lost the earlier event result.",
+        "fix": "A bounded event-level material receipt is stored in the existing state table in the same transaction as body/cursor commit. EOF restores the saved-material result; continuation errors remain independently visible. Invalid receipts surface as faults rather than empty events.",
+        "caller_boundary": "The read-only diagnostic caller projects exact safe references and fixed fault values, marks invalid-receipt state degraded and gives a bounded hint; it does not resolve bodies or retry work.",
+        "constraints": [
+          "No new database schema",
+          "No automatic retry",
+          "No body history or body copy in the receipt",
+          "No new model calls"
+        ],
+        "validation_groups": [
+          {
+            "scope": "Capture and related targeted tests",
+            "passed": 75,
+            "seconds": 48.12
+          },
+          {
+            "scope": "New caller and capture tests",
+            "passed": 16,
+            "seconds": 5.56
+          },
+          {
+            "scope": "Diagnostics tests",
+            "passed": 28,
+            "seconds": 0.63,
+            "warnings": 1,
+            "warning_scope": "Existing warning"
+          }
+        ],
+        "validation_boundary": "Groups can overlap and are not summed as a distinct full suite. Counts were reported by the parent task; this documentation pass inspected the committed implementation diff but did not rerun tests or models.",
+        "pre_fix_commit": "460dfda1e41018befbdc3b57996977cbefa3ed75"
+      },
+      {
+        "id": "remote-task-tree-preflight-before-checkout",
+        "pre_fix_commit": "915d3356a25f4197927e35b3f74f7c4592a67244",
+        "fix_commit": "e13b77b83db9aebf5c2904253565eac633373ca7",
+        "status": "fixed and pushed; targeted local tests passed; current-head remote CI pending",
+        "principle": 9,
+        "finding": "Unsupported remote paths or Git modes could fail host checkout before the task package conflict could be reported as needs_review.",
+        "fix": "Clone fetches objects with no checkout. Inspect exact selected Git-tree paths and modes before materialization, retain needs_review for unsupported package shapes and perform no remote write for those conflicts.",
+        "fixture_change": "Portable fixtures write real symlink Git mode 120000 without requiring host symlink creation.",
+        "validation": {
+          "tests_passed": 93,
+          "seconds": 36.29,
+          "log": "/tmp/mindie-915-remote-preflight-regression.log",
+          "evidence": "Original local test-result log read during documentation update; no rerun.",
+          "review": "Parent and organizer completed narrow reviews before commit/push.",
+          "scope": "Five changed files; targeted local validation, not current-head remote CI."
+        }
+      }
+    ],
+    "codex_final_pin_validation": {
+      "commit": "493c97e95b4557368155377658ff3f75005db575",
+      "knowledge_commit": "f246baea38247ed9c09e4c62d3d769717378f5b2",
+      "exact_install_preflight": "passed",
+      "installed_runtime_tests_passed": 1,
+      "seconds": 2.903,
+      "log": "/tmp/organizer-codex-f246-exact-runtime.log",
+      "prior_303_and_26_suites_repeated": false,
+      "dependency_install_scope": "The exact pinned core source was installed with no-deps in the existing validated environment."
+    },
+    "remote_ci_additional_observation": {
+      "pr_head": "ec5f33e9d6a329c0fb48cea67cba66113e70a5b9",
+      "platform": "Windows",
+      "status": "failed before completion",
+      "partial_counts_before_failure": {
+        "passed": 110,
+        "skipped": 23
+      },
+      "failure": "Raw Git test fixture did not use the managed Windows long-path Git contract.",
+      "fixture_fix_commit": "0fa011701f4d73f40709df56c969cc3492eb8fab",
+      "report_source": "parent task"
+    },
+    "remote_ci_latest_observation": {
+      "pr_head": "0fa011701f4d73f40709df56c969cc3492eb8fab",
+      "checkout": "795fb780c1c9b8532de649cbab518f24a70b03f3",
+      "base": "2637ffa848c0a44bde38ee488112150ee9bc0743",
+      "scope": "Observed results at this PR merge checkout; later-head results must be recorded separately.",
+      "jobs": [
+        {
+          "job": "Ubuntu contracts",
+          "status": "success",
+          "run_id": 37204003398,
+          "job_id": 111441355248,
+          "passed": 632,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 376.59,
+          "url": "https://github.com/mindie-agent/knowledge/actions/runs/37204003398/job/111441355248"
+        },
+        {
+          "job": "macOS contracts",
+          "status": "success",
+          "run_id": 37204003398,
+          "job_id": 111441356264,
+          "passed": 632,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 348.61,
+          "url": "https://github.com/mindie-agent/knowledge/actions/runs/37204003398/job/111441356264"
+        },
+        {
+          "job": "Package checks",
+          "status": "success",
+          "run_id": 37204003419,
+          "job_id": 111441304077,
+          "passed": 632,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 241.85,
+          "url": "https://github.com/mindie-agent/knowledge/actions/runs/37204003419/job/111441304077"
+        }
+      ],
+      "windows": {
+        "status": "failed",
+        "run_id": 37204003398,
+        "job_id": 111441355318,
+        "url": "https://github.com/mindie-agent/knowledge/actions/runs/37204003398/job/111441355318",
+        "partial_counts_before_failure": {
+          "passed": 117,
+          "skipped": 23
+        },
+        "failure": "Verification clone in test_submit_happy_path_real_git failed with Filename too long; the production submission had succeeded.",
+        "report_source": "delivery reviewer read original Actions log",
+        "local_fix_validation": {
+          "change": "Shared raw-Git test helper adds command-level core.longpaths=true.",
+          "passed": 3,
+          "seconds": 2.97,
+          "scope": "Targeted local fixture tests only; fix committed and pushed in f246baea38247ed9c09e4c62d3d769717378f5b2. Subsequent remote CI remains pending."
+        },
+        "fixture_fix_commit": "f246baea38247ed9c09e4c62d3d769717378f5b2"
+      }
+    },
+    "integrated_architecture_semantics": {
+      "files": [
+        "docs/architecture.md",
+        "docs/implementation-status.md"
+      ],
+      "reviewed_changes": [
+        "Required LangMem indexing failures remain visible and block publication; no excerpt fallback.",
+        "Explicitly selected historical material uses the same capture, redaction, incremental indexing and package pipeline as live Stop intake.",
+        "Local body and necessary send receipts persist until the exact revision is confirmed through the public feed; opening a PR alone is not cleanup authority.",
+        "Markdown is the authoritative material set; ReMe caches may contain derived text and are independently rebuildable."
+      ],
+      "evidence_boundary": "Historical acceptance sections retain their original dates and do not establish acceptance of this cutover."
+    },
+    "current_core_change_scope": "e13b77b adds Git-object task-tree preflight before checkout and portable Git-mode fixtures. It retains the earlier development transport and event-receipt fixes; no automatic retry or new model calls were added.",
+    "codex_prior_pin_validations": [
+      {
+        "commit": "78d9cffcf207a9ac7ab862f6b158906210693d52",
+        "knowledge_commit": "0fa011701f4d73f40709df56c969cc3492eb8fab",
+        "exact_install_preflight": "passed",
+        "installed_runtime_tests_passed": 1,
+        "seconds": 2.979,
+        "log": "/tmp/organizer-codex-0fa0-exact-runtime.log",
+        "prior_303_and_26_suites_repeated": false
+      }
+    ],
+    "public_document_normalization": {
+      "file": "docs/knowledge-review-2026-10-04/evidence/organizer/implementation-review.md",
+      "change": "Replaced the machine-specific private acceptance script path with an explicit local private working-area description. The fixture remains syntax-checked only and unexecuted.",
+      "behavior_change": false
+    },
+    "remote_ci_later_failures": [
+      {
+        "pr_head": "f246baea38247ed9c09e4c62d3d769717378f5b2",
+        "platform": "Windows",
+        "failure": "The 10 MiB Kimi fixture placed public-message timestamps before the capture authorization floor when Store initialization was slow, resulting in no-new-material.",
+        "scope": "Fixture authorization-boundary failure, distinct from the earlier Git long-path failures and later event-receipt bug.",
+        "fixture_fix_commit": "de8d756b8bcdbbdb2e6df334a0b5c4404d1a31f5",
+        "validation": {
+          "large_material_tests_passed": 9,
+          "lineage_and_corruption_tests_passed": 10,
+          "controlled_reproduction": "A three-second initialization delay reproduced the real parser filtering.",
+          "report_source": "delivery reviewer"
+        }
+      },
+      {
+        "pr_head": "915d3356a25f4197927e35b3f74f7c4592a67244",
+        "platform": "Windows",
+        "partial_counts_before_failure": {
+          "passed": 181,
+          "skipped": 23
+        },
+        "failure": "A remote task path containing a newline reached checkout before package-shape validation, yielding failed instead of needs_review.",
+        "fix_commit": "e13b77b83db9aebf5c2904253565eac633373ca7",
+        "report_source": "parent task and delivery reviewer",
+        "final_counts": null
+      }
+    ],
+    "environment_observations": [
+      {
+        "phase": "earlier implementation snapshot",
+        "host_access": "locked Mac prevented the remaining native UI checks",
+        "status": "historical blocker; subsequently resolved"
+      },
+      {
+        "observed_at": "2026-10-04T13:46:00Z",
+        "time_precision": "minute",
+        "source": "User unlock report and parent CUA readback",
+        "host_access": "unlocked; existing Grok Bot/routine accessible",
+        "grok_routine": {
+          "trusted_validator_commit": "40063ebfc94a4b0fcf508a2a653af8b6403a1a0b",
+          "entry_schema": "mindie-entry/2",
+          "feedback_schema": "mindie-feedback/1",
+          "prompt_trigger_permissions_changed": false
+        },
+        "open_questions": [
+          "workflow scope authorization",
+          "public contribution scope"
+        ],
+        "acceptance_boundary": "This is UI/configuration observation, not native Hook or new-format publication acceptance."
+      }
+    ],
+    "snapshot_status": "Historical stage at core e13 / Codex493 / content85; its remaining-acceptance and environment fields describe that stage, not the final candidate below."
+  },
+  "external_artifacts": {
+    "knowledge/tests/fixtures/k3-system-acceptance-2026-10-04.json": {
+      "repository": "mindie-agent/knowledge",
+      "commit": "0fa011701f4d73f40709df56c969cc3492eb8fab",
+      "path": "tests/fixtures/k3-system-acceptance-2026-10-04.json",
+      "sha256": "97de7962f717c7db83ff884488c1537c6c38ae7ebb6efcf08b9205cb54da93c4",
+      "url": "https://github.com/mindie-agent/knowledge/blob/0fa011701f4d73f40709df56c969cc3492eb8fab/tests/fixtures/k3-system-acceptance-2026-10-04.json"
+    }
+  },
+  "artifacts": {
+    "AGENTS.md": "73e76d7dff76dd7aec5cadb3ad2beca7810828fca9e50121d9a44b4529b02310",
+    "docs/README.md": "f6c9f5af9de3d7c75c325ff832c7bcd38c13733fadcea0c889d67b2e752d0993",
+    "docs/architecture.md": "264b37f5766eb292f54abe3db005f49b9f8d4340d6965aadf914b21b725375c6",
+    "docs/design-principles.md": "db1fadfb34b46ff49e6e2a113b69c5b684b8f9f13be118bd037f574851b7c98d",
+    "docs/implementation-status.md": "431dc70d97adf81c0b56cdeb9036e32417093b8a11133e43013f478c442d3698",
+    "docs/knowledge-experience-design-2026-10-04.md": "967596ea4d8f6b0c566ad1aeec763d277990624df7561767eed6f34933dbad5f",
+    "docs/knowledge-experience-evaluation-2026-10-04.md": "376a9eba5e42fb3332e478109b72edff25eb701e7eda2b5b3ad2ec216941e3b6",
+    "docs/knowledge-experience-review-2026-10-04.md": "5398105244ec0a87440afba23905bd77df7da47548f86146e68a979e69106279",
+    "docs/knowledge-framework-selection-2026-10-04.md": "47c243facba0fb68d90cc32e852313d4036d1b2fa9e06447ba3f3db2188e28c6",
+    "docs/knowledge-review-2026-10-04/evidence/codex-final-ci.json": "39fdbc2a1f3b39b5dbc717a37f7176459bc0aee29667427997f3e1e8ca551b16",
+    "docs/knowledge-review-2026-10-04/evidence/delivery/RUN.txt": "25320dfd2fd7d6be86ec5cccd8c1b1aa2fee68a78fb690b1612a8d7f7e5eb2ab",
+    "docs/knowledge-review-2026-10-04/evidence/delivery/framework-comparison.md": "15fb4f6e0076748b620f90e88d47b5fc9141e9b0c1d00a64a53b58e58e1b0520",
+    "docs/knowledge-review-2026-10-04/evidence/delivery/probe_delivery.py": "2c9e72a52e72ddfa089cf08fee5d18a11da480c59fb27dfa48ee3d1e230840f1",
+    "docs/knowledge-review-2026-10-04/evidence/delivery/results.json": "c99b4686befde9a50b1b243389e637071af756aa20bd7acd61e11d08b28a9559",
+    "docs/knowledge-review-2026-10-04/evidence/formal-deployment.json": "82cee704c3f1f9171ebdff484bf045c497894c1d2737b515e269d1648a67cce3",
+    "docs/knowledge-review-2026-10-04/evidence/grok-format-cutover.json": "a021ca1f526f7df6141fb1ec2d4c150607c2f19eab703a2bc9310701b9968c2e",
+    "docs/knowledge-review-2026-10-04/evidence/implementation-review.md": "8e590575ccc104636e415cce7dc11744120c47c4d7cca6237046dd52c84d484b",
+    "docs/knowledge-review-2026-10-04/evidence/input/probe_input.py": "8831e533499ea97bbc935db0fdb73683a476b559713b8b1cf6480d7461a9f813",
+    "docs/knowledge-review-2026-10-04/evidence/input/results.json": "24c089b67e23ea6740909c406d90a6333c8508888e1c8346d07037b2e43bd3d9",
+    "docs/knowledge-review-2026-10-04/evidence/native-local-acceptance.json": "18e793922c10fbc3e8ec3ec59f1230583afbe73c9775b71b81db370655bee419",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/README.md": "97adf8d26704251e803146bb1512d0ba4ded6ea358b80f935505ca2f3d2e217b",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/frameworks.md": "6c4a0620ed2dd049031a2c8ecd61f0617f4b6cd81d7eacc65293c77ba886bb2f",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/implementation-review.md": "2ea46f623effaca6dd44689f78d6700c95fda3f15aac6d55afc151bc75a24008",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/README.md": "3523a7f069bb6ed3969800af58e2750469327c45346d964ddfab91f3b1489017",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/first-run-results.json": "9dec3c2346e8df6ef53a318f0f46176ecf447bca2e4baf5652bc1cca2ef9e123",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/resolved-requirements.txt": "424c394da45e57f4d3fe987251c6a40f6f774da430b500ae3b7422900f44b541",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/results.json": "5c25f7cd86117f3f765c142921f9b57b1a4ab8f2e893f15260c85e5e2da8d39f",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/langmem-spike/spike.py": "b970843cb7deb184fed27aa5abff5343ecc24a9e67d05a90a9d99df9597ade17",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/probes.py": "bf510a89b1db9e68a0d3ff645fbb9a077f51442c3a212f109e59b1901eb8164f",
+    "docs/knowledge-review-2026-10-04/evidence/organizer/results.json": "3163a53cc14a2dfa52c222970321fc03110fb8857bc6257734f9c233d45c26a3",
+    "docs/knowledge-review-2026-10-04/evidence/public-github-consumer.json": "5bc760e3a37022fc3a9a71a340e5a157979c0f2f6b2df8e7c21b5fc6f7befaaa",
+    "docs/knowledge-review-2026-10-04/evidence/research-reme-ace-claudemem.md": "585a25339d08ff9d41bccc7af72fbab7792903c7cd1647e3dbfd7411c0d57f9c",
+    "docs/knowledge-review-2026-10-04/evidence/stage5/consumer.json": "b0fc29505a1a7c99e35895dd0d65f0f18633d0e506d18e7170427737a18d0243",
+    "docs/knowledge-review-2026-10-04/evidence/stage5/grok.json": "6e41f880ef80ae3da02507805a79f16599ed192b9b7b32e59b2f4bef62b68aba",
+    "docs/knowledge-review-2026-10-04/evidence/stage5/producer.json": "347563120d5d2fa2b9f9da7c6ff57ba347a29563c22187d9edfd52beab5684af",
+    "docs/knowledge-review-2026-10-04/evidence/stage5/review.md": "5e15e29afb46f760f2d8594c9c1478406fce14b0456e2cc13b1be59aa25adcdb",
+    "docs/transcript-reuse-architecture-2026-10-04.md": "93243ab40442a92045bd5b0255e9333d1be1cde5854e64d9f5ee9dd398ae96c5"
+  },
+  "validation": {
+    "json_parse": {
+      "status": "passed",
+      "files": 4,
+      "scope": "Existing added, modified or renamed UTF-8 files relative to the canonical integration base, plus untracked UTF-8 files; unchanged historical upstream files are outside this PR review."
+    },
+    "python_ast": {
+      "status": "not_applicable",
+      "files": 0,
+      "scope": "Stage5 PR-scope Python files only; none changed, and historical research probes were not rerun."
+    },
+    "local_links": {
+      "status": "passed",
+      "markdown_files": 6,
+      "checked": 52,
+      "missing": [],
+      "scope": "Existing added, modified or renamed UTF-8 files relative to the canonical integration base, plus untracked UTF-8 files; unchanged historical upstream files are outside this PR review."
+    },
+    "external_links": {
+      "distinct_references": 53,
+      "scope": "URLs in Stage5 changed Markdown; actual PR39/Grok/consumer sources were read, but unchanged older primary-source citations were not refetched."
+    },
+    "public_data_scan": {
+      "status": "reviewed findings; no unresolved findings",
+      "validator_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "checked_text_files": 10,
+      "scope": "Existing added, modified or renamed UTF-8 files relative to the canonical integration base, plus untracked UTF-8 files; unchanged historical upstream files are outside this PR review. Includes explicit home-directory and raw-transcript path checks; product scan rules are unchanged.",
+      "canonical_base_commit": "24a1f0f9b2e1b38751f890dc3664ae5c0e31abb3",
+      "mechanical_findings": 7,
+      "reviewed_finding_classes": {
+        "repository_evidence_path": 7
+      },
+      "machine_path_or_raw_transcript_references": 0,
+      "unresolved_findings": 0
+    }
+  },
+  "workspace_roles": {
+    "architecture_primary": {
+      "repository": "mindie-agent/mindie-agent",
+      "meaning": "Initial architecture and current principle source; dirty working-copy content was read only."
+    },
+    "architecture_docs_candidate": {
+      "repository": "mindie-agent/mindie-agent",
+      "meaning": "Isolated documentation worktree used for public evidence edits."
+    },
+    "knowledge_research_candidate": {
+      "repository": "mindie-agent/knowledge",
+      "meaning": "Initial pre-implementation knowledge candidate with recorded source hashes and local changes."
+    },
+    "codex_research_candidate": {
+      "repository": "mindie-agent/mindie-agent-codex",
+      "meaning": "Initial pre-implementation Codex candidate with recorded source hashes and local changes."
+    }
+  },
+  "integration_review": {
+    "canonical_repository": "mindie-agent/mindie-agent",
+    "canonical_base_ref": "verified canonical main at Stage5 start",
+    "canonical_base_commit": "24a1f0f9b2e1b38751f890dc3664ae5c0e31abb3",
+    "integrated_candidate_before_final_evidence": "24a1f0f9b2e1b38751f890dc3664ae5c0e31abb3",
+    "review_phase": "final-review",
+    "scope": "Existing added, modified or renamed UTF-8 files relative to the canonical integration base, plus untracked UTF-8 files; unchanged historical upstream files are outside this PR review.",
+    "paths": [
+      "docs/architecture.md",
+      "docs/implementation-status.md",
+      "docs/knowledge-review-2026-10-04/evidence/implementation-review.md",
+      "docs/knowledge-review-2026-10-04/evidence/manifest.json",
+      "docs/knowledge-review-2026-10-04/evidence/organizer/implementation-review.md",
+      "docs/knowledge-review-2026-10-04/evidence/stage5/consumer.json",
+      "docs/knowledge-review-2026-10-04/evidence/stage5/grok.json",
+      "docs/knowledge-review-2026-10-04/evidence/stage5/producer.json",
+      "docs/knowledge-review-2026-10-04/evidence/stage5/review.md",
+      "docs/transcript-reuse-architecture-2026-10-04.md"
+    ],
+    "initial_research_snapshot_preserved": true
+  },
+  "final_candidate_snapshot": {
+    "stage_order": 3,
+    "observed_at": "2026-10-04T15:34:53Z",
+    "phase": "final-review; core merged; Codex Windows service-start failure under investigation",
+    "sources": {
+      "knowledge": {
+        "repository": "mindie-agent/knowledge",
+        "commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "pull_request": "https://github.com/mindie-agent/knowledge/pull/59",
+        "state": "merged",
+        "merge_commit": "250fcc9d497989864e2429d422d6c2c79e4d5e71",
+        "merged_at": "2026-10-04T15:30:06Z",
+        "reviewed_head": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "merge_tree_verification": {
+          "merge_commit": "250fcc9d497989864e2429d422d6c2c79e4d5e71",
+          "parents": [
+            "2637ffa848c0a44bde38ee488112150ee9bc0743",
+            "929bdcb918f2207aea38b02a14bd8e6219fabac4"
+          ],
+          "tested_merge_commit": "f8b41e495987fddff9af060f9a2953d747b7eeee",
+          "merged_and_tested_tree": "b979562ef2c9d827d10661d1f1cba55f076db71b",
+          "same_tree": true,
+          "main_post_merge_ci_status_inferred": false,
+          "evidence": "Parent read Git objects and compared trees."
+        }
+      },
+      "codex": {
+        "repository": "mindie-agent/mindie-agent-codex",
+        "commit": "4f7df1355b59618d3a94ee4c97843a6f0b67fd19",
+        "knowledge_pin": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "pull_request": "https://github.com/mindie-agent/mindie-agent-codex/pull/18",
+        "draft": true,
+        "state": "open draft; Linux CI passed; Windows308 tests with1 failure and6 skips"
+      },
+      "content": {
+        "repository": "mindie-agent/knowledge-vllm-ascend",
+        "commit": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a",
+        "validator_pin": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "pull_request": "https://github.com/mindie-agent/knowledge-vllm-ascend/pull/37",
+        "draft": true,
+        "state": "open; not merged"
+      }
+    },
+    "principles_review": {
+      "primary_git_blob": "9b21e6ae87ac96ff8bdacc3f4f546384e111a184",
+      "primary_sha256": "15b4b58385846051464c27d06922ad0353bdd6a4031b619ff248c3a65c179741",
+      "candidate_git_blob": "62cdd5ae40553df2f0f7f7d022141123792d2944",
+      "candidate_sha256": "db1fadfb34b46ff49e6e2a113b69c5b684b8f9f13be118bd037f574851b7c98d",
+      "candidate_difference": "Architecture/reference links only; the same nine principles and mandatory review rules.",
+      "review_file": "docs/knowledge-review-2026-10-04/evidence/implementation-review.md"
+    },
+    "core_remote_ci": {
+      "pr_head": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "checkout": "f8b41e495987fddff9af060f9a2953d747b7eeee",
+      "base": "2637ffa848c0a44bde38ee488112150ee9bc0743",
+      "jobs": [
+        {
+          "job": "Ubuntu contracts",
+          "status": "success",
+          "run_id": 37211768332,
+          "job_id": 111464222653,
+          "passed": 651,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 233.5
+        },
+        {
+          "job": "macOS contracts",
+          "status": "success",
+          "run_id": 37211768332,
+          "job_id": 111464222820,
+          "passed": 651,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 433.19
+        },
+        {
+          "job": "Package checks",
+          "status": "success",
+          "run_id": 37211768330,
+          "job_id": 111464222832,
+          "passed": 651,
+          "skipped": 9,
+          "warnings": 1,
+          "seconds": 254.19
+        },
+        {
+          "job": "Windows contracts",
+          "status": "success",
+          "run_id": 37211768332,
+          "job_id": 111464222922,
+          "passed": 631,
+          "skipped": 29,
+          "warnings": 1,
+          "seconds": 1218.2
+        }
+      ],
+      "report_source": "Delivery reviewer read original complete job logs and merge checkout; this documentation pass did not rerun tests.",
+      "overall": "success; all three OS contract jobs and package checks completed"
+    },
+    "core_after_native_change_scope": {
+      "base": "d07934b6ff6510d9d666c30560e3aa072a75ce60",
+      "head": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "files": [
+        "tests/test_publication_check.py",
+        "tests/test_search_index.py",
+        "tests/test_windows_process_ownership.py"
+      ],
+      "test_only": true,
+      "production_dependencies_docs_unchanged": true,
+      "native_model_rerun": false
+    },
+    "core_intermediate_fixtures": [
+      {
+        "fix_commit": "5a93c8e",
+        "fix": "Bind synthetic public-message timestamps to initialized capture authorization boundaries."
+      },
+      {
+        "fix_commit": "d07934b6ff6510d9d666c30560e3aa072a75ce60",
+        "fix": "Enable long Git paths in raw Git feed-retention verification."
+      },
+      {
+        "fix_commit": "d1b9549457cd3952c9a817821ebfbdef9264f56e",
+        "prior_failure_head": "d07934b6ff6510d9d666c30560e3aa072a75ce60",
+        "partial_windows_counts": {
+          "passed": 490,
+          "skipped": 27,
+          "warnings": 1,
+          "seconds": 641.29
+        },
+        "fix": "Apply existing large-fixture Git write budget to both add and commit, with fixture-local LF settings; ordinary and product validation deadlines unchanged."
+      },
+      {
+        "fix_commit": "4f59b66d60139e02d6bd34c338105637446fe567",
+        "prior_failure_head": "d1b9549457cd3952c9a817821ebfbdef9264f56e",
+        "fix": "Publish descendant PID with a completed temporary-file write and atomic replace, eliminating the empty-file fixture race."
+      },
+      {
+        "fix_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "prior_failure_head": "4f59b66d60139e02d6bd34c338105637446fe567",
+        "partial_windows_counts": {
+          "passed": 534,
+          "skipped": 28
+        },
+        "fix": "Read material fixture content explicitly as UTF-8 instead of the Windows locale encoding."
+      }
+    ],
+    "codex_exact_pin_validation": {
+      "commit": "35ab33050e3a42a2b01f858c1c7a605f1a84fb7c",
+      "knowledge_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "exact_no_deps_install": "passed",
+      "preflight": "passed",
+      "installed_runtime": {
+        "tests_passed": 1,
+        "seconds": 2.866
+      },
+      "remote_dev_commit": "3c1a3543322a6d3a954715642a679336b0c5f830",
+      "kimi_fixture_commit": "90f73e76c6087ce091570f2d151b709145c913bc",
+      "prior_303_and_26_suites_repeated": false,
+      "native_evidence_rebound_to_this_pair": false
+    },
+    "codex_first_ci": {
+      "pr_head": "35ab33050e3a42a2b01f858c1c7a605f1a84fb7c",
+      "run_id": 37212499671,
+      "ubuntu_job_id": 111466350922,
+      "platform": "Ubuntu",
+      "preflight": "passed exact core929 and adapter35ab",
+      "test_count_at_failure": 128,
+      "status": "failed",
+      "failure": "test_failure_visibility used the default local updater settings path, absent on a clean runner.",
+      "scope": "Test fixture relied on local host configuration; independent from the real updater CLI exit-code defect.",
+      "fix": "Temporary settings fixture and explicit argv; CI runner reports all failures while keeping each test once and nonzero final failure exit.",
+      "fix_status": "fixed and pushed; final CI recorded separately",
+      "fix_commit": "4f7df1355b59618d3a94ee4c97843a6f0b67fd19"
+    },
+    "native_local_acceptance": {
+      "evidence": "docs/knowledge-review-2026-10-04/evidence/native-local-acceptance.json",
+      "sha256": "18e793922c10fbc3e8ec3ec59f1230583afbe73c9775b71b81db370655bee419",
+      "actual_codex_commit": "351e9f8aeb422c879fef382d3c9aea784a6008ae",
+      "actual_core_commit": "d07934b6ff6510d9d666c30560e3aa072a75ce60",
+      "scope": "Pure synthetic native tasks, isolated producer/consumer profiles and local Git only.",
+      "summary_calls": 1,
+      "summary_input_tokens": 8835,
+      "summary_output_tokens": 232,
+      "summary_cached_input_tokens": 0,
+      "summary_elapsed_ms": 12857,
+      "consumer_query_results": 1,
+      "consumer_explain_full_body_characters": 238,
+      "consumer_capture_summary_outbox_counts": 0,
+      "business_task_usage_separate": true,
+      "historical_35_call_usage_separate": true,
+      "os_scheduler_installed": false,
+      "formal_plugin_settings_preserved": true,
+      "public_github_business_write": false,
+      "grok_acceptance": false,
+      "updater_invocations": "One normal owner check performed initial sync; one separate explicit post-fix check verified unchanged feed and nonzero plugin failure."
+    },
+    "updater_failure_fix": {
+      "commit": "801d2b4b8020c9d6893f4d3db3d103c445da3e49",
+      "finding": "Successful feed sync followed by plugin check_failed still returned CLI exit 0.",
+      "fix": "Add check_failed to the existing CLI failure set.",
+      "regression_before_fix": "failed",
+      "tests_passed": 13,
+      "seconds": 1.414,
+      "actual_fixed_cli_exit": 1,
+      "actual_feed_status": "unchanged",
+      "actual_plugin_status": "check_failed",
+      "whole_updater_success": false,
+      "no_automatic_retry_or_model_call": true
+    },
+    "public_content_candidate": {
+      "commit": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a",
+      "validator_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "source_commit": "9aab5e1e2f1298f992b1b41e403c2b1e0232d12c",
+      "entries": 20,
+      "blocks": 22,
+      "feedback_files": 1,
+      "package_bytes": 246051,
+      "preserved_body_bytes": 110289,
+      "model_calls": 0,
+      "candidate_workflow": {
+        "run_id": 37212273654,
+        "status": "completed",
+        "conclusion": "success",
+        "head": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a"
+      },
+      "publication_head_check": {
+        "id": 111465812689,
+        "status": "completed",
+        "conclusion": "success",
+        "head": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a",
+        "validator": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "readback": "GitHub API confirmed"
+      },
+      "legacy_base_workflow": {
+        "run_id": 37212258128,
+        "job_id": 111465660885,
+        "validator": "e6818da4e426e938674e7f4cad32e5e0c7ec7157",
+        "status": "failure",
+        "message": "PR text fails the privacy scan",
+        "package_schema_check_reached": false,
+        "all_pr_checks_success": false,
+        "stage": "historical first attempt; later metadata-only correction recorded below",
+        "failure_cause": "Review prose used main-at-SHA notation and matched username-at-host; package schema validation had not run."
+      },
+      "credential_resolution": {
+        "historical_rejection_preserved": true,
+        "cause": "Git push used an osxkeychain credential different from the already-authorized gh credential.",
+        "resolution": "Read existing gh scope, then use a command-local credential helper for the same user.",
+        "scope_expansion": false,
+        "global_git_config_changed": false,
+        "push_and_draft_pr_readback": "succeeded"
+      },
+      "merged": false,
+      "legacy_base_workflow_after_metadata_fix": {
+        "run_id": 37213022361,
+        "job_id": 111467842946,
+        "head": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a",
+        "validator": "e6818da4e426e938674e7f4cad32e5e0c7ec7157",
+        "status": "success",
+        "entries": 0,
+        "feedback_files": 1,
+        "bytes": 641,
+        "tasks_validated": false,
+        "new_schema_acceptance": false,
+        "metadata_fix": "Use main commit plus standalone SHA; frozen old and new title/body scans pass, product rules unchanged.",
+        "publication_head_check_id": 111467879651
+      }
+    },
+    "remaining_acceptance": {
+      "codex_final_ci": "Windows required-service startup PermissionError is unresolved; body import completed. Final repair and affected validation pending.",
+      "formal_public_contribution_scope": "unresolved",
+      "formal_plugin_deployment": "not performed by this acceptance",
+      "grok": "Three existing community-PR, daily and weekly routines remain on validator40063 and entry2/feedback1; prompts, triggers and permissions unchanged.",
+      "public_github_grok_consumer_loop": "not accepted",
+      "os_scheduler": "not installed or accepted in the isolated native test",
+      "native_long_session_quality_and_hardware": "not measured by the synthetic native test",
+      "content_checks_boundary": "Candidate validator929 checked all 20 tasks and 1 feedback. Legacy base validator is green after metadata correction but checked zero tasks."
+    },
+    "environment_observation": {
+      "later_mac_lock": "Read-only Grok routine preparation stopped when the Mac was locked; no unlock request or incomplete prompt write.",
+      "interpretation": "A local UI handoff limitation only, not product or public-chain acceptance."
+    },
+    "receipt_policy": "Earlier research and implementation-stage receipts are preserved. Later CI or deployment results append exact head/checkout/status; failures and known costs are never relabeled as success.",
+    "codex_final_test_only_delta": {
+      "commit": "4f7df1355b59618d3a94ee4c97843a6f0b67fd19",
+      "prior_commit": "35ab33050e3a42a2b01f858c1c7a605f1a84fb7c",
+      "files": [
+        "tests/test_failure_visibility.py",
+        "tests/run_ci.py"
+      ],
+      "production_and_core_pin_unchanged": true,
+      "preserved": [
+        "All four caller-failure exit assertions",
+        "Each test runs once in the same ordered suite",
+        "Nonzero exit if any test fails"
+      ],
+      "targeted_tests_passed": 9,
+      "python_ast": "passed",
+      "review": "Parent and organizer reviewed all nine principles before push; documentation reviewer read final two-file diff.",
+      "no_exact_runtime_or_native_rerun": true
+    },
+    "codex_final_ci": {
+      "head": "4f7df1355b59618d3a94ee4c97843a6f0b67fd19",
+      "run_id": 37212849968,
+      "status": "completed; Linux success, Windows failure",
+      "checkout": "1e84263630ddda792d6810a455a743d8ef63f06b",
+      "base": "33de36945e6dd448104c42b7fa49639b00f8ff58",
+      "linux": {
+        "status": "success",
+        "tests": 308,
+        "skipped": 12,
+        "seconds": 164.464,
+        "unittest_result": "OK"
+      },
+      "windows": {
+        "status": "failure",
+        "tests": 308,
+        "failures": 1,
+        "skipped": 6,
+        "seconds": 318.686,
+        "failure": "Historical body was imported, but starting the required service raised PermissionError.",
+        "cause": "Unknown; investigation pending. Windows Job containment is a hypothesis, not an established finding.",
+        "report_source": "Parent read the completed Windows CI result.",
+        "fix_commit": null
+      }
+    },
+    "snapshot_status": "Historical stage 3 checkpoint before final Windows repair, merges and deployment. Current status is final_deployment_snapshot; remaining_acceptance here describes that earlier observation only."
+  },
+  "final_deployment_snapshot": {
+    "stage_order": 4,
+    "observed_at": "2026-10-04T16:23:27+00:00",
+    "date_boundary": "UTC October 4; local Asia/Shanghai October 5.",
+    "phase": "merged, formally installed and public consumption verified; public native contribution event loop unaccepted",
+    "sources": {
+      "knowledge": {
+        "source": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "merge": "250fcc9d497989864e2429d422d6c2c79e4d5e71",
+        "runtime_pin": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+        "pull_request": "https://github.com/mindie-agent/knowledge/pull/59"
+      },
+      "codex": {
+        "source": "783190bac5c387ea3f6918e14d56c7eaaedb09eb",
+        "merge": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+        "tree": "17772e776d1b75bcb52683367c1a0974835c4a7c",
+        "tested_merge": "832c3f32f34104e53c436495be77ff8842c33241",
+        "tested_tree_equal": true,
+        "pull_request": "https://github.com/mindie-agent/mindie-agent-codex/pull/18"
+      },
+      "content": {
+        "source": "55ac4704d77a7423a06d8cda8d8403b42ac5af4a",
+        "merge": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+        "tree": "b7c94962430fdd715881e113cc6f165bafeae21c",
+        "candidate_tree_equal": true,
+        "pull_request": "https://github.com/mindie-agent/knowledge-vllm-ascend/pull/37"
+      },
+      "core_contract_docs": {
+        "merge": "4d9b870dad9c223bec6aecbc9c3c24f7b896661e",
+        "pull_request": "https://github.com/mindie-agent/knowledge/pull/60",
+        "files": [
+          "docs/community-sharing.md",
+          "docs/repository-bot-contract.md"
+        ],
+        "production_and_tests_tree_equal_prior_tested_merge": true,
+        "production_tree": "41061aaba05e0abb42764194d1929f18f52499af",
+        "tests_tree": "0a3c6bc9285cc00ff1e4e2911264d41c6a39af69",
+        "automatic_windows_macos_ci": "failed at unchanged 10 MiB Kimi fixture 8-second queued wait; exact cause not established",
+        "merge_method": "normal exact-head merge; no required branch checks; no admin override",
+        "runtime_pin_changed": false
+      }
+    },
+    "receipts": {
+      "codex_ci": "docs/knowledge-review-2026-10-04/evidence/codex-final-ci.json",
+      "formal_deployment": "docs/knowledge-review-2026-10-04/evidence/formal-deployment.json",
+      "grok_cutover": "docs/knowledge-review-2026-10-04/evidence/grok-format-cutover.json",
+      "public_consumer": "docs/knowledge-review-2026-10-04/evidence/public-github-consumer.json",
+      "prior_native_local": "docs/knowledge-review-2026-10-04/evidence/native-local-acceptance.json"
+    },
+    "content_post_merge_workflow": {
+      "run_id": 37215772292,
+      "trigger": "automatic push after merge",
+      "head": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+      "validator": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "status": "completed",
+      "conclusion": "success",
+      "entries": 20,
+      "feedback_files": 1,
+      "bytes": 246051,
+      "publication_head_check_id": 111475953627,
+      "publication_head_conclusion": "success"
+    },
+    "principles_review": {
+      "primary_git_blob": "9b21e6ae87ac96ff8bdacc3f4f546384e111a184",
+      "primary_sha256": "15b4b58385846051464c27d06922ad0353bdd6a4031b619ff248c3a65c179741",
+      "candidate_git_blob": "62cdd5ae40553df2f0f7f7d022141123792d2944",
+      "candidate_sha256": "db1fadfb34b46ff49e6e2a113b69c5b684b8f9f13be118bd037f574851b7c98d",
+      "candidate_difference": "Architecture/reference links only; the same nine principles and mandatory review rules.",
+      "review_file": "docs/knowledge-review-2026-10-04/evidence/implementation-review.md"
+    },
+    "remaining_acceptance": {
+      "formal_public_contribution_scope": "not selected; no community or consent record",
+      "new_public_stop_pr_grok_event_review_merge": "not accepted; configuration and validator execution do not prove event delivery",
+      "full_grok_runtime": "missing langmem, mindie-diagnostics and reme-ai; pip check exit 1 retained",
+      "native_business_on_final_adapter": "not rerun; actual isolated native evidence remains 351/d079",
+      "scheduler_long_term_sla": "not established by one observed run",
+      "general_long_session_quality_and_hardware": "not established by synthetic native or component CI"
+    },
+    "receipt_policy": "Earlier stage facts and failures remain intact; exact source revisions and measured costs are not rebound to later successful runs."
+  },
+  "current_stage": 5,
+  "public_native_acceptance_stage5": {
+    "stage_order": 5,
+    "observed_through": "2026-10-04T16:46:15.935004+00:00",
+    "status": "passed for one newly authorized pure synthetic task",
+    "documentation_base": "24a1f0f9b2e1b38751f890dc3664ae5c0e31abb3",
+    "authorization": "Subsequent direct user authorization for a new synthetic directory only; earlier stages remain historically unconfigured.",
+    "source_commits": {
+      "codex": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+      "knowledge": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+      "content_head": "bb1cf70923b02db2ede69dea112033838d3c0d39",
+      "content_merge": "9b7966f841131d0b942d0f447599b46eddefbef1",
+      "content_tree": "18c0ba36ef5cb67ce7389ff9ca910827f3a09049"
+    },
+    "task_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+    "revision": "c019ce2fb763911e1937205f0cd09451c0895878a85e384750593a15bed64e77",
+    "receipts": {
+      "review": "docs/knowledge-review-2026-10-04/evidence/stage5/review.md",
+      "producer": "docs/knowledge-review-2026-10-04/evidence/stage5/producer.json",
+      "grok": "docs/knowledge-review-2026-10-04/evidence/stage5/grok.json",
+      "consumer": "docs/knowledge-review-2026-10-04/evidence/stage5/consumer.json"
+    },
+    "actual_boundaries": {
+      "capture": "Only post-activation assistant final; earlier launch prompt/commentary excluded by activation cutoff.",
+      "grok": "Natural bot report plus exact GitHub merge/check/tree confirmation; no separate GitHub APPROVE review or comment.",
+      "producer_outbox": "submitted with zero reconciliations at final readback; feed/public revision activation does not rewrite that status.",
+      "consumer": "One execution, installed normal CLI HTTPS sync, predefined Store query/explain and unchanged repeat; zero pipeline/native consumer model calls in controlled paths, not global provider billing.",
+      "quality": "One synthetic sample; no new private history, hardware measurement, general long-session benchmark, platform matrix or long-term scheduler/resource SLA."
+    },
+    "principles_review": {
+      "git_blob": "62cdd5ae40553df2f0f7f7d022141123792d2944",
+      "sha256": "db1fadfb34b46ff49e6e2a113b69c5b684b8f9f13be118bd037f574851b7c98d",
+      "file": "docs/knowledge-review-2026-10-04/evidence/stage5/review.md",
+      "all_nine_reviewed": true
+    },
+    "prior_stage_objects_preserved": true
+  },
+  "previous_document_freeze": {
+    "merged_commit": "24a1f0f9b2e1b38751f890dc3664ae5c0e31abb3",
+    "manifest_sha256": "a0b5b81ce0c5fdad954db76da3d27b270609f1b9a0c9d4f84f402e94f6abd504",
+    "artifact_count": 33,
+    "reviewed_pr_scope_files": 34,
+    "all_four_stage_objects_preserved": true
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "schema": "mindie-public-consumer-acceptance/1",
+  "status": "passed",
+  "core_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+  "repository": "mindie-agent/knowledge-vllm-ascend",
+  "transport": "public GitHub HTTPS main through normal installed CLI sync",
+  "native_business_model_invocations": 0,
+  "summary_worker_invocations": 0,
+  "scope": "Public feed transport and Store query/explain only; not native Stop or Grok event acceptance.",
+  "expected_main": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+  "started_at": "2026-10-04T16:10:58.003383+00:00",
+  "stage": "complete",
+  "sync_first": [
+    {
+      "status": "synced",
+      "repository": "mindie-agent/knowledge-vllm-ascend",
+      "ref": "main",
+      "prefix": "",
+      "commit": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+      "entries": 20,
+      "attempts": 1,
+      "checked": 1791130261.1428108
+    }
+  ],
+  "community": {
+    "configured": false,
+    "state": "unconfigured",
+    "enabled": false,
+    "generation_set": false,
+    "repository": null,
+    "branch": "main",
+    "project_roots": 0,
+    "idle_seconds": 300,
+    "enabled_at": null,
+    "error": "community_config is not configured",
+    "consent": null
+  },
+  "published_feed": {
+    "commit": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+    "feed": "b7c5bd4d68f997d5c714d1f0a783fa2b0be6150dd7bd7de372da2e74ae0abe84"
+  },
+  "public_tree_counts": {
+    "tasks": 20,
+    "blocks": 22,
+    "feedback_files": 1
+  },
+  "queries": [
+    {
+      "query": "npu_rms_norm non-contiguous contiguous",
+      "origin": "feed",
+      "supplemental": false,
+      "pages": 1,
+      "body_utf8_bytes": 4322,
+      "body_sha256": "4b2560219ac94f97f20cc7041852fb534721fcf1a30c19e3bf5e3367ee2f5c67",
+      "reference": {
+        "domain": "vllm-ascend",
+        "entry_id": "800f7613a97630e64f11f44089fb84cc8e1889dfa193b90a5ee5d9e0cdbdb1a2",
+        "revision": "1994ab9af780f588c5c53587330d84ec0459e16ff0d2f9f9ee07fd71cf2e7b31"
+      },
+      "query_returned_reference_explained": true
+    },
+    {
+      "query": "physical NPU 8 occupancy",
+      "origin": "feed",
+      "supplemental": false,
+      "pages": 1,
+      "body_utf8_bytes": 2792,
+      "body_sha256": "ee7919de1af9553cd666e5e82dfdb9d747e05ced01d081f7329e937da75e4018",
+      "reference": {
+        "domain": "vllm-ascend",
+        "entry_id": "81149b472aa8b84bc887f15e8ce58ea631f58d34b29e0b2c2fb17749904fdbfc",
+        "revision": "1b56d55e4357907979386923ffaf1f355ef2f53fdc26f56cd826a8b1ef71a6d2"
+      },
+      "query_returned_reference_explained": true
+    },
+    {
+      "query": "Qwen3-0.6B fork reinitialization",
+      "origin": "feed",
+      "supplemental": false,
+      "pages": 1,
+      "body_utf8_bytes": 6284,
+      "body_sha256": "034619f9fa6b27b60712fcec53c70adce209feb8d225025d0cfc6ed01f39cf62",
+      "reference": {
+        "domain": "vllm-ascend",
+        "entry_id": "2738d4de2adc92e5215f7f22096b58705ddae2b0dafe094507702d1e5c97fe25",
+        "revision": "6158f905e9478ef6d0b88181b2e1b6cd4063a20c3f9b8b0dc915147e5d6bc85f"
+      },
+      "query_returned_reference_explained": true
+    }
+  ],
+  "pipeline_counts_before_repeat": {
+    "captures": {
+      "present": true,
+      "rows": 0
+    },
+    "material_streams": {
+      "present": true,
+      "rows": 0
+    },
+    "material_batches": {
+      "present": true,
+      "rows": 0
+    },
+    "transcript_tasks": {
+      "present": true,
+      "rows": 0
+    },
+    "material_summary_attempts": {
+      "present": false,
+      "rows": 0,
+      "meaning": "Summary ledger was not created"
+    },
+    "outbox": {
+      "present": true,
+      "rows": 0
+    },
+    "owners": {
+      "present": true,
+      "rows": 0
+    }
+  },
+  "sync_second": [
+    {
+      "attempts": 1,
+      "checked": 1791130263.471293,
+      "commit": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+      "entries": 20,
+      "prefix": "",
+      "ref": "main",
+      "repository": "mindie-agent/knowledge-vllm-ascend",
+      "status": "unchanged"
+    }
+  ],
+  "pipeline_counts_final": {
+    "captures": {
+      "present": true,
+      "rows": 0
+    },
+    "material_streams": {
+      "present": true,
+      "rows": 0
+    },
+    "material_batches": {
+      "present": true,
+      "rows": 0
+    },
+    "transcript_tasks": {
+      "present": true,
+      "rows": 0
+    },
+    "material_summary_attempts": {
+      "present": false,
+      "rows": 0,
+      "meaning": "Summary ledger was not created"
+    },
+    "outbox": {
+      "present": true,
+      "rows": 0
+    },
+    "owners": {
+      "present": true,
+      "rows": 0
+    }
+  },
+  "finished_at": "2026-10-04T16:11:03.484937+00:00",
+  "runtime_verification": {
+    "package": "mindie-knowledge",
+    "version": "0.10.0",
+    "editable": false,
+    "git_commit": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+    "selected_installed_source_files_verified": 5
+  },
+  "query_interface": "Installed Store.query / Store.explain public APIs; sync used normal CLI, without direct Feed.sync or database writes.",
+  "model_count_boundary": "Controlled command paths, configuration and pipeline ledgers show zero native business-model and summary-worker invocations; not provider-wide network or billing telemetry.",
+  "private_history_read": false,
+  "publication_normalization": "Machine paths and command locations omitted; observed public references split into domain, entry ID and revision without changing binding."
+}

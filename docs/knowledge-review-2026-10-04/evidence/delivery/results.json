@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "case": "cleanup_denied",
+      "reported_removed_staging": 1,
+      "staging_still_exists": true
+    },
+    {
+      "case": "rebase_after_completed_summary",
+      "ready_before": true,
+      "ready_after": false,
+      "task_status": "complete",
+      "pending_summaries": 0,
+      "unsubmitted_observation_preserved": true,
+      "build_batch": null
+    }
+  ],
+  "source_sha256": {
+    "mindie_knowledge/loop/store.py": "3fbe9f6495296b8cbd242ee0e658e8b5bbd58067be97a39fb71dc214c7560d38",
+    "mindie_knowledge/loop/export.py": "a2c15069eeb90bea0fabb9857f053dbed9c72a306a93bb0fcf74a821c506a94f",
+    "mindie_knowledge/loop/transcript_capture.py": "bcd914d6e514c700497c93ffc5a1aa6dcf83ad33ab7e345ae4e546053e81cae6",
+    "tests/test_shared_core.py": "250dd57f7f3a0560961ea048c1843245f5c03a6c1e54664c906d8ce1d02425f6"
+  }
+}

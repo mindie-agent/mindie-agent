@@ -1,0 +1,162 @@
+{
+  "schema": "mindie-native-public-producer-summary/1",
+  "marker": "MINDIE_PUBLIC_SYNTHETIC_20261005",
+  "adapter_revision": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+  "core_revision": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+  "native_version": "0.1.0+codex.20261004160826218798",
+  "setup": {
+    "normal_configure_exit": 0,
+    "consent": "contribute",
+    "repository": "mindie-agent/knowledge-vllm-ascend",
+    "branch": "main",
+    "visibility": "public",
+    "scope": "one newly created pure synthetic directory only",
+    "idle_seconds": 300,
+    "other_adapter_engine_settings": "preserved semantically",
+    "codex_config_updater_settings_scheduler_plist": "preserved byte-for-byte during configure"
+  },
+  "native_producer": {
+    "business_turns": 1,
+    "exit_code": 0,
+    "model": "gpt-5.6-luna",
+    "effort": "low",
+    "usage": {
+      "input_tokens": 222214,
+      "cached_input_tokens": 176640,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 1009,
+      "reasoning_output_tokens": 251
+    },
+    "parent_identity_environment_removed": [
+      "CODEX_THREAD_ID",
+      "CODEX_SESSION_ID"
+    ],
+    "hook_trust_bypass": false,
+    "manual_stop_calls": 0,
+    "historical_import_calls": 0,
+    "fixture_count": "read four array elements a,b,c,d; initial assumption two corrected to four; no hardware execution",
+    "initial_marker_query": "Returned and explained an unrelated existing public result; not evidence of newly produced marker retrieval."
+  },
+  "capture": {
+    "rows": 1,
+    "status": "organized",
+    "body_model_calls": 0,
+    "task_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+    "revision": "c019ce2fb763911e1937205f0cd09451c0895878a85e384750593a15bed64e77",
+    "body_digest": "2af64b1630d5267b97bb76f63ec3c3365554ad38131b583a92499707c1d5c588",
+    "eligibility_boundary": "This first Stop contains the post-activation public assistant final. The launch prompt and earlier public commentary predate the native activation cutoff; they are not included, so this is not the full startup conversation."
+  },
+  "material": {
+    "block_count": 1,
+    "block_file_bytes": 540,
+    "block_file_sha256": "05fd0dae0474d90aefa706ead5ab3209e8f2ab70005ead2af3dd6b8a04bda629",
+    "body_utf8_bytes": 375,
+    "body_characters": 305,
+    "body_sha256": "f3d77ea8f976f6eba8691a83bd733ded1162cf9115be3d461743f4abbd322426",
+    "facts_in_order": true,
+    "fact_counts": {
+      "MINDIE_PUBLIC_SYNTHETIC_20261005": 1,
+      "Initial assumption: 2 shards.": 1,
+      "Correction after checking the synthetic fixture: 4 shards.": 1,
+      "Hardware benchmarking remains unverified.": 1
+    },
+    "private_absolute_path_present": false,
+    "native_session_uuid_present": false,
+    "roles": [
+      "### assistant:final_answer"
+    ]
+  },
+  "summary_index": {
+    "attempts": 1,
+    "status": "complete",
+    "model": "gpt-5.6-luna",
+    "effort": "low",
+    "model_calls": 1,
+    "elapsed_ms": 20425,
+    "usage": {
+      "cached_input_tokens": 0,
+      "input_tokens": 7743,
+      "output_tokens": 303
+    },
+    "usage_known": true,
+    "billing_status": "reported",
+    "cleanup_failed": false
+  },
+  "natural_publication": {
+    "status": "submitted",
+    "pr_url": "https://github.com/mindie-agent/knowledge-vllm-ascend/pull/39",
+    "head_sha": "bb1cf70923b02db2ede69dea112033838d3c0d39",
+    "created_at": 1791132050.344537,
+    "submitted_at": 1791132060.115791,
+    "remote_verified": true,
+    "remote_state_at_readback": "open",
+    "remote_draft_at_readback": false,
+    "remote_base": "5273638c81f55cc8b1423d887b6859d51d6f3621",
+    "changed_files": 2,
+    "manual_pr_creation": false,
+    "reviewer_messages_sent": 0,
+    "pr_artifact_attached": true
+  },
+  "remaining_external_stages": "Grok review/merge and independent consumer are not established by producer publication; root and consumer agent are observing those stages separately.",
+  "natural_post_merge_readback": {
+    "observed_at": 1791132375.935004,
+    "task_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+    "github_merge_main_verified_by_root": "9b7966f841131d0b942d0f447599b46eddefbef1",
+    "manual_reconcile_sync_model_calls": 0,
+    "outbox": [
+      {
+        "status": "submitted",
+        "detail": "opened PR #39",
+        "pr_url": "https://github.com/mindie-agent/knowledge-vllm-ascend/pull/39",
+        "head_sha": "bb1cf70923b02db2ede69dea112033838d3c0d39",
+        "created": 1791132050.344537,
+        "attempted": 1791132060.1157901,
+        "updated": 1791132060.115791,
+        "reconciliations": 0,
+        "next_attempt": null
+      }
+    ],
+    "entry": [
+      {
+        "entry_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+        "origin": "draft",
+        "draft_revision": null,
+        "published_revision": "c019ce2fb763911e1937205f0cd09451c0895878a85e384750593a15bed64e77",
+        "feed_active": 1,
+        "batched_revision": "c019ce2fb763911e1937205f0cd09451c0895878a85e384750593a15bed64e77"
+      }
+    ],
+    "task": [
+      {
+        "entry_id": "16796d4249feda48b9a855d387f80331dbd3d1700da25d852d091493dcc92bdb",
+        "summary_status": "complete",
+        "summary_detail": "",
+        "updated": 1791131749.530105
+      }
+    ],
+    "summary_attempt_groups": [
+      {
+        "status": "complete",
+        "count": 1
+      }
+    ],
+    "updater_current": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+    "normal_owner_knowledge_status": "ok",
+    "normal_owner_knowledge_results": [
+      {
+        "status": "synced",
+        "repository": "mindie-agent/knowledge-vllm-ascend",
+        "ref": "main",
+        "prefix": "",
+        "commit": "9b7966f841131d0b942d0f447599b46eddefbef1",
+        "entries": 21,
+        "attempts": 1,
+        "checked": 1791132353.89184
+      }
+    ],
+    "observation_count": 1,
+    "further_observation": "stopped as instructed; prior submitted history retained"
+  },
+  "publication_normalization": "Local publication batch identities and repeated internal feed-key rows omitted; public task/revision, exact observed outcomes, timestamps and usage retained.",
+  "usage_boundary": "Business turn and summary-index usage are separate. Cached-input and reasoning-output counters are subsets, not additional token totals; no provider-wide request count or currency cost inferred."
+}

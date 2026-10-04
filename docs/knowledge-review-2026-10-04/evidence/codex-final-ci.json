@@ -1,0 +1,191 @@
+{
+  "schema": "mindie-adapter-ci/1",
+  "pr": "https://github.com/mindie-agent/mindie-agent-codex/pull/18",
+  "base_commit": "33de36945e6dd448104c42b7fa49639b00f8ff58",
+  "core_pin": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+  "kimi_fixture_pin": "90f73e76c6087ce091570f2d151b709145c913bc",
+  "old_run": {
+    "run_id": 37212499671,
+    "head": "35ab33050e3a42a2b01f858c1c7a605f1a84fb7c",
+    "actual_checkout": "ddbcc61af9e180c03426015b08ab6ab00407d469",
+    "checkout_kind": "pull_request merge commit",
+    "parents_verified": true,
+    "result": "failure",
+    "linux": {
+      "job_id": 111466350922,
+      "tests_run": 128,
+      "errors": 1,
+      "skipped": 11,
+      "elapsed_seconds": 58.036,
+      "log": "local evidence log: organizer-pr18-35ab-linux.log"
+    },
+    "windows": {
+      "job_id": 111466350726,
+      "tests_run": 128,
+      "errors": 1,
+      "skipped": 0,
+      "elapsed_seconds": 148.149,
+      "log": "local evidence log: organizer-pr18-35ab-windows.log"
+    },
+    "failure": "Updater failure-visibility fixture mocked check but constructed Updater from the runner default missing updater.json. Both OS jobs stopped on the same fixture error. Exact dependency install and pin preflight passed."
+  },
+  "test_only_fix": {
+    "commit": "4f7df1355b59618d3a94ee4c97843a6f0b67fd19",
+    "files": [
+      "tests/test_failure_visibility.py",
+      "tests/run_ci.py"
+    ],
+    "behavior": "Use isolated UTF-8 minimal updater settings and explicit --settings in the fixture. Continue all component cases once while preserving final nonzero status for any failure.",
+    "targeted_tests": 9,
+    "elapsed_seconds": 0.069,
+    "result": "passed",
+    "log": "local evidence log: organizer-pr18-ci-fixtures-targeted.log",
+    "ast_parse": "passed",
+    "diff_check": "passed",
+    "root_reviewed_principles": [
+      "1",
+      "8",
+      "9"
+    ],
+    "root_reviewed_other_principles_applicability": true
+  },
+  "current_run": {
+    "run_id": 37214668022,
+    "head": "783190bac5c387ea3f6918e14d56c7eaaedb09eb",
+    "attempt": 1,
+    "manual_rerun": false,
+    "status": "completed",
+    "linux_job_id": 111472638391,
+    "windows_job_id": 111472638124,
+    "actual_checkout": "832c3f32f34104e53c436495be77ff8842c33241",
+    "checkout_kind": "pull_request merge commit",
+    "linux": {
+      "conclusion": "success",
+      "tests_run": 310,
+      "skipped": 12,
+      "errors": 0,
+      "failures": 0,
+      "elapsed_seconds": 158.035,
+      "log": "local evidence log: organizer-pr18-783-linux.log"
+    },
+    "parents_verified": true,
+    "conclusion": "success",
+    "windows": {
+      "conclusion": "success",
+      "tests_run": 310,
+      "skipped": 6,
+      "errors": 0,
+      "failures": 0,
+      "elapsed_seconds": 334.011,
+      "log": "local evidence log: organizer-pr18-783-windows.log",
+      "actual_checkout": "832c3f32f34104e53c436495be77ff8842c33241",
+      "history_import_service_case": "passed",
+      "powershell_output_isolation_case": "passed"
+    }
+  },
+  "boundaries": "CI is model-free package/component evidence; separate native local evidence remains actual Codex351/core d079. It does not establish OS scheduler, public distribution, Grok, long-session quality or hardware acceptance.",
+  "previous_run_after_fixture_fix": {
+    "run_id": 37212849968,
+    "head": "4f7df1355b59618d3a94ee4c97843a6f0b67fd19",
+    "attempt": 1,
+    "manual_rerun": false,
+    "status": "completed",
+    "linux_job_id": 111467344624,
+    "windows_job_id": 111467344848,
+    "actual_checkout": "1e84263630ddda792d6810a455a743d8ef63f06b",
+    "checkout_kind": "pull_request merge commit",
+    "parents_verified": true,
+    "linux": {
+      "conclusion": "success",
+      "tests_run": 308,
+      "skipped": 12,
+      "errors": 0,
+      "failures": 0,
+      "elapsed_seconds": 164.464,
+      "log": "local evidence log: organizer-pr18-4f7-linux.log"
+    },
+    "conclusion": "failure",
+    "windows": {
+      "conclusion": "failure",
+      "tests_run": 308,
+      "skipped": 6,
+      "errors": 0,
+      "failures": 1,
+      "elapsed_seconds": 318.686,
+      "log": "local evidence log: organizer-pr18-4f7-windows.log",
+      "failed_test": "tests.test_history_import.HistoryImportTests.test_bridge_import_saves_body_and_prepares_real_knowledge_service",
+      "receipt": "body imported; service unavailable PermissionError; CLI exit1",
+      "diagnosis": "investigating Windows service-spawn ownership; product versus fixture not yet asserted"
+    }
+  },
+  "windows_history_fix": {
+    "commit": "14afcba4aca606931164525f353d691b12449a1c",
+    "scope": "Windows-only history-import helper uses existing explicit service-launcher Job boundary with inherited stdout/stderr and no bulk timeout; service errors add safe stage/errno/winerror; cleanup preserves original exit/interruption and streamed import results.",
+    "diagnosis_boundary": "Missing explicit service-launcher Job boundary is confirmed from code. The previous PermissionError does not carry enough evidence to identify its exact Win32 call.",
+    "targeted_tests_run": 17,
+    "skipped_windows_native": 4,
+    "elapsed_seconds": 17.579,
+    "result": "OK",
+    "log": "local evidence log: organizer-pr18-windows-import-fix.log",
+    "root_reviewed": true,
+    "core_pin_unchanged": true
+  },
+  "shell_watchdog_fix": {
+    "commit": "783190bac5c387ea3f6918e14d56c7eaaedb09eb",
+    "scope": "test_stop_hook host_shell outer watchdog uses production timeout + 10 seconds; direct fixture path remains production timeout. Production hook 5-second limit and bridge Windows 1.3-second deadline unchanged.",
+    "targeted_tests_run": 12,
+    "skipped_windows_native": 6,
+    "elapsed_seconds": 0.218,
+    "result": "OK",
+    "log": "local evidence log: organizer-pr18-shell-watchdog.log",
+    "diff_check": "passed",
+    "review": "root reviewed final diff and affected principles 1/8/9 before submission; all-nine applicability from preceding complete review remains unchanged",
+    "boundary": "This fixture verifies protocol/output/exit isolation and single delivery; it does not establish the production hook 5-second cold-start SLA.",
+    "pushed": true
+  },
+  "previous_run_after_windows_history_fix": {
+    "run_id": 37213949117,
+    "head": "14afcba4aca606931164525f353d691b12449a1c",
+    "attempt": 1,
+    "manual_rerun": false,
+    "status": "completed",
+    "linux_job_id": 111470549916,
+    "windows_job_id": 111470550084,
+    "actual_checkout": "b804c557d503014ec83d68653c73ef0649cb9bf3",
+    "parents_verified": true,
+    "checkout_kind": "pull_request merge commit",
+    "linux": {
+      "conclusion": "success",
+      "tests_run": 310,
+      "skipped": 12,
+      "failures": 0,
+      "errors": 0,
+      "elapsed_seconds": 168.462,
+      "log": "local evidence log: organizer-pr18-14af-linux.log"
+    },
+    "conclusion": "failure",
+    "windows": {
+      "conclusion": "failure",
+      "tests_run": 310,
+      "skipped": 6,
+      "errors": 1,
+      "failures": 0,
+      "elapsed_seconds": 335.939,
+      "log": "local evidence log: organizer-pr18-14af-windows.log",
+      "failed_test": "tests.test_stop_hook.PowerShellStopHookTests.test_bridge_failures_and_outputs_cannot_control_conversation (code=0)",
+      "receipt": "subprocess.TimeoutExpired at 5 seconds for outer pwsh -Command production PowerShell command/mock Python fixture",
+      "history_import_service_case": "passed; prior PermissionError failure did not recur",
+      "diagnosis_boundary": "Outer harness includes an additional pwsh startup in the same watchdog as the production hook. Log does not identify which startup/runtime layer consumed the 5 seconds."
+    }
+  },
+  "merge": {
+    "commit": "f35ab6f6bc38e1a33d33bcfccc98c828feb9c041",
+    "parents": [
+      "33de36945e6dd448104c42b7fa49639b00f8ff58",
+      "783190bac5c387ea3f6918e14d56c7eaaedb09eb"
+    ],
+    "tree": "17772e776d1b75bcb52683367c1a0974835c4a7c",
+    "tree_matches_tested_merge": true,
+    "state": "merged"
+  }
+}

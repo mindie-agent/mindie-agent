@@ -1,5 +1,13 @@
 # 统一实施进度
 
+## 2026-10-05：发布前运行时与复用成本改造
+
+本轮目标与验收边界见[发布前设计](prerelease-runtime-design-2026-10-05.md)，复用质量和消费者对照见[评估报告](experience-reuse-evaluation-2026-10-05.md)。本轮仍是隔离开发与测试；下文其他阶段的原生部署、公开 Bot 闭环和真实材料数据均保留原版本归属，不能替代新版本验收。
+
+已实现默认无业务总时限、当前可信任务自动关联、Agent内部错误交付、增量目录/ReMe checkpoint和generation租约回收。远端组件的Linux两版本、macOS、Windows和wheel检查均已通过；核心与Codex的新组合CI以对应PR的精确head为准。当前内容21任务/1反馈、249,215字节已由新validator核对，正常任务不增加手动activate、状态查询或反馈步骤。
+
+复用评估没有得出普遍收益结论：12个普通消费者完成可见任务但未检索，两个显式读取是额外探索性对照。公开冻结20任务/22块没有严格重复，本轮不做语义去重。仍待新版本真实宿主Hook/更新、外部Bot切换及硬件验收；没有部署或正式发布。
+
 ## 2026-10-04：知识发布与消费契约
 
 本轮以[完整设计](systematic-knowledge-design-2026-10-04.md)为准，直接更换接口，
@@ -8,6 +16,28 @@
 用户须知只补足说明，不增加授权或逐篇确认。
 当前开发和验证记录集中在该设计文档；下文旧模型、旧读取、旧安装和 Bot
 验收仅证明当时提交，不能作为本轮已经合入、部署或原生通过的证据。
+
+## 2026-10-05：纯合成任务公开闭环通过
+
+用户在上一阶段之后授权新建纯合成目录。正式 Codex `f35ab6f` / core `929bdcb` 的一次原生任务经正常 Stop、一次必要索引和默认 300 秒静默窗口自动创建 [PR39](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/39)；现有 Grok 自然处理后合入 `9b7966f`。主任务核对了 Bot 消息、GitHub 精确 head/checks 与合入 tree，没有手工通知 Bot 或执行合入。独立消费者正常 HTTPS 同步该 main，预定查询找到新任务，并核对全部 375 字节正文及 SHA256；2 shards 的原始假设、4 shards 的纠正和硬件未验证表述均保留，重复同步 unchanged，消费者模型与采集/整理/outbox 计数为 0。
+
+此证据只覆盖新合成目录和首次激活之后的合格公开 final_answer，启动 prompt 与此前 commentary 未被采集。正式 owner 后来也同步到该 main，任务已指向公开 revision；历史 outbox 仍 submitted，未改称 merged。索引为 7,743 input / 303 output tokens（20,425 ms）；业务 turn 的 222,214 input / 1,009 output tokens 单独记账。完整来源、费用和九原则审查见 [Stage5 验收](knowledge-review-2026-10-04/evidence/stage5/review.md)。下节保留 Stage1–4 的当时状态；后续授权与成功不倒填为此前已经完成，也不扩展为真实硬件或普遍质量证明。
+
+## 2026-10-04：完整材料实现合入与分层验收
+
+本节与[当前宏观架构](transcript-reuse-architecture-2026-10-04.md)、[分阶段实施证据](knowledge-review-2026-10-04/evidence/implementation-review.md)优先于下文旧摘要合同；最终部署回读发生于北京时间 10 月 5 日。日常 Stop 与显式历史导入复用同一管线：Markdown 保存完整获准材料，LangMem 生成必要的块入口和短导航，ReMe 提供本地检索。必要索引失败阻止发布，不降级为首尾摘录；原文继续本地保留。
+
+knowledge [PR59](https://github.com/mindie-agent/knowledge/pull/59) 已合入 `250fcc9`，运行时固定源 head `929bdcb`；Linux、macOS、Windows 和包检查均通过。Codex [PR18](https://github.com/mindie-agent/mindie-agent-codex/pull/18) 已合入 `f35ab6f`，源 head `783190b` 的 Linux/Windows 各 310 项测试通过，分别跳过 12/6 项。正式插件已安装该合并 tree、精确依赖和原生 Stop Hook 信任已回读；旧 updater 的失效 import 曾拒绝安装，随后使用已审查的既有安装路径完成一次显式恢复，原失败回执及调度时间保留，不能称为无人工自动升级。
+
+内容 [PR37](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/37) 已合入 `5273638`：20 条既有公开经验无损重打包为 20 包/22 块。合并后的自动工作流使用 validator `929` 实际验证 20 entries、1 feedback、246,051 bytes。正式环境原有调度器观察到一次正常运行，同步精确 main 的 20 条经验；另一独立消费者通过正常 CLI 的公共 GitHub HTTPS 同步，3 个预定 query/explain 均命中并核对完整正文哈希，重复同步 unchanged，采集、整理及 outbox 为 0。此消费者没有模型调用，贡献配置及 consent 均未建立。
+
+现有 Grok 三个 routine 已切换到 `929` 和任务包 schema，完整刷新应用后逐项回读保存内容；PR 事件、每日 09:06、每周六 10:03（Asia/Shanghai）保持。Bot 的隔离校验实际通过 20 条内容；完整 runtime 仍缺少三个依赖，不能据此声称完整安装。随后 core [PR60](https://github.com/mindie-agent/knowledge/pull/60) 仅修正文档合同并合入 `4d9b870`；该文档提交的自动 Windows/macOS CI 失败，生产与测试 tree 与已验证 `250fcc9` 相同，运行时 pin 未变。
+
+4 份明确选定的真实 K3 历史形成 81 个块；35 次原生小模型调用（包括一次失败及显式重试）记录 658,424 input / 33,219 output tokens。本地 12 个目标查询和独立本地 Git 消费者的 12 个查询均命中，消费者模型调用为 0。真实历史正文未公开上传；这些结果不认证普遍检索质量或价格。
+
+独立 profile 的纯合成原生验收另已完成正常 Stop、一次 Luna 索引、本地 Git 发布、既有更新入口同步和独立原生消费者 query/explain。该阶段实际版本仍为 Codex `351e9f8` / core `d07934b`，索引用量 8,835 input / 232 output tokens。同步发现的 updater `check_failed` 却退出 0 缺口已在 `801d2b4` 修正，实际 CLI 回读为退出 1；已完成 feed 同步单独保留。后来的安装、信任和公共消费不改写这一原生验收版本。
+
+**尚未验收的是新格式公开 Stop→PR→Grok 事件审查合入链路；正式公开贡献范围仍未选择。** Grok routine 已保存和 validator 通过不证明事件已交付或 Bot 已自动审查合并。现有 scheduler 一次运行不证明长期 SLA；合成任务与组件 CI 不证明真实硬件或普遍长会话质量。各阶段原始失败、token 成本和适用边界见分阶段证据。
 
 ## 2026-09-29：Codex 公开对话链路
 

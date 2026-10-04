@@ -1,0 +1,12 @@
+Synthetic probes only. They create temporary configuration and SQLite databases through repository fixtures. They do not read real sessions or production databases, call a model, or access the network.
+
+Candidate knowledge HEAD at review: 6a9fb51d41f9787122ef61cbdf81df981d12cded plus pre-existing working-tree edits. results.json binds the exercised source files by SHA-256.
+
+Run using a Python 3.11+ environment with the candidate's declared dependencies and pytest available:
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$KNOWLEDGE_RESEARCH_ROOT:$KNOWLEDGE_RESEARCH_ROOT/tests:$AUDIT_TEST_SITE_PACKAGES" python3 probe_delivery.py
+
+KNOWLEDGE_RESEARCH_ROOT identifies the initial knowledge checkout; AUDIT_TEST_SITE_PACKAGES identifies the isolated test environment's dependency directory. Machine-specific paths are omitted from this public record. Do not use the production MindIE generation environment.
+
+Existing targeted suite: tests/test_export_failure.py tests/community/test_publish.py tests/community/test_remote_authoritative.py tests/test_search_index.py tests/test_mindie_feed.py tests/test_resource_cost.py tests/test_public_transcript.py tests/test_shared_core.py tests/test_mindie_loop.py
+
+Initial run: 172 passed, 3 failed in 70.14 seconds. All 3 failures were CLI subprocess imports missing yaml after the test fixture isolated HOME. Only the 3 affected tests were rerun with explicit existing dependency path; 3 passed in 0.50 seconds. This is component/synthetic evidence, not GitHub/Grok/native-host acceptance.
