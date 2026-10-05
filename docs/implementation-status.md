@@ -8,7 +8,7 @@
 
 本轮系统审查已按真实调用路径修正正常流程与故障边界，并在隔离分支中完成九原则 review。各仓代码、实际安装组合与线上验收的状态分开记录在[系统审查](system-review-2026-10-05.md)。所有开发 PR 仍为 draft；正式配置、贡献范围和安装没有随这次开发自动切换。
 
-最后的内容 workflow 修正和真实 SSH CI 遇到 GitHub OAuth workflow 权限拒绝。未切换凭据绕过；内容完整候选和依赖它的 Codex 更新暂留本地。该候选的内容验证使用精确提交的本地只读 Git 镜像，不能写成远端已可获取或正式发布完成。
+用户明确授权后，三项 workflow 修正、完整内容候选和匹配 Codex 更新已发布到 draft PR。新 preflight 和隔离原生安装已直接从公开 GitHub 获取内容候选并验证完整合同；真实 OpenSSH loopback 三项测试通过。Codex 最终 Linux/Windows、Core package/Linux/macOS/Windows CI 均已通过，精确结果和平台跳过项见系统审查。候选可获取不表示主线、正式安装或外部 Bot 已采纳新合同。
 
 | 边界 | 本轮要求 | 当前证据与限制 |
 | --- | --- | --- |
@@ -18,7 +18,7 @@
 | 查询与同步 | 无消费者模型；精确块引用；坏末尾不造成半库成功 | 完整导出、冻结、扫描和同步按文件增量推进；实测 1024 块及坏末包/冻结后变化拒绝 |
 | 执行与升级 | 默认无业务总时限；结果、清理与不确定副作用分开；每次调用使用同一版本 | RPC/SDK/协调准备统一保留结果；POSIX caller-death guardian、核心 retirement 与 launcher publication 失败路径已覆盖 |
 | 故障 | 正常能力调用得到有界机器诊断；损坏不能当停用、空库或成功 | 各仓验证真实 SQLite/进程/stdio/HTTP 路径；最终本地安装组合证据与组件测试分列 |
-| native/远端/外部 Bot | 精确候选版本分别验收 | native 包字节与入口、真实 SSH/NPU、宿主 Stop 信任/派发、线上模型和 Bot 均有独立证据边界；旧版证据不自动继承 |
+| native/远端/外部 Bot | 精确候选版本分别验收 | 隔离 native 包字节、MCP 入口及 worker 故障送达已验证，真实 SSH loopback 已通过；NPU、宿主 Stop 信任/派发、线上模型和 Bot 仍未验收，旧版证据不自动继承 |
 
 ## 复用与成本结论
 

@@ -1,6 +1,6 @@
 # Codex 及上下游系统审查
 
-状态：2026-10-05 系统审查、隔离实现与九原则复核；最终发布受 workflow 权限阻塞，线上验收未完成。原则基线为主仓 `d3627ed962c3ccba3c26020fa4dbf0032f963903` 的 `docs/design-principles.md`（Git blob `62cdd5ae40553df2f0f7f7d022141123792d2944`）。执行时也读取主工作区未提交的原则 blob `9b21e6ae87ac96ff8bdacc3f4f546384e111a184`；九条原则、失败约束和提交义务相同，只有导航链接不同。本报告记录具体缺口、修正及证据，不新增产品流程或第二份架构权威。
+状态：2026-10-05 系统审查、隔离实现与九原则复核；全部审查候选已发布到 draft PR，最终跨平台 CI 已完成，线上验收未完成。原则基线为主仓 `d3627ed962c3ccba3c26020fa4dbf0032f963903` 的 `docs/design-principles.md`（Git blob `62cdd5ae40553df2f0f7f7d022141123792d2944`）。执行时也读取主工作区未提交的原则 blob `9b21e6ae87ac96ff8bdacc3f4f546384e111a184`；九条原则、失败约束和提交义务相同，只有导航链接不同。本报告记录具体缺口、修正及证据，不新增产品流程或第二份架构权威。
 
 ## 覆盖边界
 
@@ -34,13 +34,13 @@
 
 | 组件 | 审查候选与交付位置 | 证据与限制 |
 | --- | --- | --- |
-| knowledge | `4dbe83896b66a6c21afffc5d057a4573c303bcb3`，[PR 61](https://github.com/mindie-agent/knowledge/pull/61) | 最终 package/Linux/macOS CI 各 868 passed / 9 skipped；Windows 被30分钟CI预算取消，已记录617 passed / 27 skipped、0 failures/errors，233项未完成；最终 Git 安装组合从 source tree 外运行相关回归 124 passed / 0 skipped，52 个运行时模块来自 site-packages |
-| remote-dev | `9c8ae5ef70687ce55d77e85b2dbdd79a0844f013`，[PR 26](https://github.com/mindie-agent/remote-dev/pull/26) | 当前五项 CI 成功，包含 Linux 进程归属；真实 OpenSSH loopback 新增 workflow 尚未发布、三个 opt-in 用例未执行 |
+| knowledge | `b6aad81eb07248a39325d358401eb10628ba0cde`，[PR 61](https://github.com/mindie-agent/knowledge/pull/61) | 当前 package/Linux/macOS CI 各 868 passed / 9 skipped；Windows 847 passed / 30 POSIX skips，877项均有XML记录、0 failures/errors（36分39秒）。上次30分钟预算取消的部分结果作为历史记录保留；最终 Git 安装组合从 source tree 外运行相关回归 124 passed / 0 skipped，52 个运行时模块来自 site-packages |
+| remote-dev | `d7b3f4f711350a648e80dee2ce9367d9fae4391e`，[PR 26](https://github.com/mindie-agent/remote-dev/pull/26) | 当前六项 CI 全部成功，含真实 OpenSSH loopback 三项通过（2.44秒）：RPC/二进制 artifact、durable job 存续与后代清理、写后断连 unknown 且不重放；属于隔离 loopback 验证，不代表 NPU/外部部署 |
 | diagnostics | `210e96dcbbde364f13a6cd45a4f50488226a8a29`，[PR 13](https://github.com/mindie-agent/diagnostics/pull/13) | 当前 14 项 CI 成功（push/PR 两套）；主体本地 275 passed / 3 skipped，最终坏路径相关 83 passed；未知 POST 不自动重发，坏授权不清空 pending |
 | npu-top | `96ff1291f5f7b659ddc93dafedabb1bfa1ca13ad`，[PR 15](https://github.com/mindie-agent/npu-top/pull/15) | 当前六项 CI 全部成功，覆盖 Linux/Windows 两版 Python、前端和完整 wheel；旧主体 Windows 两版各 141 passed / 5 build-only skips / 25 subtests。最终完整 wheel 正常依赖安装后，实际 HTTP health/overview、静态资源哈希与 schema 2 已验；没有真实 NPU/SSH bootstrap 验收 |
 | coordinator | `b14321a45467b509199bef97324a9c0f65b29069`，[PR 40](https://github.com/mindie-agent/coordinator/pull/40) | 默认执行/排队期限、authority、远端结果保留已修；完整源码 1327 passed / 28 skipped / 52 subtests，正常安装后的相关 134 passed / 2 skipped / 20 subtests。实际 CI 发现首条 quiet 观测的计时未保存，已修正并经真实子进程回归和相关 57 passed / 5 Linux-only skips 验证；最终四项 CI（Linux/macOS/Windows/wheel）全部成功，计数不可相加 |
-| Codex | 本地 `123909e922056d43992baff2a848dcd356ed2f33`，[PR 19](https://github.com/mindie-agent/mindie-agent-codex/pull/19) 暂仍为较早提交 | 完整最终套件 379 tests / 12 平台 skips，其余通过，90.851 秒；preflight 和完整 run_ci 均 exit 0；新 updater、进程结果和投递实现连同最终 pins 留本地，等待内容候选可发布；现有 PR 旧 CI 不替代本地新 head 验收 |
-| 公开内容 | 本地 `d4e7e8edf0539565284fde545518eacfb719bacc`，[PR 38](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/38) 暂仍为较早提交 | installed core 验证 21 entries / 1 feedback / 249215 bytes，四项变更均属 development；neutral 开发检查不授予自动内容合并 |
+| Codex | `123909e922056d43992baff2a848dcd356ed2f33`，[PR 19](https://github.com/mindie-agent/mindie-agent-codex/pull/19) | 完整最终套件 379 tests / 12 平台 skips，其余通过，90.851 秒；preflight 和完整 run_ci 均 exit 0；最终候选已发布，当前 Linux CI 379 tests / 12 skipped（103.261秒）、Windows 379 tests / 19 skipped（487.415秒），其余全部通过；公开 GitHub 内容直接获取与新的隔离原生安装验证通过 |
+| 公开内容 | `d4e7e8edf0539565284fde545518eacfb719bacc`，[PR 38](https://github.com/mindie-agent/knowledge-vllm-ascend/pull/38) | installed core 验证 21 entries / 1 feedback / 249215 bytes，四项变更均属 development；候选可从公开 GitHub 获取。旧 trusted-base CI 成功不证明新开发 neutral/Bot 策略已经采纳，开发检查不能授予自身自动合并 |
 | 组织入口 | `f48f015217d4075b67ccab410c54f191933dd31f`，[PR 9](https://github.com/mindie-agent/.github/pull/9) | 当前入口指向架构/主线内容，完整正文与可选复用、Codex 与旧版 Kimi/Claude Code 边界一致；仅文档，不声称运行验收 |
 
 上述测试计数覆盖不同提交和重叠测试，不合计为独立用例总数。每个 PR 的九原则记录绑定实际审查提交；新增 CI 发现的缺陷必须修正后再更新记录。
@@ -49,9 +49,11 @@
 
 隔离 venv 通过正常 Git 依赖安装与更新，未用 `--no-deps`、editable 或 `PYTHONPATH` 冒充已安装版本。`direct_url.json` 核对 knowledge `4dbe838`、remote-dev `9c8ae5e`、diagnostics `210e96d`。Codex 声明绑定内容完整候选 `d4e7e8e`，合同 SHA256 为 `783b415b1027dd8878b97a4e6548093da924b06bdad770563098724d5cefd730`。
 
-此前未发布候选的直接远端 preflight 在 `publication_fetch` 明确失败，未进入 native 安装；该记录不充当最终 `d4e7e8e` 的远端实测。本地组合验证显式将**验收进程内**这一个内容 Git URL 映射到精确提交的只读裸镜像，保留相同声明、完整块、哈希与 validator 检查；其他 runtime 仍从公开 Git SHA 正常安装。这个镜像是隔离验证夹具，不是产品 fallback，也没有修改全局 Git 配置、凭据或用户安装。远端可获取性必须在授权发布后另验。
+运行时 pins 保持 knowledge `4dbe838`、remote-dev `9c8ae5e`：随后 core `b6aad81` 只改变 CI 预算，remote-dev `d7b3f4f` 只改变 CI 和测试对既有失败返回值的检查，生产代码与依赖完全相同。复用已验证的安装组合，不让 CI-only 提交引发无关 pin 更新。
 
-最终 Codex `123909e` 在 Codex CLI 0.153.4 的临时原生 profile 中实际安装并启用。候选与原生 cache 每个文件字节一致，发现 3 个 knowledge 和 11 个 remote MCP 工具。包 SHA256 为 `955f205514438bce0792a6188ddca8a041966413be47b0638428c4811cef1c49`。这是实际安装与入口验证，不代表宿主已经为真实用户任务派发 Hook。
+发布前的完整本地套件显式在验收进程内使用精确内容提交的只读 Git 镜像；该阶段证据仍标注为本地验证。用户授权后，内容 `d4e7e8e` 和 Codex `123909e` 均已发布，新 preflight 和隔离原生安装从公开 GitHub 直接取得完整候选，未设置 URL 映射，合同和 validator 检查通过。这补齐远端可获取性，未修改全局 Git 配置或用户安装；候选分支可用不代表 main 已采纳新合同。
+
+最终 Codex `123909e` 在 Codex CLI 0.153.4 的临时原生 profile 中实际安装并启用。候选与原生 cache 每个文件字节一致，发现 3 个 knowledge 和 11 个 remote MCP 工具。包 SHA256 为 `c27e5f54c0028b845ade13d66db13a787f70e7e9c89adb1c193d297a0c7323e1`。这是实际安装与入口验证，不代表宿主已经为真实用户任务派发 Hook。
 
 通过已安装 Hook 命令输入合成 Stop 缺身份事件，得到中性 shell 输出及真实 `invalid_envelope` 投递。另一项在真实 Core 服务启动后损坏隔离 community JSON，由实际 outbox worker 产生 `knowledge.publish / authorization / authority_unavailable`；下一次已安装 MCP 能力调用收到该故障并 ACK，再次调用没有重复投递。没有直接塞入诊断来冒充后台错误。测试结束时 captures、summary attempts、publication outbox 均为 0，没有创建 Admission；所拥有服务正常退出，临时 profile 已移除。
 
@@ -61,7 +63,7 @@ Coordinator 最终 `b14321a` 已由公开 Git SHA 正常安装，source tree 外
 
 1024 块、16,384,000 正文 bytes 的实际 select/freeze/reload/validate/scan/apply，Python retained 2,901,898 bytes、peak 15,053,494 bytes。该测量不是进程 RSS 上限、模型质量证明或允许截断正文的阈值。长任务正文保持完整；导航摘要仍是可错的定位材料。
 
-GitHub 拒绝当前 Git 凭据写 workflow 后，真实 SSH CI、内容 validation 时限修正，以及仅将 Windows CI 预算由30改为60分钟的补丁保留本地；没有通过替换凭据、API 或其他触发路径绕过。Windows日志持续推进，本轮16项坏路径/marker/独立DFX直接回归和19项DFX相关测试均已通过。取消不是测试断言失败，但完整Windows验收没有完成；60分钟仅为CI预算调整，尚未执行，不影响产品业务执行期限。内容依赖与 Codex 最终更新据此暂不提交。真实 SSH/NPU、原生宿主 Hook 信任及首轮/fork 派发、在线模型质量/费用、公开上传与外部 Bot 采纳仍各自未验收，不能以本地安装或现有 CI 代替。
+GitHub 最初拒绝 Git OAuth 的 workflow 写入后，用户明确授权使用现有 gh 登录。三项 workflow 修正和匹配 Codex 候选已通过每条命令独立选择 credential helper 发布，没有更改全局凭据配置。Core Windows 60分钟预算只限制 CI job，不改变业务执行期限、测试选择或运行时；当前全量测试已完成，测试耗时约36分39秒，原始日志和XML均已回读。真实 OpenSSH loopback 已由新 CI 验证；真实 NPU/外部远端部署、原生宿主 Hook 信任及首轮/fork 派发、在线模型质量/费用、公开上传与外部 Bot 采纳仍分别未验收，不能以本地安装或组件 CI 代替。内容主线仍缺少新 declaration，现有 trusted-base 工作流的绿色结果也不能证明新候选 workflow 已获采纳。
 
 此前消费者评估保留原结论：12 次正常任务没有调用参考入口，不能证明复用收益；两个强制读取是额外探索。此前公开合成 Stop→PR→Bot→独立消费属于旧版本，仍有价值但不能认证本轮。
 
@@ -75,6 +77,6 @@ GitHub 拒绝当前 Git 凭据写 workflow 后，真实 SSH CI、内容 validati
 6. **知识参考性。** 完整正文保留失败与纠正，索引/反馈/Bot 合并不构成认证；没有必查必写，也没有用零查询任务宣称收益。
 7. **按需介入。** 沿用既有 choice、scope 和可信任务身份；不跨 session 扫描或新增日常授权、模型调用、重试和强制查询。可选协调/观测组件不并入每个普通任务。
 8. **成果复用。** 保留合法 SQLite、模型返回、unknown 尝试、已知成功和原有缓存；只在明确兼容边界内复用。Kimi/Claude Code 旧证据保留且不充当新组合证据。
-9. **错误可见。** 真实业务结果先于记录/清理失败保存；损坏不当首次使用/停用/空集，未知外部效果不重放。中性 Hook shell 回执与 Agent 故障送达分别验证。权限拒绝和未完成验收在本报告明示。
+9. **错误可见。** 真实业务结果先于记录/清理失败保存；损坏不当首次使用/停用/空集，未知外部效果不重放。中性 Hook shell 回执与 Agent 故障送达分别验证。最初权限拒绝、随后明确授权与实际发布、仍未完成的验收分别明示。
 
 以上是具体 diff 与行为的审查结论，不是对全部未来输入的保证。所有实际未验证项保留原边界；后续发布或实现改动仍需复查受影响原则。
