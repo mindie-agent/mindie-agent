@@ -1,0 +1,285 @@
+{
+  "scope": "Response projection byte and evidence-availability evaluation only; zero consumer agents or model calls",
+  "public": {
+    "Qwen3-0.6B NPU": {
+      "current_full_2": {
+        "initial_json_bytes": 52679,
+        "all_expansions_json_bytes": 10840,
+        "expand_calls": 1,
+        "total_bytes_if_all_related_expanded": 63519
+      },
+      "anchor_only": {
+        "initial_json_bytes": 21185,
+        "all_expansions_json_bytes": 46481,
+        "expand_calls": 2,
+        "total_bytes_if_all_related_expanded": 67666
+      },
+      "compact_excerpt_2": {
+        "initial_json_bytes": 31185,
+        "all_expansions_json_bytes": 10840,
+        "expand_calls": 1,
+        "total_bytes_if_all_related_expanded": 42025
+      }
+    },
+    "Qwen3-0.6B token 1.201": {
+      "current_full_2": {
+        "initial_json_bytes": 52100,
+        "all_expansions_json_bytes": 10323,
+        "expand_calls": 1,
+        "total_bytes_if_all_related_expanded": 62423
+      },
+      "anchor_only": {
+        "initial_json_bytes": 21190,
+        "all_expansions_json_bytes": 45390,
+        "expand_calls": 2,
+        "total_bytes_if_all_related_expanded": 66580
+      },
+      "compact_excerpt_2": {
+        "initial_json_bytes": 30606,
+        "all_expansions_json_bytes": 10323,
+        "expand_calls": 1,
+        "total_bytes_if_all_related_expanded": 40929
+      }
+    },
+    "RMSNorm FP16 BF16": {
+      "current_full_2": {
+        "initial_json_bytes": 18746,
+        "all_expansions_json_bytes": 0,
+        "expand_calls": 0,
+        "total_bytes_if_all_related_expanded": 18746
+      },
+      "anchor_only": {
+        "initial_json_bytes": 18681,
+        "all_expansions_json_bytes": 0,
+        "expand_calls": 0,
+        "total_bytes_if_all_related_expanded": 18681
+      },
+      "compact_excerpt_2": {
+        "initial_json_bytes": 18746,
+        "all_expansions_json_bytes": 0,
+        "expand_calls": 0,
+        "total_bytes_if_all_related_expanded": 18746
+      }
+    }
+  },
+  "synthetic_case_count": 6,
+  "synthetic_summary": {
+    "current_full_2": {
+      "initial_fact_visible": 3,
+      "after_all_related_metadata_fact_visible": 5,
+      "correction_ref_initially_visible": 4,
+      "correction_ref_reachable_after_expand": 6,
+      "full_block_fact_available": 6
+    },
+    "anchor_only": {
+      "initial_fact_visible": 1,
+      "after_all_related_metadata_fact_visible": 5,
+      "correction_ref_initially_visible": 1,
+      "correction_ref_reachable_after_expand": 6,
+      "full_block_fact_available": 6
+    },
+    "compact_excerpt_2": {
+      "initial_fact_visible": 3,
+      "after_all_related_metadata_fact_visible": 5,
+      "correction_ref_initially_visible": 4,
+      "correction_ref_reachable_after_expand": 6,
+      "full_block_fact_available": 6
+    }
+  },
+  "synthetic_cases": [
+    {
+      "case": "same_terms_failed_reuse_first",
+      "fact": "Correction: the contiguous float16 reuse failed; the proposed fix did not work.",
+      "ranking_fixture": true,
+      "modes": {
+        "current_full_2": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 4173
+        },
+        "anchor_only": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 1686
+        },
+        "compact_excerpt_2": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 3207
+        }
+      }
+    },
+    {
+      "case": "same_terms_failed_reuse_fourth",
+      "fact": "Correction: the contiguous float16 reuse failed; the proposed fix did not work.",
+      "ranking_fixture": true,
+      "modes": {
+        "current_full_2": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 4171
+        },
+        "anchor_only": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 1686
+        },
+        "compact_excerpt_2": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 3205
+        }
+      }
+    },
+    {
+      "case": "limited_validation_first",
+      "fact": "Only mock tests passed; hardware execution remains unverified.",
+      "ranking_fixture": true,
+      "modes": {
+        "current_full_2": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 4156
+        },
+        "anchor_only": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 1686
+        },
+        "compact_excerpt_2": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 3190
+        }
+      }
+    },
+    {
+      "case": "retracted_speedup_fourth",
+      "fact": "The speedup claim was withdrawn after unequal request counts were found.",
+      "ranking_fixture": true,
+      "modes": {
+        "current_full_2": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 4171
+        },
+        "anchor_only": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 1686
+        },
+        "compact_excerpt_2": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 3205
+        }
+      }
+    },
+    {
+      "case": "same_terms_tail_correction",
+      "fact": "Late correction: the earlier success claim was false.",
+      "ranking_fixture": true,
+      "modes": {
+        "current_full_2": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": false,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 5294
+        },
+        "anchor_only": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": false,
+          "correction_ref_initially_visible": false,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 1686
+        },
+        "compact_excerpt_2": {
+          "initial_fact_visible": false,
+          "after_all_related_metadata_fact_visible": false,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 4328
+        }
+      }
+    },
+    {
+      "case": "new_condition_independent",
+      "fact": "RMSNorm disjoint-stride failed on a new shape; the old result does not cover it.",
+      "ranking_fixture": true,
+      "modes": {
+        "current_full_2": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 5354
+        },
+        "anchor_only": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 2856
+        },
+        "compact_excerpt_2": {
+          "initial_fact_visible": true,
+          "after_all_related_metadata_fact_visible": true,
+          "correction_ref_initially_visible": true,
+          "correction_ref_reachable_after_expand": true,
+          "full_block_fact_available": true,
+          "initial_json_bytes": 4388
+        }
+      }
+    }
+  ],
+  "limitations": [
+    "Synthetic result ranks are chosen fixtures, not frequency estimates.",
+    "UTF-8 bytes are not model tokens or billable cost.",
+    "Compact excerpts do not certify truth and cannot expose facts outside the excerpt.",
+    "Cursor reachability is not initial visibility or successful consumer reuse.",
+    "Full and compact projections use production cursor shape with a normalized corpus digest; anchor-only uses an evaluation-only offset=0 cursor.",
+    "Continuation returns remaining metadata; full bodies for already previewed matches are read using their preserved refs."
+  ]
+}

@@ -1,5 +1,9 @@
 # Documentation
 
+- [系统审查（2026-10-05）](system-review-2026-10-05.md): Codex 与上下游的真实行为、故障边界和当前修正。
+
+- [发布前运行时与资源设计（2026-10-05）](prerelease-runtime-design-2026-10-05.md): 无默认执行期限、静默自动接入、增量目录和活跃环境回收。
+- [经验复用与消费者评估（2026-10-05）](experience-reuse-evaluation-2026-10-05.md): 公开去重分析、紧凑响应、12次普通模型消费者及两个探索性读取对照，保留无收益证据与预算修订。
 - [Transcript复用模块宏观架构（2026-10-04）](transcript-reuse-architecture-2026-10-04.md): 组件组合、数据分层、闭环和架构取舍，附调研、review、实施合同及分阶段验收证据。
 - [Implementation evidence（2026-10-04）](knowledge-review-2026-10-04/evidence/implementation-review.md): 已落地边界、匿名真实材料测量、九原则审查及未完成验收；保留初始研究快照。
 - [Target architecture](architecture.md): domain sessions, tool ownership and the feedback loop.

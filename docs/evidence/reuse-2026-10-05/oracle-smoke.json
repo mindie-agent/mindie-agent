@@ -1,0 +1,35 @@
+{
+  "scope": "Oracle smoke only; zero consumer agents or models",
+  "results": [
+    {
+      "case": "dtype_reference",
+      "original_rejected": true,
+      "known_correct_accepted": true
+    },
+    {
+      "case": "device_mapping",
+      "original_rejected": true,
+      "known_correct_accepted": true
+    },
+    {
+      "case": "withdrawn_speedup",
+      "original_rejected": true,
+      "known_correct_accepted": true
+    },
+    {
+      "case": "fork_runtime",
+      "original_rejected": true,
+      "known_correct_accepted": true
+    },
+    {
+      "case": "obsolete_workaround",
+      "original_rejected": true,
+      "known_correct_accepted": true
+    },
+    {
+      "case": "no_hit_slug",
+      "original_rejected": true,
+      "known_correct_accepted": true
+    }
+  ]
+}

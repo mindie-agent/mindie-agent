@@ -1,0 +1,791 @@
+[
+  {
+    "name": "same_terms_failed_reuse_first",
+    "query": "RMSNorm float16 contiguous",
+    "fact": "Correction: the contiguous float16 reuse failed; the proposed fix did not work.",
+    "groups": [
+      {
+        "entry_id": "870e7e8fb41abe813ca7735cfe36afa94981ad1c2920a5452b6ca614dfdc5a57",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 10,
+        "excerpt": "RMSNorm float16 contiguous matched the reference.",
+        "block_id": "55f76351f5bac46a3ff8f203e01e0bee64eb929f31ab8ae5fb6a8e48ab7f3312",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/870e7e8fb41abe813ca7735cfe36afa94981ad1c2920a5452b6ca614dfdc5a57/blocks/55f76351f5bac46a3ff8f203e01e0bee64eb929f31ab8ae5fb6a8e48ab7f3312@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/870e7e8fb41abe813ca7735cfe36afa94981ad1c2920a5452b6ca614dfdc5a57",
+        "feedback_ref": "mindie://demo/870e7e8fb41abe813ca7735cfe36afa94981ad1c2920a5452b6ca614dfdc5a57@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [
+          {
+            "entry_id": "8775e9cf7e499b16f84075f359fc3cc930f99316f8d42247916225e667e8ba32",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "Correction: the contiguous float16 reuse failed; the proposed fix did not work.",
+            "block_id": "70e20de02a6ed37c26e4190fe11c8db6159e692950a0c4268be0507317667258",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/8775e9cf7e499b16f84075f359fc3cc930f99316f8d42247916225e667e8ba32/blocks/70e20de02a6ed37c26e4190fe11c8db6159e692950a0c4268be0507317667258@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/8775e9cf7e499b16f84075f359fc3cc930f99316f8d42247916225e667e8ba32",
+            "feedback_ref": "mindie://demo/8775e9cf7e499b16f84075f359fc3cc930f99316f8d42247916225e667e8ba32@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "157f5b4a8b464bbb747f89b4f77a0bba461776d3bf1c05217b5c3079c60a419d",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "c1f3176e11a8ca08a8809b90db024ce9635b49f4556c6ff45ba6c078955476f9",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/157f5b4a8b464bbb747f89b4f77a0bba461776d3bf1c05217b5c3079c60a419d/blocks/c1f3176e11a8ca08a8809b90db024ce9635b49f4556c6ff45ba6c078955476f9@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/157f5b4a8b464bbb747f89b4f77a0bba461776d3bf1c05217b5c3079c60a419d",
+            "feedback_ref": "mindie://demo/157f5b4a8b464bbb747f89b4f77a0bba461776d3bf1c05217b5c3079c60a419d@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "c4c14d9258505da2275513e6ec3a7693f1d12dfd89dde5b4b8afa900dd294366",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 8,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "8e71fb9176abffd7e84a253f0aef1f95e49f39c757da25b25e74cf17d6d734db",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/c4c14d9258505da2275513e6ec3a7693f1d12dfd89dde5b4b8afa900dd294366/blocks/8e71fb9176abffd7e84a253f0aef1f95e49f39c757da25b25e74cf17d6d734db@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/c4c14d9258505da2275513e6ec3a7693f1d12dfd89dde5b4b8afa900dd294366",
+            "feedback_ref": "mindie://demo/c4c14d9258505da2275513e6ec3a7693f1d12dfd89dde5b4b8afa900dd294366@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "3ae1dcfed2585507bbd668bcd042c3bb63a477dd047cb115d6b1766aedb6c145",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 7,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "cb68705839ee7e31c58b5d449c2e4c6b3756d003def8ce97f5028d177bb6793b",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/3ae1dcfed2585507bbd668bcd042c3bb63a477dd047cb115d6b1766aedb6c145/blocks/cb68705839ee7e31c58b5d449c2e4c6b3756d003def8ce97f5028d177bb6793b@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/3ae1dcfed2585507bbd668bcd042c3bb63a477dd047cb115d6b1766aedb6c145",
+            "feedback_ref": "mindie://demo/3ae1dcfed2585507bbd668bcd042c3bb63a477dd047cb115d6b1766aedb6c145@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          }
+        ],
+        "group_score": 10,
+        "group_basis": "citation"
+      }
+    ],
+    "correction_ref": "mindie://demo/8775e9cf7e499b16f84075f359fc3cc930f99316f8d42247916225e667e8ba32/blocks/70e20de02a6ed37c26e4190fe11c8db6159e692950a0c4268be0507317667258@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "full_bodies": {
+      "mindie://demo/8775e9cf7e499b16f84075f359fc3cc930f99316f8d42247916225e667e8ba32/blocks/70e20de02a6ed37c26e4190fe11c8db6159e692950a0c4268be0507317667258@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "Correction: the contiguous float16 reuse failed; the proposed fix did not work."
+    },
+    "independent": false
+  },
+  {
+    "name": "same_terms_failed_reuse_fourth",
+    "query": "RMSNorm float16 contiguous",
+    "fact": "Correction: the contiguous float16 reuse failed; the proposed fix did not work.",
+    "groups": [
+      {
+        "entry_id": "7c9ba14fd001df6f7bfd8488adaf8ac86f4340cf73fe34bce26672e45a151419",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 10,
+        "excerpt": "RMSNorm float16 contiguous matched the reference.",
+        "block_id": "64d6f725c8a71252ee87557eb5bf11350ce803688b27f6dc240aa82d375f2c1b",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/7c9ba14fd001df6f7bfd8488adaf8ac86f4340cf73fe34bce26672e45a151419/blocks/64d6f725c8a71252ee87557eb5bf11350ce803688b27f6dc240aa82d375f2c1b@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/7c9ba14fd001df6f7bfd8488adaf8ac86f4340cf73fe34bce26672e45a151419",
+        "feedback_ref": "mindie://demo/7c9ba14fd001df6f7bfd8488adaf8ac86f4340cf73fe34bce26672e45a151419@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [
+          {
+            "entry_id": "5f8c74a1a3eb9b58463f7c8a0311cbb4c423040c4b5187e74f01175986c02641",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "9c6236f4f8812c25fe709a2031ec1b52fff730dd5780a9df74b3258ec86b8b1a",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/5f8c74a1a3eb9b58463f7c8a0311cbb4c423040c4b5187e74f01175986c02641/blocks/9c6236f4f8812c25fe709a2031ec1b52fff730dd5780a9df74b3258ec86b8b1a@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/5f8c74a1a3eb9b58463f7c8a0311cbb4c423040c4b5187e74f01175986c02641",
+            "feedback_ref": "mindie://demo/5f8c74a1a3eb9b58463f7c8a0311cbb4c423040c4b5187e74f01175986c02641@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "6bc322270f0454d224a49a72bd528a7f95c9b42a2537b5311c939b22aaf369ca",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 8,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "3d9b1271a2a6e3af52b43ef8af501a80f3e4e237033d6673dd9ac4ce5c4cdf5f",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/6bc322270f0454d224a49a72bd528a7f95c9b42a2537b5311c939b22aaf369ca/blocks/3d9b1271a2a6e3af52b43ef8af501a80f3e4e237033d6673dd9ac4ce5c4cdf5f@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/6bc322270f0454d224a49a72bd528a7f95c9b42a2537b5311c939b22aaf369ca",
+            "feedback_ref": "mindie://demo/6bc322270f0454d224a49a72bd528a7f95c9b42a2537b5311c939b22aaf369ca@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "75268cf397c27235a957b060a5279c41cd281d070b082ea52b35cbeea0468bdb",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 7,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "7135a4d5f00d4a6325a3bd3f8eed509a06e8f4b812d25282db95fcbbdbe3ad93",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/75268cf397c27235a957b060a5279c41cd281d070b082ea52b35cbeea0468bdb/blocks/7135a4d5f00d4a6325a3bd3f8eed509a06e8f4b812d25282db95fcbbdbe3ad93@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/75268cf397c27235a957b060a5279c41cd281d070b082ea52b35cbeea0468bdb",
+            "feedback_ref": "mindie://demo/75268cf397c27235a957b060a5279c41cd281d070b082ea52b35cbeea0468bdb@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "d069ac08e53dfcc0ec7b16695a1311ce898b1d266cd637b34e04a8aa4a65ad4e",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 6,
+            "excerpt": "Correction: the contiguous float16 reuse failed; the proposed fix did not work.",
+            "block_id": "51c040b08876d0e2550ad90fed2c1c144afe358a7fce2d0414433671c82dfa37",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/d069ac08e53dfcc0ec7b16695a1311ce898b1d266cd637b34e04a8aa4a65ad4e/blocks/51c040b08876d0e2550ad90fed2c1c144afe358a7fce2d0414433671c82dfa37@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/d069ac08e53dfcc0ec7b16695a1311ce898b1d266cd637b34e04a8aa4a65ad4e",
+            "feedback_ref": "mindie://demo/d069ac08e53dfcc0ec7b16695a1311ce898b1d266cd637b34e04a8aa4a65ad4e@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          }
+        ],
+        "group_score": 10,
+        "group_basis": "citation"
+      }
+    ],
+    "correction_ref": "mindie://demo/d069ac08e53dfcc0ec7b16695a1311ce898b1d266cd637b34e04a8aa4a65ad4e/blocks/51c040b08876d0e2550ad90fed2c1c144afe358a7fce2d0414433671c82dfa37@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "full_bodies": {
+      "mindie://demo/d069ac08e53dfcc0ec7b16695a1311ce898b1d266cd637b34e04a8aa4a65ad4e/blocks/51c040b08876d0e2550ad90fed2c1c144afe358a7fce2d0414433671c82dfa37@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "Correction: the contiguous float16 reuse failed; the proposed fix did not work."
+    },
+    "independent": false
+  },
+  {
+    "name": "limited_validation_first",
+    "query": "RMSNorm float16 contiguous",
+    "fact": "Only mock tests passed; hardware execution remains unverified.",
+    "groups": [
+      {
+        "entry_id": "2e1913fd3f7356eca1f6c0afe6954431aef6c3b04cf708f0b6a4dfa4a543f559",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 10,
+        "excerpt": "RMSNorm float16 contiguous matched the reference.",
+        "block_id": "d99c662398a43486cd181bc17745b4efbb8561fcc063065d3321e062afc33934",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/2e1913fd3f7356eca1f6c0afe6954431aef6c3b04cf708f0b6a4dfa4a543f559/blocks/d99c662398a43486cd181bc17745b4efbb8561fcc063065d3321e062afc33934@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/2e1913fd3f7356eca1f6c0afe6954431aef6c3b04cf708f0b6a4dfa4a543f559",
+        "feedback_ref": "mindie://demo/2e1913fd3f7356eca1f6c0afe6954431aef6c3b04cf708f0b6a4dfa4a543f559@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [
+          {
+            "entry_id": "ee5becf19a8370810f90b4cbcf5f00128646f00dd44c449d4eed559561c74020",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "Only mock tests passed; hardware execution remains unverified.",
+            "block_id": "38a00b4714c1e96c358e15c44047c9c6ebf74ee2e6b11add302aecb3278c4b39",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/ee5becf19a8370810f90b4cbcf5f00128646f00dd44c449d4eed559561c74020/blocks/38a00b4714c1e96c358e15c44047c9c6ebf74ee2e6b11add302aecb3278c4b39@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/ee5becf19a8370810f90b4cbcf5f00128646f00dd44c449d4eed559561c74020",
+            "feedback_ref": "mindie://demo/ee5becf19a8370810f90b4cbcf5f00128646f00dd44c449d4eed559561c74020@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "f718a328cb3f09ad9dfb112ca71bbcdaf830b19621b43ca8d3412011219b914d",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "38672dce0d57eeaadf998812e7cd61424e7925dd586e814d9849ae13fde01776",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/f718a328cb3f09ad9dfb112ca71bbcdaf830b19621b43ca8d3412011219b914d/blocks/38672dce0d57eeaadf998812e7cd61424e7925dd586e814d9849ae13fde01776@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/f718a328cb3f09ad9dfb112ca71bbcdaf830b19621b43ca8d3412011219b914d",
+            "feedback_ref": "mindie://demo/f718a328cb3f09ad9dfb112ca71bbcdaf830b19621b43ca8d3412011219b914d@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "d03de780b7f0afe8c82dac3f2976c4a20559b70faea542627e564bebdd1e147e",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 8,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "23d2ee8785fcb36722c7e94126529eaf4587702a94ff008e2be13ed9452d2bfc",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/d03de780b7f0afe8c82dac3f2976c4a20559b70faea542627e564bebdd1e147e/blocks/23d2ee8785fcb36722c7e94126529eaf4587702a94ff008e2be13ed9452d2bfc@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/d03de780b7f0afe8c82dac3f2976c4a20559b70faea542627e564bebdd1e147e",
+            "feedback_ref": "mindie://demo/d03de780b7f0afe8c82dac3f2976c4a20559b70faea542627e564bebdd1e147e@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "ab0982d9a95805047c84bf5db197e67c2c2e9ad0c55e0d89a229c80d48d94288",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 7,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "e44665c63506e7856949072d579139e40a6e83f72822ae5bf47ec50bfbdd8fb6",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/ab0982d9a95805047c84bf5db197e67c2c2e9ad0c55e0d89a229c80d48d94288/blocks/e44665c63506e7856949072d579139e40a6e83f72822ae5bf47ec50bfbdd8fb6@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/ab0982d9a95805047c84bf5db197e67c2c2e9ad0c55e0d89a229c80d48d94288",
+            "feedback_ref": "mindie://demo/ab0982d9a95805047c84bf5db197e67c2c2e9ad0c55e0d89a229c80d48d94288@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          }
+        ],
+        "group_score": 10,
+        "group_basis": "citation"
+      }
+    ],
+    "correction_ref": "mindie://demo/ee5becf19a8370810f90b4cbcf5f00128646f00dd44c449d4eed559561c74020/blocks/38a00b4714c1e96c358e15c44047c9c6ebf74ee2e6b11add302aecb3278c4b39@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "full_bodies": {
+      "mindie://demo/ee5becf19a8370810f90b4cbcf5f00128646f00dd44c449d4eed559561c74020/blocks/38a00b4714c1e96c358e15c44047c9c6ebf74ee2e6b11add302aecb3278c4b39@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "Only mock tests passed; hardware execution remains unverified."
+    },
+    "independent": false
+  },
+  {
+    "name": "retracted_speedup_fourth",
+    "query": "RMSNorm float16 contiguous",
+    "fact": "The speedup claim was withdrawn after unequal request counts were found.",
+    "groups": [
+      {
+        "entry_id": "3c785d6f4bb36f24cdaf5fc1c09a3dfbac78ec51761802801d961ef22e7c5eb3",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 10,
+        "excerpt": "RMSNorm float16 contiguous matched the reference.",
+        "block_id": "ad49ef48e22492e528be036a41a7a80cdf428c2eb573f803044c04f2fb6d3fb2",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/3c785d6f4bb36f24cdaf5fc1c09a3dfbac78ec51761802801d961ef22e7c5eb3/blocks/ad49ef48e22492e528be036a41a7a80cdf428c2eb573f803044c04f2fb6d3fb2@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/3c785d6f4bb36f24cdaf5fc1c09a3dfbac78ec51761802801d961ef22e7c5eb3",
+        "feedback_ref": "mindie://demo/3c785d6f4bb36f24cdaf5fc1c09a3dfbac78ec51761802801d961ef22e7c5eb3@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [
+          {
+            "entry_id": "0a33fc0472411b7c672f8063def5f4b4d1c7b23960f5ff6aaee9c70327835c0d",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "99046d15172e317a6474c97864b57a104b1cf0d2b34d991b21ad8e20fba2c0c9",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/0a33fc0472411b7c672f8063def5f4b4d1c7b23960f5ff6aaee9c70327835c0d/blocks/99046d15172e317a6474c97864b57a104b1cf0d2b34d991b21ad8e20fba2c0c9@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/0a33fc0472411b7c672f8063def5f4b4d1c7b23960f5ff6aaee9c70327835c0d",
+            "feedback_ref": "mindie://demo/0a33fc0472411b7c672f8063def5f4b4d1c7b23960f5ff6aaee9c70327835c0d@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "b7a137663e7206aff7417adfb24a09893ccbd7f2926859d6a12a62e22f5f3527",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 8,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "1dfe7a783e0b3ce6b1e4bd2a895cf92b42e6606adef885f5226688953ea6ea61",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/b7a137663e7206aff7417adfb24a09893ccbd7f2926859d6a12a62e22f5f3527/blocks/1dfe7a783e0b3ce6b1e4bd2a895cf92b42e6606adef885f5226688953ea6ea61@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/b7a137663e7206aff7417adfb24a09893ccbd7f2926859d6a12a62e22f5f3527",
+            "feedback_ref": "mindie://demo/b7a137663e7206aff7417adfb24a09893ccbd7f2926859d6a12a62e22f5f3527@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "670ec6e3892c6fd5f5210f1112bbed5fc661b1c1e8a547ebe27c643edcdd4712",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 7,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "3472f51fe168017e3386592d48d471d519a42756c6373a0d7342e5bd2bdc42e0",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/670ec6e3892c6fd5f5210f1112bbed5fc661b1c1e8a547ebe27c643edcdd4712/blocks/3472f51fe168017e3386592d48d471d519a42756c6373a0d7342e5bd2bdc42e0@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/670ec6e3892c6fd5f5210f1112bbed5fc661b1c1e8a547ebe27c643edcdd4712",
+            "feedback_ref": "mindie://demo/670ec6e3892c6fd5f5210f1112bbed5fc661b1c1e8a547ebe27c643edcdd4712@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "3ddea6b0baef6e705101296e7705b6d59518dad47adad593e8b6d7b4cde9322e",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 6,
+            "excerpt": "The speedup claim was withdrawn after unequal request counts were found.",
+            "block_id": "74df88f1d5ebb177fb8a580e9d17c4306ba9156fb0d3910cdb8a3970babd8818",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/3ddea6b0baef6e705101296e7705b6d59518dad47adad593e8b6d7b4cde9322e/blocks/74df88f1d5ebb177fb8a580e9d17c4306ba9156fb0d3910cdb8a3970babd8818@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/3ddea6b0baef6e705101296e7705b6d59518dad47adad593e8b6d7b4cde9322e",
+            "feedback_ref": "mindie://demo/3ddea6b0baef6e705101296e7705b6d59518dad47adad593e8b6d7b4cde9322e@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          }
+        ],
+        "group_score": 10,
+        "group_basis": "citation"
+      }
+    ],
+    "correction_ref": "mindie://demo/3ddea6b0baef6e705101296e7705b6d59518dad47adad593e8b6d7b4cde9322e/blocks/74df88f1d5ebb177fb8a580e9d17c4306ba9156fb0d3910cdb8a3970babd8818@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "full_bodies": {
+      "mindie://demo/3ddea6b0baef6e705101296e7705b6d59518dad47adad593e8b6d7b4cde9322e/blocks/74df88f1d5ebb177fb8a580e9d17c4306ba9156fb0d3910cdb8a3970babd8818@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "The speedup claim was withdrawn after unequal request counts were found."
+    },
+    "independent": false
+  },
+  {
+    "name": "same_terms_tail_correction",
+    "query": "RMSNorm float16 contiguous",
+    "fact": "Late correction: the earlier success claim was false.",
+    "groups": [
+      {
+        "entry_id": "fd1f77520b3b548d52a911f782744256a3dcb33401dec7522c7e17a3d8051ed1",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 10,
+        "excerpt": "RMSNorm float16 contiguous matched the reference.",
+        "block_id": "5e53bae2906eb90dc8e62027ce925f30e36484f9336e4f9283370c7c33522a6e",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/fd1f77520b3b548d52a911f782744256a3dcb33401dec7522c7e17a3d8051ed1/blocks/5e53bae2906eb90dc8e62027ce925f30e36484f9336e4f9283370c7c33522a6e@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/fd1f77520b3b548d52a911f782744256a3dcb33401dec7522c7e17a3d8051ed1",
+        "feedback_ref": "mindie://demo/fd1f77520b3b548d52a911f782744256a3dcb33401dec7522c7e17a3d8051ed1@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [
+          {
+            "entry_id": "954de08a82f0cf6be91b536399a5f63485fe7e50272a8718a1f31e99bf5ee167",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine prog",
+            "block_id": "347c3eeb099e0abee2d342476cae187b8febdb05328c5438fea7dccb75628b92",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/954de08a82f0cf6be91b536399a5f63485fe7e50272a8718a1f31e99bf5ee167/blocks/347c3eeb099e0abee2d342476cae187b8febdb05328c5438fea7dccb75628b92@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/954de08a82f0cf6be91b536399a5f63485fe7e50272a8718a1f31e99bf5ee167",
+            "feedback_ref": "mindie://demo/954de08a82f0cf6be91b536399a5f63485fe7e50272a8718a1f31e99bf5ee167@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "c7cfc730e248bf26fa9c6a2b15f3d551c4b8d5459ba2a03fe500fe7ebd8a1e7e",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "bd73bc683c5ea0ffff527d36790745e8f55bf917cab112df9d4f9616f18bbe05",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/c7cfc730e248bf26fa9c6a2b15f3d551c4b8d5459ba2a03fe500fe7ebd8a1e7e/blocks/bd73bc683c5ea0ffff527d36790745e8f55bf917cab112df9d4f9616f18bbe05@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/c7cfc730e248bf26fa9c6a2b15f3d551c4b8d5459ba2a03fe500fe7ebd8a1e7e",
+            "feedback_ref": "mindie://demo/c7cfc730e248bf26fa9c6a2b15f3d551c4b8d5459ba2a03fe500fe7ebd8a1e7e@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "21679fe7ee9b10d651abb31cab6bfc26dffaf1abf034bb55fa6e96e5774e5c52",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 8,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "ae773cda82384d18924d52debde2a2867d821c0d4ea69c6f2132a12060477fa8",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/21679fe7ee9b10d651abb31cab6bfc26dffaf1abf034bb55fa6e96e5774e5c52/blocks/ae773cda82384d18924d52debde2a2867d821c0d4ea69c6f2132a12060477fa8@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/21679fe7ee9b10d651abb31cab6bfc26dffaf1abf034bb55fa6e96e5774e5c52",
+            "feedback_ref": "mindie://demo/21679fe7ee9b10d651abb31cab6bfc26dffaf1abf034bb55fa6e96e5774e5c52@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "c8be75a94612674428bb7677acd808ae5fa34a6f5aa603031e2da87c9f3871b1",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 7,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "cdf2a3be3129cb00f87fda730a24ee25e52bc13d4e5a6344daf0df9c2e07a758",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/c8be75a94612674428bb7677acd808ae5fa34a6f5aa603031e2da87c9f3871b1/blocks/cdf2a3be3129cb00f87fda730a24ee25e52bc13d4e5a6344daf0df9c2e07a758@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/c8be75a94612674428bb7677acd808ae5fa34a6f5aa603031e2da87c9f3871b1",
+            "feedback_ref": "mindie://demo/c8be75a94612674428bb7677acd808ae5fa34a6f5aa603031e2da87c9f3871b1@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          }
+        ],
+        "group_score": 10,
+        "group_basis": "citation"
+      }
+    ],
+    "correction_ref": "mindie://demo/954de08a82f0cf6be91b536399a5f63485fe7e50272a8718a1f31e99bf5ee167/blocks/347c3eeb099e0abee2d342476cae187b8febdb05328c5438fea7dccb75628b92@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "full_bodies": {
+      "mindie://demo/954de08a82f0cf6be91b536399a5f63485fe7e50272a8718a1f31e99bf5ee167/blocks/347c3eeb099e0abee2d342476cae187b8febdb05328c5438fea7dccb75628b92@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Routine progress. Late correction: the earlier success claim was false."
+    },
+    "independent": false
+  },
+  {
+    "name": "new_condition_independent",
+    "query": "RMSNorm disjoint-stride",
+    "fact": "RMSNorm disjoint-stride failed on a new shape; the old result does not cover it.",
+    "groups": [
+      {
+        "entry_id": "1cf303a16a2ac2d183c6f17a7b2ba7d1329a26afb5a8536e6075013a63b67cd8",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 10,
+        "excerpt": "RMSNorm float16 contiguous matched the reference.",
+        "block_id": "62bc441bd04db39d971f9a656f9ab0aad2c7be69a39e2c83c2a8690860add8c9",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/1cf303a16a2ac2d183c6f17a7b2ba7d1329a26afb5a8536e6075013a63b67cd8/blocks/62bc441bd04db39d971f9a656f9ab0aad2c7be69a39e2c83c2a8690860add8c9@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/1cf303a16a2ac2d183c6f17a7b2ba7d1329a26afb5a8536e6075013a63b67cd8",
+        "feedback_ref": "mindie://demo/1cf303a16a2ac2d183c6f17a7b2ba7d1329a26afb5a8536e6075013a63b67cd8@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [
+          {
+            "entry_id": "bedbc0653c470f361a4455ba145d1aada1b88bdf0fc31f2ee500155ecd848ae7",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 9,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "2d2e3cb7bfdd2be13173ae3c8ff45a75b9972091d9647387c0ed1d0b27b918e5",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/bedbc0653c470f361a4455ba145d1aada1b88bdf0fc31f2ee500155ecd848ae7/blocks/2d2e3cb7bfdd2be13173ae3c8ff45a75b9972091d9647387c0ed1d0b27b918e5@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/bedbc0653c470f361a4455ba145d1aada1b88bdf0fc31f2ee500155ecd848ae7",
+            "feedback_ref": "mindie://demo/bedbc0653c470f361a4455ba145d1aada1b88bdf0fc31f2ee500155ecd848ae7@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "1dcf63d715aa9152c568e8201d755b94e19a71d016ea55a7a765d5fd838fb57f",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 8,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "3af1d389887be6d109bfb475b6c461b586c6e996a8f4e0b4bb92b8c4206ddce8",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/1dcf63d715aa9152c568e8201d755b94e19a71d016ea55a7a765d5fd838fb57f/blocks/3af1d389887be6d109bfb475b6c461b586c6e996a8f4e0b4bb92b8c4206ddce8@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/1dcf63d715aa9152c568e8201d755b94e19a71d016ea55a7a765d5fd838fb57f",
+            "feedback_ref": "mindie://demo/1dcf63d715aa9152c568e8201d755b94e19a71d016ea55a7a765d5fd838fb57f@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          },
+          {
+            "entry_id": "9d8ccdd3be697bfa24e8fb81ac045d1f33d8c116c1a9641632965822bd56169e",
+            "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "source": "feed",
+            "kind": "experience",
+            "title": "Synthetic observation",
+            "summary": "A fallible index.",
+            "conditions": {},
+            "score": 7,
+            "excerpt": "RMSNorm float16 contiguous quoted the same original result; no new execution.",
+            "block_id": "a371d909f2bb1a1686b6191f389eaf7d330b733e6c08a2f2884f3700aecd8cc5",
+            "block_title": "Synthetic block",
+            "block_summary": "A fallible index.",
+            "navigation": "Reference material.",
+            "source_range": {
+              "synthetic": true
+            },
+            "ref": "mindie://demo/9d8ccdd3be697bfa24e8fb81ac045d1f33d8c116c1a9641632965822bd56169e/blocks/a371d909f2bb1a1686b6191f389eaf7d330b733e6c08a2f2884f3700aecd8cc5@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "task_ref": "mindie://demo/9d8ccdd3be697bfa24e8fb81ac045d1f33d8c116c1a9641632965822bd56169e",
+            "feedback_ref": "mindie://demo/9d8ccdd3be697bfa24e8fb81ac045d1f33d8c116c1a9641632965822bd56169e@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "match_basis": "body",
+            "cites": []
+          }
+        ],
+        "group_score": 10,
+        "group_basis": "citation"
+      },
+      {
+        "entry_id": "010b3e89db81707dcc535a4eed74731df715e811171a8a75f94b9a6810180741",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "feed",
+        "kind": "experience",
+        "title": "Synthetic observation",
+        "summary": "A fallible index.",
+        "conditions": {},
+        "score": 9,
+        "excerpt": "RMSNorm disjoint-stride failed on a new shape; the old result does not cover it.",
+        "block_id": "e109b2e08a00bfbe90493995ad431b56f63f22687b3a32dee8c9467a1fd9e539",
+        "block_title": "Synthetic block",
+        "block_summary": "A fallible index.",
+        "navigation": "Reference material.",
+        "source_range": {
+          "synthetic": true
+        },
+        "ref": "mindie://demo/010b3e89db81707dcc535a4eed74731df715e811171a8a75f94b9a6810180741/blocks/e109b2e08a00bfbe90493995ad431b56f63f22687b3a32dee8c9467a1fd9e539@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "task_ref": "mindie://demo/010b3e89db81707dcc535a4eed74731df715e811171a8a75f94b9a6810180741",
+        "feedback_ref": "mindie://demo/010b3e89db81707dcc535a4eed74731df715e811171a8a75f94b9a6810180741@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "match_basis": "body",
+        "cites": [],
+        "related": [],
+        "group_score": 9,
+        "group_basis": "task"
+      }
+    ],
+    "correction_ref": "mindie://demo/010b3e89db81707dcc535a4eed74731df715e811171a8a75f94b9a6810180741/blocks/e109b2e08a00bfbe90493995ad431b56f63f22687b3a32dee8c9467a1fd9e539@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "full_bodies": {
+      "mindie://demo/010b3e89db81707dcc535a4eed74731df715e811171a8a75f94b9a6810180741/blocks/e109b2e08a00bfbe90493995ad431b56f63f22687b3a32dee8c9467a1fd9e539@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "RMSNorm disjoint-stride failed on a new shape; the old result does not cover it."
+    },
+    "independent": true
+  }
+]

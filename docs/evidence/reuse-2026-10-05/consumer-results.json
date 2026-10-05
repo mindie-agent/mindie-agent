@@ -1,0 +1,489 @@
+{
+  "schema": "mindie-consumer-pilot-results/1",
+  "model_requested": "gpt-6-astra",
+  "effort": "low",
+  "cli": "codex-cli 0.153.4",
+  "model_backend_revision": null,
+  "source_revision": "f5d9b4374ebe8323c465da0b916d8408ee5f0f2f",
+  "native_mindie_mcp_test": false,
+  "capture_and_publication": false,
+  "groups": {
+    "consumer-pilot": {
+      "runs": [
+        {
+          "id": "run-2e2377b906e0",
+          "case": "dtype_reference",
+          "arm": "baseline",
+          "ingestion_seconds": 0.7196859169998788,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 38.0484628339982,
+          "usage": {
+            "input_tokens": 80177,
+            "cached_input_tokens": 73600,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 633,
+            "reasoning_output_tokens": 45
+          },
+          "reasoning_tokens": 45,
+          "tool_calls": 5,
+          "oracle_exit_code": 1,
+          "artifact_sha256": {
+            "check_numeric.py": "9336bd73ea2562c2df19e3d065d0b965f45191011e62d7f6637d2c65fcd4dad6",
+            "golden.json": "969f7667abeb9b28f3a20f0a9c145fdcb5323707abc1d22d168c23405f9c276e",
+            "numeric.py": "9d792b5e6b77597c5e1a57a7319cc1e0f6add5ac59d3aa7442b78017b4b227dd"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "ac43d269889dc56457318727f2fe70b42917c6dc77e2a1022b338d6a9a35620f",
+          "oracle": {
+            "case": "dtype_reference",
+            "artifact_pass": false,
+            "error": "AssertionError",
+            "detail": "mismatched FP16 observable result"
+          }
+        },
+        {
+          "id": "run-c6a75f7b5a71",
+          "case": "device_mapping",
+          "arm": "reuse",
+          "ingestion_seconds": 0.011034000002837274,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 29.518715999998676,
+          "usage": {
+            "input_tokens": 62928,
+            "cached_input_tokens": 53760,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 410,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 3,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "inventory.json": "9a06e0ae6a433aeb777b9ac6193c6f1ffc68e1adc3d1174e0e667a0803ac085f",
+            "placement.json": "58a3f330ac7867d1ee8286c3b71fa6a5e9170288a59708ff09d39feeb00e85f6"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "7b3ef0223d33c82f199fd8805c7b13b0db966872c3e24a22eda9786125257b91",
+          "oracle": {
+            "case": "device_mapping",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-003af3f2ae1d",
+          "case": "dtype_reference",
+          "arm": "reuse",
+          "ingestion_seconds": 0.06988062500022352,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 38.21996387500258,
+          "usage": {
+            "input_tokens": 74594,
+            "cached_input_tokens": 66432,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 703,
+            "reasoning_output_tokens": 59
+          },
+          "reasoning_tokens": 59,
+          "tool_calls": 5,
+          "oracle_exit_code": 1,
+          "artifact_sha256": {
+            "check_numeric.py": "506646dd707008f5570bdf2a131321d2e5ed060593687cfba8bccc543996532b",
+            "golden.json": "969f7667abeb9b28f3a20f0a9c145fdcb5323707abc1d22d168c23405f9c276e",
+            "numeric.py": "9d792b5e6b77597c5e1a57a7319cc1e0f6add5ac59d3aa7442b78017b4b227dd"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "455ad2112c99c1b4ca4246a3915c34d75332a013368cc1e9bda998f70ff87396",
+          "oracle": {
+            "case": "dtype_reference",
+            "artifact_pass": false,
+            "error": "AssertionError",
+            "detail": "mismatched FP16 observable result"
+          }
+        },
+        {
+          "id": "run-ad68beba9420",
+          "case": "device_mapping",
+          "arm": "baseline",
+          "ingestion_seconds": 0.0012152499984949827,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 26.101045916002477,
+          "usage": {
+            "input_tokens": 58360,
+            "cached_input_tokens": 51456,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 407,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 3,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "inventory.json": "9a06e0ae6a433aeb777b9ac6193c6f1ffc68e1adc3d1174e0e667a0803ac085f",
+            "placement.json": "58a3f330ac7867d1ee8286c3b71fa6a5e9170288a59708ff09d39feeb00e85f6"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "7c505d7f4c0f50a33efdc4069583b2203c7b38b5a9c6a998e7fbd1e9d124b65a",
+          "oracle": {
+            "case": "device_mapping",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-370acd147460",
+          "case": "withdrawn_speedup",
+          "arm": "reuse",
+          "ingestion_seconds": 0.011878541998157743,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 25.48846795799909,
+          "usage": {
+            "input_tokens": 58396,
+            "cached_input_tokens": 54400,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 365,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 3,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "assessment.json": "2589ac09b9792416f7708932b8d306dbd91525f84d3a1ae7731c1cf011e52e08",
+            "runs.json": "b9fb586b195a3c98c629605b0ffefaca7e3db86d0f910319661bfcfc7305db10"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "5a16c395d6d062d3bdec33415e1b39e7d35e66645ceb741b3c1c316aedc89660",
+          "oracle": {
+            "case": "withdrawn_speedup",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-7f5404ff746b",
+          "case": "fork_runtime",
+          "arm": "baseline",
+          "ingestion_seconds": 0.00114729099732358,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 43.71175137499813,
+          "usage": {
+            "input_tokens": 59143,
+            "cached_input_tokens": 54656,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 849,
+            "reasoning_output_tokens": 87
+          },
+          "reasoning_tokens": 87,
+          "tool_calls": 4,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "backend.py": "5d95286cb0c98a32d129234830d4888b985d77f39acad635dfed2e4a84d4fe47",
+            "smoke_worker.py": "d47fb76a728601f414c6e1bb4b90c76cac29158fe9f01b1f11081b75439fa3ac",
+            "worker.py": "3b0caf06b597d76d2f9374618b6a27542e24649dd7f5d3143640823bab397555"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "0a4fa5f918eee2dcb718283daaa3a352d6712ef0cec52f0620cf71558be10be5",
+          "oracle": {
+            "case": "fork_runtime",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-792990140ca3",
+          "case": "withdrawn_speedup",
+          "arm": "baseline",
+          "ingestion_seconds": 0.0012993749987799674,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 23.551078374999634,
+          "usage": {
+            "input_tokens": 58396,
+            "cached_input_tokens": 54400,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 362,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 3,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "assessment.json": "a12d7165f49ff34d8eae2e2d466a464b9cc38be0d91e2647f847b79781b5aea0",
+            "runs.json": "b9fb586b195a3c98c629605b0ffefaca7e3db86d0f910319661bfcfc7305db10"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "8c291347a06f569dcc67d43e085f7962c186b7598d0bd865cddf1d6cbf38e306",
+          "oracle": {
+            "case": "withdrawn_speedup",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-ad0b4b0881bf",
+          "case": "fork_runtime",
+          "arm": "reuse",
+          "ingestion_seconds": 0.010299458001099993,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 38.984902917,
+          "usage": {
+            "input_tokens": 59107,
+            "cached_input_tokens": 54656,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 761,
+            "reasoning_output_tokens": 48
+          },
+          "reasoning_tokens": 48,
+          "tool_calls": 4,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "backend.py": "5d95286cb0c98a32d129234830d4888b985d77f39acad635dfed2e4a84d4fe47",
+            "smoke_worker.py": "01984eea7b5fa6bfa41d0191333593b777e4569e93b4b27f0ad6b283d37c5d81",
+            "worker.py": "11d84a3e339f5cd742c59a49b20d99380dfcdf5d3acc36518d0586ec85beb77b"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "6541e60c8ca1d34eead5cb82d0995ba7415b4910fa9006337da4b3a75e514d99",
+          "oracle": {
+            "case": "fork_runtime",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-27ba33fa1359",
+          "case": "obsolete_workaround",
+          "arm": "baseline",
+          "ingestion_seconds": 0.001180917002784554,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 23.562501333995897,
+          "usage": {
+            "input_tokens": 62871,
+            "cached_input_tokens": 57856,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 385,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 3,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "config.json": "d92eaf988d210a0446e51309b90223da09e66392cd94fdb9727855d184a6f601",
+            "release-notes.txt": "c1e9004869c0b262669c581158f00891b542492040a7ad7ee83e0d1736b84000"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "ba4dfd5afc37259f712aa383bc6c0b610a8986ad339a339db8d826cad83b1e6f",
+          "oracle": {
+            "case": "obsolete_workaround",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-709bccea646f",
+          "case": "no_hit_slug",
+          "arm": "reuse",
+          "ingestion_seconds": 0.0011728749959729612,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 35.41370204099803,
+          "usage": {
+            "input_tokens": 63016,
+            "cached_input_tokens": 57728,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 615,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 4,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "slug.py": "1d66ade9a025b40f5779e6980deae1e482acef3f73d5d08cb25d55f9da92553c"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "1494dc6ba0d1789c9421713a75c39ae344ee755c615718ad4720ac54952ea91d",
+          "oracle": {
+            "case": "no_hit_slug",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-7c61b21e0986",
+          "case": "obsolete_workaround",
+          "arm": "reuse",
+          "ingestion_seconds": 0.01047583300533006,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 26.213829665997764,
+          "usage": {
+            "input_tokens": 58321,
+            "cached_input_tokens": 51456,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 337,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 3,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "config.json": "d92eaf988d210a0446e51309b90223da09e66392cd94fdb9727855d184a6f601",
+            "release-notes.txt": "c1e9004869c0b262669c581158f00891b542492040a7ad7ee83e0d1736b84000"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "ee96a9e7927d8fd9c40caefaa99ba3b79ac49ee57d9e229e601b06384957fe5a",
+          "oracle": {
+            "case": "obsolete_workaround",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "run-938270c9d6ee",
+          "case": "no_hit_slug",
+          "arm": "baseline",
+          "ingestion_seconds": 0.0010670839983504266,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 33.81438199999684,
+          "usage": {
+            "input_tokens": 73279,
+            "cached_input_tokens": 68992,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 600,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 4,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "slug.py": "8bf0fc505daee1adfe6f417de24355907f9027dcf338ac6470108f3f10b0f76a"
+          },
+          "reference_reads": [],
+          "actual_prompt_sha256": "5ff4b7c0809164401ab5345eb7054c924395fef66981e8bdef63d945bbbada46",
+          "oracle": {
+            "case": "no_hit_slug",
+            "artifact_pass": true
+          }
+        }
+      ],
+      "usage_sum": {
+        "input_tokens": 768588,
+        "cached_input_tokens": 699392,
+        "output_tokens": 6427,
+        "reasoning_output_tokens": 239
+      },
+      "reference_calls": 0,
+      "reference_response_bytes": 0
+    },
+    "consumer-read-control": {
+      "runs": [
+        {
+          "id": "control-7839",
+          "case": "dtype_reference",
+          "arm": "reuse",
+          "ingestion_seconds": 0.6124847079991014,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 49.748544875001244,
+          "usage": {
+            "input_tokens": 63097,
+            "cached_input_tokens": 52352,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 926,
+            "reasoning_output_tokens": 0
+          },
+          "reasoning_tokens": 0,
+          "tool_calls": 6,
+          "oracle_exit_code": 0,
+          "artifact_sha256": {
+            "check_numeric.py": "3305c33571067de974288e6f0f5e6888bd933008b26090d046ec66d67f1fe084",
+            "golden.json": "969f7667abeb9b28f3a20f0a9c145fdcb5323707abc1d22d168c23405f9c276e",
+            "numeric.py": "485602f902bd65eaa5a155660a594bef5548e88d930461c101edccacf19ca900"
+          },
+          "reference_reads": [
+            {
+              "operation": "query",
+              "bytes": 1842,
+              "elapsed_seconds": 0.4367679169954499
+            },
+            {
+              "operation": "read",
+              "bytes": 1802,
+              "elapsed_seconds": 0.0022568330023204908
+            }
+          ],
+          "actual_prompt_sha256": "fbae71e473dccc84957d82d49632d9401a58fee1443a7f452efd648e40a557fe",
+          "oracle": {
+            "case": "dtype_reference",
+            "artifact_pass": true
+          }
+        },
+        {
+          "id": "control-2841",
+          "case": "dtype_reference",
+          "arm": "baseline",
+          "ingestion_seconds": 0.0015155000000959262,
+          "status": "completed",
+          "exit_code": 0,
+          "elapsed_seconds": 62.675680000000284,
+          "usage": {
+            "input_tokens": 75782,
+            "cached_input_tokens": 66816,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 860,
+            "reasoning_output_tokens": 50
+          },
+          "reasoning_tokens": 50,
+          "tool_calls": 7,
+          "oracle_exit_code": 1,
+          "artifact_sha256": {
+            "check_numeric.py": "a2936de6bbbad48027aaea662adc1083bbb04d27fafda3f6df87419b1592358f",
+            "golden.json": "969f7667abeb9b28f3a20f0a9c145fdcb5323707abc1d22d168c23405f9c276e",
+            "numeric.py": "9d792b5e6b77597c5e1a57a7319cc1e0f6add5ac59d3aa7442b78017b4b227dd"
+          },
+          "reference_reads": [
+            {
+              "operation": "query",
+              "bytes": 103,
+              "elapsed_seconds": 0.6749273749956046
+            },
+            {
+              "operation": "query",
+              "bytes": 103,
+              "elapsed_seconds": 0.3947687909967499
+            }
+          ],
+          "actual_prompt_sha256": "4504b10cb1313291dbbb7f1aaeb306311ed46931d8c0ad8c486b5a87ba78811d",
+          "oracle": {
+            "case": "dtype_reference",
+            "artifact_pass": false,
+            "error": "AssertionError",
+            "detail": "mismatched FP16 observable result"
+          }
+        }
+      ],
+      "usage_sum": {
+        "input_tokens": 138879,
+        "cached_input_tokens": 119168,
+        "output_tokens": 1786,
+        "reasoning_output_tokens": 50
+      },
+      "reference_calls": 4,
+      "reference_response_bytes": 3850
+    }
+  },
+  "budget": {
+    "initial_input_ceiling": 240000,
+    "initial_stop_after_runs": 4,
+    "observed_input_at_stop": 276059,
+    "enforcement": "native usage is available after each two-run wave, not a hard token interrupt; initial ceiling overshot 36059",
+    "amended_optional_pilot_ceiling": 1200000,
+    "exploratory_read_control_ceiling": 300000,
+    "all_completed_runs_preserved": true
+  },
+  "interpretation": {
+    "optional_access": "No consumer used reference query/read; this is a natural-uptake pilot, not evidence of reuse effectiveness.",
+    "artifact_oracle_limitation": "The two FP16 outputs matched all supplied golden observations and satisfied visible task scope, but failed extra hidden rounding expectations. Do not call those visible task failures.",
+    "exploratory_read_control": "The extra identical retrieval instruction in two new contexts exposed one complete historical block. Reuse passed the hidden expectation; empty-corpus baseline did not. Exploratory after the first pilot; not confirmatory evidence or a routine required workflow.",
+    "prices_or_dollar_cost": null
+  }
+}

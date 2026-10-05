@@ -1,0 +1,483 @@
+{
+  "scope": "public bytes and lexical overlap; neither task utility nor semantic equivalence",
+  "commits": {
+    "knowledge": "f5d9b4374ebe8323c465da0b916d8408ee5f0f2f",
+    "content": "f855cb0dd7b9098ad94e00c0daa239c35ba317d3",
+    "codex": "9b4203dfefeca44fa538432edde5a1b746ae3913",
+    "design": "e9d2e9921a62970c64079f217c47841802a1e323"
+  },
+  "tasks": 20,
+  "blocks": 22,
+  "body_bytes": 110289,
+  "block_file_bytes": 117252,
+  "duplicate_file_bytes": {
+    "groups": 0,
+    "duplicate_members": 0,
+    "recoverable_body_bytes": 0,
+    "identities": []
+  },
+  "duplicate_body_bytes": {
+    "groups": 0,
+    "duplicate_members": 0,
+    "recoverable_body_bytes": 0,
+    "identities": []
+  },
+  "duplicate_whitespace_normalized_bodies": {
+    "groups": 0,
+    "duplicate_members": 0,
+    "recoverable_body_bytes": 0,
+    "identities": []
+  },
+  "literal_full_citations": 5,
+  "citation_blocks": 5,
+  "pair_count": 231,
+  "pairs_over_0_5": 0,
+  "pairs_over_0_8": 0,
+  "top_lexical_pairs": [
+    {
+      "a": "01c138e79f25bec8d78fbf4579d27cd4443aa7e31207a705559f68bd2812e9ff",
+      "b": "2fa488cfced05851716ad05d325a6156fc762e4332b6c02bb97a2a840147f03c",
+      "a_block": "48994ca4c89ed51e0a0a641806d6b0ce7d80175fe298b8473f15fddae755213c",
+      "b_block": "fb480c23a3327e920fa2ec0337eb30ca9e8855727fb4f4cf08e4ef93ea11f2e8",
+      "jaccard": 0.39188069594034797,
+      "shorter_containment": 0.645293315143247,
+      "same_task": false,
+      "a_title": "检索已返回与给定 ID 前缀相同的条目引用，同时也返回了一条转述该 ID 的别的经验记录。我会按知识工具要求读取这个直接命中条目的正文，再据正文核对 token、引用和 NPU 日志证",
+      "b_title": "当前搜索返回了转述该 ID 的对话摘要和带有目标 ID 前缀的其他命中；摘要不能替代原始正文。我会再用完整条目 ID 做一次定向检索，然后只对命中的引用调用正文读取。"
+    },
+    {
+      "a": "5cdccec11137a3387aba7f7b1e27c9f2b08534b619cc2dc838c622960a4cc8e9",
+      "b": "fb05d2bf865a620a08481eb46d36d603ef0599de5d1397ec35f12a18cb3ff761",
+      "a_block": "98fc58b54f3f640f042bb42532c8c25e90b70e353e631c003ca249349cfdf954",
+      "b_block": "72bea73af336dd729696cc61cf17ca72593e888dc756ef90ca56f608a7f69506",
+      "jaccard": 0.31957690306918674,
+      "shorter_containment": 0.4990522610343894,
+      "same_task": false,
+      "a_title": "MindIE Agent Skill 已启用，capture 状态为 bound / capture-ready，范围已绑定到当前隔离验收工作目录；本轮未执行 NPU。",
+      "b_title": "已按当前 profile 启用 MindIE Agent；capture 状态为 bound、experience 为 capture-ready，分享已启用并限定在授权工作目录内，本轮未执行 NPU 推理。"
+    },
+    {
+      "a": "2fa488cfced05851716ad05d325a6156fc762e4332b6c02bb97a2a840147f03c",
+      "b": "2faeee544074eab3f9d1e01abcd0d5e00b70c9f737016cf5941fbf45896b42e4",
+      "a_block": "fb480c23a3327e920fa2ec0337eb30ca9e8855727fb4f4cf08e4ef93ea11f2e8",
+      "b_block": "e20bbb41b78ada314c0a7f935f100af87a8c9413375b6483f6462432cf0b7c11",
+      "jaccard": 0.2878787878787879,
+      "shorter_containment": 0.4614572333685322,
+      "same_task": false,
+      "a_title": "当前搜索返回了转述该 ID 的对话摘要和带有目标 ID 前缀的其他命中；摘要不能替代原始正文。我会再用完整条目 ID 做一次定向检索，然后只对命中的引用调用正文读取。",
+      "b_title": "已清除本地进程里指向不匹配 Python 3.13 的 `PYTHONHOME`，并用活动 profile 的 bridge 成功绑定：`capture=bound`、分享范围为公开 `mindie-agent/knowledge-vllm"
+    },
+    {
+      "a": "01c138e79f25bec8d78fbf4579d27cd4443aa7e31207a705559f68bd2812e9ff",
+      "b": "2faeee544074eab3f9d1e01abcd0d5e00b70c9f737016cf5941fbf45896b42e4",
+      "a_block": "48994ca4c89ed51e0a0a641806d6b0ce7d80175fe298b8473f15fddae755213c",
+      "b_block": "e20bbb41b78ada314c0a7f935f100af87a8c9413375b6483f6462432cf0b7c11",
+      "jaccard": 0.2717311906501096,
+      "shorter_containment": 0.5075034106412005,
+      "same_task": false,
+      "a_title": "检索已返回与给定 ID 前缀相同的条目引用，同时也返回了一条转述该 ID 的别的经验记录。我会按知识工具要求读取这个直接命中条目的正文，再据正文核对 token、引用和 NPU 日志证",
+      "b_title": "已清除本地进程里指向不匹配 Python 3.13 的 `PYTHONHOME`，并用活动 profile 的 bridge 成功绑定：`capture=bound`、分享范围为公开 `mindie-agent/knowledge-vllm"
+    },
+    {
+      "a": "5da7a5448c32ff13d826f8f574718249deb8a4ff1eef62c7738e6c35f049642c",
+      "b": "93ae062909698cf44dc44dbfb8db12050fae4cdc5d1b00369f8b12b038a9cb1c",
+      "a_block": "801fd5c698c906e5753669323778e3d90afe43560a50f6cca4a73276dd396d2e",
+      "b_block": "f53454a93a58bbeacbac79a47cf52937cf589927374d75c523f218828b3bc1cc",
+      "jaccard": 0.22840690978886757,
+      "shorter_containment": 0.3757894736842105,
+      "same_task": false,
+      "a_title": "当前任务已在最新的活动缓存版本中绑定，经验状态为 `capture-ready`，社区分享配置也显示为 public。现在我先用指定条目 ID 检索；只有命中后才会读取该条目的正文和证据。",
+      "b_title": "任务已启用：`capture` 为 `bound`、`experience` 为 `capture-ready`，且复用了已启用的公开目标 `mindie-agent/knowledge-vllm-ascend`。现在我会先按指定条目标识和"
+    },
+    {
+      "a": "89c756f28fbec41b9d541f6bf7b095e57b3ea51e7c1a1e2270c395495f43a5c4",
+      "b": "c3f998fdce9eecfbf1171624d6f791d4fc8e4e1b2bf7636f59dfa05e37327815",
+      "a_block": "993f00f5d9a4a1ab93edff427d203140ae95e335be8086122cfaac42cef1928b",
+      "b_block": "89bafb72f7ba1dc374e81c1f4c302ab4f20d7fbb1edc0afe568356190bc89f99",
+      "jaccard": 0.219533527696793,
+      "shorter_containment": 0.41717451523545707,
+      "same_task": false,
+      "a_title": "vllm-ascend: validate torch_npu.npu_rms_norm on Ascend910_9362 with dtype-rounded FP16/BF16 references and ASCEND_RT_VISIBLE_DEVICES=0",
+      "b_title": "Bounded Ascend torch_npu RMSNorm validation with dtype-rounded FP16/BF16 references and logical-device normalization"
+    },
+    {
+      "a": "2738d4de2adc92e5215f7f22096b58705ddae2b0dafe094507702d1e5c97fe25",
+      "b": "4b96facf5b4ae488d17a052074dcdcae37849fc3c0667051e758f4712d1eae31",
+      "a_block": "a906f207ded68fe82be78c9f8167aab87a64476a53db84a2b29e80656659c92f",
+      "b_block": "59e3e3f9a8fea5ad6ae91bbedcb6216579935620ec3f9f856640fed965e6cbd0",
+      "jaccard": 0.18124519600307457,
+      "shorter_containment": 0.31985892566467716,
+      "same_task": false,
+      "a_title": "vLLM-Ascend Qwen3-0.6B NPU preflight and inference attempts",
+      "b_title": "Remote Check of vLLM Metadata and NPU 1 Usage"
+    },
+    {
+      "a": "1fccb1ba53428e37016776d57f07321f81335303a876397c5fd8c1988fab41ba",
+      "b": "c4d7f72a092b6bcecf18fa192434707b1f309cecc74062e55132acdc2ba15d3d",
+      "a_block": "e8c6f73568fd1108e363e1647475b685cbdac25ddb8a043a06b817249dadd227",
+      "b_block": "7a508a2def5000213f02c6d851fb18101a85bc3b15f1c520ebffb64f2bd86ce8",
+      "jaccard": 0.15866388308977036,
+      "shorter_containment": 0.2743682310469314,
+      "same_task": false,
+      "a_title": "Assistant summarizes two Windows NPU benchmark records",
+      "b_title": "两份 Qwen3-0.6B NPU 运行记录摘要"
+    },
+    {
+      "a": "2faeee544074eab3f9d1e01abcd0d5e00b70c9f737016cf5941fbf45896b42e4",
+      "b": "93ae062909698cf44dc44dbfb8db12050fae4cdc5d1b00369f8b12b038a9cb1c",
+      "a_block": "e20bbb41b78ada314c0a7f935f100af87a8c9413375b6483f6462432cf0b7c11",
+      "b_block": "f53454a93a58bbeacbac79a47cf52937cf589927374d75c523f218828b3bc1cc",
+      "jaccard": 0.12853025936599424,
+      "shorter_containment": 0.23473684210526316,
+      "same_task": false,
+      "a_title": "已清除本地进程里指向不匹配 Python 3.13 的 `PYTHONHOME`，并用活动 profile 的 bridge 成功绑定：`capture=bound`、分享范围为公开 `mindie-agent/knowledge-vllm",
+      "b_title": "任务已启用：`capture` 为 `bound`、`experience` 为 `capture-ready`，且复用了已启用的公开目标 `mindie-agent/knowledge-vllm-ascend`。现在我会先按指定条目标识和"
+    },
+    {
+      "a": "2fa488cfced05851716ad05d325a6156fc762e4332b6c02bb97a2a840147f03c",
+      "b": "93ae062909698cf44dc44dbfb8db12050fae4cdc5d1b00369f8b12b038a9cb1c",
+      "a_block": "fb480c23a3327e920fa2ec0337eb30ca9e8855727fb4f4cf08e4ef93ea11f2e8",
+      "b_block": "f53454a93a58bbeacbac79a47cf52937cf589927374d75c523f218828b3bc1cc",
+      "jaccard": 0.12849494348602022,
+      "shorter_containment": 0.22808870116156282,
+      "same_task": false,
+      "a_title": "当前搜索返回了转述该 ID 的对话摘要和带有目标 ID 前缀的其他命中；摘要不能替代原始正文。我会再用完整条目 ID 做一次定向检索，然后只对命中的引用调用正文读取。",
+      "b_title": "任务已启用：`capture` 为 `bound`、`experience` 为 `capture-ready`，且复用了已启用的公开目标 `mindie-agent/knowledge-vllm-ascend`。现在我会先按指定条目标识和"
+    },
+    {
+      "a": "800f7613a97630e64f11f44089fb84cc8e1889dfa193b90a5ee5d9e0cdbdb1a2",
+      "b": "cbc41d955cd8abf495b4129bbdff15fbf3550476a8d1312bf3841cf75033773a",
+      "a_block": "4a6c0655651acc0ed3aec04a9aa080c489c4acd821b3d7f7af41ebe82f5b8473",
+      "b_block": "1319da3aa4895ce4be6215501a43d17e76d86b09e281f0e15bbe3cf97f006529",
+      "jaccard": 0.1214377406931964,
+      "shorter_containment": 0.30262316058861166,
+      "same_task": false,
+      "a_title": "torch_npu.npu_rms_norm non-contiguous view vs contiguous copy check on NPU for float16 and bfloat16",
+      "b_title": "torch_npu npu_rms_norm FP16/BF16 small-input check vs CPU reference on Ascend910_9362"
+    },
+    {
+      "a": "800f7613a97630e64f11f44089fb84cc8e1889dfa193b90a5ee5d9e0cdbdb1a2",
+      "b": "c3f998fdce9eecfbf1171624d6f791d4fc8e4e1b2bf7636f59dfa05e37327815",
+      "a_block": "4a6c0655651acc0ed3aec04a9aa080c489c4acd821b3d7f7af41ebe82f5b8473",
+      "b_block": "89bafb72f7ba1dc374e81c1f4c302ab4f20d7fbb1edc0afe568356190bc89f99",
+      "jaccard": 0.11866051929143412,
+      "shorter_containment": 0.2709141274238227,
+      "same_task": false,
+      "a_title": "torch_npu.npu_rms_norm non-contiguous view vs contiguous copy check on NPU for float16 and bfloat16",
+      "b_title": "Bounded Ascend torch_npu RMSNorm validation with dtype-rounded FP16/BF16 references and logical-device normalization"
+    }
+  ],
+  "repeated_paragraph_occurrences": 8,
+  "theoretical_removed_paragraph_bytes": 823,
+  "top_repeated_paragraphs": [
+    {
+      "count": 2,
+      "bytes": 372,
+      "text": "先按当前 profile 实际安装的 MindIE Agent Skill 显式绑定本原生任务，检查 experience/capture，使用实际安装的 mindie-remote-dev 原生 MCP 完成远端操作。禁止设置 CODEX_THREAD_ID、伪造 session、模拟 Hook 或直接写知识数据库。"
+    },
+    {
+      "count": 2,
+      "bytes": 204,
+      "text": "本任务已经在上一轮通过原生插件启用。本轮沿用授权，公开进度与最终答复要保留真实结果和未完成边界。不要调用模型整理经验，不要手工发布知识。"
+    },
+    {
+      "count": 2,
+      "bytes": 152,
+      "text": "`mindie://vllm-ascend/5cdccec11137a3387aba7f7b1e27c9f2b08534b619cc2dc838c622960a4cc8e9@5dd3c315e730da9ae3145066acf1cda36150e4aa8f22a062c8bbca281bb46222`"
+    },
+    {
+      "count": 4,
+      "bytes": 21,
+      "text": "## Later observations"
+    },
+    {
+      "count": 2,
+      "bytes": 24,
+      "text": "### assistant:commentary"
+    },
+    {
+      "count": 2,
+      "bytes": 8,
+      "text": "### user"
+    }
+  ],
+  "blocks_inventory": [
+    {
+      "task": "01c138e79f25bec8d78fbf4579d27cd4443aa7e31207a705559f68bd2812e9ff",
+      "block": "48994ca4c89ed51e0a0a641806d6b0ce7d80175fe298b8473f15fddae755213c",
+      "title": "检索已返回与给定 ID 前缀相同的条目引用，同时也返回了一条转述该 ID 的别的经验记录。我会按知识工具要求读取这个直接命中条目的正文，再据正文核对 token、引用和 NPU 日志证",
+      "body_bytes": 1291,
+      "file_bytes": 1607,
+      "body_sha256": "cd70c113629b910913784adc4b8e0844632065ff773ff4ecda7cf6cb594d5ffb",
+      "file_sha256": "ecb408c85ef4026049028c7cdf959db46864e3714d0c69e14fd258ddd3031209",
+      "cites": [
+        "mindie://vllm-ascend/5cdccec11137a3387aba7f7b1e27c9f2b08534b619cc2dc838c622960a4cc8e9@5dd3c315e730da9ae3145066acf1cda36150e4aa8f22a062c8bbca281bb46222"
+      ],
+      "conditions": {}
+    },
+    {
+      "task": "139591084cdc611ec0ba971a5fa9ba8c08583f427d69015b1161b75d534bae14",
+      "block": "82b2c01fff7b2605219b1b9328523595cc20b726bf0e96d224792d12c2963a8c",
+      "title": "看一下记录，特别是跟13277号pr相关的精度问题修复的commit的记录，清一下评论然后把精度问题修复的每个case修复了什么问题以及怎么复现给贴上去，然后对于算子的那个commit找到稳",
+      "body_bytes": 5654,
+      "file_bytes": 5970,
+      "body_sha256": "a3de7bafbf2e8f7e9ad2d20cb78a9361d670bfd5c5612a8e667c2757e0805b6f",
+      "file_sha256": "9af4e029652d8115e10c186d1f86e9ed4e2e999fbdd29bcb54d3f1e2e84efb66",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "1d60dcbb6dd02d4e16f32fe0d0e160a14f6d346084a8e132d50c83ae8a025d82",
+      "block": "21b1de05e114345d70a60f0ca52a455f69dbf087a2f3402874b46c2c77856d38",
+      "title": "修下13277的ci问题，顺便整理一下description和评论，不要暴露机器路径和ip",
+      "body_bytes": 16295,
+      "file_bytes": 16612,
+      "body_sha256": "f906484d981fe8be154aa73f63587cc37558725c2664835303b8de4542b657bd",
+      "file_sha256": "8000513987bc36d669383a444d90ea77393c226b729bb482c962b8487ecc3d61",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "1d60dcbb6dd02d4e16f32fe0d0e160a14f6d346084a8e132d50c83ae8a025d82",
+      "block": "54ae0ccea809d5b8c4fd0f56a3791651e1eb317c835c507b90698f13129c90f7",
+      "title": "修下13277的ci问题，顺便整理一下description和评论，不要暴露机器路径和ip",
+      "body_bytes": 16315,
+      "file_bytes": 16636,
+      "body_sha256": "f82605a02470a3f399daf0420ffa020b1c2650643c3e4bb058e8b8991625437a",
+      "file_sha256": "9c2bb3975336c8f578c437d2043b6a14036f14721d3418abd2753c5ae374f829",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "1d60dcbb6dd02d4e16f32fe0d0e160a14f6d346084a8e132d50c83ae8a025d82",
+      "block": "12e2db25d7ba74c0cd9b562c329527b55e429b6785a485769e02cc2e1b4ca2f3",
+      "title": "修下13277的ci问题，顺便整理一下description和评论，不要暴露机器路径和ip",
+      "body_bytes": 9794,
+      "file_bytes": 10115,
+      "body_sha256": "7fcb05ccc010df65a41bda8cc45862dd34e4dd3e1917d03832557f9bf57d6075",
+      "file_sha256": "c4ed5b60ccda55bad4160d8968a0ae940c1ad963e964e07b7530e65f1788b340",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "1fccb1ba53428e37016776d57f07321f81335303a876397c5fd8c1988fab41ba",
+      "block": "e8c6f73568fd1108e363e1647475b685cbdac25ddb8a043a06b817249dadd227",
+      "title": "Assistant summarizes two Windows NPU benchmark records",
+      "body_bytes": 1236,
+      "file_bytes": 1552,
+      "body_sha256": "064eb9d848841951830a7a4c2f234837e3851f9631cfa2ff34a8766a41b91bd6",
+      "file_sha256": "bbf47a9eec7f1de770bfbbe7882dfd4f330d0dfb6135ac83dadb5b961dec8f44",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "2738d4de2adc92e5215f7f22096b58705ddae2b0dafe094507702d1e5c97fe25",
+      "block": "a906f207ded68fe82be78c9f8167aab87a64476a53db84a2b29e80656659c92f",
+      "title": "vLLM-Ascend Qwen3-0.6B NPU preflight and inference attempts",
+      "body_bytes": 6284,
+      "file_bytes": 6600,
+      "body_sha256": "034619f9fa6b27b60712fcec53c70adce209feb8d225025d0cfc6ed01f39cf62",
+      "file_sha256": "d80ec12a5c76372dfaf66dee46bd1de43c312a873c1989c7f0b6a4fdd0b0caac",
+      "cites": [],
+      "conditions": {
+        "torch": "2.10.0+cpu",
+        "torch_npu": "2.10.0.post4.dev20260715",
+        "vllm": "0.27.1+empty",
+        "vllm-ascend": "0.19.1rc2.dev1835"
+      }
+    },
+    {
+      "task": "2fa488cfced05851716ad05d325a6156fc762e4332b6c02bb97a2a840147f03c",
+      "block": "fb480c23a3327e920fa2ec0337eb30ca9e8855727fb4f4cf08e4ef93ea11f2e8",
+      "title": "当前搜索返回了转述该 ID 的对话摘要和带有目标 ID 前缀的其他命中；摘要不能替代原始正文。我会再用完整条目 ID 做一次定向检索，然后只对命中的引用调用正文读取。",
+      "body_bytes": 1829,
+      "file_bytes": 2145,
+      "body_sha256": "b34ac0c646352794d3690de8560a8a0d8b252e80cf480cbae8374ff5c19ef92e",
+      "file_sha256": "1d37bcea890706686a33810143fc120bb1db8cdc6572ed13925f6df88d09064b",
+      "cites": [
+        "mindie://vllm-ascend/5cdccec11137a3387aba7f7b1e27c9f2b08534b619cc2dc838c622960a4cc8e9@5dd3c315e730da9ae3145066acf1cda36150e4aa8f22a062c8bbca281bb46222"
+      ],
+      "conditions": {}
+    },
+    {
+      "task": "2faeee544074eab3f9d1e01abcd0d5e00b70c9f737016cf5941fbf45896b42e4",
+      "block": "e20bbb41b78ada314c0a7f935f100af87a8c9413375b6483f6462432cf0b7c11",
+      "title": "已清除本地进程里指向不匹配 Python 3.13 的 `PYTHONHOME`，并用活动 profile 的 bridge 成功绑定：`capture=bound`、分享范围为公开 `mindie-agent/knowledge-vllm",
+      "body_bytes": 1891,
+      "file_bytes": 2207,
+      "body_sha256": "a620686baa9959884a6d8d928335328bacd811e4683133ee089f66d18282cb0e",
+      "file_sha256": "5d3167f9f798aa29c8f7fc54261e347e194bbd748ac348f96a6029ea6e925850",
+      "cites": [
+        "mindie://vllm-ascend/5cdccec11137a3387aba7f7b1e27c9f2b08534b619cc2dc838c622960a4cc8e9@cda333615cc0ef54ac4421722a6154a0ab22b2725a29d892dbbce0c3c9fb0d6b"
+      ],
+      "conditions": {}
+    },
+    {
+      "task": "3100b269cd38d21934a584d200d972809dadbac261d370b7e31f2b4d52e938c3",
+      "block": "8fb596dc797c54ee81a40c5fd1b4c38e215cb67383a607fe6a1b87b521e01790",
+      "title": "已通过技能规定的正常入口完成绑定，状态为 `active`，且沿用已保存的贡献选择、目标仓库和授权范围。现在进行这次原生任务里的知识查询。",
+      "body_bytes": 1430,
+      "file_bytes": 1746,
+      "body_sha256": "73b29e0ac01b0cbdf561dc1a1f0bf19d4362be5cd332397dc8caebcc20270f84",
+      "file_sha256": "77423f1f95de62e9ca7dea27d5a538138398b0156a591b6a74a223fed9435655",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "4b96facf5b4ae488d17a052074dcdcae37849fc3c0667051e758f4712d1eae31",
+      "block": "59e3e3f9a8fea5ad6ae91bbedcb6216579935620ec3f9f856640fed965e6cbd0",
+      "title": "Remote Check of vLLM Metadata and NPU 1 Usage",
+      "body_bytes": 7419,
+      "file_bytes": 7735,
+      "body_sha256": "b5a590d052c4997ecd99a32d083a8fb9f9d58c8e89ab6d07897ecbb0dc68cb71",
+      "file_sha256": "e8b5c827fc68d3b37d217a52ffd7171af2ec83295e95f92cb1faac5784877200",
+      "cites": [],
+      "conditions": {
+        "npu-smi": "25.5.3",
+        "vllm": "0.27.1+empty"
+      }
+    },
+    {
+      "task": "5cdccec11137a3387aba7f7b1e27c9f2b08534b619cc2dc838c622960a4cc8e9",
+      "block": "98fc58b54f3f640f042bb42532c8c25e90b70e353e631c003ca249349cfdf954",
+      "title": "MindIE Agent Skill 已启用，capture 状态为 bound / capture-ready，范围已绑定到当前隔离验收工作目录；本轮未执行 NPU。",
+      "body_bytes": 8623,
+      "file_bytes": 8939,
+      "body_sha256": "1c3cd1814a30d33f713b30c88678d782eb159e983cd63acdbef8c75a3b986998",
+      "file_sha256": "84d620f23e5a627b11532087a723182bddfc0941050c674dddbf740706182167",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "5da7a5448c32ff13d826f8f574718249deb8a4ff1eef62c7738e6c35f049642c",
+      "block": "801fd5c698c906e5753669323778e3d90afe43560a50f6cca4a73276dd396d2e",
+      "title": "当前任务已在最新的活动缓存版本中绑定，经验状态为 `capture-ready`，社区分享配置也显示为 public。现在我先用指定条目 ID 检索；只有命中后才会读取该条目的正文和证据。",
+      "body_bytes": 1908,
+      "file_bytes": 2224,
+      "body_sha256": "6bc624fc8d03d1b69ea87d246241ca391de1bd9f84d1422cc42850a6c9426f50",
+      "file_sha256": "0c2ac40bbf4332de0ed89411d2fd8563957dc9a4522867dee6df1908e7295480",
+      "cites": [
+        "mindie://vllm-ascend/fb05d2bf865a620a08481eb46d36d603ef0599de5d1397ec35f12a18cb3ff761@35208d3fa1363eeb518547def70099926da65788d784487d2731cb8a21c108bb"
+      ],
+      "conditions": {}
+    },
+    {
+      "task": "800f7613a97630e64f11f44089fb84cc8e1889dfa193b90a5ee5d9e0cdbdb1a2",
+      "block": "4a6c0655651acc0ed3aec04a9aa080c489c4acd821b3d7f7af41ebe82f5b8473",
+      "title": "torch_npu.npu_rms_norm non-contiguous view vs contiguous copy check on NPU for float16 and bfloat16",
+      "body_bytes": 4322,
+      "file_bytes": 4638,
+      "body_sha256": "4b2560219ac94f97f20cc7041852fb534721fcf1a30c19e3bf5e3367ee2f5c67",
+      "file_sha256": "9c5e1b58f8ba0222ea04a2ceeb734bddeee725e4267043170be7ed3fe150adb0",
+      "cites": [],
+      "conditions": {
+        "python": "3.12.13",
+        "torch": "2.10.0+cpu",
+        "torch_npu": "2.10.0.post2"
+      }
+    },
+    {
+      "task": "81149b472aa8b84bc887f15e8ce58ea631f58d34b29e0b2c2fb17749904fdbfc",
+      "block": "9a58cdf2e7b677d59125629ddae48cbb56e10810097a4d1c4d2f35ba2b8f9df3",
+      "title": "Read-only npu-smi survey of physical NPU 8 occupancy on a remote Ascend910 host",
+      "body_bytes": 2792,
+      "file_bytes": 3108,
+      "body_sha256": "ee7919de1af9553cd666e5e82dfdb9d747e05ced01d081f7329e937da75e4018",
+      "file_sha256": "e2234485a3c3ccd2d9d1efa4e8dd3f0d613d6ac909824d8a7aaf2e03725e89c9",
+      "cites": [],
+      "conditions": {
+        "npu-smi": "25.5.3",
+        "python": "3.13.13",
+        "remote-dev plugin": "0.9.5"
+      }
+    },
+    {
+      "task": "89c756f28fbec41b9d541f6bf7b095e57b3ea51e7c1a1e2270c395495f43a5c4",
+      "block": "993f00f5d9a4a1ab93edff427d203140ae95e335be8086122cfaac42cef1928b",
+      "title": "vllm-ascend: validate torch_npu.npu_rms_norm on Ascend910_9362 with dtype-rounded FP16/BF16 references and ASCEND_RT_VISIBLE_DEVICES=0",
+      "body_bytes": 3395,
+      "file_bytes": 3711,
+      "body_sha256": "f728b830ab45e979e33ab3b30df4ae632c906dabbfae5e75b494d8e64ca50066",
+      "file_sha256": "19280529a14ef3f44ef871e7959e219421fc47ec77f2a3060ea107443bb632ba",
+      "cites": [],
+      "conditions": {
+        "torch_npu_version": "2.10.0.post2",
+        "torch_version": "2.10.0+cpu"
+      }
+    },
+    {
+      "task": "93ae062909698cf44dc44dbfb8db12050fae4cdc5d1b00369f8b12b038a9cb1c",
+      "block": "f53454a93a58bbeacbac79a47cf52937cf589927374d75c523f218828b3bc1cc",
+      "title": "任务已启用：`capture` 为 `bound`、`experience` 为 `capture-ready`，且复用了已启用的公开目标 `mindie-agent/knowledge-vllm-ascend`。现在我会先按指定条目标识和",
+      "body_bytes": 1839,
+      "file_bytes": 2155,
+      "body_sha256": "fd33f21f33640fac2a59b969fd64b4e81b1401f456f0ac37cb3d2033718dc889",
+      "file_sha256": "2cdef73cb2e200e58306d120ed7fcd528533f246eb09c071c4298fe7c7127cf9",
+      "cites": [
+        "mindie://vllm-ascend/fb05d2bf865a620a08481eb46d36d603ef0599de5d1397ec35f12a18cb3ff761@6d95e752dbbac1075f6a3c2039bfb8519510165180c55e5060d123270480a79f"
+      ],
+      "conditions": {}
+    },
+    {
+      "task": "c3f998fdce9eecfbf1171624d6f791d4fc8e4e1b2bf7636f59dfa05e37327815",
+      "block": "89bafb72f7ba1dc374e81c1f4c302ab4f20d7fbb1edc0afe568356190bc89f99",
+      "title": "Bounded Ascend torch_npu RMSNorm validation with dtype-rounded FP16/BF16 references and logical-device normalization",
+      "body_bytes": 2503,
+      "file_bytes": 2819,
+      "body_sha256": "7ae77c8a7a3d88d63a94bb4484b093a426531afbd49de96b750255d97fc6ff2f",
+      "file_sha256": "3ab4baa8e56d7ce2f61e54813b70ccdf5fcef8aadee2356d947dc6ae095211b8",
+      "cites": [],
+      "conditions": {
+        "torch_npu_version": "2.10.0.post2",
+        "torch_version": "2.10.0+cpu"
+      }
+    },
+    {
+      "task": "c4d7f72a092b6bcecf18fa192434707b1f309cecc74062e55132acdc2ba15d3d",
+      "block": "7a508a2def5000213f02c6d851fb18101a85bc3b15f1c520ebffb64f2bd86ce8",
+      "title": "两份 Qwen3-0.6B NPU 运行记录摘要",
+      "body_bytes": 1180,
+      "file_bytes": 1496,
+      "body_sha256": "ec2d3f8d2a72ea01b40f788d887edf8c16358ae2dafba0019c7590c6854e1f2f",
+      "file_sha256": "b97ef3625fd2fedfb63e757e7129b341baa355ca1b7d4c32843d8377dea4073b",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "cbc41d955cd8abf495b4129bbdff15fbf3550476a8d1312bf3841cf75033773a",
+      "block": "1319da3aa4895ce4be6215501a43d17e76d86b09e281f0e15bbe3cf97f006529",
+      "title": "torch_npu npu_rms_norm FP16/BF16 small-input check vs CPU reference on Ascend910_9362",
+      "body_bytes": 1987,
+      "file_bytes": 2303,
+      "body_sha256": "c560a5950755b59aca68cc8eaf034332b0a7fcd3081166e77624067fa74e4693",
+      "file_sha256": "c3278703f6c75d93dd63abc26bda0469617e22fb620ed32e1a813c523fc155e2",
+      "cites": [],
+      "conditions": {
+        "torch": "2.10.0+cpu",
+        "torch_npu": "2.10.0.post4.dev20260715"
+      }
+    },
+    {
+      "task": "f071ded68b73d1a93c9b96033c6520c4c6eec9823a4073ab2e72d9b810cf4168",
+      "block": "346c2d249ddaa0447b33aa1ea4d46f8f3c5f96ddac2e9bc412d1f8037ca4788e",
+      "title": "帮我看下旋转量化的权重是哪一个版本，我记得13277是验证过全量权重的",
+      "body_bytes": 2648,
+      "file_bytes": 2964,
+      "body_sha256": "b0af9380de2d186b1b67d689407c242cfe439d8c5a98a522e5e9fb2a7f246ca4",
+      "file_sha256": "525628af95d901ce50269df4dcb6ba6b5ab468d471df9edc1642e7cfacc34887",
+      "cites": [],
+      "conditions": {}
+    },
+    {
+      "task": "fb05d2bf865a620a08481eb46d36d603ef0599de5d1397ec35f12a18cb3ff761",
+      "block": "72bea73af336dd729696cc61cf17ca72593e888dc756ef90ca56f608a7f69506",
+      "title": "已按当前 profile 启用 MindIE Agent；capture 状态为 bound、experience 为 capture-ready，分享已启用并限定在授权工作目录内，本轮未执行 NPU 推理。",
+      "body_bytes": 9654,
+      "file_bytes": 9970,
+      "body_sha256": "12c1900082782b978c4b0ee1cf0ffbc07ca80e6052130da9ed0742a2dea824ed",
+      "file_sha256": "7bcf6ee5b001b965830892c98d9fe59279cf08d94ad7419a4287dc3fb144569f",
+      "cites": [],
+      "conditions": {}
+    }
+  ]
+}

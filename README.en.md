@@ -6,15 +6,15 @@
 
 Domain context, remote execution tools, and a knowledge/experience/usefulness feedback loop for Ascend development.
 
-Use the [Codex](https://github.com/mindie-agent/mindie-agent-codex), [Kimi Code](https://github.com/mindie-agent/mindie-agent-kimi), or [Claude Code](https://github.com/mindie-agent/mindie-agent-cc) adapter in your own business repository.
-Knowledge and authorized contribution processing run locally; remote-dev provides remote execution. Codex selects and redacts public transcript messages without a body model. An independently configured model may generate only the title and retrieval summary. The contribution choice persists across tasks and updates until explicitly changed; collection is off until first enabled.
+The current implementation target is the [Codex](https://github.com/mindie-agent/mindie-agent-codex) adapter in your own business repository. Existing contribution choice and project scope apply to verified native tasks without daily activation or closing steps.
+Knowledge processing runs locally; remote-dev provides remote execution. Codex selects and redacts complete public messages without a body model. An internal native model produces required retrieval navigation, never replacement body text. The contribution choice persists across tasks and updates; missing configuration, explicit disable and operational failure remain distinct.
 
 This repository contains [architecture](docs/architecture.md), [design principles](docs/design-principles.md)
 and [next steps](docs/next-steps.md). Component ownership and current evidence are listed in the [Chinese README](README.md).
 
 The former workspace bootstrap, updater, source management, client wiring and automatically exposed Skills
 have been removed. No legacy aliases or installation path are provided. Git history retains prior work.
-The current rewrite is merged into the independent Codex, Kimi and Claude Code repositories' main branches. Read the
+The current [system review](docs/system-review-2026-10-05.md) covers Codex and its upstream/downstream components. Kimi and Claude Code retain separate older runtime pins and need their own port and acceptance. Read the
 [unified implementation status](docs/implementation-status.md) for development and native acceptance separately.
 The [2026-09-29 Codex acceptance](docs/codex-public-transcript-acceptance-2026-09-29.md) records
 Windows PowerShell and WSL NPU runs, native Stop, redacted publication and retrieval against exact

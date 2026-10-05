@@ -1,0 +1,27 @@
+{
+  "started_unix": 1791135713.32334,
+  "python": "3.13.12 (main, Mar  3 2026, 15:32:44) [Clang 21.1.4 ]",
+  "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "runtime_mode": "exact source import in existing environment; not native installed acceptance",
+  "native_model_calls": 0,
+  "network_calls": 0,
+  "private_transcript_reads": 0,
+  "product_files_modified": 0,
+  "runs": [
+    {
+      "script": "assess_public.py",
+      "returncode": 0,
+      "elapsed_seconds": 0.16171445900545223
+    },
+    {
+      "script": "assess_retrieval.py",
+      "returncode": 0,
+      "elapsed_seconds": 3.8215983750051237
+    },
+    {
+      "script": "assess_projection.py",
+      "returncode": 0,
+      "elapsed_seconds": 0.9045632080014911
+    }
+  ]
+}

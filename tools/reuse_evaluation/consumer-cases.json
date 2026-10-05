@@ -1,0 +1,107 @@
+{
+  "schema": "mindie-reuse-consumer-fixtures/1",
+  "scope": "Synthetic local consumer tasks; no claim of NPU or native product acceptance",
+  "cases": [
+    {
+      "id": "dtype_reference",
+      "kind": "code",
+      "prompt": "Fix numeric.apply(x, inv_rms, weight) so it matches the supplied FP16 golden observations exactly. Keep the function signature and return a Python float. Write and run a local check; explain only the result of this numerical task.",
+      "files": {
+        "numeric.py": "import struct\n\ndef half(x):\n    return struct.unpack(\"e\", struct.pack(\"e\", x))[0]\n\ndef apply(x, inv_rms, weight):\n    return half(half(x) * inv_rms * half(weight))\n",
+        "golden.json": "[\n  {\n    \"x\": 0.15,\n    \"inv_rms\": 0.71,\n    \"weight\": 1.3,\n    \"expected\": 0.138427734375\n  },\n  {\n    \"x\": 0.5,\n    \"inv_rms\": 0.3,\n    \"weight\": 0.7,\n    \"expected\": 0.10504150390625\n  },\n  {\n    \"x\": 1.125,\n    \"inv_rms\": 0.121,\n    \"weight\": 3.14,\n    \"expected\": 0.427490234375\n  },\n  {\n    \"x\": 2.75,\n    \"inv_rms\": 0.45,\n    \"weight\": 0.333,\n    \"expected\": 0.412109375\n  },\n  {\n    \"x\": -0.15,\n    \"inv_rms\": 0.71,\n    \"weight\": 1.3,\n    \"expected\": -0.138427734375\n  }\n]"
+      },
+      "materials": [
+        {
+          "title": "Earlier FP16 normalization observation",
+          "body": "A previous kernel comparison appeared to fail because its reference multiplied the scale into an unrounded intermediate. In that observed FP16 contract, inputs and weight were first represented in FP16, the normalized intermediate was rounded to FP16, and the scaled result was rounded to FP16 again. Reusing this requires checking the current golden observations; it does not certify other dtypes or kernels.",
+          "conditions": {
+            "dtype": "float16",
+            "contract": "two observable FP16 stores"
+          }
+        }
+      ]
+    },
+    {
+      "id": "device_mapping",
+      "kind": "configuration",
+      "prompt": "Select physical device 8 using the current inventory. Save placement.json with exactly physical_id and logical_id, both integers. The scheduler consumes the logical_id from this inventory. Verify against the inventory before reporting the chosen device.",
+      "files": {
+        "inventory.json": "{\"generation\": \"current-B\", \"devices\": [{\"physical_id\": 3, \"logical_id\": 0}, {\"physical_id\": 12, \"logical_id\": 1}, {\"physical_id\": 8, \"logical_id\": 2}]}",
+        "placement.json": "{\"physical_id\":8,\"logical_id\":0}\n"
+      },
+      "materials": [
+        {
+          "title": "Historical device placement",
+          "body": "On inventory generation old-A, physical device 8 appeared as logical device 0. The selection worked on that run. Device remapping depends on the current visible-device inventory; these numbers are an observation, not a fixed mapping.",
+          "conditions": {
+            "inventory_generation": "old-A"
+          }
+        }
+      ]
+    },
+    {
+      "id": "withdrawn_speedup",
+      "kind": "analysis",
+      "prompt": "Assess whether the supplied two runs establish a comparable performance gain. Write assessment.json containing comparable (boolean), speedup (number or null), hardware_verified (boolean), and reason (string). A valid comparison requires the same completed workload; preserve uncertainty and do not invent a new run.",
+      "files": {
+        "runs.json": "{\"A\": {\"completed_requests\": 100, \"elapsed_seconds\": 40, \"fixture_only\": true}, \"B\": {\"completed_requests\": 20, \"elapsed_seconds\": 20, \"fixture_only\": true}}"
+      },
+      "materials": [
+        {
+          "title": "Claim and later correction",
+          "body": "Initial observation: B took 20 seconds compared with A at 40 seconds, provisionally described as a 2x speedup.\n\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\nRoutine log line; no new measurements.\n\nCorrection: the speedup claim was withdrawn because A completed 100 requests while B completed 20. These fixture runs do not establish hardware speedup. A matched-workload rerun is still required.",
+          "conditions": {
+            "status": "claim withdrawn",
+            "hardware": "unverified"
+          }
+        }
+      ]
+    },
+    {
+      "id": "fork_runtime",
+      "kind": "code",
+      "prompt": "Repair worker.run_jobs(jobs) for the supplied process-bound runtime. It must execute in spawned child processes, create each runtime in the process that uses it, and preserve input order. Keep the public function signature. Validate with a guarded __main__ smoke run and report the execution result.",
+      "files": {
+        "backend.py": "import os, multiprocessing as mp\n\nclass Runtime:\n    def __init__(self):\n        self.pid = os.getpid()\n    def apply(self, value):\n        if self.pid != os.getpid():\n            raise RuntimeError(\"runtime inherited across fork\")\n        return {\"value\": value * 2, \"init_pid\": self.pid, \"pid\": os.getpid(), \"start_method\": mp.get_start_method()}\n",
+        "worker.py": "import multiprocessing as mp\nfrom backend import Runtime\n_runtime = Runtime()\n\ndef process(value):\n    return _runtime.apply(value)\n\ndef run_jobs(jobs):\n    with mp.get_context(\"fork\").Pool(2) as pool:\n        return pool.map(process, jobs)\n"
+      },
+      "materials": [
+        {
+          "title": "Forked runtime failure",
+          "body": "The first attempt used a preinitialized backend inherited by forked workers and failed. A later local toy check used a spawn context, initialized the runtime inside each worker, and put the smoke entry point under if __name__ == \"__main__\". The local toy passed; no NPU hardware acceptance was performed.",
+          "conditions": {
+            "backend_lifetime": "process-bound",
+            "validation": "local toy only"
+          }
+        }
+      ]
+    },
+    {
+      "id": "obsolete_workaround",
+      "kind": "configuration",
+      "prompt": "Update config.json for the installed runtime using the included release notes. Set legacy_workaround to the correct boolean and preserve the installed version. Do not change dependencies or claim a runtime execution that you did not perform.",
+      "files": {
+        "config.json": "{\"runtime_version\":\"2.1\",\"legacy_workaround\":true}\n",
+        "release-notes.txt": "Runtime 1.4 requires legacy_workaround=true for this fixture. Runtime 2.0 and later incorporate the fix and reject legacy_workaround=true. The installed fixture runtime is 2.1.\n"
+      },
+      "materials": [
+        {
+          "title": "Version 1.4 workaround",
+          "body": "Setting legacy_workaround=true repaired the observed startup failure on runtime 1.4. This result was tested only on 1.4; it provides no claim that the setting remains valid on 2.x.",
+          "conditions": {
+            "runtime_version": "1.4"
+          }
+        }
+      ]
+    },
+    {
+      "id": "no_hit_slug",
+      "kind": "code",
+      "prompt": "Fix slug.slug(text): lowercase ASCII letters, keep ASCII letters and digits, replace each run of other characters with one hyphen, and remove leading/trailing hyphens. Keep the function signature. Run a local check and report the code result.",
+      "files": {
+        "slug.py": "def slug(text):\n    return text.lower().replace(\" \", \"-\")\n"
+      },
+      "materials": []
+    }
+  ]
+}
