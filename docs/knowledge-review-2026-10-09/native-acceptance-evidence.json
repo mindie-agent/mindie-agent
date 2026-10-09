@@ -1,0 +1,96 @@
+{
+  "schema": "mindie-native-knowledge-acceptance/1",
+  "date": "2026-10-09",
+  "host": "macOS",
+  "codex_version": "0.162.0-alpha.2",
+  "adapter_reviewed_commit": "e9a4de80604a34d8a976a89a585e0fd8081ac948",
+  "adapter_merge_commit": "497f7c92b9eb541b351385f54adf35794f241316",
+  "knowledge_pin": "7c99fbb387304c0e4b26ca85c1839bed8b7534be",
+  "publication_contract_sha256": "6a5551335fb3a40c9a90ffaee473da34cfd49eb66975783933530252cbb4ebc6",
+  "cold_start_failure": {
+    "cause": "store-not-ready",
+    "session": "01a120e6-66ca-7492-88cf-684285f65cb3",
+    "capture_saved": false,
+    "summary_started": false
+  },
+  "corrected_cold_start": {
+    "producer_session": "01a120f5-1d86-7fa0-ab1a-17a7dad61e74",
+    "store_initialized_by_installer": true,
+    "pre_task_service_started": false,
+    "manual_activation_calls": 0,
+    "knowledge_tool_calls": 0,
+    "body_model_calls": 0,
+    "summary_model": "gpt-5.6-luna",
+    "summary_effort": "low",
+    "summary_attempts": 1,
+    "summary_status": "complete",
+    "body_sha256": "d93b37cfdf6c2ce13062f0daa5546f827737c647df330c56e3091609770242ac"
+  },
+  "publication": {
+    "pr": "https://github.com/mindie-agent/knowledge-vllm-ascend/pull/40",
+    "head": "f2c2976bba49667cac25485dc49619b2a164c0a1",
+    "merge": "7509675deb0c6d144ecb77c15f20d9101cdf7533",
+    "automatic_submission": true,
+    "manual_bot_messages_before_merge": 0,
+    "bot_native_report_observed": true,
+    "checks": [
+      "publication",
+      "publication-head"
+    ],
+    "bot_used_validator": "929bdcb918f2207aea38b02a14bd8e6219fabac4",
+    "bot_contract_alignment": "pending"
+  },
+  "consumer": {
+    "session": "01a120ff-68a2-7e31-b343-437c6a209cdd",
+    "fresh_state": true,
+    "public_feed_commit": "7509675deb0c6d144ecb77c15f20d9101cdf7533",
+    "native_query": "completed",
+    "native_explain": "completed",
+    "source": "feed",
+    "body_sha256": "d93b37cfdf6c2ce13062f0daa5546f827737c647df330c56e3091609770242ac",
+    "feedback_calls": 0
+  },
+  "ci": {
+    "run": 37941023327,
+    "linux": {
+      "tests_run": 397,
+      "skipped": 13,
+      "seconds": 131.143
+    },
+    "windows": {
+      "tests_run": 397,
+      "skipped": 20,
+      "seconds": 527.444
+    },
+    "both_passed": true
+  },
+  "release_state_regression": {
+    "knowledge_tests_passed": 10,
+    "real_persistent_fixtures": true,
+    "normal_release_versions_simulated": true,
+    "current_install_is_formal_release": false
+  },
+  "local_upgrade": {
+    "selected_revision": "497f7c92b9eb541b351385f54adf35794f241316",
+    "native_generation": "497f7c92b9eb541b351385f54adf35794f241316",
+    "body_bytes_unchanged": true,
+    "body_files": 46,
+    "counts": {
+      "captures": 0,
+      "material_summary_attempts": 0,
+      "outbox": 0,
+      "sent_receipts": 0,
+      "entries": 22
+    },
+    "global_community_config_exists": false,
+    "native_hook_trusted_hash": "sha256:7e5472ffd639971152b47b29b62179cc6b0d5b9a8da343ae58e49d23a9ebe5f8",
+    "status_message": "MindIE Agent",
+    "stop_handlers": 1
+  },
+  "limits": [
+    "Windows native Hook not retested",
+    "NPU business not retested",
+    "fork delivery not retested",
+    "Bot trusted-validator alignment pending"
+  ]
+}
