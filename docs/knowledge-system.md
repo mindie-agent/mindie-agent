@@ -58,9 +58,9 @@ flowchart TB
 - 轻量小模型读取新增分块，生成简明标题、摘要与适用条件（`conditions`），写入任务清单 `PACKAGE.md`。
 - 如果小模型调用因网络等原因失败，已落盘的正文分块完好保留，并如实记录“待索引”状态，绝不伪造完成，也不会盲目重复发起未知状态的付费调用。
 
-### 2.4 第四步：基于 `gh` 通道与个人 Fork 的自动 PR 发布与只读对账
-- 当用户已开启社区贡献时，发件箱统一通过已认证的 **`gh`（GitHub CLI）通道**（Git 推送绑定 `!gh auth git-credential`，PR 接口调用 `gh api`）将知识包分支推送到用户账号下的 `<account>/knowledge-vllm-ascend` Fork 仓库，并向 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 主库发起或更新 PR。
-- 新账号在安装 MindIE Agent 时，自动安装协议会在校验 `gh auth status` 后顺带完成 `mindie-agent/knowledge-vllm-ascend` 的 Star 与远端 Fork（`--clone=false --remote=false`），确保个人 Fork 仓库开箱即用。
+### 2.4 第四步：基于 `gh` 通道与按需个人 Fork 的自动 PR 发布与只读对账
+- 当用户已开启社区贡献时，发件箱统一通过已认证的 **`gh`（GitHub CLI）通道**（Git 推送绑定 `!gh auth git-credential`，PR 接口调用 `gh api`）将知识包分支推送到用户账号下的 `<GH_USER>/<repo>` Fork 仓库（如 `<GH_USER>/knowledge-vllm-ascend`），并向目标公开知识库（如 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)）发起或更新跨 Fork PR。
+- **按需 Star 与 Fork 目标知识库**：安装阶段仅 Fork `mindie-agent/mindie-agent` 统一入口仓，不预置 Fork 任何知识库；当用户在首次引导或后续设置中明确开启社区贡献（`contribute`）并指定目标公开知识库 `<owner/repo>`（默认 `mindie-agent/knowledge-vllm-ascend`）时，Agent 按需执行 `gh api -X PUT /user/starred/<owner/repo>` 与 `gh repo fork <owner/repo> --clone=false --remote=false`，并将配置中的 `fork` 绑定为 `<GH_USER>/<repo>`，确保非组织成员也能开箱即用地推送贡献分支并发起 PR。
 - 若网络超时导致 PR 写入回执未知（`unknown`），下次处理优先通过 `gh api` 只读对账远端 PR 状态，绝不盲目重推或强制覆盖（`--force`）。
 
 ---

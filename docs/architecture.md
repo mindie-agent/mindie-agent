@@ -20,7 +20,7 @@ MindIE Agent 的核心定位是**给开发者现有的 AI 编程客户端（Clau
   - **手动触发 `/mindie-agent`（知识、经验与 Skill 系统）**：在需要昇腾推理排障、算子开发或模型迁移时，直接使用 `/mindie-agent`（Codex 中也可使用 `$mindie-agent`）并阐述你的问题，即可唤醒昇腾 Skill 体系、检索历史经验包并关联当前任务的经验闭环；平时写普通代码时完全静默、零打扰。
   - **默认自动触发 `remote-dev`（远端昇腾开发执行）**：`remote-dev` 作为常驻 MCP 工具默认就绪。日常对话中只要提到远端服务器、容器或 NPU 命令，无需输入任何斜杠命令即可直接触发远端文件读写、补丁同步与后台长任务执行。
 - **配置一次，长期有效**：首次配置好知识贡献意愿、目标公开仓库与授权项目范围后，后续所有授权范围内的任务都会自动生效。历史经验仅供 Agent 按需参考，绝不强制检索或强制投票。
-- **硬性前置指标：稳定的 GitHub 交互通道（`gh` CLI）**：插件市场拉取、锁定发行版校验、`knowledge-vllm-ascend` 增量同步、经验闭环自动提交 PR（通过 `gh api` 与 `!gh auth git-credential`）以及可选的故障上报均依赖已登录的 `gh`（GitHub CLI）通道。新账号通过自动安装协议接入时，会首先校验 `gh auth status` 与 `gh auth setup-git`，并顺带为 `mindie-agent` 与 `knowledge-vllm-ascend` 点亮 **Star**、创建个人远端 **Fork**（`--clone=false --remote=false`），确保开源共建与后续经验 PR 提交通道开箱即用。
+- **硬性前置指标：稳定的 GitHub 交互通道（`gh` CLI）与按需收敛 Fork 范围**：插件市场拉取、锁定发行版校验、`knowledge-vllm-ascend` 增量同步、经验闭环自动提交 PR（通过 `gh api` 与 `!gh auth git-credential`）以及可选的故障上报均依赖已登录的 `gh`（GitHub CLI）通道。鉴于 `@mindie-agent` 组织下拥有十余个仓库，我们坚持**收敛、按需的二级 Fork 策略**：（1）**安装阶段**：校验 `gh auth status` 与 `gh auth setup-git` 后，仅顺带为统一入口仓 `mindie-agent/mindie-agent` 点亮 **Star** 并创建个人远端 **Fork**（`--clone=false --remote=false`），不批量 Fork 各个插件仓或知识库；（2）**开启知识贡献阶段（按需）**：当用户明确开启面向目标公开知识库（如 `mindie-agent/knowledge-vllm-ascend`）的社区贡献时，再按需为该知识库点亮 **Star**、创建个人远端 **Fork** 并绑定 `fork` 配置（`<GH_USER>/<repo>`），确保分支推送与跨 Fork PR 提交通道就绪。
 - **聚焦核心领域**：当前首发核心领域为 `vLLM` / `vLLM-Ascend` 推理与算子工程，后续可按相同知识包架构平滑扩展更多领域。
 
 ---

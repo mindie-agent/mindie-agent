@@ -38,7 +38,7 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 - **清晰的采集起点**：系统只采集用户开启授权后、在已授权项目范围内产生的新增对话；关闭授权会立即取消尚未发送的队列任务，重新开启后也只采集新产生的对话，不会回头把关闭期间的历史聊天记录补扫上传。
 
 ### 2.3 稳定 GitHub 交互通道（`gh`）与外部写入的 `unknown` 对账保护
-- **统一的 `gh` 认证通道（硬性指标）**：所有 GitHub API 读写与远端 Git 分支推送统一通过已认证的 `gh` CLI（`GhTransport` 调用 `gh api`，Git 凭据辅助器绑定 `!gh auth git-credential`）完成，Token 仅留在 `gh` 自身受管凭据或环境变量中，绝不写入命令行参数、日志或公开配置。新账号安装时会在校验 `gh auth status` 后顺带完成主仓与 `knowledge-vllm-ascend` 的 Star 与远端 Fork（`--clone=false --remote=false`），提前备好个人贡献目标仓 `<account>/knowledge-vllm-ascend`。若缺少 `gh` 或认证失效，系统明确报错并阻止未授权外发，绝不静默吞错。
+- **统一的 `gh` 认证通道（硬性指标）与两阶段按需 Fork**：所有 GitHub API 读写与远端 Git 分支推送统一通过已认证的 `gh` CLI（`GhTransport` 调用 `gh api`，Git 凭据辅助器绑定 `!gh auth git-credential`）完成，Token 仅留在 `gh` 自身受管凭据或环境变量中，绝不写入命令行参数、日志或公开配置。新账号安装时在校验 `gh auth status` 后仅顺带完成统一入口仓 `mindie-agent/mindie-agent` 的 Star 与远端 Fork（`--clone=false --remote=false`），不预置 Fork 各插件仓或知识库；待用户在首次引导或后续配置中明确开启社区知识贡献（`contribute`）时，再针对所选目标公开知识库（如 `mindie-agent/knowledge-vllm-ascend`）按需执行 Star 与远端 Fork，并将 `fork` 绑定为 `<GH_USER>/<repo>`。若缺少 `gh` 或认证失效，系统明确报错并阻止未授权外发，绝不静默吞错。
 - **每次外发重验授权**：每次执行外部写入（如推送分支或创建知识库 PR）前都会重新核对当前授权状态。
 - **结果不确定（`unknown`）只读对账**：如果网络抖动导致写入回执丢失，该操作会被标记为 `unknown`（结果不确定）并保留原始操作 ID；系统在下次写入前必须先通过只读查询与远端仓库核对真实状态，绝不盲目当成“没发出去”而重复提交。
 
