@@ -1,5 +1,7 @@
 # MindIE Agent 设计原则
 
+[English](design-principles.en.md) · [返回文档索引](README.md)
+
 Status: current
 
 MindIE Agent 完整继承 VAWS 的以下九条设计原则。产品更名、Plugin 形态、共享组件和各 Harness 适配均受同一组原则约束；本轮重构不另设替代原则，也不把实现细节提升为新的强制流程。VAWS 的旧运行入口退役，不改变这些原则的有效性。
@@ -18,7 +20,7 @@ MindIE Agent 完整继承 VAWS 的以下九条设计原则。产品更名、Plug
 
 这些原则不预先决定包的数量、命令的数量、必须有多强的 session，或是否建立统一 Core。具体方案需要说明它减少了哪种已经发生或有依据的任务成本。已有正确实现和有效验证证据也是可复用成果。
 
-当前产品边界见[架构](architecture.md)，知识流程见[Transcript 复用架构](transcript-reuse-architecture-2026-10-04.md)，授权和更新见[Harness 生命周期](harness-boundary-and-lifecycle.md)，实际完成情况见[统一实施进度](implementation-status.md)。
+当前产品边界见[架构](architecture.md)，知识流程见[知识与经验闭环设计](knowledge-system.md)，授权和更新见[Harness 生命周期](harness-boundary-and-lifecycle.md)，首发完成情况与验收证据见[0.0.1 发布记录](releases/0.0.1.md)。
 
 限制应说明它防止的具体故障，并作用于对应操作。一次调用不自动重试，不等于永久停止后续正常检查；开始过不等于完成；运行参数不等于兼容协议。不要把验收时的次数、截止时间或样本数量直接变成产品门槛。
 

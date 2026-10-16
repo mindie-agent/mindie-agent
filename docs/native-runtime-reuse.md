@@ -1,5 +1,7 @@
 # 原生更新、Hook 与进程管理复用
 
+[English](native-runtime-reuse.en.md) · [返回文档索引](README.md)
+
 当前入口更新于 2026-10-16。本文保留 2026-10-15 的机制调查、选型与
 重构实验；各实验仍只证明其原版本和范围，表中的“待验”“实现中”是当时
 状态，不是当前首发清单。Codex/Claude Code × macOS/原生 Windows/WSL

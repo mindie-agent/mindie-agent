@@ -1,5 +1,7 @@
 # 发布兼容与静默更新
 
+[English](release-compatibility-and-update.en.md) · [返回文档索引](README.md)
+
 状态：2026-10-16 当前产品合同；首个普通内测 Release `0.0.1` 已发布。
 本文替代此前“全部版本选择交给 Git marketplace”及“不同安装绑定一律拒绝”
 的限制。实际实现、配套组件发行状态和六组合证据以

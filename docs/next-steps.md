@@ -1,43 +1,18 @@
-# Next steps
+# MindIE Agent 后续迭代
 
-Updated 2026-10-16. Follow the [nine design principles](design-principles.md),
-[architecture](architecture.md) and [lifecycle contract](harness-boundary-and-lifecycle.md).
-The [0.0.1 release record](releases/0.0.1.md) owns the released source identities,
-dependency pins, native matrix and release state. Earlier acceptance records
-retain their exact version and operation boundaries.
+[English](next-steps.en.md) · [返回文档索引](README.md)
 
-The first release is an ordinary `v0.0.1` GitHub Release for internal testing,
-without a beta suffix or prerelease flag. Its six environments are Codex and
-Claude Code on macOS, native Windows and Windows WSL. The release record
-separately identifies installed native evidence, later source deltas, actual
-merged commits and each repository's publication state. This page does not
-infer publication of the architecture repository from an adapter Release.
+当前产品与完整材料设计分别见 [`docs/architecture.md`](architecture.md) 与
+[`docs/knowledge-system.md`](knowledge-system.md)，所有演进遵循
+[`docs/design-principles.md`](design-principles.md)。
 
-1. Follow the [paired-release checklist](release-compatibility-and-update.md#组件与插件配套发布):
-   publish first-party runtime dependencies before plugins, preserve independent
-   component versions, and match every release tag to the exact commit in the
-   plugin lock. Reuse unchanged releases. Check reviewed notes, ordinary Release
-   flags and downloaded package hashes. Follow the release record rather than treating
-   historical pending rows as new work. Preserve original failures and the
-   corrected-fixture boundaries in the
-   [root-cause review](releases/0.0.1-root-cause-review.md).
-2. Track the accepted Codex child-cancellation issue upstream. A child interrupt
-   may leave a pending helper/SSH operation or an already-started remote command
-   running. Acceptance for 0.0.1 is not proof of repair or wider Harness support.
-   Do not add a compensating watcher, arbitrary business deadline or private
-   Harness distribution. Durable remote jobs retain their own lifecycle.
-3. Evaluate future fixes against their actual changes and exact supported
-   Harness versions. Reuse unchanged native, body/index and public-delivery
-   evidence; do not replay failed or uncertain paid work. New failures remain
-   visible and are not covered by the accepted child-cancellation limitation.
-4. Pursue component benefit and version-over-version benchmarks as a separate
-   track, with explicit workloads and measured results rather than first-release
-   reliability timings.
+首发 `0.0.1` 已作为普通内测 Release 正式发布，覆盖 Codex / Claude Code 与 macOS、
+原生 Windows、Windows WSL 六个宿主与平台组合。精确版本、配套组件发行映射与已知限制见
+[`docs/releases/0.0.1.md`](releases/0.0.1.md)。
 
-Timing collected to diagnose a correctness or first-use failure does not
-establish a benchmark or a quality/cost benefit.
+## 现阶段推进重点
 
-Kimi, additional domains, automatic Skill extraction and old business Skills
-remain outside this release. Ordinary tasks retain optional knowledge reads and
-automatic capture governed by their saved choice and scope; they acquire no new
-mandatory activation, reporting or closing workflow.
+- **真实业务复用收益评测（Benchmark）**：独立推进端到端业务效果与效率基准评测，验证知识与经验闭环在真实昇腾开发任务中的实际收益（首发版本不预先宣称量化收益）。
+- **上游宿主已知问题跟进**：持续跟进 OpenAI Codex CLI 子代理中断信号未送达待处理工具调用的上游修复进展；在此期间不在插件内引入破坏边界的私有进程监控或武断超时。
+- **跨领域与更多宿主扩展**：Kimi Code 首发集成、历史业务 Skills 迁移整理与性能 Profiling 能力继续作为独立迭代方向按需推进。
+- **日常开发体验零负担**：常规业务开发直接使用现有插件与按需工具，不增加日常手动激活、强制查询或收尾命令。

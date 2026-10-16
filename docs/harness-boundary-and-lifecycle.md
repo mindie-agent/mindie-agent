@@ -1,6 +1,8 @@
 # Harness 边界与生命周期
 
-当前合同，2026-10-16。继承[九条设计原则](design-principles.md)，服务于[架构](architecture.md)定义的普通原生任务；实现见[统一实施进度](implementation-status.md)，Codex/Claude Code × macOS/原生 Windows/WSL 六组合的首发证据、已知问题与各仓发行状态见[0.0.1 统一发布记录](releases/0.0.1.md)。本文替代此前可选摘要摘录、每任务手动激活、默认业务总时限和未发布客户端多代兼容的约定。旧版本证据保留原提交和适用范围，不改写为新提交的验收。
+[English](harness-boundary-and-lifecycle.en.md) · [返回文档索引](README.md)
+
+当前合同，2026-10-16。继承[九条设计原则](design-principles.md)，服务于[架构](architecture.md)定义的普通原生任务；Codex/Claude Code × macOS/原生 Windows/WSL 六组合的首发证据、已知问题与各仓发行状态见[0.0.1 统一发布记录](releases/0.0.1.md)。本文替代此前可选摘要摘录、每任务手动激活、默认业务总时限和未发布客户端多代兼容的约定。旧版本证据保留原提交和适用范围，不改写为新提交的验收。
 
 ## 职责与普通使用
 
@@ -47,8 +49,8 @@ Stop 只持久准入并通知既有 owner，协议输出不要求业务模型续
 协议和用量，不重新推断同一份所有权。Windows 复用精确 Job，
 POSIX 必须保障 core 突然死亡后的整组退出，不能只依赖正常 finally
 或适配器仍存活时的轮询。安装前独立调用、后台服务与摘要保持各自寿命。
-重构前的误判、漏清理及选型过程保留在
-[执行生命周期与更新事务收敛](execution-lifecycle-convergence.md)；
+重构前的进程树边界与选型依据见
+[原生更新、Hook 与进程管理复用](native-runtime-reuse.md)；
 共享原语和适配器修复的实际版本、平台验收及剩余已知限制由统一发布记录
 汇总，不把当时发现写成当前实现仍未修复，也不把原语实验当成全产品验收。
 
