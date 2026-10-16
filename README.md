@@ -5,7 +5,7 @@
 <h1 align="center">MindIE Agent</h1>
 
 <p align="center">
-  <strong>让你的 AI Coding Agent 原生掌握昇腾（Ascend）推理工程——自带领域记忆、远端 NPU 容器孪生工具与自进化经验飞轮</strong>
+  <strong>面向昇腾（Ascend）NPU AI Infra 全流程的统一 Agent 能力底座——贯穿架构设计、特性开发、算子实现、测试验证与自进化工程记忆</strong>
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@
   <a href="https://github.com/mindie-agent/mindie-agent-cc"><img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757.svg" alt="Claude Code Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-codex"><img src="https://img.shields.io/badge/OpenAI_Codex-Plugin-10A37F.svg" alt="OpenAI Codex Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-kimi"><img src="https://img.shields.io/badge/Kimi_Code-Plugin-2563EB.svg" alt="Kimi Code Plugin"></a>
-  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_NPU-vLLM--Ascend-0F766E.svg" alt="Ascend NPU vLLM-Ascend"></a>
+  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_AI_Infra-vLLM--Ascend_%7C_AscendC_%7C_Triton-0F766E.svg" alt="Ascend NPU AI Infra"></a>
 </p>
 
 <p align="center">
@@ -70,7 +70,7 @@ Agent 读取本页面后，会自动识别自身宿主环境并执行下方的**
 >   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | python3 -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
 >   python3 "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
 >   ```
->   *验证标准*：安装脚本成功返回，告知用户可在会话中输入 `/mindie-agent:status` 查看状态。
+>   *验证标准*：安装脚本成功返回，告知用户可在会话中输入 `/mindie-agent` 使用。
 >
 > - **分支 D — 如果你是 Cursor / 其他通用 MCP 客户端（仅需 SSH 远端 NPU 开发底座 `remote-dev`）**：
 >   在项目的 `.mcp.json`（或 `.cursor/mcp.json`）中写入 `remote-dev` 服务：
@@ -89,7 +89,7 @@ Agent 读取本页面后，会自动识别自身宿主环境并执行下方的**
 > #### 第二步：向用户汇报安装结果
 > 安装完成后，向用户简要汇报：
 > 1. 已安装的客户端插件名称、版本与验证结果；
-> 2. 说明日常开发**无需任何激活命令**，直接在业务仓库中提问或操作远端 NPU 即可；
+> 2. 说明日常开发只需通过单一入口 `/mindie-agent` 唤醒昇腾领域知识与 Skill，而远端 NPU 工具（`remote-dev`）在日常对话中默认自动触发；
 > 3. 说明**社区知识贡献**与**产品故障自动上报**默认均处于关闭状态（Opt-in），保护私密代码与内网信息安全。
 
 </details>
@@ -109,13 +109,15 @@ Agent 读取本页面后，会自动识别自身宿主环境并执行下方的**
 
 ## ✨ 为什么选择 MindIE Agent？
 
-昇腾（Ascend）大模型推理工程（如 `vLLM-Ascend` 算子适配、CANN 图编译排障、多机多卡精度对齐与性能调优）往往面临**环境在远端容器、经验散落在聊天记录、通用大模型缺乏昇腾实战上下文**的痛点。
+MindIE Agent 的核心目标是为**昇腾（Ascend）NPU 上的 AI Infra 全流程（架构设计、特性开发、算子实现、测试验证、性能调优与问题定位）提供统一的 Agent 能力底座**。
+
+目前生态已率先沉淀了面向 **`vLLM-Ascend` 特性开发与测试**、**`AscendC` 与 `Triton` 算子开发验证**等场景的知识库与技能体系，并正在持续扩展至更广泛的昇腾基础软件栈。
 
 | 维度 | 传统 Agent 开发体验 ❌ | 接入 MindIE Agent 之后 ✅ |
 | --- | --- | --- |
-| **领域经验与踩坑记忆** | 每次新开会话都要从头解释 `vLLM-Ascend` 架构，反复踩相同的算子/HCCL/ACLGraph 坑 | 自动同步 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 真实排障知识包，本地 BM25 秒级定位 + 原文分块按需精读 |
-| **远端 NPU 服务器与容器操作** | 手写冗长 `ssh` / `docker exec` 命令，引号转义频繁出错，长耗时测试断连即丢日志 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) 提供 19 个与本地 `Read`/`Edit`/`Bash`/`Grep` 完全同构的远端孪生工具，直接深入运行中的容器 |
-| **经验沉淀与隐私安全** | 有价值的排障过程随会话关闭而流失；或者担心内网 IP、路径、Token 泄露而不敢分享 | 用户显式授权后，由确定性规则 + Gitleaks 双重脱敏公开对话，绝不用大模型篡改技术原文 |
+| **领域知识与工程记忆** | 每次新开会话都要从头解释昇腾软硬件栈、`vLLM-Ascend` 架构或 `AscendC`/`Triton` 算子约束，设计、开发与测试经验无法跨会话复用 | 自动同步 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 等领域知识包，本地 BM25 秒级定位 + 原文分块按需精读，覆盖设计规范、开发实践、测试方法与排障案例 |
+| **远端 NPU 服务器与容器操作** | 手写冗长 `ssh` / `docker exec` 命令，代码同步与容器内测试割裂，长耗时编译或测试断连即丢日志 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) 提供 19 个与本地 `Read`/`Edit`/`Bash`/`Grep` 完全同构的远端孪生工具，直接深入运行中的 NPU 容器完成开发与测试验证 |
+| **研发经验沉淀与隐私安全** | 有价值的架构设计、算子实现、测试验证与调优过程随会话关闭而流失；或担心内网 IP、路径、Token 泄露而不敢分享 | 用户显式授权后，由确定性规则 + Gitleaks 双重脱敏公开对话，绝不用大模型篡改技术原文，自动沉淀可复用的工程经验 |
 | **工作流侵入性** | 被迫迁入厚重的定制脚手架或改写个人全局 MCP/Skills 配置 | **零日常仪式感**：直接在你自己的业务 Git 仓库与原生 Agent 会话中按需介入，不触碰无关配置 |
 
 ---
@@ -124,7 +126,7 @@ Agent 读取本页面后，会自动识别自身宿主环境并执行下方的**
 
 ### 1. 模块化分层架构
 
-MindIE Agent 采用**薄客户端适配层 + 独立共享运行时底座**架构，不綁架业务源码仓库：
+MindIE Agent 采用**薄客户端适配层 + 独立共享运行时底座**架构，不绑架业务源码仓库：
 
 ```mermaid
 flowchart TB
@@ -149,7 +151,7 @@ flowchart TB
   end
 
   subgraph Remote["🖥️ 远端昇腾集群与知识源 (Ascend Fleet & Canonical Feed)"]
-    Feed[("📚 knowledge-vllm-ascend<br/>公共工程知识包与有用性反馈")]
+    Feed[("📚 knowledge-vllm-ascend & 更多领域源<br/>公共工程知识包与有用性反馈")]
     Cluster[("🚀 远端昇腾 NPU 主机与 Docker 容器<br/>910B / A3 / Ascend 950 (A5)")]
   end
 
@@ -164,7 +166,7 @@ flowchart TB
   NpuTop -. "SSH 只读探测" .-> Cluster
 ```
 
-### 2. 领域知识与实战经验自进化闭环
+### 2. 昇腾 AI Infra 研发、测试与经验自进化闭环
 
 ```mermaid
 sequenceDiagram
@@ -173,14 +175,14 @@ sequenceDiagram
   participant Agent as Coding Agent (Claude / Codex / Kimi)
   participant Know as mindie-knowledge (本地服务)
   participant NPU as remote-dev (远端昇腾容器)
-  participant Repo as knowledge-vllm-ascend (公共知识库)
+  participant Repo as 公共工程知识库 (knowledge-vllm-ascend 等)
 
-  Dev->>Agent: 输入 /mindie-agent + 问题描述（唤醒昇腾知识、经验与 Skill 体系）
-  Agent->>Know: 1. 检索相关领域知识摘要 (query) 并按需精读原文分块 (explain)
-  Agent->>NPU: 2. 默认自动调用 remote-dev 在远端容器内读写代码、打补丁并运行 NPU 验证
-  NPU-->>Agent: 返回实机执行结果与日志引用
-  Agent-->>Dev: 3. 完成修复并给出最终回复 (可选提交知识有用性反馈 up/down)
-  Note over Agent,Repo: 以下步骤仅在用户已显式开启「社区共享 (Opt-in)」时后台异步触发
+  Dev->>Agent: 输入 /mindie-agent + 研发需求（特性设计 / 算子开发 / 测试构建 / 调优排障）
+  Agent->>Know: 1. 检索相关领域设计、开发与测试经验 (query) 并按需精读原文分块 (explain)
+  Agent->>NPU: 2. 默认自动调用 remote-dev 在远端 NPU 容器内编写代码、同步补丁并运行测试验证
+  NPU-->>Agent: 返回实机编译、单测、精度/性能验证结果与日志引用
+  Agent-->>Dev: 3. 交付通过实机验证的实现或方案 (可选提交知识有用性反馈 up/down)
+  Note over Agent,Repo: 以下步骤仅在用户已显式开启「社区共享 (Opt-in)」时后台静默运行
   Agent->>Know: 4. 会话结束 (Stop Hook) 捕获公开可见对话投影
   Know->>Know: 5. 确定性规则 + Gitleaks 脱敏 (拒绝任何未决敏感信息) + 小模型生成分块导航
   Know->>Repo: 6. 自动创建脱敏 Markdown 知识包 PR 沉淀回社区
@@ -194,29 +196,29 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 
 | 能力模块 | 触发方式 | 极简使用方式说明 |
 | --- | --- | --- |
-| **🧠 昇腾知识库、实战经验与 Skill 系统**<br/>（`mindie-knowledge` + 领域 Skills） | **手动触发**<br/>（统一入口 `/mindie-agent`） | 遇到昇腾排障、模型迁移、算子开发或推理调优问题时，直接输入 **`/mindie-agent` + 你的问题描述**（Codex 中也可输入 `$mindie-agent`）。哪怕是首次配置、查看状态或开关共享，也只需输入 `/mindie-agent` 加自然语言，由 Agent 内部自动感知处理。 |
-| **⚡ 远端昇腾服务器开发执行**<br/>（`remote-dev` SSH / 容器工具集） | **默认自动触发**<br/>（常驻 MCP，无需斜杠命令） | `remote-dev` 默认处于就绪状态。日常对话中只要提到远端服务器、容器或 NPU 命令，Agent 就会**默认自动调用** `remote_read`、`remote_edit`、`remote_bash` 及后台作业工具操作远端环境。 |
-| **🔄 排障经验沉淀与社区共建**<br/>（`Stop` 后台采集 + Gitleaks 脱敏） | **后台静默运行**<br/>（一次开启，全程无感） | 首次配置选择开启社区贡献后，每次会话结束时都会在后台**自动完成本地脱敏与知识包 PR 整理**——平时只管专注提问和写代码，全程无需额外操作。 |
+| **🧠 昇腾 Infra 知识库、经验与 Skill 系统**<br/>（`mindie-knowledge` + 领域 Skills） | **手动触发**<br/>（统一入口 `/mindie-agent`） | 在开展昇腾 AI Infra 方案设计、`vLLM-Ascend` 特性开发、`AscendC` / `Triton` 算子实现、测试验证或性能调优时，直接输入 **`/mindie-agent` + 你的需求描述**（Codex 中也可输入 `$mindie-agent`）。首次配置、查看状态或开关共享也同样只需输入 `/mindie-agent` 加自然语言。 |
+| **⚡ 远端昇腾服务器开发与测试**<br/>（`remote-dev` SSH / 容器工具集） | **默认自动触发**<br/>（常驻 MCP，无需斜杠命令） | `remote-dev` 默认处于就绪状态。日常对话中只要提到远端服务器、容器或 NPU 编译/测试命令，Agent 就会**默认自动调用** `remote_read`、`remote_edit`、`remote_bash` 及后台作业工具操作远端环境。 |
+| **🔄 研发经验沉淀与社区共建**<br/>（`Stop` 后台采集 + Gitleaks 脱敏） | **后台静默运行**<br/>（一次开启，全程无感） | 首次配置选择开启社区贡献后，每次会话结束时都会在后台**自动完成本地脱敏与知识包 PR 整理**——平时只管专注设计、写代码和跑测试，全程无需额外操作。 |
 
 ### 实战对话示例（直接复制即可体验）
 
-#### 💡 示例 1：手动输入 `/mindie-agent` 唤醒知识库、历史经验与 Skill 排障
+#### 💡 示例 1：手动输入 `/mindie-agent` 辅助特性设计、算子开发与测试构建
 ```text
-/mindie-agent 我们在昇腾 A3 上跑 DeepSeek MLA 遇到 ACLGraph 捕获失败 / Triton 内核编译报错，帮我查下知识库里有没有相同现象的历史经验和修复方案。
+/mindie-agent 我准备在 vllm-ascend 中为新模型实现一个自定义融合算子（提供 Triton / AscendC 实现）并补齐单元与精度测试，请结合知识库里的现有设计规范、算子适配经验帮我制定实现方案。
 ```
-> **背后发生的事**：通过 `/mindie-agent` 显式唤醒 MindIE Agent 技能与知识体系后，Agent 自动调用 `mindie-knowledge` 检索 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 中的真实排障知识包，先浏览 `PACKAGE.md` 分块目录，再按需精读对应分块的报错栈、适用条件与修复命令。
+> **背后发生的事**：通过 `/mindie-agent` 唤醒 MindIE Agent 技能与知识体系后，Agent 自动调用 `mindie-knowledge` 检索 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 中的架构规范、算子开发经验与测试构造案例，先浏览 `PACKAGE.md` 分块目录，再按需精读对应分块的接口约束、精度基准构造方式与验证命令。
 
-#### 💡 示例 2：日常对话默认触发 `remote-dev`，在远端昇腾容器内改代码跑测
+#### 💡 示例 2：日常对话默认触发 `remote-dev`，在远端昇腾容器内开发编译与跑测
 ```text
-连上远端机器 192.0.2.21（端口 22）上的 vllm-dev 容器，帮我看下 /workspace/vllm-ascend 当前分支的报错日志，定位为什么 Qwen3 在 TP=4 下精度异常，修改后在容器里跑一下对应的 pytest。
+连上远端机器 192.0.2.21（端口 22）上的 vllm-dev 容器，把我本地新写的算子实现和 tests/ 下的单测同步到 /workspace/vllm-ascend，在 NPU 上跑一下完整的 pytest 精度与性能测试。
 ```
-> **背后发生的事**：无需输入任何斜杠命令，Agent 默认自动调用 `remote-dev` 的 `remote_read`、`remote_grep`、`remote_edit` 与 `remote_bash` 在远端 `vllm-dev` 容器内完成代码检索、打补丁与单测验证；长耗时编译或测试会自动转为受管后台作业并支持实时看日志。
+> **背后发生的事**：无需输入任何斜杠命令，Agent 默认自动调用 `remote-dev` 的 `remote_read`、`remote_edit` 与 `remote_bash` 在远端 `vllm-dev` 容器内完成代码同步、编译与 NPU 实机单测；长耗时编译或测试会自动转为受管后台作业并支持实时看日志。
 
-#### 💡 示例 3：`/mindie-agent` + `remote-dev` 联动调优，排障经验后台静默沉淀
+#### 💡 示例 3：`/mindie-agent` + `remote-dev` 联动调优，研发经验后台静默沉淀
 ```text
-/mindie-agent 结合昇腾推理调优经验，帮我在远端 NPU 开发机上排查当前 decode 阶段的时延瓶颈，拉取 Profiling 关键指标并验证优化补丁。
+/mindie-agent 结合昇腾推理与算子调优经验，帮我在远端 NPU 开发机上分析当前 decode 阶段的时延瓶颈，拉取 Profiling 关键指标并验证优化补丁。
 ```
-> **背后发生的事**：Agent 同时调用 `/mindie-agent` 的领域经验与 `remote-dev` 的远端实机执行能力完成闭环验证。若已在首次配置时开启社区贡献，会话结束时后台会自动将脱敏后的排障过程沉淀为新的开源知识包，全程无需额外操作。
+> **背后发生的事**：Agent 同时调用 `/mindie-agent` 的领域经验与 `remote-dev` 的远端实机执行能力完成闭环验证。若已在首次配置时开启社区贡献，会话结束时后台会自动将脱敏后的设计、开发或调优过程沉淀为新的开源知识包，全程无需额外操作。
 
 ---
 
@@ -229,7 +231,7 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 | 仓库 | 定位与核心职责 |
 | --- | --- |
 | **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
-| **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | 面向昇腾推理工程的高质量开源 Agent Skills 精选目录（精度定位、性能采集、算子分析等） |
+| **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | 面向昇腾 NPU AI Infra 全流程的高质量开源 Agent Skills 精选目录（现已覆盖 `vLLM-Ascend`、`AscendC`/`Triton` 算子开发、精度测试与性能调优，持续扩展中） |
 
 ### 2. 原生客户端插件（Harness Adapters）
 
@@ -244,7 +246,7 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 | 仓库 | Python 包 / 入口 | 定位与核心职责 |
 | --- | --- | --- |
 | **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | 共享知识与经验闭环引擎：本地 SQLite/BM25 检索、确定性脱敏、块索引调度、Git PR 发布与独立反馈 |
-| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | *(Markdown 知识库)* | `vLLM` / `vLLM-Ascend` 领域公共工程知识包与有用性反馈权威语料源 |
+| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | *(Markdown 知识库)* | `vLLM-Ascend`、算子开发与 NPU 测试领域的公共工程知识包与有用性反馈语料源（更多昇腾 Infra 领域持续扩展中） |
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | SSH 远端开发底座：19 个本地工具孪生、已有 Docker 容器直连、连接池复用与产物传输 |
 | **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | 本地受管执行控制面：持久化用户容器生命周期、Git 快照物化与宿主机 NPU 排队分配 |
 | **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | 昇腾 NPU 无代理监控台：Web 实时看板、90 天有界历史热力图与只读 Agent CLI/MCP 观测面 |
