@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/banner.svg" alt="MindIE Agent" width="900">
+  <img src="assets/brand/mindie-agent-logo.png" alt="MindIE Agent logo" width="128" height="128">
 </p>
 
 # MindIE Agent
