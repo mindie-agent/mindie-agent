@@ -18,20 +18,21 @@ These nine principles define what should be a tool, what should be a Skill or kn
 2. **Turn only well-bounded, closed problems into tools**
    - A tool must have clear preconditions, inputs, outputs, and failure modes (e.g., reading a remote file, querying live NPU telemetry, or redacting secrets).
    - Leave open-ended, context-dependent judgment to the Agent; extract only repeatable, deterministic operations into stable tools, and never expand scope just for the sake of building a tool.
-3. **Never increase cognitive load for the Agent or the user**
-   - Tools should absorb internal state complexity and expose intuitive, task-oriented interfaces.
-   - A CLI with dozens of obscure flags, hidden state transitions, or errors that require reading internal source code to diagnose is a classic anti-pattern.
+3. **Never increase cognitive load for the Agent or the user (Single Unified `/mindie-agent` Entry)**
+   - From the user's perspective, every interaction and setting is wrapped inside a single unified entrypoint: **`/mindie-agent`**. Users should never have to learn or type internal subcommands such as `/mindie-agent:init`, `/mindie-agent:status`, or long flag strings—they simply use `/mindie-agent` with natural language, and internal state routing is handled behind the scenes.
+   - A CLI that forces users to memorize subcommands, exposes tangled internal state, or requires reading source code to understand an error is a classic anti-pattern.
 4. **Give every tool a single, well-defined boundary**
    - Each tool should solve one cohesive problem. It can execute the necessary multi-step mechanics internally so the Agent does not have to micromanage every step, while avoiding monolithic "kitchen-sink" tools that mix unrelated responsibilities.
-5. **Skills provide a map, not a straitjacket**
-   - Skills exist to show applicable scenarios, capability entrypoints, practical examples, and optional troubleshooting approaches.
-   - Concrete troubleshooting lessons belong in the Knowledge base rather than rigid step-by-step mandates inside a Skill. Essential usage should be immediately visible at the entrypoint so the Agent never has to search repeatedly just to assemble one command.
+5. **Skills provide a map and practice Progressive Disclosure, not a straitjacket**
+   - Keep the top-level Skill concise and focused on core troubleshooting, knowledge lookup, and remote execution; place low-frequency setup wizards, historical import, and recovery details into secondary `references/` documents that the Agent loads **progressively on demand** only when relevant.
+   - Concrete troubleshooting lessons belong in the Knowledge base rather than rigid step-by-step mandates inside a Skill.
 6. **Knowledge is advisory reference material, never mandatory dogma**
    - Knowledge packages store applicability conditions, evidence, and caveats in plain Markdown. A search hit or merged PR never makes an entry infallible—decisions must always be grounded in the live behavior of the current system.
    - The Agent consults or records experience on demand, with **no mandatory lookups, mandatory writes, rigid fill-in-the-blank templates, or end-of-task closing rituals**.
-7. **Every tool and Skill intervenes strictly on demand**
-   - Whether reviewing a PR, inspecting a remote directory, or bringing up a new model on Ascend NPUs, developers work naturally inside their native Agent session.
-   - Lightweight tasks use native tools directly; heavy tasks compose capabilities as needed. Merely opening a workspace never triggers heavy background pipelines.
+7. **Manual on-demand activation for Knowledge & Skills; default auto-trigger for Remote Dev and Opt-In Experience Capture**
+   - **Manual `/mindie-agent` trigger for Knowledge & Skills**: When troubleshooting Ascend issues, adapting operators, or tuning inference, the user explicitly types `/mindie-agent <problem description>`, keeping non-Ascend coding sessions clutter-free.
+   - **Default auto-trigger for `remote-dev`**: Whenever a prompt involves remote servers, containers, or NPU commands, `remote-dev` tools intervene automatically in normal conversation.
+   - **Automatic background experience loop after opt-in**: Once the user enables community contribution during installation or first-time setup, every subsequent session automatically captures, redacts, and packages experience on `Stop` in the background—**without the user ever needing to ask for it in their prompts**.
 8. **Reuse proven host, OS, and ecosystem mechanisms first**
    - Whenever task semantics and compatibility requirements are met, reuse mechanisms already provided by the host CLI, operating system, `uv`, and mature libraries, as well as existing build artifacts and verified results.
    - Identify concrete gaps before writing custom code, keep custom glue minimal, and delete replaced legacy managers or duplicate state stores once a native mechanism is adopted.
@@ -50,8 +51,8 @@ As MindIE Agent matured across hosts and operating systems, we codified five ope
 - **No dual-track state**: Once a replacement mechanism is verified, delete the superseded custom updater, duplicate state tables, and obsolete configs while preserving existing user Markdown packages, cursors, and consent settings.
 - **Data-format-driven compatibility**: Before formal release, rewrite intermediate implementations cleanly without carrying multi-generation shims. After formal release, design compatibility around actual schema and contract changes rather than guessing from version strings.
 
-### 11. Decouple User Consent from Code Installation Identity
-- **Configure once, persist across updates**: A user's contribution preference, public target repository, and authorized project scope are persistent user settings decoupled from the installed code revision.
+### 11. Decouple User Consent from Code Installation Identity (Configure Once, Run Automatically Thereafter)
+- **Configure once, active by default thereafter**: A user's contribution preference, public target repository, and authorized project scope are persistent user settings decoupled from the installed code revision. Once enabled, background capture and redaction run automatically at the end of every eligible task without requiring per-task user instructions.
 - **No re-prompting or silent overrides**: Restarting sessions, reinstalling, or silently updating a plugin preserves existing consent and explicit disablement without re-prompting or silently turning disabled settings back on.
 
 ### 12. Paired Component and Plugin Releases
