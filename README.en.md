@@ -34,8 +34,8 @@ Please install MindIE Agent for me: https://github.com/mindie-agent/mindie-agent
 
 When your Agent reads this page, it will automatically detect its own host environment and execute the **Agent Auto-Install Playbook** below.
 
-<details open>
-<summary>🤖 <b>Agent Auto-Install Playbook (Instructions for AI Agents — Execute directly when asked to install this repo)</b></summary>
+<details>
+<summary>🤖 <b>Agent Auto-Install Playbook (Click to expand / Automatically parsed by AI Agents)</b></summary>
 
 > **Instructions for AI Agents**: When the user asks you to install `mindie-agent`, do **not** ask them to read documentation manually. Detect which coding agent environment you are running inside and execute the matching branch below:
 >
@@ -196,7 +196,7 @@ MindIE Agent is built around **simplicity and progressive disclosure**—from th
 | --- | --- | --- |
 | **🧠 Ascend Knowledge, Experience & Skill System**<br/>(`mindie-knowledge` + Domain Skills) | **Manual Trigger**<br/>(Unified `/mindie-agent` entry) | Whenever you need Ascend troubleshooting, operator adaptation, or inference tuning, type **`/mindie-agent <your question>`** (or `$mindie-agent` in Codex). Even for first-time setup, checking status, or toggling sharing, you simply use `/mindie-agent` with natural language and let the Agent handle the rest internally. |
 | **⚡ Remote Ascend Server & Container Execution**<br/>(`remote-dev` SSH / Container Toolset) | **Default Auto-Trigger**<br/>(Always-on MCP, no slash command needed) | `remote-dev` is active by default. Whenever you mention a remote server, container, or NPU command in normal conversation, your Agent **automatically calls** `remote_read`, `remote_edit`, `remote_bash`, and background job tools. |
-| **🔄 Community Experience Contribution Loop**<br/>(`Stop` Auto-Capture + Gitleaks Redaction) | **Default Auto-Trigger After Opt-In**<br/>(No need to mention in prompts) | Once you opt into community sharing during setup, **experience capture, deterministic + Gitleaks redaction, and PR creation happen automatically in the background after every session**—you never need to ask the Agent to "save this experience" in your prompts. |
+| **🔄 Community Experience Loop**<br/>(`Stop` Auto-Capture + Gitleaks Redaction) | **Silent Background Run**<br/>(Set once, zero daily friction) | Once enabled during initial setup, session takeaways are **automatically redacted locally and packaged into a knowledge PR in the background** when a session ends—zero extra steps during your daily work. |
 
 ### Copy-Paste Usage Examples
 
@@ -212,11 +212,11 @@ Connect to the vllm-dev container on host 192.0.2.21 (port 22), inspect /workspa
 ```
 > **What happens**: Without needing any slash command, your Agent automatically uses `remote_read`, `remote_grep`, `remote_edit`, and `remote_bash` inside the remote `vllm-dev` container over pooled SSH, turning long test runs into managed background jobs with live log streaming.
 
-#### 💡 Example 3: Combining `/mindie-agent` + `remote-dev` (With Silent Background Experience Capture)
+#### 💡 Example 3: Joint `/mindie-agent` + `remote-dev` Tuning with Silent Background Knowledge Capture
 ```text
 /mindie-agent Using Ascend inference tuning experience, help me profile decode latency bottlenecks on our remote NPU dev machine, pull the key profiling metrics, and verify an optimization patch.
 ```
-> **What happens**: Your Agent combines domain knowledge/skills from `/mindie-agent` with live remote execution via `remote-dev`. If community sharing was enabled during setup, **without you saying another word**, the `Stop` hook automatically captures, redacts, and packages the verified troubleshooting session in the background when the turn ends.
+> **What happens**: Your Agent combines domain knowledge/skills from `/mindie-agent` with live remote execution via `remote-dev`. If community sharing was enabled during initial setup, the `Stop` hook silently captures, redacts, and packages the verified troubleshooting session in the background when the session ends.
 
 ---
 
