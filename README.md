@@ -175,9 +175,9 @@ sequenceDiagram
   participant NPU as remote-dev (远端昇腾容器)
   participant Repo as knowledge-vllm-ascend (公共知识库)
 
-  Dev->>Agent: 提问或要求定位 vLLM-Ascend 远端 NPU 故障
+  Dev->>Agent: 输入 /mindie-agent + 问题描述（唤醒昇腾知识、经验与 Skill 体系）
   Agent->>Know: 1. 检索相关领域知识摘要 (query) 并按需精读原文分块 (explain)
-  Agent->>NPU: 2. 在远端容器内读写代码、打补丁并运行 NPU 验证 (remote.edit / remote.bash)
+  Agent->>NPU: 2. 默认自动调用 remote-dev 在远端容器内读写代码、打补丁并运行 NPU 验证
   NPU-->>Agent: 返回实机执行结果与日志引用
   Agent-->>Dev: 3. 完成修复并给出最终回复 (可选提交知识有用性反馈 up/down)
   Note over Agent,Repo: 以下步骤仅在用户已显式开启「社区共享 (Opt-in)」时后台异步触发
@@ -188,25 +188,34 @@ sequenceDiagram
 
 ---
 
-## 🔥 装好之后怎么用？
+## 🔥 装好之后怎么用？（触发方式与使用示例）
 
-安装完成后，**不需要输入任何特殊唤醒指令**。直接在你的 `vllm` / `vllm-ascend` 或业务仓库里向 Agent 提问即可：
+MindIE Agent 采用 **“知识与 Skill 手动按需唤醒 + 远端工具默认自动触发”** 的组合设计，既保证平时写普通代码时零打扰，又能在需要昇腾工程能力时一键拉满：
 
-#### 💡 场景 1：远端昇腾容器内交互式排障与改代码
-> **你对 Agent 说**：
-> *“连上远端机器 `192.0.2.21`（端口 22）上的 `vllm-dev` 容器，帮我看下 `/workspace/vllm-ascend` 当前分支的报错日志，定位为什么 Qwen3 在 TP=4 下精度异常，修改后在容器里跑一下对应的 pytest。”*
->
-> **背后发生的事**：Agent 自动调用 `remote_read`、`remote_grep`、`remote_edit` 与 `remote_bash` 在 `vllm-dev` 容器内完成代码检索、原子修改与测试验证，长耗时任务自动转为持久后台会话。
+| 能力模块 | 触发方式 | 使用方法说明 |
+| --- | --- | --- |
+| **🧠 昇腾知识库、实战经验与 Skill 系统**<br/>（`mindie-knowledge` + 领域 Skills） | **手动触发**<br/>（使用 `/mindie-agent`） | 在遇到昇腾排障、模型迁移、算子开发或推理调优问题时，直接在对话框输入 **`/mindie-agent` + 你的问题描述**（Codex 中也可输入 `$mindie-agent`），即可唤醒相关经验、领域知识库与 Skill 体系。 |
+| **⚡ 远端昇腾服务器开发执行**<br/>（`remote-dev` SSH / 容器工具集） | **默认自动触发**<br/>（常驻 MCP，无需斜杠命令） | `remote-dev` 默认处于就绪状态。日常对话中只要提到远端服务器、容器或 NPU 命令，Agent 就会**默认自动调用** `remote_read`、`remote_edit`、`remote_bash` 及后台作业工具操作远端环境。 |
 
-#### 💡 场景 2：检索社区已验证的昇腾推理排障经验
-> **你对 Agent 说**：
-> *“我们在昇腾 A3 上跑 DeepSeek MLA 遇到 `ACLGraph` 捕获失败 / Triton 内核编译报错，先查下 MindIE 知识库里有没有相同现象的根因和修复方案。”*
->
-> **背后发生的事**：Agent 调用 `mindie-knowledge` 检索 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 中的真实排障案例，先看分块摘要大纲，再按需展开对应分块的完整命令、报错栈与适用条件。
+### 实战对话示例（直接复制即可体验）
 
-#### 💡 场景 3：查看集群空闲 NPU 水位或补充专项 Skill
-> **你对 Agent 说**：
-> *“用 `npu-top` 看下现在哪台 A3 服务器有至少 4 张空闲 NPU？另外帮我从 `awesome-mindie-skills` 装一下 `ascend-profiling-analysis` 技能。”*
+#### 💡 示例 1：手动输入 `/mindie-agent` 唤醒知识库、历史经验与 Skill 排障
+```text
+/mindie-agent 我们在昇腾 A3 上跑 DeepSeek MLA 遇到 ACLGraph 捕获失败 / Triton 内核编译报错，帮我查下知识库里有没有相同现象的历史经验和修复方案。
+```
+> **背后发生的事**：通过 `/mindie-agent` 显式唤醒 MindIE Agent 技能与知识体系后，Agent 自动调用 `mindie-knowledge` 检索 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 中的真实排障知识包，先浏览 `PACKAGE.md` 分块目录，再按需精读对应分块的报错栈、适用条件与修复命令。
+
+#### 💡 示例 2：日常对话默认触发 `remote-dev`，在远端昇腾容器内改代码跑测
+```text
+连上远端机器 192.0.2.21（端口 22）上的 vllm-dev 容器，帮我看下 /workspace/vllm-ascend 当前分支的报错日志，定位为什么 Qwen3 在 TP=4 下精度异常，修改后在容器里跑一下对应的 pytest。
+```
+> **背后发生的事**：无需输入任何斜杠命令，Agent 默认自动调用 `remote-dev` 的 `remote_read`、`remote_grep`、`remote_edit` 与 `remote_bash` 在远端 `vllm-dev` 容器内完成代码检索、打补丁与单测验证；长耗时编译或测试会自动转为受管后台作业并支持实时看日志。
+
+#### 💡 示例 3：`/mindie-agent` + `remote-dev` 联动完成远端算子调优与经验沉淀
+```text
+/mindie-agent 结合昇腾推理调优经验，帮我在远端 NPU 开发机上排查当前 decode 阶段的时延瓶颈，拉取 Profiling 关键指标并验证优化补丁。
+```
+> **背后发生的事**：Agent 同时调用 `/mindie-agent` 的领域经验与 `remote-dev` 的远端实机执行能力完成闭环验证；若该项目已开启经验共享，回合结束时还会自动将脱敏后的排障过程沉淀为新的知识包。
 
 ---
 

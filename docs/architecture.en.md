@@ -11,13 +11,15 @@ This document explains what MindIE Agent does, how its repositories are organize
 
 ---
 
-## 1. Product Scope & Everyday Developer Experience
+## 1. Product Scope & Trigger Modes
 
 MindIE Agent upgrades your existing AI coding CLI (**Claude Code**, **OpenAI Codex CLI**, **Kimi Code**) into an Ascend NPU and LLM inference engineering powerhouse.
 
 - **No reinvented wheels**: We do not ship a proprietary foundation model, replace your host's conversation UI, or take over your source code repository. You work naturally inside your existing terminal and business codebase.
-- **Configure once, zero daily ceremony**: After setting your contribution preference, public target repository, and project scope once, eligible tasks associate automatically. There are no daily activation commands or end-of-task closing scripts to run.
-- **On-demand tools and knowledge**: Remote SSH development tools (`remote-dev`) and local/community knowledge search work independently whether experience capture is enabled or disabled. Historical experience is purely advisory reference material for the Agent—never a mandatory step.
+- **Two clear trigger modes (Manual On-Demand vs. Default Auto-Triggered)**:
+  - **Manual `/mindie-agent` Trigger (Knowledge, Experience & Skill System)**: When troubleshooting Ascend workloads, adapting operators, or tuning inference, type `/mindie-agent` (or `$mindie-agent` in Codex) followed by your problem description to invoke the Ascend Skill workflow, search verified historical experience packages, and bind the session's experience loop—staying completely out of the way during ordinary non-Ascend coding.
+  - **Default Auto-Trigger for `remote-dev` (Remote Ascend Execution)**: `remote-dev` is registered as an always-ready MCP server. Whenever you mention a remote host, container, or NPU command in normal conversation, your Agent automatically invokes `remote-dev` for remote file I/O, patching, and background job execution without needing any slash command.
+- **Configure once, persist across sessions**: After setting your contribution preference, public target repository, and project scope once, eligible tasks associate automatically. Historical experience is purely advisory reference material for the Agent—never a mandatory step.
 - **Domain focus**: Our initial focus domain is `vLLM` / `vLLM-Ascend` inference and operator engineering, designed so additional domains can plug in cleanly using the same package architecture.
 
 ---

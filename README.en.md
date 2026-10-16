@@ -175,9 +175,9 @@ sequenceDiagram
   participant NPU as remote-dev (Remote Ascend Container)
   participant Repo as knowledge-vllm-ascend (Public Corpus)
 
-  Dev->>Agent: Ask to debug or optimize a vLLM-Ascend workload on remote NPUs
+  Dev->>Agent: Invoke /mindie-agent + problem description (activates Ascend knowledge, experience & Skills)
   Agent->>Know: 1. Search domain knowledge outlines (query) & inspect relevant blocks (explain)
-  Agent->>NPU: 2. Read/edit files, apply patches, and run NPU tests inside container (remote.*)
+  Agent->>NPU: 2. Automatically invoke remote-dev to read/edit files, patch, and run NPU tests in container
   NPU-->>Agent: Return execution results & durable log refs
   Agent-->>Dev: 3. Deliver verified fix (optionally record usefulness feedback up/down)
   Note over Agent,Repo: Steps 4–6 run asynchronously in the background ONLY when Community Sharing is enabled (Opt-in)
@@ -188,25 +188,34 @@ sequenceDiagram
 
 ---
 
-## 🔥 Real-World Workflows
+## 🔥 How to Use After Installation (Trigger Modes & Examples)
 
-Once installed, **no special activation command is required**. Just talk to your Agent inside your repository:
+MindIE Agent combines **explicit `/mindie-agent` invocation for domain knowledge, experience, and Skills** with **default automatic invocation for `remote-dev` SSH/container tools**—keeping everyday non-Ascend coding completely clutter-free while giving you full Ascend engineering power on demand:
 
-#### 💡 Scenario 1: Interactive Debugging Inside a Remote Ascend Container
-> **Prompt**:
-> *"Connect to the `vllm-dev` container on host `192.0.2.21` (port 22), inspect `/workspace/vllm-ascend`, find out why Qwen3 accuracy diverges under TP=4, patch the kernel wrapper, and run the corresponding pytest inside the container."*
->
-> **What happens**: Your Agent uses `remote_read`, `remote_grep`, `remote_edit`, and `remote_bash` with `container="vllm-dev"` directly over pooled SSH RPC, automatically tracking long-running test output via durable cursors.
+| Capability Module | Trigger Mode | How It Works |
+| --- | --- | --- |
+| **🧠 Ascend Knowledge, Experience & Skill System**<br/>(`mindie-knowledge` + Domain Skills) | **Manual Trigger**<br/>(Type `/mindie-agent`) | Whenever you need Ascend troubleshooting, operator adaptation, or inference tuning, type **`/mindie-agent <your question>`** (or `$mindie-agent` in Codex) to activate the MindIE Skill workflow, search verified historical experience packages, and bind the session's experience loop. |
+| **⚡ Remote Ascend Server & Container Execution**<br/>(`remote-dev` SSH / Container Toolset) | **Default Auto-Trigger**<br/>(Always-on MCP, no slash command needed) | `remote-dev` is active by default. Whenever you mention a remote server, container, or NPU command in normal conversation, your Agent **automatically calls** `remote_read`, `remote_edit`, `remote_bash`, and background job tools. |
 
-#### 💡 Scenario 2: Querying Verified Ascend Troubleshooting Experience
-> **Prompt**:
-> *"We're hitting an `ACLGraph` capture failure / Triton compilation error with DeepSeek MLA on Ascend A3. Check MindIE knowledge for prior root causes and verified workarounds."*
->
-> **What happens**: Your Agent queries `mindie-knowledge` against synchronized [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) packages, scans the block outline, and reads the exact troubleshooting steps and applicability conditions.
+### Copy-Paste Usage Examples
 
-#### 💡 Scenario 3: Checking Fleet Capacity & Installing Domain Skills
-> **Prompt**:
-> *"Check `npu-top` for any A3 server with at least 4 observed idle NPUs, and install the `ascend-profiling-analysis` skill from `awesome-mindie-skills`."*
+#### 💡 Example 1: Manually Invoke `/mindie-agent` to Tap into Knowledge, Experience & Skills
+```text
+/mindie-agent We're hitting an ACLGraph capture failure / Triton compilation error running DeepSeek MLA on Ascend A3. Check MindIE knowledge and historical experience for the root cause and verified fix.
+```
+> **What happens**: Typing `/mindie-agent` activates the MindIE Agent skill and knowledge workflow. Your Agent queries [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) via `mindie-knowledge`, inspects the `PACKAGE.md` block outline, and reads the exact troubleshooting steps and applicability conditions.
+
+#### 💡 Example 2: Default Auto-Triggered `remote-dev` for Remote Ascend Container Debugging
+```text
+Connect to the vllm-dev container on host 192.0.2.21 (port 22), inspect /workspace/vllm-ascend, find out why Qwen3 accuracy diverges under TP=4, patch the kernel wrapper, and run the corresponding pytest inside the container.
+```
+> **What happens**: Without needing any slash command, your Agent automatically uses `remote_read`, `remote_grep`, `remote_edit`, and `remote_bash` inside the remote `vllm-dev` container over pooled SSH, turning long test runs into managed background jobs with live log streaming.
+
+#### 💡 Example 3: Combining `/mindie-agent` + `remote-dev` for End-to-End NPU Tuning
+```text
+/mindie-agent Using Ascend inference tuning experience, help me profile decode latency bottlenecks on our remote NPU dev machine, pull the key profiling metrics, and verify an optimization patch.
+```
+> **What happens**: Your Agent combines domain knowledge/skills from `/mindie-agent` with live remote execution via `remote-dev`—and if community sharing is enabled for the project, automatically captures and redacts the verified troubleshooting session when the turn finishes.
 
 ---
 

@@ -20,7 +20,9 @@ MindIE Agent does not invent a proprietary chat UI or force you into a custom ta
 | **Shared Knowledge Engine** (`knowledge`) | Managing consent & cursors, running deterministic privacy redaction, coordinating block navigation indexing, serving two-layer search, and tracking PR receipts & recovery | Never imports host-private session tables or guesses task ownership from working directories or timestamps |
 | **Remote & Diagnostics Components** (`remote-dev` / `diagnostics`) | Providing standalone SSH remote execution/background job management, bounded local logs, and opt-in fault reporting | Never depends on experience capture being enabled, and never truncates user job outputs |
 
-In everyday use, knowledge search and `remote-dev` remote tools work on demand regardless of whether experience capture is turned on.
+In everyday workflows:
+- **Manual `/mindie-agent` Trigger**: Type `/mindie-agent <problem description>` (or `$mindie-agent` in Codex) whenever you want to invoke Ascend domain knowledge, historical troubleshooting experience, and the Skill workflow;
+- **Default Auto-Trigger for `remote-dev`**: Remote SSH and container tools are active by default and trigger automatically whenever you ask the Agent to work on a remote server or container, independent of whether experience capture is enabled.
 
 ---
 
