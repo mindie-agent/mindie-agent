@@ -2,129 +2,269 @@
   <img src="assets/brand/mindie-agent-logo.png" alt="MindIE Agent logo" width="128" height="128">
 </p>
 
-# MindIE Agent
+<h1 align="center">MindIE Agent</h1>
 
-[English](README.en.md)
+<p align="center">
+  <strong>让你的 AI Coding Agent 原生掌握昇腾（Ascend）推理工程——自带领域记忆、远端 NPU 容器孪生工具与自进化经验飞轮</strong>
+</p>
 
-**面向昇腾（Ascend）推理工程的智能体能力、领域知识闭环与远端开发工具链**
+<p align="center">
+  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.0.1.md"><img src="https://img.shields.io/badge/release-v0.0.1-7045F5.svg" alt="Release v0.0.1"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent-cc"><img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757.svg" alt="Claude Code Plugin"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent-codex"><img src="https://img.shields.io/badge/OpenAI_Codex-Plugin-10A37F.svg" alt="OpenAI Codex Plugin"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent-kimi"><img src="https://img.shields.io/badge/Kimi_Code-Plugin-2563EB.svg" alt="Kimi Code Plugin"></a>
+  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_NPU-vLLM--Ascend-0F766E.svg" alt="Ascend NPU vLLM-Ascend"></a>
+</p>
 
-MindIE Agent 将昇腾推理开发（如 `vLLM-Ascend` 算子适配、远端 NPU 容器调试、精度比对与性能调优）所需的**领域知识检索、本地任务经验闭环、隐私脱敏分享与 SSH 远端执行能力**，以原生插件的形式接入开发者日常使用的 AI 编程客户端（[OpenAI Codex CLI](https://github.com/mindie-agent/mindie-agent-codex)、[Claude Code](https://github.com/mindie-agent/mindie-agent-cc) 与 [Kimi Code](https://github.com/mindie-agent/mindie-agent-kimi)）。
-
-你无需切换工作流或托管业务源码仓库——直接在自己的业务仓库与原生 Agent 会话中使用即可。
-
----
-
-## 核心特性
-
-- **原生宿主插件，零心智负担接入**：安装后直接在业务仓库的日常会话中生效，不强制任何日常激活或收尾命令，不改写用户已有的其他 Skill、Plugin 或 MCP 配置。
-- **双层知识与经验闭环**：
-  - **公共领域知识库（[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)）**：按需检索经过证据门禁校验的 `vLLM-Ascend` 工程知识包与原始参考材料。
-  - **本地经验沉淀与独立反馈（[`knowledge`](https://github.com/mindie-agent/knowledge)）**：由确定性程序筛选并严格脱敏公开对话块，利用原生小模型生成结构化检索导航，支持跨任务经验复用与独立的有用性反馈（`helpful` / `not_helpful`）。
-- **SSH 远端 NPU 开发底座（[`remote-dev`](https://github.com/mindie-agent/remote-dev)）**：提供编辑器语义的远端文件读写、补丁应用、受管后台作业、日志流式追踪与产物同步，支持本机无 NPU 环境直连远端昇腾容器。
-- **隐私优先与故障可观测（[`diagnostics`](https://github.com/mindie-agent/diagnostics)）**：所有外发通道均执行确定性隐私规则与 Gitleaks 脱敏拦截；组件故障诊断与社区知识贡献分别独立授权，默认不替用户开启任何自动外发。
+<p align="center">
+  <strong>中文</strong> · <a href="./README.en.md">English</a> · <a href="#-一句话无感安装">⚡ 一句话安装</a> · <a href="#-为什么选择-mindie-agent">✨ 核心能力</a> · <a href="#️-架构全景与经验飞轮">🏗️ 架构全景</a> · <a href="#-装好之后怎么用">🔥 实战用法</a> · <a href="#-组件与仓库生态">📦 仓库生态</a> · <a href="./docs/README.md">📚 文档中心</a>
+</p>
 
 ---
 
-## 快速开始
+## ⚡ 一句话无感安装
 
-根据你正在使用的 AI 编程客户端或开发场景选择入口：
+### 方式一：直接甩链接给你的 Agent（最推荐 ✨）
 
-| 使用场景 | 推荐入口 | 说明 |
-|---|---|---|
-| **OpenAI Codex CLI 用户** | **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | 首发 `v0.0.1` 已发布，支持 macOS、原生 Windows 与 Windows WSL |
-| **Claude Code 用户** | **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | 首发 `v0.0.1` 已发布，支持 macOS、原生 Windows 与 Windows WSL |
-| **Kimi Code 用户** | **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | 独立 Kimi Code 原生适配层（不在 `0.0.1` 首发矩阵内） |
-| **按需安装独立 Agent Skills** | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | 面向昇腾推理工程的开源 Agent Skills 精选目录（调试、压测、迁移等） |
-| **搭建本地多任务开发工作区** | **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | 为 `vllm` + `vllm-ascend` 提供基于 Git Worktree 的多任务隔离开发脚手架 |
+你不需要记住任何安装命令。打开你正在使用的 **Claude Code**、**OpenAI Codex CLI** 或 **Kimi Code**，直接复制并发送下面这句话：
 
-### 插件安装与自动更新机制
+```text
+帮我安装一下这个 https://github.com/mindie-agent/mindie-agent
+```
 
-1. **首次安装**：按照 [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) 或 [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) 首页的一行安装命令，通过宿主原生插件市场安装固定的 `v0.0.1` 正式版本。
-2. **日常使用**：在你的业务仓库中正常发起任务。插件在会话启动时准备本地知识服务，在回合结束时自动整理合格任务的经验导航（若尚未开启社区贡献则不会外发，未配置与显式停用状态清晰区分）。
-3. **静默兼容更新**：距离上次成功检查超过 24 小时后，下一次自然使用会在后台异步检查当前宿主版本支持的最高正式 Release，后台准备完成后于空闲时原子切换，保留已有授权配置且无需手动重载。
+Agent 读取本页面后，会自动识别自身宿主环境并执行下方的**自动安装协议**，一步到位完成插件注册与运行时初始化。
+
+<details open>
+<summary>🤖 <b>AI Agent 自动安装执行协议（Instructions for AI Agents — 当用户让你安装本仓库时请直接按此执行）</b></summary>
+
+> **给 AI Agent 的指令**：如果用户要求你安装 `mindie-agent`，请不要让用户手动翻文档，直接按以下步骤自动检测你所在的宿主客户端并在终端执行对应命令：
+>
+> #### 第一步：检查基础环境并识别你所在的宿主客户端
+> 先在终端运行 `git --version && uv --version` 确认基础工具就绪，然后根据你自身的运行环境选择**唯一匹配**的分支执行（若不确定，请检查 `claude --version`、`codex --version` 或 `kimi --version`）：
+>
+> - **分支 A — 如果你是 Claude Code（或检测到 `CLAUDECODE` 环境变量 / 用户使用 `claude`）**：
+>   ```bash
+>   claude plugin marketplace add "https://github.com/mindie-agent/mindie-agent-cc.git#v0.0.1"
+>   claude plugin install mindie-agent@mindie-agent-cc --scope user
+>   claude --init-only
+>   claude plugin list --json
+>   claude mcp list
+>   ```
+>   *验证标准*：`claude plugin list --json` 显示 `mindie-agent@mindie-agent-cc`（`0.0.1`）已启用，且 `claude mcp list` 中 `mindie-knowledge` 与 `remote-dev` 均显示 `Connected`。
+>
+> - **分支 B — 如果你是 OpenAI Codex CLI（或检测到 `CODEX_CI` / `CODEX_THREAD_ID` / 用户使用 `codex`）**：
+>   ```bash
+>   codex plugin marketplace add https://github.com/mindie-agent/mindie-agent-codex.git --ref v0.0.1
+>   codex plugin add mindie-agent@mindie-agent --json
+>   codex plugin list --json
+>   ```
+>   *验证标准*：`codex plugin list --json` 显示 `mindie-agent@mindie-agent`（`0.0.1`）已启用。提醒用户开启新会话即可自动触发 `SessionStart` 构建锁定运行时。
+>
+> - **分支 C — 如果你是 Kimi Code CLI（或检测到 `KIMI_CODE_HOME` / 用户使用 `kimi`）**：
+>   ```bash
+>   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-kimi-install"
+>   rm -rf "$MINDIE_TMP"
+>   git clone --depth 1 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
+>   SETUP_OUT=$(python3 "$MINDIE_TMP/scripts/setup.py")
+>   echo "$SETUP_OUT"
+>   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | python3 -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
+>   python3 "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
+>   ```
+>   *验证标准*：安装脚本成功返回，告知用户可在会话中输入 `/mindie-agent:status` 查看状态。
+>
+> - **分支 D — 如果你是 Cursor / 其他通用 MCP 客户端（仅需 SSH 远端 NPU 开发底座 `remote-dev`）**：
+>   在项目的 `.mcp.json`（或 `.cursor/mcp.json`）中写入 `remote-dev` 服务：
+>   ```json
+>   {
+>     "mcpServers": {
+>       "remote-dev": {
+>         "type": "stdio",
+>         "command": "uvx",
+>         "args": ["--from", "git+https://github.com/mindie-agent/remote-dev@main", "remote-dev", "server"]
+>       }
+>     }
+>   }
+>   ```
+>
+> #### 第二步：向用户汇报安装结果
+> 安装完成后，向用户简要汇报：
+> 1. 已安装的客户端插件名称、版本与验证结果；
+> 2. 说明日常开发**无需任何激活命令**，直接在业务仓库中提问或操作远端 NPU 即可；
+> 3. 说明**社区知识贡献**与**产品故障自动上报**默认均处于关闭状态（Opt-in），保护私密代码与内网信息安全。
+
+</details>
+
+### 方式二：人类终端手动一行安装
+
+如果你更喜欢自己在终端敲命令，按你使用的客户端复制一行即可：
+
+| 客户端 | 一键安装命令 | 插件仓库 |
+| --- | --- | --- |
+| **Claude Code** | `claude plugin marketplace add "https://github.com/mindie-agent/mindie-agent-cc.git#v0.0.1" && claude plugin install mindie-agent@mindie-agent-cc --scope user && claude --init-only` | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) |
+| **OpenAI Codex CLI** | `codex plugin marketplace add https://github.com/mindie-agent/mindie-agent-codex.git --ref v0.0.1 && codex plugin add mindie-agent@mindie-agent --json` | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) |
+| **Kimi Code CLI** | `git clone https://github.com/mindie-agent/mindie-agent-kimi.git && cd mindie-agent-kimi && python3 scripts/setup.py` | [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) |
+| **仅安装 NPU 监控台 (`npu-top`)** | `uvx --from "https://github.com/mindie-agent/npu-top/releases/download/v0.1.6/npu_top-0.1.6-py3-none-any.whl" npu-top serve` | [`npu-top`](https://github.com/mindie-agent/npu-top) |
 
 ---
 
-## 仓库生态与架构分工
+## ✨ 为什么选择 MindIE Agent？
 
-MindIE Agent 采用清晰的职责解耦架构，各组件仓库独立演进并通过锁定版本配套发布：
+昇腾（Ascend）大模型推理工程（如 `vLLM-Ascend` 算子适配、CANN 图编译排障、多机多卡精度对齐与性能调优）往往面临**环境在远端容器、经验散落在聊天记录、通用大模型缺乏昇腾实战上下文**的痛点。
+
+| 维度 | 传统 Agent 开发体验 ❌ | 接入 MindIE Agent 之后 ✅ |
+| --- | --- | --- |
+| **领域经验与踩坑记忆** | 每次新开会话都要从头解释 `vLLM-Ascend` 架构，反复踩相同的算子/HCCL/ACLGraph 坑 | 自动同步 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 真实排障知识包，本地 BM25 秒级定位 + 原文分块按需精读 |
+| **远端 NPU 服务器与容器操作** | 手写冗长 `ssh` / `docker exec` 命令，引号转义频繁出错，长耗时测试断连即丢日志 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) 提供 19 个与本地 `Read`/`Edit`/`Bash`/`Grep` 完全同构的远端孪生工具，直接深入运行中的容器 |
+| **经验沉淀与隐私安全** | 有价值的排障过程随会话关闭而流失；或者担心内网 IP、路径、Token 泄露而不敢分享 | 用户显式授权后，由确定性规则 + Gitleaks 双重脱敏公开对话，绝不用大模型篡改技术原文 |
+| **工作流侵入性** | 被迫迁入厚重的定制脚手架或改写个人全局 MCP/Skills 配置 | **零日常仪式感**：直接在你自己的业务 Git 仓库与原生 Agent 会话中按需介入，不触碰无关配置 |
+
+---
+
+## 🏗️ 架构全景与经验飞轮
+
+### 1. 模块化分层架构
+
+MindIE Agent 采用**薄客户端适配层 + 独立共享运行时底座**架构，不綁架业务源码仓库：
 
 ```mermaid
 flowchart TB
-    subgraph Clients["宿主适配插件 (Harness Plugins)"]
-        Codex["mindie-agent-codex<br/>(OpenAI Codex CLI)"]
-        CC["mindie-agent-cc<br/>(Claude Code)"]
-        Kimi["mindie-agent-kimi<br/>(Kimi Code)"]
-    end
+  subgraph Clients["🧑‍💻 开发者日常 AI 编程客户端 (Native Coding Agents)"]
+    CC["Claude Code"]
+    Codex["OpenAI Codex CLI"]
+    Kimi["Kimi Code CLI"]
+  end
 
-    subgraph Runtimes["共享运行时组件 (Shared Runtimes)"]
-        Knowledge["knowledge<br/>(知识同步 / 本地经验索引 / 脱敏分享)"]
-        RemoteDev["remote-dev<br/>(SSH 远端文件 / 作业 / 产物 MCP)"]
-        Diagnostics["diagnostics<br/>(结构化本地诊断与授权故障上报)"]
-    end
+  subgraph Adapters["🔌 原生插件薄适配层 (Thin Harness Plugins)"]
+    P_CC["mindie-agent-cc"]
+    P_Codex["mindie-agent-codex"]
+    P_Kimi["mindie-agent-kimi"]
+  end
 
-    subgraph Optional["可选集群工具与社区生态 (Optional & Community)"]
-        Corpus["knowledge-vllm-ascend<br/>(vLLM-Ascend 公共知识包)"]
-        Coordinator["coordinator<br/>(昇腾容器池与 NPU 绑定协调)"]
-        NpuTop["npu-top<br/>(昇腾集群只读监控 TUI/Web/MCP)"]
-        Skills["awesome-mindie-skills &<br/>vllm-ascend-workspace"]
-    end
+  subgraph Core["⚙️ 共享运行时组件底座 (Shared Runtime Components)"]
+    Knowledge["🧠 mindie-knowledge<br/>本地 BM25 检索 · 确定性脱敏 · 异步索引"]
+    RemoteDev["⚡ remote-dev<br/>19 个 SSH 远端孪生工具 · 容器直连 · 持久作业"]
+    Coord["🎯 coordinator<br/>持久化用户容器 · Git 快照物化 · NPU 租约队列"]
+    NpuTop["📊 npu-top<br/>无代理 NPU 实时看板 · 90 天热力图 (只观测不分配)"]
+    Diag["🛡️ mindie-diagnostics<br/>有界 JSONL 轮转日志 · 严密白名单故障上报"]
+  end
 
-    Codex --> Knowledge
-    Codex --> RemoteDev
-    Codex --> Diagnostics
-    CC --> Knowledge
-    CC --> RemoteDev
-    CC --> Diagnostics
-    Kimi --> Knowledge
-    Kimi --> RemoteDev
-    Kimi --> Diagnostics
-    Knowledge <--> Corpus
+  subgraph Remote["🖥️ 远端昇腾集群与知识源 (Ascend Fleet & Canonical Feed)"]
+    Feed[("📚 knowledge-vllm-ascend<br/>公共工程知识包与有用性反馈")]
+    Cluster[("🚀 远端昇腾 NPU 主机与 Docker 容器<br/>910B / A3 / Ascend 950 (A5)")]
+  end
+
+  CC --> P_CC
+  Codex --> P_Codex
+  Kimi --> P_Kimi
+
+  P_CC & P_Codex & P_Kimi --> Knowledge & RemoteDev & Diag
+  Knowledge <--> Feed
+  RemoteDev --> Cluster
+  Coord --> RemoteDev
+  NpuTop -. "SSH 只读探测" .-> Cluster
 ```
 
-| 仓库 | 定位与职责 |
-|---|---|
-| [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品总入口、整体架构、领域边界、九条设计原则与版本发布记录 |
-| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) | OpenAI Codex CLI 原生插件、生命周期 Hook 与任务接入（`v0.0.1`） |
-| [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) | Claude Code 原生插件、生命周期 Hook 与任务接入（`v0.0.1`） |
-| [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) | Kimi Code 原生适配层、Hook 与本地模型适配 |
-| [`knowledge`](https://github.com/mindie-agent/knowledge) | 共享知识与经验运行时：公共知识同步、本地检索、隐私脱敏与有用性反馈 |
-| [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) | `vLLM-Ascend` 领域公共工程知识包仓库（正式 Feed 源） |
-| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 基于 SSH 的远端文件读写、补丁、受管后台作业与产物同步 MCP/CLI |
-| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | 组件结构化日志、隐私脱敏支持包与显式授权的 GitHub Issue 故障上报 |
-| [`coordinator`](https://github.com/mindie-agent/coordinator) | 昇腾主机可选本地回环 MCP 协调器（任务身份、就绪容器池与独占 NPU 绑定） |
-| [`npu-top`](https://github.com/mindie-agent/npu-top) | 仅监听本地回环的昇腾 NPU 集群只读观测工具（TUI / Web / CLI / MCP） |
-| [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) | 面向昇腾推理工程的开源 Agent Skills 精选目录 |
-| [`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace) | 面向 `vllm` 与 `vllm-ascend` 的本地开发工作区脚手架 |
+### 2. 领域知识与实战经验自进化闭环
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Dev as 开发者
+  participant Agent as Coding Agent (Claude / Codex / Kimi)
+  participant Know as mindie-knowledge (本地服务)
+  participant NPU as remote-dev (远端昇腾容器)
+  participant Repo as knowledge-vllm-ascend (公共知识库)
+
+  Dev->>Agent: 提问或要求定位 vLLM-Ascend 远端 NPU 故障
+  Agent->>Know: 1. 检索相关领域知识摘要 (query) 并按需精读原文分块 (explain)
+  Agent->>NPU: 2. 在远端容器内读写代码、打补丁并运行 NPU 验证 (remote.edit / remote.bash)
+  NPU-->>Agent: 返回实机执行结果与日志引用
+  Agent-->>Dev: 3. 完成修复并给出最终回复 (可选提交知识有用性反馈 up/down)
+  Note over Agent,Repo: 以下步骤仅在用户已显式开启「社区共享 (Opt-in)」时后台异步触发
+  Agent->>Know: 4. 会话结束 (Stop Hook) 捕获公开可见对话投影
+  Know->>Know: 5. 确定性规则 + Gitleaks 脱敏 (拒绝任何未决敏感信息) + 小模型生成分块导航
+  Know->>Repo: 6. 自动创建脱敏 Markdown 知识包 PR 沉淀回社区
+```
 
 ---
 
-## 文档导航
+## 🔥 装好之后怎么用？
 
-本仓库 `docs/` 目录维护 MindIE Agent 的核心架构、设计原则、子系统规范与正式发布记录（均提供中英双语版本）：
+安装完成后，**不需要输入任何特殊唤醒指令**。直接在你的 `vllm` / `vllm-ascend` 或业务仓库里向 Agent 提问即可：
 
-- **索引与总览**：[文档目录（中文）](docs/README.md) · [Documentation Index (English)](docs/README.en.md)
-- **核心设计原则**：[九条设计原则](docs/design-principles.md) · [Nine Design Principles](docs/design-principles.en.md)
-- **总体架构**：[系统架构与领域边界](docs/architecture.md) · [System Architecture](docs/architecture.en.md)
-- **知识与经验系统**：[知识与经验闭环设计](docs/knowledge-system.md) · [Knowledge & Experience System](docs/knowledge-system.en.md)
-- **宿主边界与生命周期**：[Harness 边界与生命周期契约](docs/harness-boundary-and-lifecycle.md) · [Harness Boundary & Lifecycle](docs/harness-boundary-and-lifecycle.en.md)
-- **发布兼容与静默更新**：[配套发布与静默更新规范](docs/release-compatibility-and-update.md) · [Release Compatibility & Silent Update](docs/release-compatibility-and-update.en.md)
-- **诊断与故障上报**：[日志、故障定位与自动 Issue 规范](docs/diagnostics-and-reporting.md) · [Diagnostics & Fault Reporting](docs/diagnostics-and-reporting.en.md)
-- **原生运行时复用**：[原生插件管理、Hook 与进程树复用说明](docs/native-runtime-reuse.md) · [Native Runtime & Process Reuse](docs/native-runtime-reuse.en.md)
-- **发布记录与后续规划**：
-  - [`0.0.1` 正式发布记录](docs/releases/0.0.1.md) · [`0.0.1` Release Record](docs/releases/0.0.1.en.md)
-  - [路线图与后续迭代](docs/next-steps.md) · [Roadmap & Next Steps](docs/next-steps.en.md)
+#### 💡 场景 1：远端昇腾容器内交互式排障与改代码
+> **你对 Agent 说**：
+> *“连上远端机器 `192.0.2.21`（端口 22）上的 `vllm-dev` 容器，帮我看下 `/workspace/vllm-ascend` 当前分支的报错日志，定位为什么 Qwen3 在 TP=4 下精度异常，修改后在容器里跑一下对应的 pytest。”*
+>
+> **背后发生的事**：Agent 自动调用 `remote_read`、`remote_grep`、`remote_edit` 与 `remote_bash` 在 `vllm-dev` 容器内完成代码检索、原子修改与测试验证，长耗时任务自动转为持久后台会话。
 
----
+#### 💡 场景 2：检索社区已验证的昇腾推理排障经验
+> **你对 Agent 说**：
+> *“我们在昇腾 A3 上跑 DeepSeek MLA 遇到 `ACLGraph` 捕获失败 / Triton 内核编译报错，先查下 MindIE 知识库里有没有相同现象的根因和修复方案。”*
+>
+> **背后发生的事**：Agent 调用 `mindie-knowledge` 检索 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) 中的真实排障案例，先看分块摘要大纲，再按需展开对应分块的完整命令、报错栈与适用条件。
 
-## 当前版本状态与已知说明（`v0.0.1`）
-
-- **支持矩阵**：首发 `v0.0.1` 覆盖 `Codex` / `Claude Code` × `macOS` / `原生 Windows` / `Windows WSL` 六个宿主与平台组合，配套锁定 `mindie-knowledge v0.9.5`、`mindie-remote-dev v0.11.0` 与 `vaws-dfx v0.4.1`。精确支持的宿主版本区间与六组合验收证据见 [`0.0.1` 发布记录](docs/releases/0.0.1.md)。
-- **已知宿主限制**：在 OpenAI Codex CLI 中，当子代理（Child Agent）被中断时，宿主可能未将中断信号送达待处理的工具调用，导致本地辅助进程或已启动的远端命令继续运行。该限制已记录在发布说明中，插件不引入破坏边界的私有进程猎杀机制，持久后台作业仍通过 `remote-dev` 独立生命周期管理。
-- **诚实声明**：业务效果基准评测（Benchmark）独立推进，当前版本不作任务质量或成本收益的量化宣称。[用户须知](https://github.com/mindie-agent/mindie-agent-codex/blob/main/plugins/mindie-agent/skills/mindie-agent/references/user-notice.md)详细说明了公开材料范围、规则脱敏边界与公开 Git 历史不可撤回特性。
+#### 💡 场景 3：查看集群空闲 NPU 水位或补充专项 Skill
+> **你对 Agent 说**：
+> *“用 `npu-top` 看下现在哪台 A3 服务器有至少 4 张空闲 NPU？另外帮我从 `awesome-mindie-skills` 装一下 `ascend-profiling-analysis` 技能。”*
 
 ---
 
-## 参与贡献
+## 📦 组件与仓库生态
 
-请先阅读组织级[贡献指南](https://github.com/mindie-agent/.github/blob/main/CONTRIBUTING.md)与本仓库的[九条设计原则](docs/design-principles.md)。所有开发类 Pull Request 在提交前均须对照九条设计原则完成逐条审查，并在 PR 描述中附上审查记录。
+`@mindie-agent` 组织下的每个仓库均遵循单一职责边界，既可由插件协同联动，也可独立安装使用：
+
+### 1. 产品总入口与社区生态
+
+| 仓库 | 定位与核心职责 |
+| --- | --- |
+| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
+| **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | 面向昇腾推理工程的高质量开源 Agent Skills 精选目录（精度定位、性能采集、算子分析等） |
+
+### 2. 原生客户端插件（Harness Adapters）
+
+| 仓库 | 适用宿主 | 定位与核心职责 |
+| --- | --- | --- |
+| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | Claude Code 原生插件：生命周期 Hook、MCP 服务桥接与固定运行时管理 |
+| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | OpenAI Codex CLI 原生插件：Marketplace 安装、Rollout 增量脱敏采集与服务连续性管理 |
+| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | Kimi Code 原生插件：代数原子更新、公开会话投影采集与 MCP 桥接 |
+
+### 3. 共享运行时底座（Shared Runtime Components）
+
+| 仓库 | Python 包 / 入口 | 定位与核心职责 |
+| --- | --- | --- |
+| **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | 共享知识与经验闭环引擎：本地 SQLite/BM25 检索、确定性脱敏、块索引调度、Git PR 发布与独立反馈 |
+| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | *(Markdown 知识库)* | `vLLM` / `vLLM-Ascend` 领域公共工程知识包与有用性反馈权威语料源 |
+| **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | SSH 远端开发底座：19 个本地工具孪生、已有 Docker 容器直连、连接池复用与产物传输 |
+| **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | 本地受管执行控制面：持久化用户容器生命周期、Git 快照物化与宿主机 NPU 排队分配 |
+| **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | 昇腾 NPU 无代理监控台：Web 实时看板、90 天有界历史热力图与只读 Agent CLI/MCP 观测面 |
+| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` | 结构化诊断底座：无模型 4×1 MiB 本地日志轮转、离线脱敏诊断包与可选 GitHub Issue 自动上报 |
+
+---
+
+## 🧭 工程设计哲学
+
+MindIE Agent 在持续演进中沉淀了一套严格的 **[工程设计原则](./docs/design-principles.md)**（[English](./docs/design-principles.en.md)），核心理念包括：
+
+- **以完成用户实际目标的总成本衡量效率**：绝不为了防备极小概率异常而给每次日常任务强加繁琐仪式。
+- **零心智负担与按需介入**：工具内部消化管理复杂度；Skill 仅提供信息与导航；知识仅作带证据的参考，绝不喧宾夺主。
+- **复用成熟机制，按确证缺口自研**：优先复用宿主、OS 与成熟组件能力，替代旧方案时彻底移除重复状态机。
+- **诚实可观测，严禁静默降级或隐藏错误**：明确区分“已完成”、“失败”与“外部副作用不确定（`unknown`）”，绝不伪造成功或盲目重放不确定写入。
+
+---
+
+## 📚 文档中心
+
+完整技术文档索引请参阅 **[`docs/README.md`](./docs/README.md)**（**[English Documentation Index](./docs/README.en.md)**）：
+
+| 文档主题 | 中文 | English |
+| --- | --- | --- |
+| **系统架构与组件边界** | [docs/architecture.md](./docs/architecture.md) | [docs/architecture.en.md](./docs/architecture.en.md) |
+| **工程设计原则与演进准则** | [docs/design-principles.md](./docs/design-principles.md) | [docs/design-principles.en.md](./docs/design-principles.en.md) |
+| **知识与经验闭环设计** | [docs/knowledge-system.md](./docs/knowledge-system.md) | [docs/knowledge-system.en.md](./docs/knowledge-system.en.md) |
+| **Harness 边界、授权与生命周期** | [docs/harness-boundary-and-lifecycle.md](./docs/harness-boundary-and-lifecycle.md) | [docs/harness-boundary-and-lifecycle.en.md](./docs/harness-boundary-and-lifecycle.en.md) |
+| **原生运行时复用设计** | [docs/native-runtime-reuse.md](./docs/native-runtime-reuse.md) | [docs/native-runtime-reuse.en.md](./docs/native-runtime-reuse.en.md) |
+| **发布兼容、配套发行与静默更新** | [docs/release-compatibility-and-update.md](./docs/release-compatibility-and-update.md) | [docs/release-compatibility-and-update.en.md](./docs/release-compatibility-and-update.en.md) |
+| **结构化诊断与故障自动上报** | [docs/diagnostics-and-reporting.md](./docs/diagnostics-and-reporting.md) | [docs/diagnostics-and-reporting.en.md](./docs/diagnostics-and-reporting.en.md) |
+| **演进路线与下一步重点** | [docs/next-steps.md](./docs/next-steps.md) | [docs/next-steps.en.md](./docs/next-steps.en.md) |
+| **`v0.0.1` 首发版本发布记录** | [docs/releases/0.0.1.md](./docs/releases/0.0.1.md) | [docs/releases/0.0.1.en.md](./docs/releases/0.0.1.en.md) |

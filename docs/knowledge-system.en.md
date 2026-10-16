@@ -1,80 +1,89 @@
 # Knowledge & Experience System Design
 
-[中文](knowledge-system.md) · [Back to Documentation Index](README.en.md)
+[中文](knowledge-system.md) · [Back to Documentation Center](README.en.md)
 
-This document specifies MindIE Agent's public domain knowledge synchronization, local task experience projection, multi-stage privacy redaction, native small-model navigation indexing, two-layer storage, and community sharing loop. It follows the [Nine Design Principles](design-principles.en.md) and [System Architecture](architecture.en.md). The shared runtime implementation lives in [`mindie-agent/knowledge`](https://github.com/mindie-agent/knowledge), and the public `vLLM-Ascend` corpus lives in [`mindie-agent/knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend).
+This document explains how MindIE Agent turns real-world Ascend NPU debugging and engineering sessions into structured, reusable Markdown knowledge packages—while keeping private data safe and context windows lean.
 
----
-
-## 1. Core Design Goals
-
-1. **Complete Primary Text, Never Replaced by Summaries**: Selecting and redacting public conversation turns is performed entirely by deterministic code and saved as immutable, ordered Markdown blocks (`materials/0001.md`, `0002.md`, ...). No LLM rewrites the body text or truncates the middle of long tasks.
-2. **Lightweight Retrieval Navigation for On-Demand Reading**: Each adapter uses its lightweight native model (with LangMem) strictly to generate fallible block titles, summaries, and task-level navigation (`PACKAGE.md`), enabling Agents to inspect the task outline first and read specific blocks on demand.
-3. **Two-Layer Isolation with a Unified Package Format**: Curated public domain knowledge (`public/`) and private local task records (`local/`) are physically separated on disk while sharing the same `mindie-material-task/1` package layout and rebuildable ReMe retrieval index.
-4. **Fail-Closed Privacy & Consent**: No collection occurs without configured consent or when explicitly disabled. Deterministic privacy rules and Gitleaks scanning run before disk persistence, model indexing, and external publication.
-5. **Advisory Knowledge & Independent Usefulness Feedback**: Retrieval hits or public merges never grant decision authority. Consuming tasks can independently record `helpful` / `not_helpful` feedback after actual use.
+- Governed by: [Engineering Design Principles](design-principles.en.md) · [Architecture & Module Boundaries](architecture.en.md)
+- Core Engine Repository: [`mindie-agent/knowledge`](https://github.com/mindie-agent/knowledge)
+- Public Domain Corpus: [`mindie-agent/knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)
 
 ---
 
-## 2. Pipeline & Lifecycle
+## 1. Five Core Design Ideas
+
+1. **Preserve the Complete Primary Conversation—Never Replace It with a Summary**
+   - Many memory systems ask an LLM to rewrite a debugging session into a short paragraph, losing the exact stack traces, environment variables, and diagnostic turning points that actually matter.
+   - In MindIE Agent, extracting and redacting public conversation turns is done entirely by **deterministic code** and saved as immutable, ordered Markdown blocks (`materials/0001.md`, `0002.md`, ...). No LLM ever rewrites the body text or truncates the middle of a long task.
+2. **Use a Lightweight Native Model Only to Build the "Table of Contents"**
+   - So Agents don't have to load massive transcripts into context, each Harness plugin uses its lightweight native model (with LangMem) strictly to generate block titles, search summaries, and a task-level navigation manifest (`PACKAGE.md`).
+   - When searching, the Agent reads `PACKAGE.md` first to see the big picture, then loads only the specific block(s) it needs (e.g., `#0002`).
+3. **Two-Layer Storage Isolation with One Unified Format**
+   - Curated community knowledge (`public/`) and private local task records (`local/`) live in separate directories on disk but share the exact same `mindie-material-task/1` package format and rebuildable ReMe search index.
+4. **Fail-Closed Privacy & Explicit Consent**
+   - Nothing is collected without explicit project-scope consent. Before any bytes are written to disk, sent to the indexing model, or proposed in a public PR, deterministic privacy rules and Gitleaks secret scanning run automatically.
+5. **Advisory Knowledge with Real-World Usefulness Feedback**
+   - Knowledge entries are helpful reference leads, never mandatory rules. After consulting an entry in a real task, the consuming Agent can submit `helpful` or `not_helpful` feedback to help the corpus evolve.
+
+---
+
+## 2. End-to-End Pipeline: From Session to Knowledge Package
 
 ```mermaid
 flowchart TB
-    T["Verified Native Host Transcript"] --> P["1. Deterministic Public Message Projection<br/>(User input, public progress, final answer)"]
+    T["Verified Host Session Transcript"] --> P["1. Deterministic Public Message Extraction<br/>(Keep only user input, public progress & final answer)"]
     P --> R["2. Deterministic Privacy Rules + Gitleaks Redaction"]
-    R --> B["3. Persist Immutable Markdown Blocks<br/>(materials/0001.md, 0002.md...)"]
-    B --> I["4. Native Small Model Generates Incremental Navigation<br/>(PACKAGE.md + SQLite cursor commit)"]
+    R --> B["3. Write Immutable Markdown Blocks<br/>(materials/0001.md, 0002.md...)"]
+    B --> I["4. Lightweight Native Model Builds Navigation<br/>(Update PACKAGE.md & advance SQLite cursor)"]
     I --> L["5. Update Local Rebuildable ReMe Index<br/>(BM25 + Hybrid Search)"]
     I --> O{"Community Sharing Enabled?"}
-    O -->|No / Local Only| L
-    O -->|Yes| G["6. Propose Public Package PR<br/>(knowledge-vllm-ascend)"]
-    G --> Bot["7. Grok Bot Safety Review & Merge"]
-    Bot --> Sync["8. Client Incremental Sync (public/)"]
+    O -->|No (Local Reuse Only)| L
+    O -->|Yes| G["6. Automatically Open Public Package PR<br/>(knowledge-vllm-ascend)"]
+    G --> Bot["7. Grok Bot Safety & Compliance Review"]
+    Bot --> Sync["8. Incremental Client Sync (public/)"]
 ```
 
-### 2.1 Deterministic Transcript Projection
+### 2.1 Step 1: Deterministic Public Message Extraction
+- The plugin reads only the explicitly verified transcript of the current task—never scanning arbitrary historical sessions.
+- **Only three message types are kept**: **User Input**, **Public Assistant Progress**, and **Final Answers**.
+- **Internal noise is stripped**: Raw tool call payloads, hidden reasoning chains, system-injected instructions, and duplicate host wrapper events are deterministically removed.
 
-- The host adapter reads only the explicitly named, ownership-verified native task transcript.
-- Only three categories of public messages survive projection: **User Input**, **Public Assistant Progress**, and **Final Answers**.
-- Raw tool call arguments/outputs, hidden reasoning traces, system-injected instructions, and duplicate host wrapper events are deterministically stripped.
+### 2.2 Step 2: Multi-Stage Privacy Redaction & Safety Gate
+- Before writing to disk, calling the indexing model, or opening a PR, `mindie_knowledge.redact` and Gitleaks scanning run automatically.
+- Secrets, tokens, private keys, private IPv4 ranges, SSH `user@host` endpoints, local home directory paths (`/Users/...`, `/home/...`, `C:\Users\...`), and email addresses are redacted or blocked.
+- **Defense in depth**: Pattern redaction complements explicit consent—only tasks inside the user's authorized project scope are admitted.
 
-### 2.2 Privacy Redaction & Safety Gate
-
-- Before any body bytes are written to disk, passed to the indexing model, or packaged into a public PR, `mindie_knowledge.redact` and Gitleaks scanning are enforced.
-- Credentials, tokens, private keys, private IPv4 ranges, SSH `user@host` endpoints, local user home directory paths, and email addresses are detected and redacted or blocked.
-- Rule-based redaction complements rather than replaces project-scope consent: only tasks within the user's explicitly authorized project scope are admitted.
-
-### 2.3 Immutable Blocks & Small-Model Navigation
-
-- Complete redacted turns are split sequentially into immutable `mindie-material-block/1` files (`materials/0001.md`, `0002.md`, ...).
-- The adapter invokes its lightweight native model to produce titles and retrieval summaries for new blocks and update the task manifest `PACKAGE.md` (`mindie-material-task/1` embedding a `mindie-entry/3` header).
-- Long tasks advance incrementally via durable cursors without arbitrary task-size truncation limits. If an indexing call fails, local blocks are preserved and the unfinished stage is reported honestly without faking completion or replaying uncertain paid calls.
+### 2.3 Step 3: Immutable Blocks & Small-Model Navigation
+- Redacted turns are split sequentially into immutable `mindie-material-block/1` files (`materials/0001.md`, `0002.md`, ...).
+- The adapter's lightweight model generates titles, retrieval summaries, and applicability `conditions` for new blocks, updating `PACKAGE.md`.
+- Long tasks advance incrementally via durable cursors. If an indexing model call fails, the saved Markdown blocks remain intact on disk and the unfinished stage is reported honestly without faking completion or blindly retrying uncertain paid calls.
 
 ---
 
-## 3. Package Layout Specification
+## 3. What a Knowledge Package Looks Like (`tasks/<task_hash>/`)
 
-Both local experience packages and public packages in [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) reside under `tasks/<64-hex-task-hash>/`:
+Both local experience packages and public packages in [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) follow the exact same directory layout:
 
 ```text
 tasks/<task_hash>/
-├── PACKAGE.md           # Task manifest (mindie-material-task/1 + mindie-entry/3 header, summary, and block table)
+├── PACKAGE.md           # Task manifest (mindie-material-task/1 + mindie-entry/3 header, summary & block table)
 └── materials/
     ├── 0001.md          # Ordered redacted conversation block 1 (mindie-material-block/1)
     ├── 0002.md          # Ordered redacted conversation block 2
     └── ...
 ```
 
-- **Task Navigation Read**: Reading `tasks/<task_hash>` returns the task summary, applicability `conditions`, and block outline from `PACKAGE.md`.
-- **Block Read**: Reading a specific block reference returns that exact block body, its file hash, and adjacent block references so the Agent only loads the context it needs.
+- **Read the Outline First (`tasks/<task_hash>`)**: Returns `PACKAGE.md` with the overall problem summary, applicability conditions, and block table of contents.
+- **Read Specific Blocks on Demand (`tasks/<task_hash>#0001`)**: Returns that exact block's Markdown body, file hash, and adjacent block pointers so the Agent loads only the context it needs.
 
 ---
 
-## 4. Authoritative State, Derived Indexes, and Feedback
+## 4. Authoritative Markdown Storage & Rebuildable Indexes
 
-- **Authoritative Store vs. Derived Index**:
-  - **Markdown files** are the sole authoritative store for body text.
-  - **SQLite** stores compact cursors, queues, consent bindings, and external operation outcomes (including `unknown` receipts).
-  - **ReMe** maintains an in-process derived search index that can be rebuilt from authoritative Markdown files at any time. Missing or corrupted SQLite state fails visibly while preserving all Markdown body files.
-- **Literal Citations**: Literal citations inside block bodies participate in search grouping only when the cited source independently matches the query terms; citation counts never confer truth certification.
-- **Independent Usefulness Feedback**: After consulting an entry in a real task, the consuming Agent may optionally submit `helpful` or `not_helpful` feedback with a brief explanation to inform retrieval ranking and corpus maintenance.
+- **Markdown Is the Source of Truth**:
+  - **Markdown files** on disk are the sole authoritative store for conversation content;
+  - **SQLite** stores compact cursors, queues, consent bindings, and external operation receipts;
+  - **ReMe** maintains an in-process search index that can be rebuilt from the Markdown files at any time. If SQLite is missing or corrupted, the runtime reports a clear error and protects all existing Markdown files rather than treating it as a fresh install.
+- **Citations & Feedback**:
+  - Literal citations inside blocks participate in search grouping only when the cited package also matches the current query; citation count never implies official certification.
+  - Consuming tasks can optionally submit `helpful` or `not_helpful` feedback after real use to improve ranking and guide corpus maintenance.

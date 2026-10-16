@@ -1,29 +1,29 @@
-# MindIE Agent Documentation Index
+# MindIE Agent Documentation Center
 
 [中文](README.md) · [Back to Home](../README.en.md)
 
-This directory contains the system architecture, nine core design principles, cross-component contracts, runtime specifications, and official release records for MindIE Agent. Every document is available in both English and Chinese.
+Welcome to the MindIE Agent documentation center. Here you will find the system architecture, engineering design principles, knowledge-loop design, runtime lifecycle guides, and official release records. Every document is available in both English and Chinese.
 
-## Core Architecture & Principles
+## Architecture & Design Principles
 
-| Document (English) | 中文 | Description |
+| Document (English) | 中文 | What It Covers |
 |---|---|---|
-| [Nine Design Principles](design-principles.en.md) | [九条设计原则](design-principles.md) | Foundational engineering principles governing all MindIE Agent design, code, configuration, and release decisions |
-| [Architecture & Domain Boundaries](architecture.en.md) | [系统架构与领域边界](architecture.md) | Component ownership, architectural layers, and runtime boundaries across Harness plugins and shared runtimes |
-| [Knowledge & Experience System](knowledge-system.en.md) | [知识与经验闭环设计](knowledge-system.md) | Deterministic transcript projection, multi-stage redaction, native small-model navigation indexing, two-layer storage, and community sharing |
+| [Engineering Design Principles](design-principles.en.md) | [工程设计原则与演进准则](design-principles.md) | The core product and engineering principles governing tool boundaries, developer experience, mechanism reuse, and error visibility |
+| [Architecture & Module Boundaries](architecture.en.md) | [系统架构与模块分工](architecture.md) | How native Harness plugins, the knowledge engine, remote execution, NPU observability, and diagnostics fit together |
+| [Knowledge & Experience System](knowledge-system.en.md) | [知识与经验闭环设计](knowledge-system.md) | How troubleshooting sessions are redacted, indexed into lightweight Markdown packages, and shared with the community |
 
-## Runtime Contracts & Engineering Specifications
+## Runtime Lifecycle & Engineering Specifications
 
-| Document (English) | 中文 | Description |
+| Document (English) | 中文 | What It Covers |
 |---|---|---|
-| [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | [Harness 边界与生命周期](harness-boundary-and-lifecycle.md) | Task identity attribution, persistent consent, operation lifetimes, authoritative state recovery, and single-binding installation contract |
-| [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | [发布兼容与静默更新](release-compatibility-and-update.md) | Paired component/plugin release checklist, Harness compatibility range selection, and silent background cutover contract |
-| [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | [日志、故障定位与自动 Issue](diagnostics-and-reporting.md) | Bounded local structured logs, privacy redaction boundaries, opt-in GitHub Issue reporting, and retry budgets |
-| [Native Runtime & Process Reuse](native-runtime-reuse.en.md) | [原生更新、Hook 与进程管理复用](native-runtime-reuse.md) | Architectural rationale and evidence for reusing native plugin managers, `uv` locked environments, and OS process-tree primitives |
+| [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | Task identity attribution, persistent user consent, operation lifetimes, and local state protection |
+| [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | [版本兼容与无感更新](release-compatibility-and-update.md) | Paired component/plugin release workflow, SemVer host compatibility matching, and background silent updates |
+| [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | [诊断日志与故障上报](diagnostics-and-reporting.md) | Bounded local structured logs, strict privacy redaction rules, and opt-in GitHub Issue fault reporting |
+| [Native Runtime & Process Reuse](native-runtime-reuse.en.md) | [原生能力与系统机制复用](native-runtime-reuse.md) | How MindIE Agent reuses native plugin managers, `uv` locked environments, and OS process-tree primitives |
 
 ## Release Records & Roadmap
 
-| Document (English) | 中文 | Description |
+| Document (English) | 中文 | What It Covers |
 |---|---|---|
-| [`0.0.1` Release Record](releases/0.0.1.en.md) | [`0.0.1` 发布记录](releases/0.0.1.md) | `0.0.1` supported matrix, paired component Release mapping, six-environment verification evidence, and known limitations |
-| [Roadmap & Next Steps](next-steps.en.md) | [后续迭代](next-steps.md) | Current engineering priorities, business benchmark roadmap, and upstream host issue tracking |
+| [`0.0.1` Release Record](releases/0.0.1.en.md) | [`0.0.1` 版本发布记录](releases/0.0.1.md) | Supported host matrix, paired component release mapping, verified capabilities, and known host limitations |
+| [Roadmap & Next Steps](next-steps.en.md) | [后续演进路线图](next-steps.md) | Upcoming work on end-to-end benchmarks, broader host coverage, and developer experience improvements |

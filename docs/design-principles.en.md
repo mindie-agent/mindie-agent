@@ -1,70 +1,89 @@
-# MindIE Agent Design Principles
+# MindIE Agent Engineering Design Principles & Guidelines
 
-[中文](design-principles.md) · [Back to Documentation Index](README.en.md)
+[中文](design-principles.md) · [Back to Documentation Center](README.en.md)
 
-Status: current
+MindIE Agent is built with a single goal: **make general-purpose AI coding agents genuinely effective, effortless, and unobtrusive for Ascend NPU and LLM inference engineering.**
 
-MindIE Agent inherits all nine design principles originally established in VAWS. Product renaming, plugin packaging, shared runtime components, and Harness adapters are governed by the exact same set of principles; architectural refactoring does not introduce replacement rules or elevate implementation details into mandatory user ceremony. Retiring the legacy VAWS entry points does not alter the validity of these principles.
+Starting from nine foundational product and boundary principles, our engineering guidelines have evolved through real-world Ascend troubleshooting, cross-platform support (macOS, native Windows, Windows WSL), and multi-host integration (Claude Code, OpenAI Codex CLI, Kimi Code) into a comprehensive set of product and operational rules.
 
-These principles guide all design trade-offs across MindIE Agent. Principle 1 takes precedence over other design choices, though reducing cost is never an excuse to hide errors or weaken confirmed product requirements. Existing components, interfaces, Skills, documentation, and prior designs may be adjusted accordingly. Normal engineering tasks continue to invoke capabilities on demand; every development task must complete the design-principles review specified in this document before submitting a PR. This is a development delivery gate and adds no extra approval step for end users.
+---
 
-1. **Measure Agent efficiency by the total cost of achieving the user's real goal.** Total cost includes comprehension, operation, waiting, troubleshooting, and rework. Reliability investments are worthwhile only when they reduce these costs; never burden every ordinary task with complex ceremony just to guard against low-probability edge cases. When other design considerations conflict with this rule, Principle 1 prevails.
-2. **Toolify only closed problems with well-defined boundaries.** A tool must have explicit applicability conditions, inputs/outputs, and failure boundaries. Problems that are highly variable or depend on contextual judgment should be handled by other means. Repeated mechanical operations with well-established boundaries inside open-ended tasks may be extracted into stable tools; never expand scope merely for the sake of building a tool. Complexity or expressibility in code alone does not make a problem closed.
-3. **Never increase the Agent's cognitive load.** Tools must absorb internal management complexity and let the Agent operate using concepts native to the engineering task. CLIs with sprawling flags, opaque hidden state, or failures that require studying internal implementation details to diagnose are classic anti-patterns.
-4. **Every tool must have a clear boundary and single definition.** A tool solves one problem or one cohesive class of problems. It may internally execute multiple steps required to fulfill that operation; do not force the Agent to orchestrate every internal step, and do not stuff unrelated responsibilities into a monolithic catch-all tool.
-5. **Skills primarily provide information.** Skills supply applicable scenarios, capability entry points, essential examples, and optional methods to assist the Agent's judgment. Experience that can be carried by knowledge entries should be captured directly as knowledge rather than encoded as rigid research workflows inside a Skill. Basic usage must be available right at the entry point so the Agent does not need repeated searches just to assemble a single call.
-6. **Knowledge is advisory only.** Preserve applicability conditions, evidence, and uncertainties in plain Markdown; search hits, reviews, or publication never grant decision authority. Engineering decisions must be grounded primarily in current observations and analysis. The Agent consults or records knowledge on demand without mandatory lookup, mandatory write, rigid templates, or closing rituals, reusing knowledge according to relevance, freshness, and verification cost rather than re-proving everything from scratch.
-7. **All tools and Skills intervene on demand.** Ordinary PR reviews, remote directory inspection, and greenfield model bring-up can all be performed in MindIE Agent. Lightweight tasks use native capabilities directly; heavy tasks compose capabilities as needed. Merely working inside a repository never triggers the entire pipeline.
-8. **Reuse proven mechanisms and existing valid results first.** Provided current task semantics and compatibility requirements are met, prefer mechanisms already supplied by the host, operating system, and mature components, as well as existing kernels, build artifacts, environments, and verified results. Identify existing capabilities and concrete gaps before deciding what to build in-house; custom logic must focus on product-specific semantics and minimal necessary glue. When adopting a mature mechanism, remove the replaced duplicate orchestration and competing authoritative state rather than layering a new dependency on top of legacy managers. Keep verification proportional to the scope of change; routine checks belong inside the tool while preserving queryable provenance and failure reasons.
-9. **Tools must be observable and diagnosable; hiding errors is forbidden.** Reporting errors accurately, honestly, and with actionable location context is a hard product requirement. When a required step fails, never report the outcome as success, empty data, first-time use, user disablement, or a completed degraded artifact; never silently demote a required capability into an optional one. Explicitly distinguish completed work, failure, and uncertain external side effects, stating the failed stage, known cause, and affected scope. If a business operation succeeds but bookkeeping, cleanup, or diagnostics fail, report both separately without inducing duplicate execution. When a problem exceeds a tool's capability, return the facts to the Agent rather than forcing it to reverse-engineer a black box.
+## Part 1: Nine Core Product & Tool Boundary Principles
 
-These principles do not predetermine the number of packages, number of commands, session weight, or whether a unified Core exists. Any concrete design must explain which real or evidence-backed task cost it reduces. Existing working implementations and valid verification evidence are also reusable assets.
+These nine principles define what should be a tool, what should be a Skill or knowledge package, and how to minimize friction for both humans and Agents:
 
-For current product boundaries see [Architecture](architecture.en.md), for the knowledge pipeline see [Knowledge & Experience System](knowledge-system.en.md), for authorization and updates see [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md), and for release verification evidence see the [`0.0.1` Release Record](releases/0.0.1.en.md).
+1. **Measure efficiency by the total cost of achieving the user's real goal (Top Priority)**
+   - Total cost includes **understanding, configuration, waiting, debugging, and rework**—not just raw execution time.
+   - Reliability mechanisms are worthwhile only when they reduce these real costs. Never burden every everyday task with heavy ceremony just to guard against rare edge cases. When other considerations conflict with this rule, Principle 1 wins.
+2. **Turn only well-bounded, closed problems into tools**
+   - A tool must have clear preconditions, inputs, outputs, and failure modes (e.g., reading a remote file, querying live NPU telemetry, or redacting secrets).
+   - Leave open-ended, context-dependent judgment to the Agent; extract only repeatable, deterministic operations into stable tools, and never expand scope just for the sake of building a tool.
+3. **Never increase cognitive load for the Agent or the user**
+   - Tools should absorb internal state complexity and expose intuitive, task-oriented interfaces.
+   - A CLI with dozens of obscure flags, hidden state transitions, or errors that require reading internal source code to diagnose is a classic anti-pattern.
+4. **Give every tool a single, well-defined boundary**
+   - Each tool should solve one cohesive problem. It can execute the necessary multi-step mechanics internally so the Agent does not have to micromanage every step, while avoiding monolithic "kitchen-sink" tools that mix unrelated responsibilities.
+5. **Skills provide a map, not a straitjacket**
+   - Skills exist to show applicable scenarios, capability entrypoints, practical examples, and optional troubleshooting approaches.
+   - Concrete troubleshooting lessons belong in the Knowledge base rather than rigid step-by-step mandates inside a Skill. Essential usage should be immediately visible at the entrypoint so the Agent never has to search repeatedly just to assemble one command.
+6. **Knowledge is advisory reference material, never mandatory dogma**
+   - Knowledge packages store applicability conditions, evidence, and caveats in plain Markdown. A search hit or merged PR never makes an entry infallible—decisions must always be grounded in the live behavior of the current system.
+   - The Agent consults or records experience on demand, with **no mandatory lookups, mandatory writes, rigid fill-in-the-blank templates, or end-of-task closing rituals**.
+7. **Every tool and Skill intervenes strictly on demand**
+   - Whether reviewing a PR, inspecting a remote directory, or bringing up a new model on Ascend NPUs, developers work naturally inside their native Agent session.
+   - Lightweight tasks use native tools directly; heavy tasks compose capabilities as needed. Merely opening a workspace never triggers heavy background pipelines.
+8. **Reuse proven host, OS, and ecosystem mechanisms first**
+   - Whenever task semantics and compatibility requirements are met, reuse mechanisms already provided by the host CLI, operating system, `uv`, and mature libraries, as well as existing build artifacts and verified results.
+   - Identify concrete gaps before writing custom code, keep custom glue minimal, and delete replaced legacy managers or duplicate state stores once a native mechanism is adopted.
+9. **Keep tools observable and diagnosable; never hide errors**
+   - Surfacing honest, actionable errors is a hard product requirement. When a required step fails, report it clearly—**never disguise a read failure as "empty data," a corrupted database as "first-time use," or a local save as "published."**
+   - Clearly distinguish **completed**, **failed**, and **uncertain (`unknown`)** outcomes. If a primary operation succeeds but cleanup or bookkeeping fails, report both separately so the caller is never tricked into repeating a completed action.
 
-Operational limits must state the specific failure mode they prevent and apply only to the corresponding operation. Not retrying a single failed call automatically does not mean permanently halting future routine checks; having started does not mean having completed; runtime flags do not equal compatibility contracts. Never turn acceptance test counts, deadlines, or sample sizes directly into production gates.
+---
 
-## Execution Constraints for Principle 8: Reuse First, Build Only for Proven Gaps
+## Part 2: Evolved Engineering & Operational Guidelines
 
-When adding or refactoring general management capabilities such as updates, dependency installation, Hooks, or process lifecycles, first verify the actual capabilities of the relevant host, OS, or mature component. Investigation scope should be proportional to the change—neither requiring an industry-wide survey for every small fix nor adopting a heavier system merely to claim zero custom code.
+As MindIE Agent matured across hosts and operating systems, we codified five operational guidelines extending Principles 8 and 9:
 
-- **Define replacement scope explicitly.** State which responsibilities the adopted mechanism takes over, which product semantics remain owned by our component, and which legacy paths, duplicate states, and schedulers are being deleted. Moving old code into a shared module or wrapping a mature CLI command does not by itself constitute reuse.
-- **Ground decisions in real contracts.** Verify applicable versions, platforms, state and directory lifetimes, cancellation, and failure semantics. Identical API names, documentation prose, or happy-path runs do not replace verification of our critical boundary conditions. Prefer minimal model-free probes to verify gaps without repeating unrelated or paid operations. For reproduced upstream gaps, search existing Issues, PRs, and patches before deciding implementation scope; never misrepresent a private patch as official host support.
-- **Fill only proven gaps.** When an existing mechanism cannot satisfy a required guarantee, record the concrete counterexample or limitation and implement the minimal fix at the single owning boundary. Never let each adapter re-implement its own ownership heuristics or recovery state machine, and never silently lower robustness, privacy, or compatibility bars just to shrink line count.
-- **Complete the migration.** Once the replacement path is verified, delete the duplicate production implementation along with obsolete configs and tests, keeping only bounded migration checks where necessary. Existing tasks, user data, consent, and uncertain external side effects (`unknown`) must retain clear ownership; never erase failures or `unknown` receipts by deleting code, swapping libraries, or reinstalling.
-- **Evaluate total maintenance cost.** Account for dependencies, packaging, cross-platform behavior, diagnostics, and upgrade complexity together. Measure value by the reduction in independent decision sources and ongoing maintenance burden—not by library count, custom-code ratio, or lines of code alone.
-- **Compatibility obligations come from formal contracts and real user state.** Unreleased intermediate implementations can be rewritten directly without maintaining multi-generation code branches, migration chains, or speculative compatibility shims. After formal publication, design compatibility around actual changes in data fields, storage formats, and interface contracts rather than using product version numbers as a proxy for data format checks. Existing user content, explicit consent choices, incurred model usage, and `unknown` operations are user facts that must be preserved across code updates.
-- **Single source of truth for release selection.** Each plugin Release declares its supported Harness version range, and the runtime uses standard SemVer resolution to select the highest ordinary Release compatible with the installed Harness. All directly used Harness interfaces are registered with their support ranges, call sites, and verification evidence (`harness-compatibility.json`), enforced by release gates. The native plugin manager owns downloading, installation, and install records; our shared selector only bridges the compatibility-filtering gap without tracking an unconditional `latest` branch. First-time installation also pins an immutable Release tag.
-- **Paired component and plugin releases.** Every first-party runtime dependency locked by a plugin must have a corresponding published, non-draft, non-prerelease component Release whose tag resolves to that exact locked commit and whose uploaded artifacts match the lock. Publish dependencies in topological order before publishing consumer plugins; follow the [paired-release checklist](release-compatibility-and-update.en.md#paired-component-and-plugin-releases).
-- **Decouple silent updates from business execution.** More than 24 hours after the last successful check, the next natural use asynchronously checks and prepares a compatible update; hot paths perform only lightweight local checks without blocking on network I/O, release scanning, or full environment hashing. Failed checks apply backoff without resetting the last-success timestamp; prepared candidates wait for an idle window to switch atomically without prompting, notifying, or requiring manual reload. See [Release Compatibility & Silent Update](release-compatibility-and-update.en.md).
+### 10. Build Only for Proven Gaps and Remove Legacy Baggage
+- **Verify with lightweight probes first**: Before refactoring updaters, hooks, or process management, verify host and OS behavior (timeouts, cancellation, abrupt termination) using minimal model-free probes.
+- **No dual-track state**: Once a replacement mechanism is verified, delete the superseded custom updater, duplicate state tables, and obsolete configs while preserving existing user Markdown packages, cursors, and consent settings.
+- **Data-format-driven compatibility**: Before formal release, rewrite intermediate implementations cleanly without carrying multi-generation shims. After formal release, design compatibility around actual schema and contract changes rather than guessing from version strings.
 
-## Execution Constraints for Principle 9: Hiding Errors Is Forbidden
+### 11. Decouple User Consent from Code Installation Identity
+- **Configure once, persist across updates**: A user's contribution preference, public target repository, and authorized project scope are persistent user settings decoupled from the installed code revision.
+- **No re-prompting or silent overrides**: Restarting sessions, reinstalling, or silently updating a plugin preserves existing consent and explicit disablement without re-prompting or silently turning disabled settings back on.
 
-The failure semantics below are mandatory product requirements, not optional best-effort guidelines:
+### 12. Paired Component and Plugin Releases
+- **Release dependencies before plugins**: Every first-party runtime dependency pinned by a plugin (`diagnostics`, `remote-dev`, `knowledge`) must first have a published, non-draft, non-prerelease GitHub Release whose tag resolves to the exact locked commit and whose uploaded wheel/sdist artifacts match `uv.lock`.
+- **Independent component versioning**: Each repository maintains its own version sequence and reuses unchanged Releases without artificial version bumps. See the [Paired Component and Plugin Release Checklist](release-compatibility-and-update.en.md#paired-component-and-plugin-releases).
 
-- **Never fabricate completion.** A read error is not "no data"; a corrupted config is not "first-time use"; a live background PID is not "required worker healthy"; a successful local save is not "organization or publication succeeded." If any required step fails, the overall result must explicitly report failure, partial completion, or uncertain outcome—never unconditional success.
-- **Errors must reach the caller.** Report the failed operation and stage, known cause, completed vs. uncompleted work, and whether uncertain external side effects exist. Preserve the primary error and redacted diagnostic context; never substitute empty values, defaults, generic success receipts, or background-only log entries for an error return. Secrets and raw private content must never appear in public error messages.
-- **No silent degradation.** Catching an exception to return an empty list, skip corrupted records, fall back to raw excerpts, disable required features, switch to a blank state store, or serve stale cache must be evaluated against whether it alters the meaning of the caller's request. Use fallback paths only when the original contract is still honored or when the user has explicitly authorized that degradation, and state the reason, actual outcome, and uncompleted parts.
-- **Preserve actual execution outcomes.** When a business operation succeeds but bookkeeping, cleanup, or diagnostics fail, report both facts distinctly so the caller is never misled into re-running a completed write. When an external write outcome is uncertain (`unknown`), report `unknown` explicitly and verify read-only first—never automatically retry it as if it had not executed.
-- **Protocol safety does not equal business success.** A Hook or protocol wrapper may exit cleanly to prevent unintended model continuation, but any internal business failure must still be surfaced through caller-visible status or warning fields.
-- **Verify failure paths.** Test exception branches for actual return values and side effects, using fault injection where appropriate to verify that cursors are not prematurely advanced, partial artifacts are not published, and writes are not replayed.
+### 13. Silent Background Updates with Atomic Idle Cutover
+- **Compatibility-first selection**: Each plugin Release declares its verified Harness version range in `harness-compatibility.json` and automatically selects the highest compatible formal Release rather than chasing an unverified `main` branch.
+- **Zero hot-path blocking**: More than 24 hours after the last successful check, natural usage triggers an asynchronous background check and runtime build; everyday tool calls perform only a fast local timestamp check.
+- **Atomic cutover when idle**: After downloading and building the locked `uv` environment outside the active runtime, the updater waits until no active RPC, capture, or indexing job is running, acquires the exclusive lock, retires the old worker, and atomically switches the active installation binding without user prompts or manual session reloads. See [Release Compatibility & Silent Update](release-compatibility-and-update.en.md).
 
-## Mandatory Design-Principles Review for Development PRs
+### 14. Fail-Visible Semantics and `unknown` Side-Effect Protection
+- **No silent degradation**: Never catch an exception and silently return empty results, skip corrupted state, or serve stale cache if doing so alters the meaning of the caller's request.
+- **Protect uncertain (`unknown`) external writes**: If a paid model call or external Git/PR write times out or loses its receipt, record it as `unknown` and reconcile read-only against the remote target before any future write—never blindly retry it as if it had not run.
+- **Protocol safety never hides business faults**: A Hook may exit cleanly so the host model does not loop, but any underlying capture or service failure must still be surfaced through the host's warning field or the next tool call's diagnostic status.
 
-This requirement applies to all development tasks across all MindIE Agent repositories, covering features, bug fixes, refactors, configuration, dependencies, build/CI, and project documentation. Pure knowledge content or usefulness feedback contributions follow their content publication rules; however, developing the code for knowledge capture, indexing, or publication remains subject to this review.
+---
 
-**Before creating any development PR (including a draft), the author must read the current design principles and review the final diff and its affected execution paths against all nine principles.** Passing tests, green CI, prior implementation precedents, or template checkboxes never substitute for this review. If the principles cannot be read or the review is incomplete, report that explicitly and do not open or update the PR. When subsequent commits modify the PR, re-review the affected principles and update the PR description.
+## Part 3: Pre-PR Design Principles Checklist
 
-| Principle | Mandatory Review Question |
+Every development PR across all MindIE Agent repositories (covering code, configuration, dependencies, CI, and documentation) must review its final diff against these principles before submission:
+
+| Dimension | Review Question |
 |---|---|
-| 1 Total Cost | What real task cost does this change reduce? Does it introduce unjustified background work, redundant computation, storage bloat, recovery ceremony, or user steps? |
-| 2 Closed Problems | Does any toolified logic address a closed problem with clear boundaries, or does it freeze open-ended judgment into a brittle mechanical flow? |
-| 3 Cognitive Load | Are users or Agents forced to understand additional internal states, flags, or management steps? |
-| 4 Single Boundary | Are component responsibilities clear? Does the change cross repository boundaries, introduce a second authoritative state, or duplicate orchestration? |
-| 5 Informational Skills | Does the change turn advisory guidance into a mandatory workflow, or use a Skill for work that belongs in knowledge entries or runtime tools? |
-| 6 Advisory Knowledge | Does the change treat experience or feedback as authoritative truth, or force mandatory lookups, writes, or fabricated evidence? |
-| 7 On-Demand Intervention | Does the change introduce unrequested activation, cross-session leakage, extra model calls, or mandatory closing steps? |
-| 8 Reuse of Mechanisms & Results | Were host/OS/mature component capabilities checked first? Does custom code target a proven gap, delete replaced orchestration, and preserve existing user state and `unknown` receipts? |
-| 9 Visible Errors | Do all affected failure paths surface honest errors without silent fallbacks, fake success, uncertain-write retries, or overwritten primary errors? |
+| **1. Total Cost** | What real friction or cost does this change remove? Does it add unnecessary background work, redundant computation, or extra user steps? |
+| **2. Tool Boundary** | Is any toolified logic solving a closed, well-bounded problem rather than freezing open-ended judgment into a rigid flow? |
+| **3. Cognitive Load** | Does the change keep internal state and parameters simple for both users and Agents? |
+| **4. Single Responsibility** | Are module boundaries clean without cross-repo leakage, duplicate state stores, or competing orchestrators? |
+| **5. Informational Skills** | Do Skills remain clear, helpful guides rather than mandatory procedural checklists? |
+| **6. Advisory Knowledge** | Do knowledge entries and feedback remain advisory without mandatory lookups, writes, or truth certification? |
+| **7. On-Demand Activation** | Does everything trigger strictly on demand without unrequested background work or closing rituals? |
+| **8. Reuse & Paired State** | Were host/OS/mature tools reused first? Were replaced implementations deleted while preserving user data, consent, and `unknown` receipts? |
+| **9. Visible Errors** | Do all failure paths report honest, actionable errors without silent fallbacks, fake success, or overwritten primary errors? |
 
-Any violation found during review must be fixed and re-verified before opening the PR. Truly non-applicable principles must briefly state why based on the specific diff rather than using blanket `N/A` labels. The PR description must include a concise, concrete `## 设计原则 Review` (Design Principles Review) section recording the reviewed commit, principles revision, applicability and conclusions across all nine principles, findings and fixes, and actual validation vs. remaining unverified boundaries.
+Include a concise `## 设计原则 Review` (Design Principles Review) summary in every development PR description documenting the reviewed commit, conclusions, fixes applied, and verification performed.

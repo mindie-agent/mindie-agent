@@ -1,81 +1,79 @@
-# Native Plugin Managers, Hooks, and Process-Tree Reuse
+# Native Runtime & Process Reuse
 
-[中文](native-runtime-reuse.md) · [Back to Documentation Index](README.en.md)
+[中文](native-runtime-reuse.md) · [Back to Documentation Center](README.en.md)
 
-Updated 2026-10-16. This document summarizes the architectural rationale, mechanism selection, and OS primitive evaluations behind MindIE Agent's native runtime reuse (Principle 8). For the final `0.0.1` verification evidence across all six Codex/Claude Code × macOS/native Windows/WSL environments, see the [`0.0.1` Release Record](releases/0.0.1.en.md).
+This document explains how MindIE Agent applies [Engineering Design Principle 8 (Reuse Proven Mechanisms First)](design-principles.en.md): delegating generic package downloads, virtual-environment locking, and process-tree cleanup to the host CLI, `uv`, and operating-system primitives while keeping custom code focused strictly on Ascend engineering and the experience loop.
 
 ---
 
-## Core Architectural Decision
+## 1. Core Architectural Trade-Off: Stop Reinventing Infrastructure
 
-Instead of maintaining custom multi-stage plugin updaters, custom virtual-environment builders, or duplicate process-supervision daemons in every adapter, MindIE Agent delegates generic lifecycle mechanics to proven host, package-manager, and OS primitives while retaining only the minimal product-specific glue required for compatibility filtering, durable state safety, and atomic binding switches:
+Early on, maintaining custom multi-stage plugin updaters, hand-rolled `venv`/`pip` installers, and PPID-guessing process watchers across adapters created unnecessary complexity and subtle cross-platform edge cases on macOS, native Windows, and WSL.
 
-| Responsibility | Adopted Mechanism | Retained MindIE Agent Scope | Deleted Legacy Responsibilities |
+We consolidated runtime lifecycle management around proven native mechanisms:
+
+| Responsibility | Adopted Native Mechanism | Retained MindIE Agent Scope | Deleted Legacy Code |
 | --- | --- | --- | --- |
-| **Plugin Download, Install & Registry** | Native Codex / Claude Code plugin managers | Single shared SemVer compatibility selector (`harness-compatibility.json`) + release gate | Deleted custom multi-stage `auto_update.py` / `updater.py`, dedicated update schedulers, and successor chains |
-| **Python Dependencies & Isolated Runtime** | `uv sync --locked --no-editable` with committed `uv.lock` | Product combination contract (`product-contract.json`), platform/ABI identity, and schema validation | Replaced hand-rolled `venv`/`pip` orchestration and loose top-level requirements |
-| **Lifecycle Hook Events** | Native Host Hooks + existing SQLite durable admission | Task identity verification, project scope check, lower-bound cursor, idempotency key, and commit receipt | Hooks never block on model calls and introduce no secondary file spool |
-| **Service & Operation Process Trees** | Windows Job Objects (`KILL_ON_JOB_CLOSE`); WSL `systemd` transient user units (`KillMode=control-group`); macOS minimal shared `owner-pipe` helper | Service identity, single-consumer lock, operation outcome persistence, and scratch cleanup order | Deleted duplicate PPID ownership heuristics across adapters while preserving native cancellation boundaries |
-| **Installation & Service Binding** | Single canonical installation binding + existing shared/exclusive operation lock | Prepare candidate outside lock; switch atomically when idle; keep active runtime outside disposable host plugin cache | Removed multi-generation service routing, session leases, and global `current` symlinks |
-| **Business State & Recovery** | Authoritative Markdown blocks + SQLite receipts + `diagnostics` | Redaction, token usage tracking, known/failed/`unknown` reconciliation, and privacy gates | Never replay uncertain (`unknown`) paid model calls or external Git writes |
+| **Plugin Download, Install & Registry** | Native Codex / Claude Code plugin managers | Shared SemVer compatibility selector (`harness-compatibility.json`) + pre-release gate | Removed custom multi-stage `auto_update.py` / `updater.py`, dedicated update schedulers, and multi-generation successor chains |
+| **Python Dependencies & Isolated Runtime** | `uv sync --locked --no-editable` with committed `uv.lock` | Product combination contract (`product-contract.json`), platform/ABI identity checks, and schema validation | Replaced hand-rolled `venv`/`pip` scripts and loose top-level `requirements.txt` files |
+| **Session Lifecycle Hooks** | Native Host Hooks + local SQLite durable admission | Task identity verification, project scope check, cursor advancement, and idempotency | Hooks never block on LLM calls and introduce no secondary file spool |
+| **Background Services & Process Trees** | Windows Job Objects; WSL `systemd` transient user services; macOS lightweight `owner-pipe` helper | Service config fingerprint, single-consumer lock, result persistence, and scratch cleanup order | Deleted duplicate PPID ownership heuristics across adapters |
+| **Installation & Service Binding** | Single canonical installation binding + shared/exclusive operation lock | Prepare candidate outside lock; switch atomically when idle; keep runtime outside disposable host caches | Removed multi-generation routing, session leases, and global `current` symlinks |
+| **Business State & Recovery** | Authoritative Markdown blocks + SQLite receipts + `diagnostics` | Privacy redaction, token usage persistence, and completed/failed/`unknown` reconciliation | Never automatically retry uncertain (`unknown`) paid model calls or external Git writes |
 
 ---
 
-## Updates: Reusing Native Installers with Compatibility Filtering
+## 2. Plugin Updates: Native Installers + Compatibility Filtering
 
-Full update semantics are specified in [Release Compatibility & Silent Update](release-compatibility-and-update.en.md). Each plugin Release declares its supported Harness version range; because neither host's native marketplace catalog natively filters releases by SemVer compatibility range, a shared pure selector computes the highest compatible ordinary Release and hands that pinned candidate to the native plugin installer.
+Full update rules are covered in [Release Compatibility & Silent Update](release-compatibility-and-update.en.md). Because native Git plugin marketplaces pull the latest branch tip by default without filtering by the installed host CLI's SemVer version, MindIE Agent adds a single shared pure selector function to pick the highest compatible Release and hands that pinned version to the native installer:
 
-### OpenAI Codex CLI
+### 2.1 OpenAI Codex CLI Integration
+- **Host cache behavior**: Codex refreshes configured Git marketplaces on startup, and its store (`store.rs`) prunes older version directories or replaces same-version cache directories in place.
+- **Stable runtime isolation**: Running long-lived workers or active Hook/MCP entrypoints directly out of a disposable host cache would cause `file-not-found` errors mid-session when the cache refreshes. MindIE Agent therefore places stable release-bound entrypoints (`SessionStart`, `MCP`, `Stop`) and non-editable `uv` environments inside the application data directory.
 
-- Codex updates configured Git marketplaces on startup and refreshes plugin caches, but its cache store (`store.rs`) prunes old version directories and replaces same-version cache paths in place.
-- Consequently, long-running background workers and loaded Hook/MCP entrypoints (`SessionStart`, `MCP`, `Stop`) must not execute directly out of disposable host cache directories.
-- MindIE Agent places stable release-bound entrypoints and non-editable `uv` environments under the application data directory, bound to the exact release identity, `uv.lock`, ABI, and platform.
-
-### Claude Code
-
-- Claude Code supports native marketplace installation and keeps existing session paths stable until reload, while providing `CLAUDE_PLUGIN_DATA` across `SessionStart` and `MCP`.
-- MindIE Agent uses the same stable entrypoint and isolated runtime model on Claude Code so background services never depend on host cache retention policies, and bumps the manifest version on every release so native cache updates remain deterministic.
+### 2.2 Claude Code Integration
+- **Host cache behavior**: Claude Code supports native marketplace installation, keeps active session paths stable until reload, and provides a consistent `CLAUDE_PLUGIN_DATA` directory across `SessionStart` and `MCP`.
+- **Unified binding model**: We use the same stable entrypoint and isolated `uv` runtime layout on Claude Code so background services never depend on host cache retention policies, and increment the manifest version on every release for deterministic updates.
 
 ---
 
-## Short Stop Hooks, Single Durable Queue, and Independent Owner
+## 3. Millisecond Stop Hooks & Asynchronous Queue Consumption
 
-The experience capture pipeline follows a strict separation between fast synchronous admission and asynchronous background indexing:
+Experience capture strictly separates **fast foreground admission** from **asynchronous background indexing**:
 
 ```text
-Native Stop Hook
-  -> Verify task identity & project scope
-  -> Commit durable admission record to SQLite
-  -> Return neutral protocol confirmation immediately
-  -> Independent Core worker consumes queue
-  -> OS-owned indexing process tree runs native small model
-  -> Persist navigation result & usage -> Clean up process tree -> Remove scratch
+Host triggers Stop Hook
+  -> 1. Verify task identity & authorized project scope
+  -> 2. Commit durable admission record to local SQLite
+  -> 3. Return neutral response immediately (milliseconds, zero LLM calls)
+  -> 4. Independent background worker consumes queue
+  -> 5. OS-managed process tree runs lightweight native model for navigation
+  -> 6. Save navigation & token usage -> Reclaim process tree -> Remove scratch
 ```
 
-- **Fast Hook Return**: The Stop Hook confirmation means "durably enqueued," never blocking on cold service startup or model execution. On Windows, Task Scheduler control calls use `pywin32` COM APIs directly (~5–14 ms) rather than spawning multiple PowerShell subprocesses, keeping cold Stop admission well within the 1.5-second budget.
-- **No Unreliable Async Hook Assumption**: Because hosts like `claude -p` cancel unfinished background-flagged hooks on process exit, MindIE Agent uses fast synchronous SQLite admission followed by an independent background service owner.
+- **Why not rely on host `async: true` background hooks?**
+  - As documented by Claude Code, non-interactive runs (`claude -p`) cancel unfinished background-flagged hooks when the main process exits. Using fast synchronous SQLite admission followed by an independent background service guarantees that experience indexing finishes reliably without slowing down the terminal.
+- **Fast Windows cold wakeups**:
+  - On Windows, waking the background Task Scheduler job uses `pywin32` native COM/ACL calls (~5–14 ms) instead of spawning multiple PowerShell subprocesses, keeping cold Stop Hooks well under budget.
 
 ---
 
-## Cross-Platform Process-Tree Ownership
+## 4. Cross-Platform Process-Tree Cleanup via OS Primitives
 
-Rather than assuming identical process-group behavior across macOS, Linux/WSL, and Windows, MindIE Agent uses the native OS primitive proven to clean up descendant processes even when the parent worker receives `SIGKILL` or terminates abruptly:
+Process-group semantics differ sharply across operating systems. To guarantee that all child and grandchild processes are reliably cleaned up even if the parent worker crashes or receives `SIGKILL`, MindIE Agent uses native OS primitives on each platform:
 
-| Platform | Mechanism | Guarantee |
+| Platform | OS Primitive Used | Reliability Guarantee |
 | --- | --- | --- |
-| **Windows** | Suspended spawn + named Windows Job Object with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` (via `pywin32`) | Terminating the core worker closes the Job handle and reliably reclaims all child and grandchild processes |
-| **Windows WSL** | `systemd` transient user service (`Type=exec`, `ExitType=main`, `KillMode=control-group`, `Restart=no`) | When the main process exits or is killed, `systemd` reclaims the entire cgroup including children that created new process groups |
-| **macOS** | Minimal shared `owner-pipe` helper (core holds the sole write end; wrapper sets up same-PGID watcher before `exec`) | Pipe `EOF` upon core death immediately terminates the operation process group without registration overhead in `launchd` |
+| **Native Windows** | Suspended spawn + named Windows Job Object with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` (via `pywin32`) | If the worker exits or is killed, the OS kernel closes the Job handle and terminates all descendant processes automatically |
+| **Windows WSL / Linux** | `systemd` transient user service (`Type=exec`, `ExitType=main`, `KillMode=control-group`, `Restart=no`) | When the main process terminates, `systemd` reclaims the entire cgroup—even if child processes created new process groups (PGIDs) |
+| **macOS** | Minimal shared `owner-pipe` helper (worker holds the sole write end; wrapper monitors pipe in same PGID before `exec`) | Worker termination causes immediate pipe `EOF`, cleanly terminating the entire operation process group without `launchd` registration overhead |
 
 ---
 
-## Primary References
+## 5. Primary Upstream References
 
-- [C1] OpenAI Codex plugin manager startup refresh (`codex-rs/core-plugins/src/manager.rs`, `rust-v0.153.4` / `rust-v0.162.0-alpha.17.2`)
-- [C2] OpenAI Codex plugin store cache replacement and pruning (`codex-rs/core-plugins/src/store.rs`, `rust-v0.153.4`)
-- [A1] [Claude Code Plugin Marketplace Documentation](https://code.claude.com/docs/en/plugins/host-marketplace) & [A2] [Plugin Loading & Caching](https://code.claude.com/docs/en/plugins/loading)
-- [U1] [`uv` Locking and Syncing](https://docs.astral.sh/uv/concepts/projects/sync/) & [U2] [Velopack Update Lifecycle Reference](https://docs.velopack.io/integrating/overview)
-- [H1] [Claude Code Background Hooks Contract](https://code.claude.com/docs/en/hooks#run-hooks-in-the-background)
-- [P1] [`systemd.kill(5)`](https://github.com/systemd/systemd/blob/v257/man/systemd.kill.xml) & [`systemd.service(5)`](https://github.com/systemd/systemd/blob/v257/man/systemd.service.xml)
-- [P2] [Apple `launchd.plist(5)` Manual](https://github.com/apple-oss-distributions/launchd/blob/d448a1c8f70a61202f8705f94337f686b87c30c4/man/launchd.plist.5)
-- [P3] [Microsoft Windows Job Objects Documentation](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects)
+- **[C1 / C2] OpenAI Codex Plugin Manager & Store**: [`manager.rs`](https://github.com/openai/codex/blob/rust-v0.153.4/codex-rs/core-plugins/src/manager.rs#L2733) · [`store.rs`](https://github.com/openai/codex/blob/rust-v0.153.4/codex-rs/core-plugins/src/store.rs#L699)
+- **[A1 / A2] Claude Code Plugin Marketplace & Loading Docs**: [Plugin Marketplace](https://code.claude.com/docs/en/plugins/host-marketplace) · [Plugin Loading & Caching](https://code.claude.com/docs/en/plugins/loading)
+- **[U1 / U2] Locked Environments & Atomic Cutover References**: [`uv` Project Sync](https://docs.astral.sh/uv/concepts/projects/sync/) · [Velopack Update Lifecycle](https://docs.velopack.io/integrating/overview)
+- **[H1] Claude Code Background Hooks Contract**: [Run Hooks in the Background](https://code.claude.com/docs/en/hooks#run-hooks-in-the-background)
+- **[P1 / P2 / P3] OS Process Management Specifications**: [`systemd.kill(5)`](https://github.com/systemd/systemd/blob/v257/man/systemd.kill.xml) · [Apple `launchd.plist(5)`](https://github.com/apple-oss-distributions/launchd/blob/d448a1c8f70a61202f8705f94337f686b87c30c4/man/launchd.plist.5) · [Microsoft Windows Job Objects](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects)

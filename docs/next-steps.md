@@ -1,18 +1,21 @@
-# MindIE Agent 后续迭代
+# MindIE Agent 后续演进路线图
 
-[English](next-steps.en.md) · [返回文档索引](README.md)
+[English](next-steps.en.md) · [返回文档中心](README.md)
 
-当前产品与完整材料设计分别见 [`docs/architecture.md`](architecture.md) 与
-[`docs/knowledge-system.md`](knowledge-system.md)，所有演进遵循
-[`docs/design-principles.md`](design-principles.md)。
+当前系统架构与知识闭环设计见 [系统架构与模块分工](architecture.md) 与 [知识与经验闭环设计](knowledge-system.md)，所有迭代遵循 [工程设计原则与演进准则](design-principles.md)。
 
-首发 `0.0.1` 已作为普通内测 Release 正式发布，覆盖 Codex / Claude Code 与 macOS、
-原生 Windows、Windows WSL 六个宿主与平台组合。精确版本、配套组件发行映射与已知限制见
-[`docs/releases/0.0.1.md`](releases/0.0.1.md)。
+首发版本 [`0.0.1`](releases/0.0.1.md) 已完成发布，覆盖 Claude Code 与 OpenAI Codex CLI 在 macOS、原生 Windows 与 Windows WSL 上的六个主流开发环境。
+
+---
 
 ## 现阶段推进重点
 
-- **真实业务复用收益评测（Benchmark）**：独立推进端到端业务效果与效率基准评测，验证知识与经验闭环在真实昇腾开发任务中的实际收益（首发版本不预先宣称量化收益）。
-- **上游宿主已知问题跟进**：持续跟进 OpenAI Codex CLI 子代理中断信号未送达待处理工具调用的上游修复进展；在此期间不在插件内引入破坏边界的私有进程监控或武断超时。
-- **跨领域与更多宿主扩展**：Kimi Code 首发集成、历史业务 Skills 迁移整理与性能 Profiling 能力继续作为独立迭代方向按需推进。
-- **日常开发体验零负担**：常规业务开发直接使用现有插件与按需工具，不增加日常手动激活、强制查询或收尾命令。
+1. **真实业务复用收益评测（End-to-End Benchmark）**
+   - 独立推进端到端的昇腾工程任务评测，客观衡量知识与经验闭环在算子排障、模型迁移和性能调优中的实际提效幅度（在基准评测完成前，我们不在版本说明中做未经实测的量化夸大宣传）。
+2. **更多宿主与领域扩展**
+   - **Kimi Code 正式版对齐**：推进 [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) 跨平台验收与正式 Release 发布。
+   - **独立开箱即用 Skills 持续扩充**：在 [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) 中沉淀更多昇腾 Profiling、精度比对与算子开发专项指南。
+3. **上游宿主问题跟进**
+   - 持续跟踪 OpenAI Codex CLI 子代理（Subagent）中断信号向在途工具调用传递的上游修复进展；待上游合入发布后及时补齐验证并更新兼容性声明，不在插件内引入高侵入性的私有杀进程轮询器。
+4. **持续打磨“零打扰”开发体验**
+   - 保持“一句话让 Agent 自动安装、日常开发零手动命令、后台无感更新”的轻量体验，让开发者把精力 100% 放在昇腾与推理核心工程问题上。

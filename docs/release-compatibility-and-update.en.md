@@ -1,67 +1,71 @@
 # Release Compatibility & Silent Update
 
-[中文](release-compatibility-and-update.md) · [Back to Documentation Index](README.en.md)
+[中文](release-compatibility-and-update.md) · [Back to Documentation Center](README.en.md)
 
-Status: Current product contract (2026-10-16); the first ordinary internal Release `0.0.1` is published. For actual implementation details, paired component release mappings, and six-environment verification evidence, see the [`0.0.1` Release Record](releases/0.0.1.en.md).
+This document explains how MindIE Agent coordinates paired component and plugin releases, matches plugin versions against your installed host CLI, and performs silent background updates without interrupting active engineering sessions.
+
+- Governed by: [Engineering Design Principles](design-principles.en.md)
+- Release Verification Details: [`0.0.1` Release Record](releases/0.0.1.en.md)
 
 ---
 
 ## Paired Component and Plugin Releases
 
-MindIE Agent publishes verified combinations of components. Each software repository maintains its own independent version history—product release `0.0.1` does not require `remote-dev`, `knowledge`, or `diagnostics` to also be numbered `0.0.1`, and existing component versions must never be rolled back or renumbered merely for visual uniformity. Unchanged components reuse their already published Releases without artificial version bumps. Third-party dependencies remain pinned by complete dependency locks (`uv.lock`).
+MindIE Agent ships **verified combinations of components and plugins**. Each repository maintains its own independent version sequence (for example, plugin release `0.0.1` locks `diagnostics v0.4.1`, `remote-dev v0.9.5`, and `knowledge v0.11.0` without renumbering or rolling back component versions). Components with no code changes simply reuse their existing published Releases.
 
-Publish in topological dependency order: first `diagnostics`, then `remote-dev` and `knowledge` (which depend on `diagnostics`), and finally the Harness plugins (`mindie-agent-codex`, `mindie-agent-cc`) and the unified product entry (`mindie-agent`). Independent components may be prepared, verified, and published in parallel. Components may iterate independently, but published plugins adopt changes only through a new paired release—a published plugin never bypasses its dependency lock to chase a component's `main` branch or unconditional `latest` tag.
+### Topological Release Order & Checklist
 
-Before publishing a plugin Release, the release operator must record the checklist below in the product release record:
+Releases always follow a **bottom-up dependency order**:
+1. Publish the base diagnostics library [`diagnostics`](https://github.com/mindie-agent/diagnostics) first;
+2. Prepare and publish [`remote-dev`](https://github.com/mindie-agent/remote-dev) and [`knowledge`](https://github.com/mindie-agent/knowledge) (which depend on `diagnostics`);
+3. Publish the Harness plugins ([`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex), [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc), [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)) that lock those exact component releases, followed by the unified release record in `mindie-agent`.
 
-| Pre-Release Check | Required Evidence & Handling of Gaps |
+Before publishing any plugin Release, maintainers verify and record the following checklist:
+
+| Pre-Release Check | Verification Standard |
 | --- | --- |
-| **Complete Dependency Inventory** | Read all direct and transitive first-party software components from each plugin's final dependency lock; list repository, package name, package version, full commit SHA, and corresponding Release tag. |
-| **Formal Component Releases** | Every first-party runtime dependency must have a published, non-draft, non-prerelease GitHub Release; a Git tag, candidate branch, merged PR, or green CI alone is insufficient. |
-| **Exact Identity Alignment** | Dereferencing the annotated tag must resolve to the exact commit locked by the plugin; the tag version, source package version, and wheel/sdist metadata must match without reusing the same version string for different code. |
-| **Downloadable & Verified Artifacts** | Download the built artifacts and checksums from the official Release, verifying SHA256 digests, package metadata, and correspondence to the locked source commit. |
-| **Scoped Acceptance Evidence** | Record the exact installed native identities, component/package checks, and any subsequent source deltas separately; tests not re-run on a new tag are not claimed as fresh hardware evidence, and any failures or `unknown` outcomes remain visible. |
-| **Closed-Loop Combination** | Publish plugins only after all component Releases are complete; verify the mapping between plugin locks and component Releases, read back tags, Release flags, uploaded assets, and the unified release record. |
+| **1. Complete Dependency Inventory** | Extract all direct and transitive first-party runtime packages from the plugin's final `uv.lock`; record repository, package name, version, full commit SHA, and corresponding Release tag. |
+| **2. Formal Component Releases** | Every first-party runtime dependency must have a published GitHub Release (`draft=false`, `prerelease=false`); a Git tag, merged PR, or green CI run alone is never sufficient. |
+| **3. Exact Commit & Version Alignment** | Dereferencing the component Release tag must resolve to the exact commit SHA pinned in `uv.lock`, and the tag version, `pyproject.toml` version, and built wheel/sdist metadata must match. |
+| **4. Artifact Download & Checksum Verification** | Download the published wheel, sdist, and `SHA256SUMS` from the GitHub Release and verify digests and package contents against the locked source tree. |
+| **5. Honest Acceptance Scope** | Record verified host versions, OS platforms, and any post-acceptance source deltas clearly; never claim un-run tests as fresh hardware evidence, and document known host limitations openly. |
+| **6. Closed-Loop Combination** | Publish plugins only after all underlying component Releases are verified, preventing broken dependency locks in released plugins. |
 
-`knowledge` is a software runtime component and requires a formal software Release. `knowledge-vllm-ascend` is a domain content repository distributed continuously via its fixed content contract (`publication-contract.json`), Git commits, and block hashes; adding content packages does not require a new software Release unless the content schema or validator contract changes.
-
----
-
-## Release Declarations and Deterministic Selection
-
-Every formal plugin Release declares its product version, official repository origin, exact source commit, and supported Harness name and SemVer range. The currently installed Harness version determines the candidate set, and standard SemVer resolution selects the highest compatible ordinary Release—never downgrading automatically and never treating a draft, prerelease, or development `main` branch as an ordinary Release. When the Harness itself is an `alpha` build, it must be explicitly permitted by the declared range.
-
-Compatibility ranges are established from verified interface contracts and test evidence rather than interpolated from endpoints alone. Every plugin repository maintains a machine-readable `harness-compatibility.json` and centralized interface inventory recording:
-
-| Field | Purpose |
-| --- | --- |
-| **Interface ID, Harness, and Support Range** | Uniformly declares Hooks, MCP wiring, CLI flags, environment variables, and native output contracts |
-| **Production Call Sites** | Locates exact source files invoking the interface |
-| **Official Documentation or Pinned Host Source** | Distinguishes documented public contracts, audited host source revisions, and unverified assumptions |
-| **Tests & Native Evidence** | Covers return values, failure semantics, platform differences, and edge cases |
-| **Release Active Interface Set** | Ensures the declared release support range lies within the intersection of all required interface ranges |
-
-The host's native plugin manager owns package downloading, installation, caching, and install records. Where the native catalog format cannot express Harness version-range filtering directly, the shared selector computes the single compatible candidate and projects it to the native installer. First-time installation also pins an immutable Release tag and checks the installed Harness version against the declared range.
+> **Note**: `knowledge` is a software runtime package governed by this release checklist, whereas `knowledge-vllm-ascend` is a domain content repository updated continuously under `publication-contract.json` without requiring a new software release for every new knowledge package.
 
 ---
 
-## Online Checks and Silent Update Semantics
+## Host Compatibility Declarations & Deterministic Selection
 
-More than 24 hours after the last successful check, the next natural use asynchronously executes the compatibility check and update preparation:
+Host CLIs evolve rapidly, and Hook schemas, MCP timeouts, or environment variable rules can differ across versions. To ensure an update never installs a plugin version incompatible with your installed CLI, MindIE Agent uses deterministic compatibility filtering:
 
-- **Zero User Interruption**: Performs no interactive prompt, requires no confirmation, sends no update notification, and requires no manual reload.
-- **Persistent Consent**: Retains the contribution choice, project scope, explicit disablement, and independent fault-reporting preference configured at install time.
-- **Lightweight Hot Path**: Routine invocations perform only an in-process timestamp check (reading at most a small local check receipt once per process) without blocking on network calls, release scanning, or full environment hashing. Short Stop Hooks never perform network checks or installations.
-- **Backoff & Idempotency**: A "successful check" means reading and validating the official release metadata and completing compatibility selection (even when no newer version exists). Failed checks apply backoff without updating the last-success timestamp; already prepared candidates wait for a safe idle cutover window without re-downloading.
+1. **Machine-Readable Compatibility Manifest (`harness-compatibility.json`)**:
+   - Each plugin repository maintains a `harness-compatibility.json` cataloging every host interface it touches (Hooks, MCP wiring, CLI flags, environment variables), production call sites, official references, tests, and verified SemVer support ranges.
+   - Pre-release checks enforce that the plugin's declared support range lies strictly within the intersection of all required interface ranges.
+2. **Highest Compatible Ordinary Release Selection**:
+   - Both first-time installation and background updates evaluate the currently installed host CLI version using standard SemVer resolution and select the **highest compatible ordinary Release** (`draft=false`, `prerelease=false`).
+   - The selector never downgrades automatically and never pulls unverified development branches (`main`).
 
 ---
 
-## Preparation, Cutover, and Recovery
+## Silent Background Checks & Atomic Idle Cutover
 
-Silent updates follow a staged prepare-drain-switch-verify lifecycle reusing the existing installation lock, native installer, immutable runtime layout, and exact service ownership:
+Once more than **24 hours** have elapsed since the last successful update check, the next everyday invocation triggers an asynchronous background check:
 
-1. **Background Preparation**: Download the pinned release, sync the complete `uv` lock (`--locked --no-editable`), and verify package and interface contracts outside the active installation binding.
-2. **Wait for Idle**: While any RPC, admitted capture, or indexing job is active, keep serving requests on the existing installation and defer switching.
-3. **Atomic Short Cutover**: Acquire the exclusive operation lock, confirm the old service owner is idle, retire the old owner cleanly, verify the new service is ready, and atomically update the single canonical installation binding (switching interpreter, scripts, and engine configuration as one unit).
-4. **Resilient Entrypoints**: During the brief cutover window, new requests either wait briefly or receive an explicit `temporarily unavailable, not yet executed` response. Already loaded native entrypoints resolve the updated canonical binding on subsequent calls without requiring a session reload. Durable Stop events enqueue into the existing SQLite admission queue without waiting on the cutover lock.
-5. **Honest Failure Preservation**: Any failure prior to binding publication leaves the previous version active; if cutover is interrupted, recovery reconciles actual native install records and active bindings without guessing success or replaying uncertain (`unknown`) operations.
+- **Zero Hot-Path Latency**: Routine tool calls check only a lightweight local timestamp (in ~1–2 ms) and never block on network I/O, release scanning, or environment builds. Short Stop Hooks never access the network or run installers.
+- **Zero User Interruption & Persistent Consent**: Silent updates never pop up confirmation prompts, inject update notifications into model context, or require manual session reloads—and they preserve your existing contribution, project scope, and fault-reporting settings.
+- **Failure Backoff & Idempotency**: Network errors or rate limits trigger exponential backoff without resetting the last-success timestamp; already prepared candidate environments simply wait for an idle window without re-downloading.
+
+### Four-Step Safe Cutover Lifecycle
+
+```mermaid
+flowchart LR
+    P["1. Background Preparation<br/>Download pinned release & build locked uv runtime"] --> W["2. Wait for Idle<br/>Defer switch while any RPC, capture, or index job is active"]
+    W --> S["3. Atomic Exclusive Switch<br/>Retire old worker -> Verify new worker ready -> Update binding"]
+    S --> R["4. Seamless Continuation<br/>Subsequent calls resolve the new binding without manual reload"]
+```
+
+1. **Background Preparation**: Download the selected release and build its isolated, non-editable `uv` environment (`uv sync --locked --no-editable`) outside the active runtime binding. Any failure during preparation leaves the existing version untouched.
+2. **Wait for Idle**: As long as any MCP tool call, admitted capture, or indexing job is running, the existing service continues handling work and cutover waits patiently.
+3. **Atomic Exclusive Cutover**: Once the active service is idle, the updater acquires the exclusive operation lock, cleanly retires the old worker, verifies that the new worker is ready, and atomically updates the single canonical installation binding (switching interpreter, scripts, and engine config together).
+4. **Seamless Continuation**: During the sub-second switch window, incoming requests either wait briefly or receive an explicit `temporarily unavailable, not yet executed` status. Afterward, even already running sessions automatically resolve the new canonical binding on their next Hook or tool call.

@@ -1,14 +1,21 @@
 # MindIE Agent Roadmap & Next Steps
 
-[中文](next-steps.md) · [Back to Documentation Index](README.en.md)
+[中文](next-steps.md) · [Back to Documentation Center](README.en.md)
 
-For the current system architecture and knowledge loop design, see [`docs/architecture.en.md`](architecture.en.md) and [`docs/knowledge-system.en.md`](knowledge-system.en.md). All iterations are governed by [`docs/design-principles.en.md`](design-principles.en.md).
+For the current system architecture and knowledge loop design, see [Architecture & Module Boundaries](architecture.en.md) and [Knowledge & Experience System](knowledge-system.en.md). All iterations follow the [Engineering Design Principles](design-principles.en.md).
 
-The initial `0.0.1` release is published as an ordinary Release covering six host and platform combinations (`Codex` and `Claude Code` across `macOS`, `native Windows`, and `Windows WSL`). Exact supported versions, paired component Release mappings, and known limitations are documented in [`docs/releases/0.0.1.en.md`](releases/0.0.1.en.md).
+Our initial [`0.0.1`](releases/0.0.1.en.md) release is live across six mainstream development environments (**Claude Code** and **OpenAI Codex CLI** on **macOS**, **native Windows**, and **Windows WSL**).
 
-## Current Priorities
+---
 
-- **Real-World Business Reuse Benchmarks**: Independently evaluate end-to-end engineering quality and efficiency gains from the knowledge and experience loop on real Ascend tasks (`0.0.1` makes no premature quantitative claims).
-- **Upstream Host Issue Follow-Up**: Track upstream fixes in OpenAI Codex CLI for child-agent interruption delivery to pending tool calls, without introducing intrusive process-hunting workarounds or arbitrary business execution timeouts.
-- **Additional Domains & Host Adapters**: Continue iterating on Kimi Code release readiness, curated standalone Agent Skills (`awesome-mindie-skills`), and profiling workflows as independent tracks.
-- **Zero Daily Ceremony**: Keep ordinary engineering tasks friction-free—no mandatory per-task activation, lookup, or closing rituals.
+## Current Engineering Priorities
+
+1. **Real-World Engineering Benchmarks**
+   - Run end-to-end benchmarks on real Ascend operator debugging, model migration, and inference tuning workloads to measure how much time and effort the experience loop saves in practice (we avoid making premature quantitative claims before benchmarks are complete).
+2. **Broader Host & Domain Coverage**
+   - **Kimi Code Formal Release**: Complete cross-platform acceptance and publish the formal release for [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi).
+   - **Expand Standalone Skills**: Grow [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) with additional ready-to-use workflows for Ascend profiling, accuracy verification, and kernel development.
+3. **Upstream Host Issue Tracking**
+   - Track upstream fixes in OpenAI Codex CLI for delivering cancellation signals to in-flight tool calls when a child agent (`spawn_agent`) is interrupted, updating our compatibility range once upstream ships the fix rather than adding intrusive process-hunting workarounds.
+4. **Keep Everyday Workflows Zero-Ceremony**
+   - Maintain a frictionless experience—one-sentence Agent-native installation, zero daily activation commands, and silent background updates—so developers can focus entirely on Ascend engineering.
