@@ -29,3 +29,9 @@
 | [`0.0.2` 版本发布记录](releases/0.0.2.md) | [`0.0.2` Release Record](releases/0.0.2.en.md) | 插件统一版本、精确组件源码、实机验收范围与常态化十仓 benchmark |
 | [`0.0.1` 版本发布记录](releases/0.0.1.md) | [`0.0.1` Release Record](releases/0.0.1.en.md) | `0.0.1` 支持客户端矩阵、配套组件版本映射、实机验证范围与已知限制 |
 | [后续演进路线图](next-steps.md) | [Roadmap & Next Steps](next-steps.en.md) | 下一阶段重点推进的业务基准评测、更多宿主支持与体验优化计划 |
+
+## 质量审计
+
+| 文档 | English | 范围 |
+|---|---|---|
+| [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | 固定源码版本的跨仓扫描、实测行/分支覆盖率、审查结论与分批修改计划；不代表缺陷已修复或硬件已验收 |

@@ -29,3 +29,9 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 | [`0.0.2` Release Record](releases/0.0.2.en.md) | [`0.0.2` 版本发布记录](releases/0.0.2.md) | Aligned plugin versions, exact component sources, native acceptance, and recurring ten-repository benchmarks |
 | [`0.0.1` Release Record](releases/0.0.1.en.md) | [`0.0.1` 版本发布记录](releases/0.0.1.md) | Supported host matrix, paired component release mapping, verified capabilities, and known host limitations |
 | [Roadmap & Next Steps](next-steps.en.md) | [后续演进路线图](next-steps.md) | Upcoming work on end-to-end benchmarks, broader host coverage, and developer experience improvements |
+
+## Quality Audits
+
+| Document (English) | 中文 | Scope |
+|---|---|---|
+| [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | Cross-repository review at fixed revisions, measured line/branch coverage, findings, and staged changes; not a claim that defects are fixed or hardware acceptance is complete |
