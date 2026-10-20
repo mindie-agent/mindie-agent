@@ -2,7 +2,7 @@
 
 [中文](profiler-system.md) · [Architecture](architecture.en.md) · [Design Principles](design-principles.en.md) · [Context & Experience Design](knowledge-context-and-exploration.en.md) · [Documentation](README.en.md)
 
-`mindie_profiler` is a standalone Ascend NPU performance collection, in-place analysis, and comparison package maintained within [`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics) (exposing both the `mindie-profiler` CLI and Python APIs).
+`mindie_profiler` is a standalone Ascend NPU performance collection, in-place analysis, and comparison package maintained in [`mindie-agent/profiler`](https://github.com/mindie-agent/profiler) (exposing both the `mindie-profiler` CLI and Python APIs), orthogonal to [`diagnostics`](https://github.com/mindie-agent/diagnostics) and [`sim`](https://github.com/mindie-agent/sim).
 
 Its core objective is to **codify Ascend profiling format adaptation, nanosecond interval accounting, Host-to-Device asynchronous call correlation, and cross-run comparability checks into a deterministic, low-overhead closed-problem tool—enabling general coding Agents to obtain traceable performance evidence and verify end-to-end optimization gains without transferring multi-GB raw files or rewriting ad-hoc parsing scripts.**
 

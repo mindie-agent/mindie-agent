@@ -2,7 +2,7 @@
 
 This repository owns product architecture, domain boundaries, and entry documentation (`docs/`).
 Native Harness plugins live in `mindie-agent-codex`, `mindie-agent-cc`, `mindie-agent-kimi`, and `mindie-agent-dsh`.
-Shared runtime components live in `knowledge`, `remote-dev`, `diagnostics`, `npu-top`, and `coordinator`.
+Shared runtime components live in `knowledge`, `remote-dev`, `diagnostics`, `profiler`, `sim`, `npu-top`, and `coordinator`.
 
 ## 1. Core Operating Rules (Always Active)
 
@@ -37,7 +37,7 @@ Do not preload all documentation into context. Read only the document matching y
 - **Product, Engineering & Testing Principles** → [`docs/design-principles.md`](docs/design-principles.md) & [`docs/testing-architecture.md`](docs/testing-architecture.md)
 - **Harness Plugin Boundary, Hooks & Lifecycle** → [`docs/harness-boundary-and-lifecycle.md`](docs/harness-boundary-and-lifecycle.md) & [`docs/native-runtime-reuse.md`](docs/native-runtime-reuse.md)
 - **Knowledge Flywheel & Privacy Redaction** → [`docs/knowledge-system.md`](docs/knowledge-system.md)
-- **Diagnostics & Issue Reporting** → [`docs/diagnostics-and-reporting.md`](docs/diagnostics-and-reporting.md)
+- **Diagnostics, Profiling & Simulation** → [`docs/diagnostics-and-reporting.md`](docs/diagnostics-and-reporting.md), [`docs/profiler-system.md`](docs/profiler-system.md) & [`docs/simulation-system.md`](docs/simulation-system.md)
 - **Gate — Submitting or Updating a Development PR**:
   - Read and complete [`docs/design-principles.md#三开发-pr-提交前自查清单pre-pr-review`](docs/design-principles.md#三开发-pr-提交前自查清单pre-pr-review) before creating/updating any PR (including drafts), and include the concise review summary in the PR description.
 - **Gate — Publishing a Formal Component or Plugin Release**:

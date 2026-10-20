@@ -2,7 +2,7 @@
 
 [系统架构](architecture.md) · [Profiler 系统设计](profiler-system.md) · [设计原则](design-principles.md) · [上下文与经验设计](knowledge-context-and-exploration.md) · [文档中心](README.md)
 
-`mindie_sim`（CLI 与组件名 `mindie-sim`）是从原 `mindie_profiler` 理论建模子模块中独立抽离出的 **昇腾（Ascend）NPU 仿真、理论边界求解与跨算子融合分析组件**。
+`mindie_sim`（独立仓库 [`sim`](https://github.com/mindie-agent/sim)，CLI 与包名 `mindie-sim` / `mindie_sim`）是与实测 Profiling 仓库（[`profiler`](https://github.com/mindie-agent/profiler)）和诊断上报仓库（[`diagnostics`](https://github.com/mindie-agent/diagnostics)）完全独立建仓的 **昇腾（Ascend）NPU 仿真、理论边界求解与跨算子融合分析组件**。
 
 其核心目标是：**参考 `cannbot`（`ops/npu-arch`、`pipeline_schedule_model`、`ops-simulator`）、`cannsim` 与 `msmodeling`（`tensor_cast`），提供从底层硬件规格、算子内微阶段流水、算子间子图融合到整网多维并行的完整仿真建模能力；将可编码的数学求解与容量核算固化为确定性引擎，同时严格禁止将源码特化逻辑、未校准阶段耗时或模拟器标称值硬编码为伪实测结论。**
 

@@ -2,7 +2,7 @@
 
 [English](profiler-system.en.md) · [系统架构](architecture.md) · [设计原则](design-principles.md) · [上下文与经验设计](knowledge-context-and-exploration.md) · [文档中心](README.md)
 
-`mindie_profiler` 是 [`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics) 仓库内独立维护的昇腾（Ascend）NPU 性能采集、原地解析与对比组件（提供 `mindie-profiler` CLI 与 Python 接口）。
+`mindie_profiler` 是独立仓库 [`mindie-agent/profiler`](https://github.com/mindie-agent/profiler) 维护的昇腾（Ascend）NPU 性能采集、原地解析与对比组件（提供 `mindie-profiler` CLI 与 Python 接口），与诊断上报仓库 [`diagnostics`](https://github.com/mindie-agent/diagnostics) 和四层仿真求解仓库 [`sim`](https://github.com/mindie-agent/sim) 各自独立建仓、职责正交。
 
 其核心目标是：**将昇腾 Profiling 产物的格式适配、纳秒级区间核算、Host-Device 异步调用关联与跨 Run 可比性校验固化为确定性、低开销的封闭工具；让通用编程 Agent 无需搬运 GB 级原始文件或重复编写底层解析脚本，即可快速获得可追溯的性能证据并验证端到端优化收益。**
 

@@ -14,6 +14,8 @@ flowchart TB
     P --> K["knowledge：领域路由、检索与经验沉淀"]
     P --> R["remote-dev：文件、命令与受管作业"]
     P --> D["diagnostics：本地诊断与可选上报"]
+    P --> PR["profiler：实测性能采集、解析与对比"]
+    P --> S["sim：四层硬件/流水/子图/整网仿真"]
     K <--> F["vLLM-Ascend / operators 领域仓库"]
     T["按需安装的 TaskClient / coordinator"] --> Q["机器、容器、设备与端口租约"]
     Q --> R
@@ -38,7 +40,9 @@ flowchart TB
 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | SSH 远端文件读写、精确编辑、搜索、补丁、命令执行、受管长任务、取消与产物同步 |
 | [`coordinator`](https://github.com/mindie-agent/coordinator) | 机器与容器台账、设备探测、NPU 与端口租约、共享队列、受管任务身份和资源回收；向执行工具提供端点 |
 | [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向人的集群观测界面和有界历史数据；读取机器台账，不承担任务调度 |
-| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | 有界结构化日志、可定位的错误编号和经授权的白名单故障上报；同仓独立包 `mindie_profiler` 提供实测性能产物解析与对比 CLI，独立包 `mindie_sim`（`mindie-sim`）提供从底层硬件/微阶段流水到子图融合与整网并行的仿真求解能力 |
+| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | 有界结构化日志、可定位的错误编号、支持包导出与经授权的白名单故障上报（`mindie_diagnostics`） |
+| [`profiler`](https://github.com/mindie-agent/profiler) | 昇腾实测 Profiling 采集控制、`inventory / analyze / correlate / compare / sql` 原地解析、显存分析与跨 Run 事实对比 CLI（`mindie_profiler`） |
+| [`sim`](https://github.com/mindie-agent/sim) | 昇腾四层仿真与边界求解组件（`mindie_sim` / `mindie-sim`）：多型号 SKU `DeviceCapabilityProfile`、7 类全路径传输（`D2D`/`H2D`/`D2H`/`RH2D`/`RD2H`）、算子微阶段周期依赖图求解、子图跨算子融合先行分析与整网并行推演 |
 | [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | 固定任务与 oracle、预置零负担准入脚手架（Gate Runner）、隔离宿主运行、真实结果与成本记录、组件基准、跨任务复用及发行报告校验（100% 复用生产组件公开接口，不重复造轮子） |
 
 主仓发布记录汇总十个代码仓的版本、源码 SHA 和基准产物。领域内容另行绑定其仓库修订，不能把一个新代码标签当成知识内容已经发布或客户端已经消费的证明。配套规则见[组件与插件配套发布](release-compatibility-and-update.md#组件与插件配套发布)。
