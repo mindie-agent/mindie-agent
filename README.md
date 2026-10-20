@@ -158,7 +158,8 @@ MindIE Agent 在你已有的 Claude Code、Codex、Kimi Code 或 DSH 会话中�
 | --- | --- |
 | **带适用条件的领域知识** | 按框架版本、硬件和输入条件检索规则、步骤、工作流与代码变换，精读具体修订并追溯来源；缺失前提不会被自动视作匹配 |
 | **远端 NPU 开发与验证** | 通过 [`remote-dev`](https://github.com/mindie-agent/remote-dev) 在 SSH 主机和容器中读写文件、应用补丁、执行命令、管理长任务与读取产物 |
-| **资源协调与诊断** | 按需使用 `coordinator` 协调设备和端口租约，用 `npu-top` 观察设备状态，用 `diagnostics` 分析运行记录；观测结果与任务正确性分别判断 |
+| **实测剖析与四层理论仿真** | 通过 [`profiler`](https://github.com/mindie-agent/profiler) 原地解析昇腾 Profiling 产物并对比跨 Run 收益，通过 [`sim`](https://github.com/mindie-agent/sim) 开展硬件/传输/算子微阶段/子图融合/整网并行四层边界求解 |
+| **资源协调与结构化诊断** | 按需使用 [`coordinator`](https://github.com/mindie-agent/coordinator) 协调设备和端口租约，用 [`npu-top`](https://github.com/mindie-agent/npu-top) 观察设备状态，用 [`diagnostics`](https://github.com/mindie-agent/diagnostics) 分析运行记录；观测结果与任务正确性分别判断 |
 | **可追溯的经验沉淀** | 在授权范围内采集并脱敏当前任务材料；从选定证据提炼新知识，审核后入库。公开贡献另外受贡献配置控制 |
 
 插件保留原生宿主的会话和工具机制，按需加载领域内容。详细约束见[知识与经验系统](./docs/knowledge-system.md)。
@@ -191,6 +192,8 @@ flowchart TB
     Knowledge["🧠 mindie-knowledge<br/>分级知识 · 条件检索 · 精确引用与反馈"]
     Coord["🎯 coordinator<br/>升级版 SSH & 远端昇腾环境管理 · 容器开通/绑定 · NPU 探测与租约队列"]
     RemoteDev["⚡ remote-dev<br/>SSH 文件与命令 · 容器直连 · 受管作业"]
+    Profiler["🔬 mindie-profiler<br/>昇腾 Profiling 原地解析 · Host-Device 关联 · 跨 Run 对比"]
+    Sim["📐 mindie-sim<br/>四层硬件/微阶段/子图/整网仿真 · 全路径传输边界求解"]
     NpuTop["📊 npu-top<br/>面向人类的 Web 实时看板 · 90 天热力图 (共享 machines.json)"]
     Diag["🛡️ mindie-diagnostics<br/>有界 JSONL 轮转日志 · 严密白名单故障上报"]
   end
@@ -205,8 +208,9 @@ flowchart TB
   Kimi --> P_Kimi
   DSH --> P_DSH
 
-  P_CC & P_Codex & P_Kimi & P_DSH --> Knowledge & RemoteDev & Diag
+  P_CC & P_Codex & P_Kimi & P_DSH --> Knowledge & RemoteDev & Diag & Profiler & Sim
   Task["按需安装 TaskClient / coordinator"] --> Coord
+  Bench["mindie-bench 评测套件"] --> Task & Clients
   Knowledge <--> Feed
   Coord -- "自动同步 endpoints.json / Resolver" --> RemoteDev
   Coord & RemoteDev --> Cluster
@@ -274,12 +278,14 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 
 `@mindie-agent` 组织下的每个仓库均遵循单一职责边界，既可由插件协同联动，也可独立安装使用：
 
-### 1. 产品总入口与社区生态
+### 1. 产品总入口、评测基准与社区生态
 
 | 仓库 | 定位与核心职责 |
 | --- | --- |
 | **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
+| **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | 独立评测框架与真机基准套件：固定任务与 Oracle、预置准入脚手架（Gate Runner）、隔离宿主运行、组件级基准、跨任务知识复用及端到端总工程成本校验 |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | 面向昇腾 NPU AI Infra 全流程的高质量开源 Agent Skills 精选目录（现已覆盖 `vLLM-Ascend`、`AscendC`/`Triton` 算子开发、精度测试与性能调优，持续扩展中） |
+| **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | 轻量可定制的 `vLLM` + `vLLM-Ascend` 本地多任务开发工作区，支持独立 Git Worktree 隔离与 MindIE Agent 集成 |
 
 ### 2. 原生客户端插件（Harness Adapters）
 
@@ -290,16 +296,19 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 | **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | Kimi Code 原生插件：代数原子更新、公开会话投影采集与 MCP 桥接 |
 | **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | DSH 原生组合插件：`/mindie-agent` Skill、知识工具、生命周期桥接与 `remote-dev`；复用宿主插件机制 |
 
-### 3. 共享运行时底座（Shared Runtime Components）
+### 3. 共享运行时底座与公共知识库（Shared Runtime Components & Corpora）
 
 | 仓库 | Python 包 / 入口 | 定位与核心职责 |
 | --- | --- | --- |
 | **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | 分级单元、条件检索、领域路由、精确版本反馈、授权采集与审核后的内容发布 |
-| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** / **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | *(Markdown 知识库)* | 两个独立领域的知识正文、来源、适用条件与内容修订 |
+| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | *(Markdown 知识库)* | `vLLM-Ascend` 领域公共工程知识库：带源码修订绑定、适用条件与实证证据的模型开发、适配与调优知识单元 |
+| **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | *(Markdown 知识库)* | 昇腾算子领域公共工程知识库：带源码修订绑定、适用条件与实证证据的 `AscendC`、`Triton` 与 CANN 算子实现及调优知识单元 |
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | SSH 远端文件与命令工具、容器直连、受管作业、连接池复用与产物传输；可消费 `coordinator` 提供的端点 |
 | **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | 升级版 SSH 与远端昇腾环境管理器：SSH 主机/免密/多机互通、容器绑定与自动开通、Agent 级 NPU/节点/权重挂载探测（`mindie_probe`）、NPU/端口租约仲裁（`mindie_lease`）及本地受管任务调度 |
+| **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | 独立昇腾实测 Profiling 采集与原地解析组件：受控采集、`inventory / analyze / correlate / compare / sql` 原地只读分析、显存证据提取与跨 Run 事实对比 CLI |
+| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | 独立昇腾四层仿真与边界求解组件：多型号 A2/A3/A5 `DeviceCapabilityProfile`、7 类全路径 `D2D`/`H2D`/`D2H`/`RH2D`/`RD2H` 传输边界、算子微阶段周期依赖图求解、Phase 0 子图跨算子融合先行分析与整网多维并行推演 |
 | **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | 面向人类开发者的昇腾 NPU 可视化监控台：Web 实时看板（`127.0.0.1:8788`）与 90 天有界 SQLite 利用率热力图（直接共享读取 `coordinator` 的 `machines.json`） |
-| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` | 结构化诊断底座：无模型 4×1 MiB 本地日志轮转、离线脱敏诊断包与可选 GitHub Issue 自动上报 |
+| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` / `mindie_diagnostics` | 结构化诊断底座：无模型 4×1 MiB 本地日志轮转、离线脱敏诊断包与可选 GitHub Issue 自动上报 |
 
 ---
 
@@ -337,10 +346,16 @@ MindIE Agent 在持续演进中沉淀了一套严格的 **[工程设计原则](.
 | **系统架构与组件边界** | [docs/architecture.md](./docs/architecture.md) | [docs/architecture.en.md](./docs/architecture.en.md) |
 | **工程设计原则与演进准则** | [docs/design-principles.md](./docs/design-principles.md) | [docs/design-principles.en.md](./docs/design-principles.en.md) |
 | **知识与经验闭环设计** | [docs/knowledge-system.md](./docs/knowledge-system.md) | [docs/knowledge-system.en.md](./docs/knowledge-system.en.md) |
+| **上下文分层、经验演化与开放探索设计** | [docs/knowledge-context-and-exploration.md](./docs/knowledge-context-and-exploration.md) | [docs/knowledge-context-and-exploration.en.md](./docs/knowledge-context-and-exploration.en.md) |
+| **面向 Agent 的 Profiler 系统设计（`mindie-profiler`）** | [docs/profiler-system.md](./docs/profiler-system.md) | [docs/profiler-system.en.md](./docs/profiler-system.en.md) |
+| **面向 Agent 的 NPU 四层仿真与边界求解设计（`mindie-sim`）** | [docs/simulation-system.md](./docs/simulation-system.md) | — |
+| **核心能力落地与 GEAK 演化架构设计** | [docs/core-implementation-and-geak-evolution-design.md](./docs/core-implementation-and-geak-evolution-design.md) | — |
 | **Harness 边界、授权与生命周期** | [docs/harness-boundary-and-lifecycle.md](./docs/harness-boundary-and-lifecycle.md) | [docs/harness-boundary-and-lifecycle.en.md](./docs/harness-boundary-and-lifecycle.en.md) |
 | **原生运行时复用设计** | [docs/native-runtime-reuse.md](./docs/native-runtime-reuse.md) | [docs/native-runtime-reuse.en.md](./docs/native-runtime-reuse.en.md) |
 | **发布兼容、配套发行与静默更新** | [docs/release-compatibility-and-update.md](./docs/release-compatibility-and-update.md) | [docs/release-compatibility-and-update.en.md](./docs/release-compatibility-and-update.en.md) |
 | **结构化诊断与故障自动上报** | [docs/diagnostics-and-reporting.md](./docs/diagnostics-and-reporting.md) | [docs/diagnostics-and-reporting.en.md](./docs/diagnostics-and-reporting.en.md) |
+| **分级测试体系与用例设计规范** | [docs/testing-architecture.md](./docs/testing-architecture.md) | [docs/testing-architecture.en.md](./docs/testing-architecture.en.md) |
+| **L1–L4 知识与系统能力分级测试方案** | [docs/knowledge-tiered-testing-plan.md](./docs/knowledge-tiered-testing-plan.md) | — |
 | **演进路线与下一步重点** | [docs/next-steps.md](./docs/next-steps.md) | [docs/next-steps.en.md](./docs/next-steps.en.md) |
 | **`v0.0.1` 首发版本发布记录** | [docs/releases/0.0.1.md](./docs/releases/0.0.1.md) | [docs/releases/0.0.1.en.md](./docs/releases/0.0.1.en.md) |
 

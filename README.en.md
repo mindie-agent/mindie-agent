@@ -58,7 +58,7 @@ When your Agent reads this page, it will automatically verify a **stable `gh` (G
 > Community contribution is off by default. Only after the user enables contribution to a target corpus `<owner/repo>` should you create or reuse that corpus's personal Fork and bind `<GH_USER>/<repo>` as the push target. Do not Fork the main repository, plugin repositories or all domain repositories as an installation step.
 >
 > #### Step 3: Identify your host environment & install the matching plugin
-> Run the **single matching branch** for your host CLI (check `claude --version`, `codex --version`, or `kimi --version` if unsure):
+> Run the **single matching branch** for your host CLI (check `claude --version`, `codex --version`, `kimi --version`, or `dsh --version` if unsure):
 >
 > - **Branch A — If you are running inside Claude Code (`CLAUDECODE` env or `claude` CLI)**:
 >   ```bash
@@ -158,7 +158,8 @@ MindIE Agent brings domain knowledge and remote development tools into your exis
 | --- | --- |
 | **Knowledge with explicit conditions** | Retrieve rules, procedures, workflows, and code transformations by framework version, hardware, and input conditions; inspect exact revisions and trace their sources. Missing prerequisites remain unknown |
 | **Remote NPU development and validation** | Use [`remote-dev`](https://github.com/mindie-agent/remote-dev) to edit files, apply patches, run commands, manage long jobs, and read artifacts on SSH hosts and in containers |
-| **Resource coordination and diagnosis** | Use the optional `coordinator` for device and port leases, `npu-top` for device observations, and `diagnostics` for run analysis. Observations and task correctness are assessed separately |
+| **In-place profiling & 4-layer simulation** | Use [`profiler`](https://github.com/mindie-agent/profiler) for in-place Ascend profiling analysis and cross-run comparison, and [`sim`](https://github.com/mindie-agent/sim) for 4-layer hardware/transfer/microstage/subgraph/whole-network boundary solving |
+| **Resource coordination and diagnosis** | Use [`coordinator`](https://github.com/mindie-agent/coordinator) for device and port leases, [`npu-top`](https://github.com/mindie-agent/npu-top) for device observations, and [`diagnostics`](https://github.com/mindie-agent/diagnostics) for run analysis. Observations and task correctness are assessed separately |
 | **Traceable engineering experience** | Capture and redact the current task within its authorized scope; distill selected evidence into new knowledge and review it before admission. Public contribution has its own configuration gate |
 
 Plugins retain native session and tool mechanisms and load domain content as needed. See the [knowledge system](./docs/knowledge-system.en.md) for details.
@@ -191,6 +192,8 @@ flowchart TB
     Knowledge["🧠 mindie-knowledge<br/>Graded Units · Conditional Retrieval · Exact Refs and Feedback"]
     Coord["🎯 coordinator<br/>Upgraded SSH & Remote Ascend Env Manager · Container Bind/Provision · NPU Probe & Leases"]
     RemoteDev["⚡ remote-dev<br/>SSH Files and Commands · Containers · Managed Jobs"]
+    Profiler["🔬 mindie-profiler<br/>In-Place Ascend Profiling · Host-Device Correlation · Cross-Run Compare"]
+    Sim["📐 mindie-sim<br/>4-Layer Hardware/Microstage/Subgraph/Network Sim · Full-Path Transfer Solver"]
     NpuTop["📊 npu-top<br/>Human-Facing Web Dashboard · 90-Day Heatmaps (Shares machines.json)"]
     Diag["🛡️ mindie-diagnostics<br/>Bounded 4x1 MiB JSONL Logs · Allowlist Issue Reporter"]
   end
@@ -205,8 +208,9 @@ flowchart TB
   Kimi --> P_Kimi
   DSH --> P_DSH
 
-  P_CC & P_Codex & P_Kimi & P_DSH --> Knowledge & RemoteDev & Diag
+  P_CC & P_Codex & P_Kimi & P_DSH --> Knowledge & RemoteDev & Diag & Profiler & Sim
   Task["Optional TaskClient / coordinator"] --> Coord
+  Bench["mindie-bench Evaluation Suite"] --> Task & Clients
   Knowledge <--> Feed
   Coord -- "Syncs endpoints.json / Resolver" --> RemoteDev
   Coord & RemoteDev --> Cluster
@@ -274,12 +278,14 @@ Connect to the vllm-dev container on host 192.0.2.21 (port 22), sync my new oper
 
 Every repository under `@mindie-agent` has a clean, single-purpose boundary and can be used together or standalone:
 
-### 1. Product Entry & Community Catalogue
+### 1. Product Entry, Benchmarks & Community Catalogue
 
 | Repository | Role |
 | --- | --- |
 | **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(This Repo)* | Product entry point, system architecture, engineering design principles, release compatibility contracts, and release records |
+| **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | Independent evaluation harness and live NPU benchmark suite: fixed tasks and oracles, pre-configured Gate Runner, isolated host execution, component benchmarks, cross-task reuse, and total engineering cost verification |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | Curated catalogue of open-source Agent Skills for the full Ascend NPU AI Infra workflow (currently covering `vLLM-Ascend`, `AscendC`/`Triton` kernels, accuracy testing, and profiling, with more domains expanding) |
+| **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | Lightweight customizable local workspace for `vLLM` + `vLLM-Ascend` development with isolated task Git Worktrees and MindIE Agent integration |
 
 ### 2. Native Harness Plugins
 
@@ -290,16 +296,19 @@ Every repository under `@mindie-agent` has a clean, single-purpose boundary and 
 | **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | Native Kimi Code plugin: atomic generation updates, public transcript projection capture, and MCP bridging |
 | **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | Native DSH composition plugin: `/mindie-agent`, knowledge tools, lifecycle bridging, and `remote-dev`, using the host plugin mechanism |
 
-### 3. Shared Runtime Components
+### 3. Shared Runtime Components & Public Knowledge Corpora
 
 | Repository | Package / CLI | Role |
 | --- | --- | --- |
 | **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | Graded units, conditional retrieval, domain routing, exact revision feedback, authorized capture, and publication of reviewed content |
-| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** / **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | *(Markdown Corpora)* | Two independent domains with knowledge bodies, sources, applicability conditions, and content revisions |
+| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | *(Markdown Corpus)* | Curated `vLLM-Ascend` domain knowledge repository: model development, adaptation, and optimization units with pinned source revisions, applicability conditions, and evidence |
+| **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | *(Markdown Corpus)* | Curated Ascend operators domain knowledge repository: `AscendC`, `Triton`, and CANN operator implementation and pipeline tuning units with source-bound applicability and evidence |
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | SSH file and command tools, container execution, managed jobs, pooled connections, and artifact transfer; can consume endpoints provided by `coordinator` |
 | **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | Upgraded SSH & remote Ascend environment manager: SSH host/key/mesh management, container binding & provisioning, Agent-facing NPU/server/mount probing (`mindie_probe`), NPU/port lease arbitration (`mindie_lease`), and managed task execution |
+| **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | Standalone Ascend profiling collection and in-place analysis component: controlled capture, `inventory / analyze / correlate / compare / sql` read-only artifact analysis, memory evidence, and cross-run comparison CLI |
+| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | Standalone Ascend 4-layer simulation and theoretical boundary solver: multi-SKU A2/A3/A5 `DeviceCapabilityProfile`, 7-channel `D2D`/`H2D`/`D2H`/`RH2D`/`RD2H` transfer bounds, periodic microstage pipeline solver, Phase 0 subgraph fusion analyzer, and whole-network parallel decomposition |
 | **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | Human-facing Ascend NPU observability dashboard: live web UI (`127.0.0.1:8788`) and bounded 90-day SQLite utilization heatmaps (reading `coordinator`'s shared `machines.json`) |
-| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` | Model-free observability substrate: bounded 4×1 MiB JSONL rotation, offline redacted bundles, and opt-in GitHub Issue reporting |
+| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` / `mindie_diagnostics` | Model-free observability substrate: bounded 4×1 MiB JSONL rotation, offline redacted bundles, and opt-in GitHub Issue reporting |
 
 ---
 
@@ -337,10 +346,16 @@ See **[`docs/README.en.md`](./docs/README.en.md)** (**[中文文档中心](./doc
 | **System Architecture & Domain Boundaries** | [docs/architecture.md](./docs/architecture.md) | [docs/architecture.en.md](./docs/architecture.en.md) |
 | **Engineering Design Principles** | [docs/design-principles.md](./docs/design-principles.md) | [docs/design-principles.en.md](./docs/design-principles.en.md) |
 | **Knowledge & Experience System** | [docs/knowledge-system.md](./docs/knowledge-system.md) | [docs/knowledge-system.en.md](./docs/knowledge-system.en.md) |
+| **Context, Experience & Exploration Design** | [docs/knowledge-context-and-exploration.md](./docs/knowledge-context-and-exploration.md) | [docs/knowledge-context-and-exploration.en.md](./docs/knowledge-context-and-exploration.en.md) |
+| **Agent-Facing Profiler System Design (`mindie-profiler`)** | [docs/profiler-system.md](./docs/profiler-system.md) | [docs/profiler-system.en.md](./docs/profiler-system.en.md) |
+| **Agent-Facing NPU 4-Layer Simulation & Boundary Solver (`mindie-sim`)** | [docs/simulation-system.md](./docs/simulation-system.md) | — |
+| **Core Implementation & GEAK Evolution Design** | [docs/core-implementation-and-geak-evolution-design.md](./docs/core-implementation-and-geak-evolution-design.md) | — |
 | **Harness Boundary, Consent & Lifecycle** | [docs/harness-boundary-and-lifecycle.md](./docs/harness-boundary-and-lifecycle.md) | [docs/harness-boundary-and-lifecycle.en.md](./docs/harness-boundary-and-lifecycle.en.md) |
 | **Native Runtime Reuse** | [docs/native-runtime-reuse.md](./docs/native-runtime-reuse.md) | [docs/native-runtime-reuse.en.md](./docs/native-runtime-reuse.en.md) |
 | **Release Compatibility & Silent Update** | [docs/release-compatibility-and-update.md](./docs/release-compatibility-and-update.md) | [docs/release-compatibility-and-update.en.md](./docs/release-compatibility-and-update.en.md) |
 | **Structured Diagnostics & Issue Reporting** | [docs/diagnostics-and-reporting.md](./docs/diagnostics-and-reporting.md) | [docs/diagnostics-and-reporting.en.md](./docs/diagnostics-and-reporting.en.md) |
+| **Tiered Testing Architecture** | [docs/testing-architecture.md](./docs/testing-architecture.md) | [docs/testing-architecture.en.md](./docs/testing-architecture.en.md) |
+| **L1–L4 Tiered Knowledge & System Testing Plan** | [docs/knowledge-tiered-testing-plan.md](./docs/knowledge-tiered-testing-plan.md) | — |
 | **Roadmap & Next Steps** | [docs/next-steps.md](./docs/next-steps.md) | [docs/next-steps.en.md](./docs/next-steps.en.md) |
 | **`v0.0.1` Release Record** | [docs/releases/0.0.1.md](./docs/releases/0.0.1.md) | [docs/releases/0.0.1.en.md](./docs/releases/0.0.1.en.md) |
 

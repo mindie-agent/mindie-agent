@@ -11,18 +11,18 @@ This document explains how MindIE Agent coordinates paired component and plugin 
 
 ## Paired Component and Plugin Releases
 
-MindIE Agent ships **verified combinations of components and plugins**. Starting with `0.0.2`, the OpenAI Codex CLI, Claude Code, Kimi Code, and DeepSeek Harness (DSH) plugins align their version number with the main product. Shared runtime components (`diagnostics`, `knowledge`, `remote-dev`, `coordinator`, `npu-top`) and `mindie-bench` maintain independent version sequences, and unchanged components reuse their existing formal Releases.
+MindIE Agent ships **verified combinations of components and plugins**. Starting with `0.0.2`, the OpenAI Codex CLI, Claude Code, Kimi Code, and DeepSeek Harness (DSH) plugins align their version number with the main product. Shared runtime components (`diagnostics`, `knowledge`, `remote-dev`, `coordinator`, `npu-top`, `profiler`, `sim`) and `mindie-bench` maintain independent version sequences, and unchanged components reuse their existing formal Releases.
 
 > **DSH `0.0.2` Same-Version Refresh Note**: DSH remains at `0.0.2` for this release as an authorized one-time replacement of the earlier `0.0.2` tag (`828c375...`). Existing installations of the earlier `0.0.2` require a one-time explicit refresh of both the runtime and plugin bundle followed by a full DSH process restart; see the [`0.0.2` Release Notes](releases/0.0.2.en.md#4-dsh-002-same-version-refresh-notice).
 
 ### Topological Release Order & Checklist
 
 Releases follow a **bottom-up dependency order**:
-1. Publish the base diagnostics library [`diagnostics`](https://github.com/mindie-agent/diagnostics) first;
-2. Prepare and publish [`remote-dev`](https://github.com/mindie-agent/remote-dev), [`knowledge`](https://github.com/mindie-agent/knowledge), and [`npu-top`](https://github.com/mindie-agent/npu-top), which depend on `diagnostics`;
+1. Publish the base diagnostics library [`diagnostics`](https://github.com/mindie-agent/diagnostics) and 4-layer boundary solver [`sim`](https://github.com/mindie-agent/sim) first;
+2. Prepare and publish [`remote-dev`](https://github.com/mindie-agent/remote-dev), [`knowledge`](https://github.com/mindie-agent/knowledge), [`profiler`](https://github.com/mindie-agent/profiler), and [`npu-top`](https://github.com/mindie-agent/npu-top), which depend on them;
 3. Publish [`coordinator`](https://github.com/mindie-agent/coordinator) pinned to the formal `remote-dev` and `diagnostics` Releases;
 4. Publish the four Harness plugins ([`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex), [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc), [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi), [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)) pinned to their runtime dependencies, followed by the main product release record.
-   - The four host plugins bundle and register `knowledge`, `remote-dev`, and `diagnostics`; `coordinator` and `npu-top` remain standalone components installed on demand.
+   - The four host plugins bundle and register `knowledge`, `remote-dev`, and `diagnostics`; `coordinator`, `profiler`, `sim`, and `npu-top` can be installed standalone on demand or wired into plugins as they mature.
    - `mindie-bench` maintains its own version sequence and is referenced by immutable commit SHA in release workflows.
 
 Before publishing any plugin Release, maintainers verify the following checklist:
@@ -50,7 +50,7 @@ Any failed, missing, or timed-out required scenario—or any checkout modificati
 
 Product `0.0.2` and subsequent release records verify and aggregate the formal benchmark and real-task evaluation reports across all ten code repositories: `diagnostics`, `knowledge`, `remote-dev`, `coordinator`, `npu-top`, the four Harness plugins, and `mindie-bench` (see the [`0.0.2` Release Notes](releases/0.0.2.en.md#3-benchmark-results-and-003-roadmap)).
 
-> **Note**: `knowledge` is a software runtime package governed by this release checklist, whereas `knowledge-vllm-ascend` is a domain content repository updated continuously under `publication-contract.json` without requiring a new software release for every new knowledge package.
+> **Note**: `knowledge` is a software runtime package governed by this release checklist, whereas [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) and [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) are domain content repositories updated continuously without requiring a new software release for every new knowledge unit.
 
 ---
 

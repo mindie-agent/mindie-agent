@@ -15,9 +15,9 @@ The current release is [`0.0.2`](releases/0.0.2.en.md), which aligns the product
 2. **Host Lifecycle Reliability & Live Test Speed**
    - Monitor real-world usage of the unified contribution and fault-reporting pipeline, prioritize fixes for reported tool faults, and expand automated cross-platform upgrade verification.
    - Streamline the `remote-dev` live A2/A3 integration suite so its total execution time drops from ~51 seconds into the 25-second Tier 2 design budget.
-3. **Broader Ascend AI Infra Skills & Knowledge Coverage**
-   - Expand [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) and [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) across the Ascend NPU AI Infra workflow, covering architecture design, `vLLM-Ascend` feature development, `AscendC`/`Triton` kernel implementation, accuracy verification, and profiling.
-   - Extend `mindie-bench` with G3 native session capture and live remote-NPU evaluation support for DSH.
+3. **Broader Ascend AI Infra Knowledge, Profiling/Simulation (`profiler` / `sim`) & Skills Coverage**
+   - Expand [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend), [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators), and [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) across the Ascend NPU AI Infra workflow, covering architecture design, `vLLM-Ascend` feature development, `AscendC`/`Triton` kernel implementation, accuracy verification, and profiling.
+   - Advance end-to-end integration and benchmark verification of the standalone profiling component [`profiler`](https://github.com/mindie-agent/profiler) (`mindie-profiler`) and 4-layer boundary solver [`sim`](https://github.com/mindie-agent/sim) (`mindie-sim`) with [`mindie-bench`](https://github.com/mindie-agent/mindie-bench).
 4. **Optional `coordinator` Integration Path**
    - Today, [`coordinator`](https://github.com/mindie-agent/coordinator) (Agent-facing SSH host management, agentless NPU/server probing, container binding, and lease arbitration) and [`npu-top`](https://github.com/mindie-agent/npu-top) (human-facing Web dashboard and 90-day heatmaps) are installed standalone on demand, while the four host plugins bundle `knowledge`, `remote-dev`, and `diagnostics`.
    - Exposing `coordinator` tools by default inside host plugins will be evaluated as a dedicated step with explicit dependency locking, tool registration, and host verification.
