@@ -557,6 +557,8 @@ knowledge_feedback(ref, rating=None, reason="", event_type=None,
 
 遵循[分级测试体系](testing-architecture.md)，只验证真实行为：
 
+各层知识的现有实现覆盖、具体用例、开源协议对照、评价指标与落地顺序见 [L1–L4 知识与系统能力分级测试方案](knowledge-tiered-testing-plan.md)。下表保留本设计的功能验收要求，真实任务收益与长期学习按该方案分别验证。
+
 | 场景 | 验收重点 |
 | --- | --- |
 | 两个 L3 共享 L1/L2 | 全响应预算内，父正文只出现一次；无缺失前提却标记可采用 |

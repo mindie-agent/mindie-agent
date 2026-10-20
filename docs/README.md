@@ -2,7 +2,7 @@
 
 [English](README.en.md) · [返回首页](../README.md)
 
-欢迎来到 MindIE Agent 文档中心。这里汇总了 MindIE Agent 的整体架构、工程设计原则、知识闭环机制、跨组件协作约定以及版本发布记录。所有文档均提供中英双语版本。
+欢迎来到 MindIE Agent 文档中心。这里汇总了 MindIE Agent 的整体架构、工程设计原则、知识闭环机制、跨组件协作约定以及版本发布记录。核心文档提供中英双语入口。
 
 ## 架构与设计原则
 
@@ -23,6 +23,7 @@
 | [诊断日志与故障上报](diagnostics-and-reporting.md) | [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | 本地结构化诊断日志、隐私脱敏红线与可选的 GitHub Issue 自动故障上报 |
 | [原生能力与系统机制复用](native-runtime-reuse.md) | [Native Runtime & Process Reuse](native-runtime-reuse.en.md) | 为什么及如何复用宿主插件市场、`uv` 锁定环境与操作系统原生进程树管理 |
 | [分级测试体系与用例设计规范](testing-architecture.md) | [Tiered Testing Architecture](testing-architecture.en.md) | 用例有效性红线与基于常备 A2/A3 昇腾真机的 Tier 0 ~ Tier 3 分级验证体系 |
+| [L1–L4 知识与系统能力分级测试方案](knowledge-tiered-testing-plan.md) | — | 开源评测协议、现有覆盖与缺口、具体用例、评价指标及实施顺序 |
 
 ## 版本记录与路线图
 
