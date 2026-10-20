@@ -1,0 +1,34 @@
+docs/README.en.md
+  s_d737ad21458d6c::t_eb548a50d58cf5 32-37
+docs/audits/2026-10-20/README.en.md
+  s_d737ad21458d6c::t_b5047ace6b11df 31,165
+  s_d737ad21458d6c::t_03f17e1772f244 1-30,32-164,166-207
+docs/README.md
+  s_d737ad21458d6c::t_eb548a50d58cf5 32-37
+docs/audits/2026-10-20/findings.en.md
+  s_d737ad21458d6c::t_accc38b04d8261 524-587
+  s_d737ad21458d6c::t_87a5679dc1efdf 1-523
+  s_d737ad21458d6c::t_fe8cba63f9282c 588-800
+docs/audits/2026-10-20/README.md
+  s_d737ad21458d6c::t_a32c6acb34377d 1-207
+docs/audits/2026-10-20/baseline.json
+  s_d737ad21458d6c::t_2e1eeadaaff29d 1-2384
+docs/audits/2026-10-20/findings.md
+  s_d737ad21458d6c::t_fe64feb1ec590c 1-984
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eeee435ae1ac6e362d448c19f6333ffb75a5319d",
+  "prompts": {},
+  "sessions": {
+    "s_d737ad21458d6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a15708-c6bc-7b41-a0c4-4c573d98441e",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "fan2956 <zhoufan53@huawei.com>"
+    }
+  }
+}
