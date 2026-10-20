@@ -13,6 +13,7 @@
 | [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | 本地实战经验如何脱敏沉淀、生成检索导航，并与社区公共知识库双向流转 |
 | [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | 后续设计：Token 预算、渐进加载、L3 决策经验、知识增长控制与探索回流；含开源对照和验收方案 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 原地解析、纳秒区间计量、Host-Device 异步关联、跨 Run 对比与按需采集设计 |
+| [面向 Agent 的 NPU 仿真与边界求解系统设计](simulation-system.md) | — | `mindie-sim` 四层仿真（硬件/热态、算子微阶段周期求解、子图跨界融合、整网并行）及可编码 vs 不可硬编码边界 |
 
 ## 运行机制与工程规范
 

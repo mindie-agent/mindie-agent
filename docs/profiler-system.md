@@ -45,7 +45,8 @@ flowchart LR
 
 | 组件 | 核心职责 | 明确不做的事（边界） |
 | --- | --- | --- |
-| **`mindie_profiler`**（`diagnostics` 仓独立包） | 产物发现、Schema 校验、纳秒区间计量、变体聚合、Host-Device 关联、跨 Run 事实对比、显存归因、在线采集窗口控制 | 不维护跨轮 LLM 会话状态（不追踪 `known_refs` 或上下文压缩）、不估算宿主模型 Token 账单、不在 CPU 解析路径 `import torch_npu`、不替 Agent 做开放式瓶颈定性 |
+| **`mindie_profiler`**（`diagnostics` 仓独立包） | 产物发现、Schema 校验、纳秒区间计量、变体聚合、Host-Device 关联、跨 Run 事实对比、显存归因、在线采集窗口控制 | 不维护跨轮 LLM 会话状态、不估算宿主模型 Token 账单、不在 CPU 解析路径 `import torch_npu`、不内置复杂流水周期求解或子图融合仿真（统一委托给同仓平级独立包 [`mindie_sim`](simulation-system.md)） |
+| **`mindie_sim`（`mindie-sim`）** | 硬件规格与热态频率下界、算子内微阶段周期依赖图最大环均值求解、Phase 0 子图跨界融合流量/关键路径仿真、整网并行推演（桥接 `msmodeling` / `cannsim` / `npusim`） | 不解析实测 Profiling DB/CSV/Trace 原始事件表；仅接收结构化图/配置与 `mindie_profiler` 实测摘要进行仿真求解与三值对齐 |
 | **宿主 Agent + Skill** | 理解用户性能目标（TTFT/TPOT/吞吐/算子时延）、按需调用 `mindie-profiler` 子命令、结合上下文提出假设并设计最小验证实验 | 不把死板的排查步骤写进工具源码，不在本地全量拉取 GB 级原始 Trace |
 | **`remote-dev` + `coordinator`** | 在数据所在远端主机/容器内原地运行 `mindie-profiler` 及受管离线导出作业（`torch_npu.profiler.analyse`），管理设备与端口租约 | 不新建独立的性能任务队列或第二套运行身份（统一复用 `run_id`） |
 | **`npu-top`** | 提供同时间窗口的设备温度、功耗、AICore 频率与显存采样序列 | 不脱离硬件降频信号位仅凭单一温度阈值（如 `>= 85°C`）直接宣判降频 |

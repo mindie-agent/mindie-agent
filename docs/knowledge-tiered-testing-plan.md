@@ -32,6 +32,8 @@ Hermes 是从任务中学习并修订知识的过程，横跨 L1–L4。常规�
 
 下文“已有覆盖”表示已找到对应实现和测试，不能自动解释为当前修订已实测通过。“历史实测”绑定原报告的代码、语料、宿主与条件。
 
+机制吸收补充检查使用 `knowledge@02ccb63`、`mindie-bench@c606777`，见第 4.6 节。该 bench 修订已提供 `evaluation/knowledge_tiered.py` 的真实知识接口回放、`bridge_run_receipt_to_feedback` 和 `run_sequential_learning_episodes`；后者仍消费提供的提案，属于组件链路覆盖，真实 organizer 学习与新宿主任务的结论仍待验收。下文旧快照中的“待补”不能覆盖这项增量，也不能据此升格为真实迁移通过。
+
 ## 2. 开源协议如何采用
 
 | 项目与来源 | 采用的设计 | 对应范围与调整 |
@@ -153,6 +155,31 @@ Hermes 是从任务中学习并修订知识的过程，横跨 L1–L4。常规�
 | X-05 重复事件与未确认观察 | 重复上报同一 run；设备失败；新独立 run 给有效支持/反驳 | 重复事件不增加证据数；设备失败为 inconclusive；只有独立有效验证改变支持/反驳统计 | 组件用例已有；真实回执到知识事件映射待补 |
 | X-06 增长与低频条件保留 | 顺序输入同主题重复、新机制、版本迁移和低频例外；在检查点做固定评测 | 分别观察修订、新增、正文和读取成本；低频场景仍能检索并正确执行；不以单元越少判越好 | 增长计算与事件回放已有；真实 organizer 和语义保留测量待补 |
 
+<a id="mechanism-replay"></a>
+
+### 4.6 Transcript 决策机制回放（M1–M6）
+
+机制、归属组件和逐条来源见[机制吸收设计第 15 节](knowledge-context-and-exploration.md#15-从真实-transcript-吸收机制)。T1–T5 是已分析的历史材料，只作为 exposed-dev 和来源审阅；不作为独立 Held-out。此处验收的是能否根据当时证据选择动作、保留反证并修订知识，A5/K3 的专用配置和修复代码不进入本批内容建设。
+
+| 用例 | 决策前材料与来源 | 合理动作或必须保留的判断 | 不通过的表现 | 归属与证据层级 |
+| --- | --- | --- | --- | --- |
+| M1-01 有信息的下一步与子图融合先行 | T1 的周边预算/关键路径与负结果记录，T3:53 之前的版本定位背景；后续用户纠正单独揭示 | 先做 **Phase 0 子图跨界融合与关键路径分析**（识别可消除的 GM 往返、独立 `pack`/quant helper 及不可融合的通信屏障/容量硬边界），说明竞争解释、下一项能区分它们的观察及成本；根据新增事实调整投入 | 未分析上下游可融合边界便盲目死磕单算子 Tile/Buffer；重复同一个无信息实验；仅按“两次失败”升级；把首个分歧当作没有进展 | 四插件决策 + `mindie_sim` 子图仿真；bench 轨迹判分。先 Dev 决策回放，后真实完整任务 |
+| M2-01 等价边界、跨模块契约与四层仿真 | T2:639/737 已知的输入/路由一致与 partial sum 对照；T3 的逻辑状态与物理 ID 区别；T1 C8 FlashMLA 36 节点依赖图与 MLAPO 子图 | 检查首个等价边界以及其后归约/非线性、布局和生命周期；使用 `mindie_sim` 核算片上 Buffer 容量/对齐、最大环均值周期下界 `II`、热态频率敏感性与 $\max(P+C, Q+G)$ 关键路径；缺失服务时长保持 `null/unknown` | 未对齐逻辑对象就比数值；collective 正常便宣布整个模块正确；捏造未测阶段耗时填模型；把短采高频或理论下界当持续热态可达延迟；相加重叠阶段耗时推算系统收益 | 领域 L2/L3 + `mindie_sim` / `mindie_profiler` / `remote-dev`。材料判读、Tier 0 仿真求解与真实采集分别验收 |
+| M3-01 观察动作改变结果 | T3 dump 后现象改变的公开观察；22797/22844 的解释留给 evaluator；补充 DFX 草案仅作对照设计参考 | 选择与假设对应的无插桩/最小干预/仅观察对照；无法排除竞争解释时保留 inconclusive；最终无 DFX 复验 | 将 dump 后正常称为修复；分支没有执行仍归因于补丁；把草案写成已跑完 | 插件设计实验，coordinator/remote-dev 执行，bench 验证。需要真实设备因果证据 |
+| M4-01 首次正常到异常的序列 | T3:23706 的新进程/历史进程差异，T4:4793 的串行/并发边界；后续修复和结论不提供给 learner | 把初始状态、请求顺序、reset 和必要并发纳入复现，缩短触发序列，再检验旧序列 | 只保留最后输入；每次新进程后宣称修复；丢掉必要并发；将 reset 当成完整初始化而不检查 | bench task 与 private judge；插件/remote-dev 复现。组件序列控制通过不代替 NPU 复现 |
+| M5-01 共同错误、未执行路径与零负担准入 | T3:20178 前后的 token/acceptance 原始事实、3028 的路径计数；T2:911 的首 token 范围；T1 增量门禁包与符号校验记录 | 选择不共享可疑缺陷的 oracle，核对实际路径；通过预置 `G0–G3` 准入脚手架（Gate Runner）完成增量验证，分别报告首 token、持续 decode、模块和并发 | 100% acceptance、exit 0 或 health 即判精度通过；把未走到的补丁称为有效；把第一步通过推广为全任务通过；向业务 Agent 强加手工拼装门禁脚本的负担 | bench 验证器/预置 Gate Runner + 插件解释；实际输出和路径证据必须存在 |
+| M6-01 反证、纠正、跨会话修订与静默防膨胀 | T4:11236/16041/17326/19868/24062/24224 的纠正链；T1 ACTIVE_STATE 与多轮负向流水实验记录 | 保留作废对象、后来生效的约束、技术证据强度和重开条件；恢复先查原运行；U@1→U@2 后使用新分支，旧适用条件保留；`knowledge` 后台静默折叠同主题多次负向尝试并控制单单元字节净增长（对前台业务 Agent 零负担） | 相同条件下无理由再怀疑已排除项；复活中间布局；旧正文尾部反证在更新时丢失；每次负向实验新建独立卡片导致知识库线性膨胀；要求前台业务 Agent 手动计算字数或执行压缩仪式 | knowledge 提炼/静默防膨胀与插件恢复。完整正文/不完整更新阻断与后台防膨胀为 Tier 0/1；跨新会话学习另测 |
+
+回放使用已有 task、轨迹和 evaluator 边界：
+
+1. 从公开消息与产物选取最小决策片段，保留 transcript UUID、解压行号或 artifact 位置。对 learner 只展示截至该决策点可见的事实；正确后续、最终修复和 rubric 留给 evaluator。受控分段揭示是评测协议，不要求日常用户逐步喂材料。
+2. 不用最终根因标签替代过程判分。检查下一动作能否区分尚存假设、是否引用可见证据、是否承认未知、是否避免被已有反证排除的重复。多种等价有效策略均可接受；自然语言质量需要经审阅的 rubric，不能关键词命中即通过。
+3. 历史记录缺失的执行结果保持缺失。只提供一个下一步建议的回放只能证明材料判读；真正的实验选择、时间/模型/NPU 成本和无信息尝试数来自真实执行轨迹。
+4. 学习实验先让实际 organizer 提炼或让当前 Agent 提交真实形成的提案，再在新会话消费。预写提案用于测试验证/修订接口，不计作模型学到该机制。记录未使用、误用和负迁移，不能只展示成功项。
+5. 固定知识、修改指导、修改提炼和追加知识分别比较，保持模型/工具/可见材料一致。该 Dev 材料已经暴露，迁移结论必须另选未参与设计的新任务族；换名字、换形状或复盘同一事故不构成独立迁移。
+
+当前先交付四端规则和 C6 的证据保留修正；上述六个 Dev 场景是验收规格，尚未完成真实宿主判分与设备矩阵。Skill 结构检查不证明下一实验选择正确，提炼契约测试也不证明模型保留了所有语义。
+
 ## 5. 实验分组与数据隔离
 
 ### 5.1 固定知识的内容与检索实验
@@ -189,6 +216,43 @@ Hermes 是从任务中学习并修订知识的过程，横跨 L1–L4。常规�
 - **只追加组**：仅在需要分离修订/整理贡献时增加，维持相同工具和预算。
 
 顺序满足任务依赖；可互换部分进行平衡排序，并报告顺序影响。每步先按当时可见知识判分，再允许学习；独立检查点测试使用只读副本，结果不进入后续学习。保存实际版本链，检查新条件改善、旧条件保持以及未来任务累计收益。组件测试可提交固定提案验证接口；真实学习实验必须使用声明过的实际提炼方法，不能直接注入预写 U@2。
+
+### 5.4 生产拓扑规模分级与多卡/多机 Benchmark 设计（消除单机单卡偏差）
+
+目前 `mindie-bench/tasks/` 中大多数基础题（如 `rope-*`、`sampler-*`、`rmsnorm-*`、`kda-chunk-varlen-padded-workspace`、`fused-rmsnorm-gate`）均为 `npu_count=1`（单机单卡/单 Die），仅 `k3-gdn-idle-dp-state` 与 `stale-fused-mc2-deployment` 为 `npu_count=2`。然而真实昇腾生产负载（A2 8 卡 910B、A3 8 卡 16 Die 910C 多机集群上的 Qwen3.5-MoE、DeepSeek-V3/R1、Kimi-K3、GLM-5）的核心故障与性能瓶颈几乎全部出现在**多 Die 拓扑映射、TP/DP/EP 集合通信边界、非对称 DP 状态同步、MoE 专家负载均衡（EPLB）与通算融合（MC2）、ACLGraph 多 rank 捕获以及 Prefill-Decode（PD）分离实例协同**上。
+
+为此，真实测试与 Benchmark 按硬件拓扑规模划分为 **`S0 → S1 → S2 → S3` 四级生产拓扑阶梯**，将单卡微基准降级为“算子局部前置探针”，以多 Die / 多卡 / 多实例作为主力验收基准：
+
+| 拓扑档位 | 规模与常驻集群映射 | 核心生产特征与故障/瓶颈域 | 知识层级（`L1–L4`）与 Benchmark 重点 | 对应工程验证层 |
+| --- | --- | --- | --- | --- |
+| **S0：单 Die 算子微探针**<br/>`1 Die`（`npu_count=1`） | A2 单卡或 A3 单 Die（`Phy-ID` 单个） | UB 32B 对齐、Vector/Cube 单核流水、FP32 累加精度、Triton `constexpr` 重编译、单算子 ACLGraph 捕获 | `L1` 硬件对齐/精度公理、`L2` 单核编译/数值 SOP、`L4` 局部算子核函数改写（仅作局部收益前置条件，**不単独代表模型或系统收益**） | Tier 1（契约）+ Tier 2/3 单卡快速回归 |
+| **S1：单机多 Die 协同子集群**<br/>`2–4 Dies`（A3 `1–2 NPU` / A2 `2–4 NPU`） | A3 `.156` 空闲子集（如 `NPU 2,3` = `Phy-ID 4..7`）或 `.165` / A2 `173.125.1.2` | **A3 同包双 Die（Die0↔Die1）vs 跨包 HCCS 带宽非对称**；`TP=2/4` 或 `DP=2 × TP=2`；非对称 Batch（`[B, 0]` idle-DP + `varlen`）下 GDN/KDA/MLA 递归状态污染与 `coordinate_batch_across_dp` 保活；`TP2/EP2` MoE `Dispatch`/`Combine` 与 `MC2`（`MatmulAllReduce`）通算融合；多 rank ACLGraph piecewise 捕获 | `L1` A3 `Phy-ID` 拓扑与 HCCL 集体通信不变量；`L2` 多 rank Graph capture 失效与死锁排查 SOP；`L3` 通信等待 vs 计算/带宽瓶颈收敛；`L4` 空批 zero-pad workspace / MC2 融合变换 | **Tier 2 常态化真机主力（`< 25s`）+ Tier 3 Canary（`< 90s`）** |
+| **S2：单机整机满配与同机 PD 分离**<br/>`8–16 Dies`（A2 整机 8 卡 / A3 整机 16 Die） | A3 `.165`（16 Die `Phy-ID 0..15`）或 A2 `173.125.1.2`（8 卡） | **整机 `TP4×DP2` / `DP4×EP4` 混合并行**；MoE 动态路由热点与 **EPLB（专家并行负载均衡）**；**同机多实例 PD 分离**（如 `Phy-ID 0..7` 跑 Prefill 实例、`Phy-ID 8..15` 跑 Decode 实例，经 Mooncake/HCCL 传输 KV Cache）；长序列 PCP + MTP 多 token 预测投机解码 | `L2` 整机 `npu-top` 慢卡/负载倾斜诊断与 `/dev/shm/hccl*` 排空；`L3` Prefill（Cube 计算受限）与 Decode（HBM/AlltoAll 延迟受限）双阶段解耦调优；`L4` 整机 warm-server TTFT/TPOT/Goodput 与 Guard Workload 门禁 | **Release Benchmark 主力 Cohort（单列预算 `15–45 min`）** |
+| **S3：跨机多节点 RoCE 与分布式 PD 分离**<br/>`2 Nodes × 8–16 Dies`（跨 `.165` ↔ `.156`/`.154`） | A3 双节点跨机互联（RoCE `HCCL_IF_IP` / `HCCL_SOCKET_IFNAME`） | **跨机 RoCE 通信延迟/拥塞与超时**（`HCCL_EXEC_TIMEOUT`、网卡绑定错误）；**跨节点 PD 分离服务**（Node 1 Prefill → Node 2 Decode KV 远端传输）与跨节点 `DP/EP` AlltoAll；多机 Gang Lease 协同锁与一端异常退出后的跨机孤儿进程/HCCL 端口回收 | `L1` 跨机网络接口与超时契约；`L2` 跨节点 HCCL 建链失败与慢节点定位 SOP；`L3` 跨机通信掩盖与流水线气泡收敛；`L4` 端到端分布式推理吞吐与 P99 尾延迟优化 | **版本发布/重大架构演进跨机验收 Cohort** |
+
+针对上述四级拓扑，`mindie-bench` 与关联组件执行以下五项关键优化：
+
+1. **拓扑感知的成组租约（Topology-Aware Gang Lease，`coordinator` + `npu-top`）**：
+   - 将任务环境声明从单一标量 `npu_count` 扩展为拓扑契约 `topology_spec`：`die_count`、`placement_policy`（`same_npu_dual_die` 强制同卡双 Die、`intra_node_hccs` 同机跨卡、`disaggregated_pd_pair` P/D 双实例配对、`multi_node_roce` 跨机成组）与 `visible_phy_ids`。
+   - 租约分配前校验 A3 逻辑卡号到物理 Die（`Phy-ID 0..15`）映射以及 `/dev/shm`、HCCL 端口与僵尸 `VLLMWorker_*` 状态；支持在部分占用的生产节点（如 `.156` 空闲的 4 个 Die）上安全切分独立子集群运行 `S1` 基准。
+2. **非对称与并发压力输入矩阵（替代单请求固定 Shape）**：
+   - 分布式正确性与性能评测强制注入**四类生产压力分布**：① **DP 非对称请求矩阵**（`[B_max, 0]`、`[0, B_max]`、`[1, B_max]`、`[0, 0]`，专门暴露 idle-DP 未参与集合通信、GDN/KDA 状态越界写和动态图 shape 崩溃）；② **MoE 偏斜路由分布**（高热专家集中度 vs 均匀分布，检验 EPLB 与 `AlltoAll` 尾延迟）；③ **长短请求混合（Varlen Prefill + Continuous Batching Decode）**；④ **多客户端并发阶梯（Concurrency `1 → 16 → 64`）**。
+3. **跨并行度数值等价与多 Rank 状态不变量 Oracle**：
+   - 单卡 Oracle 仅比对 PyTorch CPU/Eager 参考；多卡/多机 Oracle 增加**并行度不变性门禁（Parallelism Invariance Gate）**：同一输入在 `TP=1` vs `TP=2/4`、`DP=1` vs `DP=2/4`、`Eager` vs `ACLGraph` 下比对 Logits KL 散度、Top-1 一致率以及各 rank 递归状态（`conv_state` / `ssm_state` / KV Cache checksum）的确定性一致。
+4. **生产级多维系统与通信指标（升级 `[performance]` 与 `[inference]` 契约）**：
+   - 算子局部加速比不再单独作为 `L4` 放行依据；多卡/多机 Benchmark 同时采集并门禁：
+     - **服务级 SLA 指标**：Warm Server **TTFT（p50/p95）**、**TPOT / ITL（p50/p95）**、**SLA 约束下最大 Goodput（tok/s）**；
+     - **多卡通信与负载均衡指标**：**通信占比（`comm_time / step_time`）**、**通算掩盖率（Overlap Ratio）**、**跨 Rank 耗时偏斜度（`max_rank_step_ms / median_rank_step_ms`，捕获慢卡与专家负载失衡）**；
+     - **全 Rank 内存门禁**：统计所有 rank 中的最大峰值内存增量 `max_rank_workspace_delta_bytes` 与 KV Cache 余量，任何单个 rank 越界即触发 Guard 拒绝。
+5. **首批重点扩充的生产级多卡/多机 Benchmark 任务清单**：
+
+| 任务 ID（规划/扩充） | 拓扑档位 | 领域与并行模式 | 真实生产问题与验收判据 |
+| --- | --- | --- | --- |
+| `a3-dual-die-tp2-allreduce-placement` | **S1**（2 Dies） | `operators` / `vllm-ascend`（A3 同包双 Die vs 跨包双 Die） | 识别并修复 A3 `Phy-ID` 跨包错配导致的 `MatmulAllReduce` 带宽退化；同包双 Die 延迟与吞吐达标，跨包回退边界明确 |
+| `qwen35-gdn-dp2-tp2-asymmetric-aclgraph` | **S1**（4 Dies） | `vllm-ascend`（`DP=2, TP=2` + Piecewise ACLGraph） | 在 `[B, 0]` / `[1, B]` 混合批次与 ACLGraph 下，修复 idle-DP 空批集合通信死锁与 GDN 递归状态污染；Logits 与 `DP=1` 等价且 Decode TPOT 达标 |
+| `qwen3-moe-tp2-ep4-mc2-eplb-skew` | **S1/S2**（4–8 Dies） | `operators` + `vllm-ascend`（MoE `TP2×EP2/4` + MC2 + EPLB） | 在偏斜专家路由输入下，修复/优化 `Dispatch`/`Combine` + EPLB 负载重平衡；消除慢 rank 尾延迟且 Guard Workload 不退化 |
+| `a3-16die-pd-disaggregated-mooncake-handoff` | **S2**（8–16 Dies） | `vllm-ascend`（同机/跨实例 `4-Die P + 4-Die D` PD 分离） | 修复 Prefill→Decode 跨实例 KV Cache 传输对齐/超时或首 token 精度漂移；同时满足 Prefill TTFT 与 Decode TPOT 双重门禁 |
+| `a3-2node-roce-hccl-dp4-ep8-canary` | **S3**（2 Nodes × 8/16 Dies） | `vllm-ascend` + `diagnostics` + `coordinator`（跨机 `.165` ↔ `.156`） | 诊断跨机 RoCE `HCCL_IF_IP` / 超时 / 慢链路与跨节点 EP AlltoAll 退化；验证多机租约协同与异常后双机 `/dev/shm` 干净回收 |
 
 ## 6. 评价指标与报告规则
 
@@ -248,11 +312,11 @@ Hermes 是从任务中学习并修订知识的过程，横跨 L1–L4。常规�
 
 | 工程层级 | 本方案用例 | 运行安排与限制 |
 | --- | --- | --- |
-| Tier 0，目标 `< 5s` | 条件判断、闭包装配、去重、结果三轴、隐藏输入五分类、纯指标计算 | 改动相关逻辑时运行；纯内存，不含子进程、网络和 `sleep` |
-| Tier 1，目标 `< 15s` | 实际 Store、Session 级 Git/SQLite 模板、MCP 读取、适用性/干扰项题集、跨会话 `U@1 → U@2` 回放与回执关联 | 相关组件改动时运行；含文件/进程的用例不冒充 Tier 0 |
-| Tier 2，目标 `< 25s` | A2/A3（`173.125.1.2` / `192.168.13.165`）真实条件获取、隔离沙箱执行、租约和必要轻量探针 | 涉及真实设备路径时运行；仅操作 `/tmp/mindie-npu-test-<uuid>` 沙箱，不干扰线上业务 |
-| Tier 3，目标 `< 90s` | 真实宿主（DSH 默认 `standard` 模式 + `reasoningEffort=max`）读取、使用、短验证与结果回流 Canary | 宿主与跨仓入口变化时运行；超过预算的用例归入完整实验 |
-| 完整能力实验，单列预算 | 多步骤诊断、模型适配、L4 性能、跨会话学习、长期增长 | 按 cohort 声明模型调用、NPU、总时间和整理预算；不以 90 秒 smoke 代替 |
+| Tier 0，目标 `< 5s` | 条件判断、A2/A3 多 Die 拓扑 Golden Captures 解析、闭包装配、去重、结果三轴、隐藏输入五分类、纯指标计算 | 改动相关逻辑时运行；纯内存，不含子进程、网络和 `sleep` |
+| Tier 1，目标 `< 15s` | 实际 Store、Session 级 Git/SQLite 模板、MCP 读取、适用性/干扰项题集、多 rank 成组租约状态机、跨会话 `U@1 → U@2` 回放与回执关联 | 相关组件改动时运行；含文件/进程的用例不冒充 Tier 0 |
+| Tier 2，目标 `< 25s` | A2（`173.125.1.2` 8 卡）与 A3（`192.168.13.165` / `.156` / `.154` 16 Die）真实拓扑探测、`S1`（2–4 Dies）子集群成组租约、双 Die `Phy-ID` 映射、HCCL 最小双 rank 连通性与 `/proc` + `/dev/shm` 排空探针 | 涉及真实设备或分布式路径时运行；仅操作 `/tmp/mindie-npu-test-<uuid>` 沙箱与空闲 Die 子集，不干扰线上业务 |
+| Tier 3，目标 `< 90s` | 真实宿主（DSH 默认 `standard` 模式 + `reasoningEffort=max`）在 `S0/S1`（优先 2–4 Dies 多卡场景）上的读取、使用、短验证与结果回流 Canary | 宿主与跨仓入口变化时运行；超过预算的用例归入完整实验 |
+| 完整能力实验，单列预算 | **以 `S1`（2–4 Dies）、`S2`（8–16 Dies 整机/同机 PD 分离）和 `S3`（双机 RoCE）为主力**的多步骤分布式诊断、混合并行模型适配、L4 通算融合/图捕获性能、跨会话学习与长期增长 | 按 cohort 声明模型调用、NPU Die 数与拓扑策略、总时间和整理预算；不以 90 秒单卡 smoke 代替多卡生产结论 |
 
 本文改动的验证是来源、链接与方案一致性审查，不新增 grep 文档的自动化测试。后续代码改动运行受影响的契约测试；真实任务验收必须另留任务、运行环境、原始回执和判分结果。
 
