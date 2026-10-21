@@ -16,7 +16,7 @@ Repeated component value scenarios executed against exact non-editable 0.0.3 for
 
 ## Measurement versions and scope
 
-Release runner: `mindie-bench` 0.4.1 (`c69074fba55eb2d60b99254ab5266797b2b9082f`). Task evaluations ran on the historical runner revisions listed below; later changes in `0.3.0` cover cleanup, provenance checks, and report publication without rewriting task inputs, models, budgets, or recorded attempt costs.
+Release runner: `mindie-bench` 0.4.1 (`994b48e410f8dec989e26130b6e52fc5a6b569d2`). Task evaluations ran on the historical runner revisions listed below; later changes in `0.3.0` cover cleanup, provenance checks, and report publication without rewriting task inputs, models, budgets, or recorded attempt costs.
 
 ## npu-top
 
@@ -35,7 +35,6 @@ Scenario: physical die/PID/HBM correctness from captures and live proc/container
 | golden_process_assignments_expected | unmeasured, unmeasured, unmeasured | 16, 16, 16 |
 | human_answer_accuracy | None, None, None | unmeasured, unmeasured, unmeasured |
 | human_completion_time_sec | None, None, None | unmeasured, unmeasured, unmeasured |
-| information_source | original npu-smi tables and proc/Docker identities, original npu-smi tables and proc/Docker identities, original npu-smi tables and proc/Docker identities | unmeasured, unmeasured, unmeasured |
 | live_container_owner_correct | unmeasured, unmeasured, unmeasured | True, True, True |
 | live_physical_devices | unmeasured, unmeasured, unmeasured | 8, 8, 8 |
 | live_ssh_operations | unmeasured, unmeasured, unmeasured | 3, 3, 3 |
@@ -118,8 +117,6 @@ Scenario: real analyze_profile, compare_profiles and attribute_memory on determi
 | residual_status | unmeasured, unmeasured, unmeasured | within_target, within_target, within_target |
 | slow_link_dominant_block | unmeasured, unmeasured, unmeasured | Comm, Comm, Comm |
 | slow_rank_dominant_block | unmeasured, unmeasured, unmeasured | Attention, Attention, Attention |
-| source | raw SQLite event intervals, raw SQLite event intervals, raw SQLite event intervals | unmeasured, unmeasured, unmeasured |
-| steps | [4, 5], [4, 5], [4, 5] | unmeasured, unmeasured, unmeasured |
 
 ## sim
 
@@ -136,14 +133,12 @@ Scenario: real A3 physical-calibration predict, finite operator planning and sub
 | a3_graph_ttft_ms | unmeasured, unmeasured, unmeasured | 17.339, 17.339, 17.339 |
 | graph_tpot_ms | 15.710, 15.710, 15.710 | unmeasured, unmeasured, unmeasured |
 | graph_ttft_ms | 50.850, 50.850, 50.850 | unmeasured, unmeasured, unmeasured |
-| operator_plan_backends | unmeasured, unmeasured, unmeasured | ['gemm_finite_pipeline', 'vector_instruction'], ['gemm_finite_pipeline', 'vector_instruction'], ['gemm_finite_pipeline', 'vector_instruction'] |
 | operator_plan_elapsed_ms | unmeasured, unmeasured, unmeasured | 0.055, 0.055, 0.055 |
 | operator_plan_latency_ms | unmeasured, unmeasured, unmeasured | 6.151, 4.227, 3.877 |
 | output_tokens | 32, 32, 32 | unmeasured, unmeasured, unmeasured |
 | prompt_tokens | 128, 128, 128 | unmeasured, unmeasured, unmeasured |
 | qwen_case_deterministic | unmeasured, unmeasured, unmeasured | True, True, True |
 | qwen_prediction_latency_ms | unmeasured, unmeasured, unmeasured | 83.623, 102.771, 81.618 |
-| source | published A3 Qwen2.5-7B-Instruct c=1 graph measurement, published A3 Qwen2.5-7B-Instruct c=1 graph measurement, published A3 Qwen2.5-7B-Instruct c=1 graph measurement | unmeasured, unmeasured, unmeasured |
 | subgraph_critical_path_saving_us | unmeasured, unmeasured, unmeasured | 5.000, 5.000, 5.000 |
 | subgraph_overflow_latency_ms | unmeasured, unmeasured, unmeasured | 0.045, 0.034, 0.034 |
 | subgraph_overflow_rejected | unmeasured, unmeasured, unmeasured | True, True, True |

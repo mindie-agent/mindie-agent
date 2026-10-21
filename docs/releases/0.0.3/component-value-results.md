@@ -1,6 +1,6 @@
 # MindIE Agent `0.0.3` Component Value Verification Report
 
-This report records the repeatable component-value benchmark scenarios executed by `mindie-bench` (`v0.4.1`, commit `c69074fba55eb2d60b99254ab5266797b2b9082f`) against the exact non-editable (`editable: false`) `0.0.3` formal release packages (`component-value-results.json`), together with the `knowledge` (`v0.13.0`) P0–P4 progressive-disclosure and closed-loop verification metrics.
+This report records the repeatable component-value benchmark scenarios executed by `mindie-bench` (`v0.4.1`, commit `994b48e410f8dec989e26130b6e52fc5a6b569d2`) against the exact non-editable (`editable: false`) `0.0.3` formal release packages (`component-value-results.json`), together with the `knowledge` (`v0.13.0`) P0–P4 progressive-disclosure and closed-loop verification metrics.
 
 ## 1. Installed Runtime & Analysis Package Revisions
 
@@ -8,11 +8,11 @@ This report records the repeatable component-value benchmark scenarios executed 
 | --- | --- | --- | --- |
 | `mindie-diagnostics` | `0.5.1` | `fba07e8607ddadde14cea315c9dbda23726c1c79` | `false` |
 | `mindie-profiler` | `0.5.0` | `4010d72f0b6950caf1425e3b683d495a6c76016a` | `false` |
-| `mindie-sim` | `0.7.0` | `b520b1c41b5dcf97ce7a00cbb6578ff9f834907b` | `false` |
+| `mindie-sim` | `0.7.0` | `4040f078c19487c019c87466a0d128821289ccc2` | `false` |
 | `npu-top` | `0.2.1` | `6737925d0ebb39c1aefda2c933eae0486169333c` | `false` |
 | `remote-dev` | `0.10.4` | `6bd1a15380195a95d450458e7c1856905d95bf73` | `false` |
 | `mindie-knowledge` | `0.13.0` | `10ee85606aa43de7975e3c4542013be4c177730a` | `false` |
-| `mindie-coordinator` | `0.6.2` | `a89033aadb435dc970826bbfe157aa553ef45d8c` | `false` |
+| `mindie-coordinator` | `0.6.2` | `bdead0ac37cc4cee34a1736edc776b48ea823542` | `false` |
 
 ---
 

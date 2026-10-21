@@ -1,0 +1,95 @@
+{
+  "benchmark_scope": "Native host tasks with controlled MCP and shipped Skills. The task comparisons measure the configured MindIE combination; full plugin loading is verified by the separate native checks.",
+  "blocking_reasons": [],
+  "collector_source": {
+    "dirty": null,
+    "editable": false,
+    "installation": "installed",
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+    "version": "0.4.1"
+  },
+  "component": "codex",
+  "component_cases": [],
+  "component_revision": "f0b2669e12e48342d680abb3fff6a4177be39fa4",
+  "component_revisions": {
+    "claude-code": "128517d8d74e829fd750a2b31c1093e6d59eddd4",
+    "codex": "f0b2669e12e48342d680abb3fff6a4177be39fa4",
+    "coordinator": "bdead0ac37cc4cee34a1736edc776b48ea823542",
+    "diagnostics": "fba07e8607ddadde14cea315c9dbda23726c1c79",
+    "dsh": "c9f62cb000a7d3ce1c11d201c998f9200946820b",
+    "kimi": "eb79012094ff73c3f11d6d2ac5365f3558714b7c",
+    "knowledge": "10ee85606aa43de7975e3c4542013be4c177730a",
+    "mindie-bench": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "npu-top": "6737925d0ebb39c1aefda2c933eae0486169333c",
+    "profiler": "4010d72f0b6950caf1425e3b683d495a6c76016a",
+    "remote-dev": "6bd1a15380195a95d450458e7c1856905d95bf73",
+    "sim": "4040f078c19487c019c87466a0d128821289ccc2"
+  },
+  "component_runner_reports": [
+    {
+      "case_ids": [
+        "npu-top-physical-owner-query",
+        "coordinator-contention",
+        "diagnostics-fault-delivery",
+        "profiler-rank-link-memory-attribution",
+        "sim-a3-graph-and-boundary-screening"
+      ],
+      "runner_source": {
+        "dirty": false,
+        "editable": true,
+        "installation": "explicit_source",
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+        "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+        "version": "0.4.1"
+      },
+      "runner_source_after": {
+        "dirty": false,
+        "editable": true,
+        "installation": "explicit_source",
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+        "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+        "version": "0.4.1"
+      }
+    }
+  ],
+  "component_version": "0.0.3",
+  "excluded_attempts": [],
+  "infrastructure_patches": [],
+  "limitations": [
+    "Native host tasks with controlled MCP and shipped Skills. The task comparisons measure the configured MindIE combination; full plugin loading is verified by the separate native checks.",
+    "Repeated component value scenarios executed against exact non-editable 0.0.3 formal releases.",
+    "0.0.3 value-suite verifies the 5 repeatable component value scenarios (coordinator, npu-top, diagnostics, profiler, sim) against exact non-editable 0.0.3 formal releases alongside 12-repository release benchmarks."
+  ],
+  "native_plugins": [],
+  "product_version": "0.0.3",
+  "release_gate": true,
+  "repository": "mindie-agent/mindie-agent-codex",
+  "runner_release": {
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+    "version": "0.4.1"
+  },
+  "runner_release_reviews": [],
+  "schema_version": "mindie-component-value-report/1",
+  "setup_reports": [],
+  "setup_resources": {
+    "cost_complete": false,
+    "elapsed_complete": false,
+    "elapsed_observed_operations": 0,
+    "observed_cost_usd_lower_bound": null,
+    "observed_elapsed_sec_lower_bound": null,
+    "observed_tokens_lower_bound": {
+      "cache_creation": null,
+      "indexer_small_model_total": null,
+      "input_cached": null,
+      "input_uncached": null,
+      "output": null
+    },
+    "operations": 0,
+    "token_metering_complete": false
+  },
+  "source_patches": [],
+  "studies": [],
+  "suite": "product-value-v0.0.3-components"
+}

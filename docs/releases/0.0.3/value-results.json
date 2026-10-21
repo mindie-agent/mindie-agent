@@ -1,11 +1,11 @@
 {
   "blocking_reasons": [],
   "collector_source": {
-    "dirty": false,
-    "editable": true,
-    "installation": "explicit_source",
-    "revision": "c69074fba55eb2d60b99254ab5266797b2b9082f",
-    "source_sha256": "445942de0bddb32655c0cd012c4f4ec2f18d3ec7f151e531b5de72044df6f6ea",
+    "dirty": null,
+    "editable": false,
+    "installation": "installed",
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
     "version": "0.4.1"
   },
   "component_cases": [
@@ -25,8 +25,7 @@
         {
           "baseline": {
             "human_answer_accuracy": null,
-            "human_completion_time_sec": null,
-            "information_source": "original npu-smi tables and proc/Docker identities"
+            "human_completion_time_sec": null
           },
           "candidate": {
             "golden_physical_devices_correct": 24,
@@ -36,15 +35,13 @@
             "live_physical_devices": 8,
             "live_ssh_operations": 3
           },
-          "raw": "/private/tmp/component-value-003-live/npu-top-1/raw.json",
           "repetition": 1,
           "status": "pass"
         },
         {
           "baseline": {
             "human_answer_accuracy": null,
-            "human_completion_time_sec": null,
-            "information_source": "original npu-smi tables and proc/Docker identities"
+            "human_completion_time_sec": null
           },
           "candidate": {
             "golden_physical_devices_correct": 24,
@@ -54,15 +51,13 @@
             "live_physical_devices": 8,
             "live_ssh_operations": 3
           },
-          "raw": "/private/tmp/component-value-003-live/npu-top-2/raw.json",
           "repetition": 2,
           "status": "pass"
         },
         {
           "baseline": {
             "human_answer_accuracy": null,
-            "human_completion_time_sec": null,
-            "information_source": "original npu-smi tables and proc/Docker identities"
+            "human_completion_time_sec": null
           },
           "candidate": {
             "golden_physical_devices_correct": 24,
@@ -72,7 +67,6 @@
             "live_physical_devices": 8,
             "live_ssh_operations": 3
           },
-          "raw": "/private/tmp/component-value-003-live/npu-top-3/raw.json",
           "repetition": 3,
           "status": "pass"
         }
@@ -82,7 +76,7 @@
       "source_revisions": {
         "mindie-coordinator": {
           "editable": false,
-          "revision": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
           "version": "0.6.2"
         },
         "mindie-diagnostics": {
@@ -130,7 +124,6 @@
             "release_to_next_success_sec": 0.00187691708561033,
             "successful_listeners": 2
           },
-          "raw": "/private/tmp/component-value-003-live/coordinator-1/raw.json",
           "repetition": 1,
           "status": "pass"
         },
@@ -149,7 +142,6 @@
             "release_to_next_success_sec": 0.002102959086187184,
             "successful_listeners": 2
           },
-          "raw": "/private/tmp/component-value-003-live/coordinator-2/raw.json",
           "repetition": 2,
           "status": "pass"
         },
@@ -168,7 +160,6 @@
             "release_to_next_success_sec": 0.001994666992686689,
             "successful_listeners": 2
           },
-          "raw": "/private/tmp/component-value-003-live/coordinator-3/raw.json",
           "repetition": 3,
           "status": "pass"
         }
@@ -178,7 +169,7 @@
       "source_revisions": {
         "mindie-coordinator": {
           "editable": false,
-          "revision": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
           "version": "0.6.2"
         },
         "mindie-diagnostics": {
@@ -239,9 +230,7 @@
             "useful_fault_fields_retained": true,
             "withdrawal_prevented_requests": true
           },
-          "raw": "/private/tmp/component-value-003-live/diagnostics-1/raw.json",
           "repetition": 1,
-          "report": "/private/tmp/component-value-003-live/diagnostics-1/delivered-report.md",
           "status": "pass"
         },
         {
@@ -269,9 +258,7 @@
             "useful_fault_fields_retained": true,
             "withdrawal_prevented_requests": true
           },
-          "raw": "/private/tmp/component-value-003-live/diagnostics-2/raw.json",
           "repetition": 2,
-          "report": "/private/tmp/component-value-003-live/diagnostics-2/delivered-report.md",
           "status": "pass"
         },
         {
@@ -299,9 +286,7 @@
             "useful_fault_fields_retained": true,
             "withdrawal_prevented_requests": true
           },
-          "raw": "/private/tmp/component-value-003-live/diagnostics-3/raw.json",
           "repetition": 3,
-          "report": "/private/tmp/component-value-003-live/diagnostics-3/delivered-report.md",
           "status": "pass"
         }
       ],
@@ -310,7 +295,7 @@
       "source_revisions": {
         "mindie-coordinator": {
           "editable": false,
-          "revision": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
           "version": "0.6.2"
         },
         "mindie-diagnostics": {
@@ -345,12 +330,7 @@
       "measurements": [
         {
           "baseline": {
-            "raw_arithmetic_matches_report": true,
-            "source": "raw SQLite event intervals",
-            "steps": [
-              4,
-              5
-            ]
+            "raw_arithmetic_matches_report": true
           },
           "candidate": {
             "analyze_latency_ms": 7.567499997094274,
@@ -369,18 +349,12 @@
             "slow_link_dominant_block": "Comm",
             "slow_rank_dominant_block": "Attention"
           },
-          "raw": "/private/tmp/component-value-003-live/profiler-1/raw.json",
           "repetition": 1,
           "status": "pass"
         },
         {
           "baseline": {
-            "raw_arithmetic_matches_report": true,
-            "source": "raw SQLite event intervals",
-            "steps": [
-              4,
-              5
-            ]
+            "raw_arithmetic_matches_report": true
           },
           "candidate": {
             "analyze_latency_ms": 5.698958062566817,
@@ -399,18 +373,12 @@
             "slow_link_dominant_block": "Comm",
             "slow_rank_dominant_block": "Attention"
           },
-          "raw": "/private/tmp/component-value-003-live/profiler-2/raw.json",
           "repetition": 2,
           "status": "pass"
         },
         {
           "baseline": {
-            "raw_arithmetic_matches_report": true,
-            "source": "raw SQLite event intervals",
-            "steps": [
-              4,
-              5
-            ]
+            "raw_arithmetic_matches_report": true
           },
           "candidate": {
             "analyze_latency_ms": 5.41733403224498,
@@ -429,7 +397,6 @@
             "slow_link_dominant_block": "Comm",
             "slow_rank_dominant_block": "Attention"
           },
-          "raw": "/private/tmp/component-value-003-live/profiler-3/raw.json",
           "repetition": 3,
           "status": "pass"
         }
@@ -462,16 +429,11 @@
             "graph_tpot_ms": 15.71,
             "graph_ttft_ms": 50.85,
             "output_tokens": 32,
-            "prompt_tokens": 128,
-            "source": "published A3 Qwen2.5-7B-Instruct c=1 graph measurement"
+            "prompt_tokens": 128
           },
           "candidate": {
             "a3_graph_tpot_ms": 15.05968675734593,
             "a3_graph_ttft_ms": 17.33910669942674,
-            "operator_plan_backends": [
-              "gemm_finite_pipeline",
-              "vector_instruction"
-            ],
             "operator_plan_elapsed_ms": 0.05501920000000002,
             "operator_plan_latency_ms": 6.150500033982098,
             "qwen_case_deterministic": true,
@@ -486,7 +448,6 @@
             "ttft_absolute_error_ms": -33.51089330057326,
             "ttft_error_pct": -65.90146175137318
           },
-          "raw": "/private/tmp/component-value-003-live/sim-1/raw.json",
           "repetition": 1,
           "status": "pass"
         },
@@ -495,16 +456,11 @@
             "graph_tpot_ms": 15.71,
             "graph_ttft_ms": 50.85,
             "output_tokens": 32,
-            "prompt_tokens": 128,
-            "source": "published A3 Qwen2.5-7B-Instruct c=1 graph measurement"
+            "prompt_tokens": 128
           },
           "candidate": {
             "a3_graph_tpot_ms": 15.05968675734593,
             "a3_graph_ttft_ms": 17.33910669942674,
-            "operator_plan_backends": [
-              "gemm_finite_pipeline",
-              "vector_instruction"
-            ],
             "operator_plan_elapsed_ms": 0.05501920000000002,
             "operator_plan_latency_ms": 4.226749995723367,
             "qwen_case_deterministic": true,
@@ -519,7 +475,6 @@
             "ttft_absolute_error_ms": -33.51089330057326,
             "ttft_error_pct": -65.90146175137318
           },
-          "raw": "/private/tmp/component-value-003-live/sim-2/raw.json",
           "repetition": 2,
           "status": "pass"
         },
@@ -528,16 +483,11 @@
             "graph_tpot_ms": 15.71,
             "graph_ttft_ms": 50.85,
             "output_tokens": 32,
-            "prompt_tokens": 128,
-            "source": "published A3 Qwen2.5-7B-Instruct c=1 graph measurement"
+            "prompt_tokens": 128
           },
           "candidate": {
             "a3_graph_tpot_ms": 15.05968675734593,
             "a3_graph_ttft_ms": 17.33910669942674,
-            "operator_plan_backends": [
-              "gemm_finite_pipeline",
-              "vector_instruction"
-            ],
             "operator_plan_elapsed_ms": 0.05501920000000002,
             "operator_plan_latency_ms": 3.8768750382587314,
             "qwen_case_deterministic": true,
@@ -552,7 +502,6 @@
             "ttft_absolute_error_ms": -33.51089330057326,
             "ttft_error_pct": -65.90146175137318
           },
-          "raw": "/private/tmp/component-value-003-live/sim-3/raw.json",
           "repetition": 3,
           "status": "pass"
         }
@@ -562,7 +511,7 @@
       "source_revisions": {
         "mindie-sim": {
           "editable": false,
-          "revision": "b520b1c41b5dcf97ce7a00cbb6578ff9f834907b",
+          "revision": "4040f078c19487c019c87466a0d128821289ccc2",
           "version": "0.7.0"
         }
       },
@@ -570,18 +519,18 @@
     }
   ],
   "component_revisions": {
-    "claude-code": "4652bfbc04582dcdb37b849bbee1d7646c87d89c",
-    "codex": "c619dc4e02b7d9acc19800f3e7f05f381355f4d3",
-    "coordinator": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+    "claude-code": "128517d8d74e829fd750a2b31c1093e6d59eddd4",
+    "codex": "f0b2669e12e48342d680abb3fff6a4177be39fa4",
+    "coordinator": "bdead0ac37cc4cee34a1736edc776b48ea823542",
     "diagnostics": "fba07e8607ddadde14cea315c9dbda23726c1c79",
-    "dsh": "08cad02a4d9c92c858ed94b0ac5d14723d3d995f",
-    "kimi": "5f1fe5756fb12dfe74267ae9548cbed9c281b4ba",
+    "dsh": "c9f62cb000a7d3ce1c11d201c998f9200946820b",
+    "kimi": "eb79012094ff73c3f11d6d2ac5365f3558714b7c",
     "knowledge": "10ee85606aa43de7975e3c4542013be4c177730a",
-    "mindie-bench": "c69074fba55eb2d60b99254ab5266797b2b9082f",
+    "mindie-bench": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
     "npu-top": "6737925d0ebb39c1aefda2c933eae0486169333c",
     "profiler": "4010d72f0b6950caf1425e3b683d495a6c76016a",
     "remote-dev": "6bd1a15380195a95d450458e7c1856905d95bf73",
-    "sim": "b520b1c41b5dcf97ce7a00cbb6578ff9f834907b"
+    "sim": "4040f078c19487c019c87466a0d128821289ccc2"
   },
   "component_runner_reports": [
     {
@@ -596,16 +545,16 @@
         "dirty": false,
         "editable": true,
         "installation": "explicit_source",
-        "revision": "c69074fba55eb2d60b99254ab5266797b2b9082f",
-        "source_sha256": "445942de0bddb32655c0cd012c4f4ec2f18d3ec7f151e531b5de72044df6f6ea",
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+        "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
         "version": "0.4.1"
       },
       "runner_source_after": {
         "dirty": false,
         "editable": true,
         "installation": "explicit_source",
-        "revision": "c69074fba55eb2d60b99254ab5266797b2b9082f",
-        "source_sha256": "445942de0bddb32655c0cd012c4f4ec2f18d3ec7f151e531b5de72044df6f6ea",
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+        "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
         "version": "0.4.1"
       }
     }
@@ -649,8 +598,8 @@
     }
   },
   "runner_release": {
-    "revision": "c69074fba55eb2d60b99254ab5266797b2b9082f",
-    "source_sha256": "445942de0bddb32655c0cd012c4f4ec2f18d3ec7f151e531b5de72044df6f6ea",
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
     "version": "0.4.1"
   },
   "runner_release_reviews": [],

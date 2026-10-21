@@ -1,0 +1,604 @@
+{
+  "benchmark_scope": "Benchmark execution and measurement coverage across the product suite. These task results measure the evaluated product, not productivity caused by the measurement tool itself.",
+  "blocking_reasons": [],
+  "collector_source": {
+    "dirty": null,
+    "editable": false,
+    "installation": "installed",
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+    "version": "0.4.1"
+  },
+  "component": "mindie-bench",
+  "component_cases": [
+    {
+      "baseline": "Raw npu-smi/proc/Docker observations contain the reference information.",
+      "candidate": "Production npu-top produces structured physical-device and container-owner answers.",
+      "component": "npu-top",
+      "id": "npu-top-physical-owner-query",
+      "limitations": [
+        "A2 live and A3 dual-die historical captures are reported separately.",
+        "Golden replay repetitions measure repeatability, not independent hardware samples.",
+        "The container identity probe does not claim its init process consumes NPU memory.",
+        "No model/human task timing, avoided incident count or causal productivity gain is measured.",
+        "Raw command lines, working directories and environments are not exported."
+      ],
+      "measurements": [
+        {
+          "baseline": {
+            "human_answer_accuracy": null,
+            "human_completion_time_sec": null
+          },
+          "candidate": {
+            "golden_physical_devices_correct": 24,
+            "golden_process_assignments_correct": 16,
+            "golden_process_assignments_expected": 16,
+            "live_container_owner_correct": true,
+            "live_physical_devices": 8,
+            "live_ssh_operations": 3
+          },
+          "repetition": 1,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "human_answer_accuracy": null,
+            "human_completion_time_sec": null
+          },
+          "candidate": {
+            "golden_physical_devices_correct": 24,
+            "golden_process_assignments_correct": 16,
+            "golden_process_assignments_expected": 16,
+            "live_container_owner_correct": true,
+            "live_physical_devices": 8,
+            "live_ssh_operations": 3
+          },
+          "repetition": 2,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "human_answer_accuracy": null,
+            "human_completion_time_sec": null
+          },
+          "candidate": {
+            "golden_physical_devices_correct": 24,
+            "golden_process_assignments_correct": 16,
+            "golden_process_assignments_expected": 16,
+            "live_container_owner_correct": true,
+            "live_physical_devices": 8,
+            "live_ssh_operations": 3
+          },
+          "repetition": 3,
+          "status": "pass"
+        }
+      ],
+      "repetitions": 3,
+      "scope": "physical die/PID/HBM correctness from captures and live proc/container identity",
+      "source_revisions": {
+        "mindie-coordinator": {
+          "editable": false,
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
+          "version": "0.6.2"
+        },
+        "mindie-diagnostics": {
+          "editable": false,
+          "revision": "fba07e8607ddadde14cea315c9dbda23726c1c79",
+          "version": "0.5.1"
+        },
+        "mindie-knowledge": {
+          "editable": false,
+          "revision": "10ee85606aa43de7975e3c4542013be4c177730a",
+          "version": "0.13.0"
+        },
+        "npu-top": {
+          "editable": false,
+          "revision": "6737925d0ebb39c1aefda2c933eae0486169333c",
+          "version": "0.2.1"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "baseline": "Both agents select the first free device and port from the same observation.",
+      "candidate": "Both agents submit to one production NpuCoordinator; a third waits for release.",
+      "component": "coordinator",
+      "id": "coordinator-contention",
+      "limitations": [
+        "This is the check-then-act race, not a comparison against another atomic scheduler.",
+        "Device identities come from observation; no NPU compute is launched or reserved globally.",
+        "Ports, child processes and allocation state are owned by this local scenario.",
+        "Elapsed time includes child startup and is not a model productivity estimate."
+      ],
+      "measurements": [
+        {
+          "baseline": {
+            "bind_conflicts": 1,
+            "duplicate_device_selections": 1,
+            "elapsed_sec": 0.18664433294907212,
+            "release_to_next_success_sec": null,
+            "successful_listeners": 1
+          },
+          "candidate": {
+            "bind_conflicts": 0,
+            "duplicate_device_selections": 0,
+            "elapsed_sec": 0.1351801250129938,
+            "release_to_next_success_sec": 0.00187691708561033,
+            "successful_listeners": 2
+          },
+          "repetition": 1,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "bind_conflicts": 1,
+            "duplicate_device_selections": 1,
+            "elapsed_sec": 0.095301374909468,
+            "release_to_next_success_sec": null,
+            "successful_listeners": 1
+          },
+          "candidate": {
+            "bind_conflicts": 0,
+            "duplicate_device_selections": 0,
+            "elapsed_sec": 0.106144041987136,
+            "release_to_next_success_sec": 0.002102959086187184,
+            "successful_listeners": 2
+          },
+          "repetition": 2,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "bind_conflicts": 1,
+            "duplicate_device_selections": 1,
+            "elapsed_sec": 0.09405158401932567,
+            "release_to_next_success_sec": null,
+            "successful_listeners": 1
+          },
+          "candidate": {
+            "bind_conflicts": 0,
+            "duplicate_device_selections": 0,
+            "elapsed_sec": 0.10919445799663663,
+            "release_to_next_success_sec": 0.001994666992686689,
+            "successful_listeners": 2
+          },
+          "repetition": 3,
+          "status": "pass"
+        }
+      ],
+      "repetitions": 3,
+      "scope": "two concurrent agents, live TCP ports, production SQLite allocation and recovery",
+      "source_revisions": {
+        "mindie-coordinator": {
+          "editable": false,
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
+          "version": "0.6.2"
+        },
+        "mindie-diagnostics": {
+          "editable": false,
+          "revision": "fba07e8607ddadde14cea315c9dbda23726c1c79",
+          "version": "0.5.1"
+        },
+        "mindie-knowledge": {
+          "editable": false,
+          "revision": "10ee85606aa43de7975e3c4542013be4c177730a",
+          "version": "0.13.0"
+        },
+        "npu-top": {
+          "editable": false,
+          "revision": "6737925d0ebb39c1aefda2c933eae0486169333c",
+          "version": "0.2.1"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "baseline": "Three raw exception tracebacks and an unredacted Ascend HCCL/device plog.",
+      "candidate": "One sanitized issue payload, a redacted deterministic root cause and deduplicated delivery.",
+      "component": "diagnostics",
+      "id": "diagnostics-fault-delivery",
+      "limitations": [
+        "The Ascend plog is a deterministic fixture with a synthetic credential, not a fresh device failure.",
+        "Fault triage selects root cause deterministically; it does not execute the recommended commands.",
+        "The HTTP receiver implements a bounded GitHub-compatible fixture, not GitHub availability.",
+        "GitHub.request and subprocess parsing are production code; only its executable transport is local.",
+        "The controlled fault is FileNotFoundError; reporting does not repair the failing operation.",
+        "No human triage-time or model productivity claim is made.",
+        "The separate public Issue 243 native canary is not rerun or counted here."
+      ],
+      "measurements": [
+        {
+          "baseline": {
+            "automatic_delivery": false,
+            "contains_synthetic_secret": true,
+            "failure_occurrences": 3,
+            "raw_tracebacks": 3
+          },
+          "candidate": {
+            "delivered_reports": 1,
+            "failure_occurrences": 3,
+            "failure_to_delivery_sec": 61.64241474994924,
+            "fault_log_redacted": true,
+            "fault_triage_cascading_rank": "7",
+            "fault_triage_cascading_timeout": true,
+            "fault_triage_deterministic": true,
+            "fault_triage_domain": "aicore_memory_or_tiling",
+            "fault_triage_root_cause_rank": "3",
+            "http_posts": 1,
+            "private_fixture_removed": true,
+            "production_retry_wait_sec": 59.99838209152222,
+            "queue_items": 1,
+            "reconciled_without_duplicate": true,
+            "useful_fault_fields_retained": true,
+            "withdrawal_prevented_requests": true
+          },
+          "repetition": 1,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "automatic_delivery": false,
+            "contains_synthetic_secret": true,
+            "failure_occurrences": 3,
+            "raw_tracebacks": 3
+          },
+          "candidate": {
+            "delivered_reports": 1,
+            "failure_occurrences": 3,
+            "failure_to_delivery_sec": 61.61783399991691,
+            "fault_log_redacted": true,
+            "fault_triage_cascading_rank": "7",
+            "fault_triage_cascading_timeout": true,
+            "fault_triage_deterministic": true,
+            "fault_triage_domain": "aicore_memory_or_tiling",
+            "fault_triage_root_cause_rank": "3",
+            "http_posts": 1,
+            "private_fixture_removed": true,
+            "production_retry_wait_sec": 59.99835801124573,
+            "queue_items": 1,
+            "reconciled_without_duplicate": true,
+            "useful_fault_fields_retained": true,
+            "withdrawal_prevented_requests": true
+          },
+          "repetition": 2,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "automatic_delivery": false,
+            "contains_synthetic_secret": true,
+            "failure_occurrences": 3,
+            "raw_tracebacks": 3
+          },
+          "candidate": {
+            "delivered_reports": 1,
+            "failure_occurrences": 3,
+            "failure_to_delivery_sec": 61.65580695797689,
+            "fault_log_redacted": true,
+            "fault_triage_cascading_rank": "7",
+            "fault_triage_cascading_timeout": true,
+            "fault_triage_deterministic": true,
+            "fault_triage_domain": "aicore_memory_or_tiling",
+            "fault_triage_root_cause_rank": "3",
+            "http_posts": 1,
+            "private_fixture_removed": true,
+            "production_retry_wait_sec": 59.99871325492859,
+            "queue_items": 1,
+            "reconciled_without_duplicate": true,
+            "useful_fault_fields_retained": true,
+            "withdrawal_prevented_requests": true
+          },
+          "repetition": 3,
+          "status": "pass"
+        }
+      ],
+      "repetitions": 3,
+      "scope": "real logging, redaction, deterministic fault triage, outbox and reporter with local HTTP",
+      "source_revisions": {
+        "mindie-coordinator": {
+          "editable": false,
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
+          "version": "0.6.2"
+        },
+        "mindie-diagnostics": {
+          "editable": false,
+          "revision": "fba07e8607ddadde14cea315c9dbda23726c1c79",
+          "version": "0.5.1"
+        },
+        "mindie-knowledge": {
+          "editable": false,
+          "revision": "10ee85606aa43de7975e3c4542013be4c177730a",
+          "version": "0.13.0"
+        },
+        "npu-top": {
+          "editable": false,
+          "revision": "6737925d0ebb39c1aefda2c933eae0486169333c",
+          "version": "0.2.1"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "baseline": "Raw event intervals and raw SQLite files remain the only baseline.",
+      "candidate": "Production profiler accounts steps, separates slow-rank from slow-link, and keeps references non-additive.",
+      "component": "profiler",
+      "id": "profiler-rank-link-memory-attribution",
+      "limitations": [
+        "The SQLite captures are deterministic fixtures; they are not new NPU measurements.",
+        "The memory manifest is a bounded attribution input, not a live HBM capture.",
+        "Profiler latency is CPU wall-clock for this host, not NPU throughput.",
+        "Only the production read-only analyze/compare/attribute paths are exercised."
+      ],
+      "measurements": [
+        {
+          "baseline": {
+            "raw_arithmetic_matches_report": true
+          },
+          "candidate": {
+            "analyze_latency_ms": 7.567499997094274,
+            "attention_delta_ms": 0.0175,
+            "comm_delta_ms": -0.0075000000000000015,
+            "compare_latency_ms": 0.15750003512948751,
+            "comparison_status": "comparable_with_limitations",
+            "db_mutation": false,
+            "known_sum_bytes": 9900000000.0,
+            "memory_latency_ms": 0.14875002671033144,
+            "memory_target_met": true,
+            "msprof_reference_not_added": true,
+            "profile_steps_aligned": true,
+            "residual_bytes": 50000000.0,
+            "residual_status": "within_target",
+            "slow_link_dominant_block": "Comm",
+            "slow_rank_dominant_block": "Attention"
+          },
+          "repetition": 1,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "raw_arithmetic_matches_report": true
+          },
+          "candidate": {
+            "analyze_latency_ms": 5.698958062566817,
+            "attention_delta_ms": 0.0175,
+            "comm_delta_ms": -0.0075000000000000015,
+            "compare_latency_ms": 0.13325002510100603,
+            "comparison_status": "comparable_with_limitations",
+            "db_mutation": false,
+            "known_sum_bytes": 9900000000.0,
+            "memory_latency_ms": 0.10783399920910597,
+            "memory_target_met": true,
+            "msprof_reference_not_added": true,
+            "profile_steps_aligned": true,
+            "residual_bytes": 50000000.0,
+            "residual_status": "within_target",
+            "slow_link_dominant_block": "Comm",
+            "slow_rank_dominant_block": "Attention"
+          },
+          "repetition": 2,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "raw_arithmetic_matches_report": true
+          },
+          "candidate": {
+            "analyze_latency_ms": 5.41733403224498,
+            "attention_delta_ms": 0.0175,
+            "comm_delta_ms": -0.0075000000000000015,
+            "compare_latency_ms": 0.1312500098720193,
+            "comparison_status": "comparable_with_limitations",
+            "db_mutation": false,
+            "known_sum_bytes": 9900000000.0,
+            "memory_latency_ms": 0.0886659836396575,
+            "memory_target_met": true,
+            "msprof_reference_not_added": true,
+            "profile_steps_aligned": true,
+            "residual_bytes": 50000000.0,
+            "residual_status": "within_target",
+            "slow_link_dominant_block": "Comm",
+            "slow_rank_dominant_block": "Attention"
+          },
+          "repetition": 3,
+          "status": "pass"
+        }
+      ],
+      "repetitions": 3,
+      "scope": "real analyze_profile, compare_profiles and attribute_memory on deterministic SQLite captures",
+      "source_revisions": {
+        "mindie-profiler": {
+          "editable": false,
+          "revision": "4010d72f0b6950caf1425e3b683d495a6c76016a",
+          "version": "0.5.0"
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "baseline": "Published A3 c=1 Qwen2.5-7B-Instruct graph TTFT/TPOT anchors plus a raw producer-consumer DAG.",
+      "candidate": "Production sim models graph latency, plans Vector/GEMM operators and rejects an overflowing UB fusion.",
+      "component": "sim",
+      "id": "sim-a3-graph-and-boundary-screening",
+      "limitations": [
+        "Predicted TTFT includes no client/scheduler floor; its absolute error is recorded, not hidden.",
+        "The Qwen physical calibration artifact is a checked-in public fixture, not a new NPU measurement.",
+        "Operator-plan and subgraph inputs are synthetic arithmetic fixtures.",
+        "Latency is CPU wall-clock for these pure-Python calls, not device throughput."
+      ],
+      "measurements": [
+        {
+          "baseline": {
+            "graph_tpot_ms": 15.71,
+            "graph_ttft_ms": 50.85,
+            "output_tokens": 32,
+            "prompt_tokens": 128
+          },
+          "candidate": {
+            "a3_graph_tpot_ms": 15.05968675734593,
+            "a3_graph_ttft_ms": 17.33910669942674,
+            "operator_plan_elapsed_ms": 0.05501920000000002,
+            "operator_plan_latency_ms": 6.150500033982098,
+            "qwen_case_deterministic": true,
+            "qwen_prediction_latency_ms": 83.62325001507998,
+            "subgraph_critical_path_saving_us": 5.0,
+            "subgraph_overflow_latency_ms": 0.0452499371021986,
+            "subgraph_overflow_rejected": true,
+            "subgraph_removable_gm_bytes": 2097152.0,
+            "subgraph_screen_latency_ms": 0.13716600369662046,
+            "tpot_absolute_error_ms": -0.6503132426540716,
+            "tpot_error_pct": -4.139485949421207,
+            "ttft_absolute_error_ms": -33.51089330057326,
+            "ttft_error_pct": -65.90146175137318
+          },
+          "repetition": 1,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "graph_tpot_ms": 15.71,
+            "graph_ttft_ms": 50.85,
+            "output_tokens": 32,
+            "prompt_tokens": 128
+          },
+          "candidate": {
+            "a3_graph_tpot_ms": 15.05968675734593,
+            "a3_graph_ttft_ms": 17.33910669942674,
+            "operator_plan_elapsed_ms": 0.05501920000000002,
+            "operator_plan_latency_ms": 4.226749995723367,
+            "qwen_case_deterministic": true,
+            "qwen_prediction_latency_ms": 102.77137497905642,
+            "subgraph_critical_path_saving_us": 5.0,
+            "subgraph_overflow_latency_ms": 0.03366696182638407,
+            "subgraph_overflow_rejected": true,
+            "subgraph_removable_gm_bytes": 2097152.0,
+            "subgraph_screen_latency_ms": 0.07037492468953133,
+            "tpot_absolute_error_ms": -0.6503132426540716,
+            "tpot_error_pct": -4.139485949421207,
+            "ttft_absolute_error_ms": -33.51089330057326,
+            "ttft_error_pct": -65.90146175137318
+          },
+          "repetition": 2,
+          "status": "pass"
+        },
+        {
+          "baseline": {
+            "graph_tpot_ms": 15.71,
+            "graph_ttft_ms": 50.85,
+            "output_tokens": 32,
+            "prompt_tokens": 128
+          },
+          "candidate": {
+            "a3_graph_tpot_ms": 15.05968675734593,
+            "a3_graph_ttft_ms": 17.33910669942674,
+            "operator_plan_elapsed_ms": 0.05501920000000002,
+            "operator_plan_latency_ms": 3.8768750382587314,
+            "qwen_case_deterministic": true,
+            "qwen_prediction_latency_ms": 81.61754196044058,
+            "subgraph_critical_path_saving_us": 5.0,
+            "subgraph_overflow_latency_ms": 0.03404100425541401,
+            "subgraph_overflow_rejected": true,
+            "subgraph_removable_gm_bytes": 2097152.0,
+            "subgraph_screen_latency_ms": 0.05791697185486555,
+            "tpot_absolute_error_ms": -0.6503132426540716,
+            "tpot_error_pct": -4.139485949421207,
+            "ttft_absolute_error_ms": -33.51089330057326,
+            "ttft_error_pct": -65.90146175137318
+          },
+          "repetition": 3,
+          "status": "pass"
+        }
+      ],
+      "repetitions": 3,
+      "scope": "real A3 physical-calibration predict, finite operator planning and subgraph boundary gates",
+      "source_revisions": {
+        "mindie-sim": {
+          "editable": false,
+          "revision": "4040f078c19487c019c87466a0d128821289ccc2",
+          "version": "0.7.0"
+        }
+      },
+      "status": "pass"
+    }
+  ],
+  "component_revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+  "component_revisions": {
+    "claude-code": "128517d8d74e829fd750a2b31c1093e6d59eddd4",
+    "codex": "f0b2669e12e48342d680abb3fff6a4177be39fa4",
+    "coordinator": "bdead0ac37cc4cee34a1736edc776b48ea823542",
+    "diagnostics": "fba07e8607ddadde14cea315c9dbda23726c1c79",
+    "dsh": "c9f62cb000a7d3ce1c11d201c998f9200946820b",
+    "kimi": "eb79012094ff73c3f11d6d2ac5365f3558714b7c",
+    "knowledge": "10ee85606aa43de7975e3c4542013be4c177730a",
+    "mindie-bench": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "npu-top": "6737925d0ebb39c1aefda2c933eae0486169333c",
+    "profiler": "4010d72f0b6950caf1425e3b683d495a6c76016a",
+    "remote-dev": "6bd1a15380195a95d450458e7c1856905d95bf73",
+    "sim": "4040f078c19487c019c87466a0d128821289ccc2"
+  },
+  "component_runner_reports": [
+    {
+      "case_ids": [
+        "npu-top-physical-owner-query",
+        "coordinator-contention",
+        "diagnostics-fault-delivery",
+        "profiler-rank-link-memory-attribution",
+        "sim-a3-graph-and-boundary-screening"
+      ],
+      "runner_source": {
+        "dirty": false,
+        "editable": true,
+        "installation": "explicit_source",
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+        "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+        "version": "0.4.1"
+      },
+      "runner_source_after": {
+        "dirty": false,
+        "editable": true,
+        "installation": "explicit_source",
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+        "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+        "version": "0.4.1"
+      }
+    }
+  ],
+  "component_version": "0.4.1",
+  "excluded_attempts": [],
+  "infrastructure_patches": [],
+  "limitations": [
+    "Benchmark execution and measurement coverage across the product suite. These task results measure the evaluated product, not productivity caused by the measurement tool itself.",
+    "Repeated component value scenarios executed against exact non-editable 0.0.3 formal releases.",
+    "0.0.3 value-suite verifies the 5 repeatable component value scenarios (coordinator, npu-top, diagnostics, profiler, sim) against exact non-editable 0.0.3 formal releases alongside 12-repository release benchmarks."
+  ],
+  "native_plugins": [],
+  "product_version": "0.0.3",
+  "release_gate": true,
+  "repository": "mindie-agent/mindie-bench",
+  "runner_release": {
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
+    "version": "0.4.1"
+  },
+  "runner_release_reviews": [],
+  "schema_version": "mindie-component-value-report/1",
+  "setup_reports": [],
+  "setup_resources": {
+    "cost_complete": false,
+    "elapsed_complete": false,
+    "elapsed_observed_operations": 0,
+    "observed_cost_usd_lower_bound": null,
+    "observed_elapsed_sec_lower_bound": null,
+    "observed_tokens_lower_bound": {
+      "cache_creation": null,
+      "indexer_small_model_total": null,
+      "input_cached": null,
+      "input_uncached": null,
+      "output": null
+    },
+    "operations": 0,
+    "token_metering_complete": false
+  },
+  "source_patches": [],
+  "studies": [],
+  "suite": "product-value-v0.0.3-components"
+}

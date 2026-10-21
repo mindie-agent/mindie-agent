@@ -6,20 +6,20 @@
     "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O"
   },
   "runner_source": {
-    "revision": "c69074fba55eb2d60b99254ab5266797b2b9082f",
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
     "version": "0.4.1",
     "installation": "explicit_source",
     "editable": true,
     "dirty": false,
-    "source_sha256": "445942de0bddb32655c0cd012c4f4ec2f18d3ec7f151e531b5de72044df6f6ea"
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1"
   },
   "runner_source_after": {
-    "revision": "c69074fba55eb2d60b99254ab5266797b2b9082f",
+    "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
     "version": "0.4.1",
     "installation": "explicit_source",
     "editable": true,
     "dirty": false,
-    "source_sha256": "445942de0bddb32655c0cd012c4f4ec2f18d3ec7f151e531b5de72044df6f6ea"
+    "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1"
   },
   "cases": [
     {
@@ -96,7 +96,7 @@
       "source_revisions": {
         "mindie-coordinator": {
           "version": "0.6.2",
-          "revision": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
           "editable": false
         },
         "npu-top": {
@@ -192,7 +192,7 @@
       "source_revisions": {
         "mindie-coordinator": {
           "version": "0.6.2",
-          "revision": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
           "editable": false
         },
         "npu-top": {
@@ -324,7 +324,7 @@
       "source_revisions": {
         "mindie-coordinator": {
           "version": "0.6.2",
-          "revision": "a89033aadb435dc970826bbfe157aa553ef45d8c",
+          "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542",
           "editable": false
         },
         "npu-top": {
@@ -576,7 +576,7 @@
       "source_revisions": {
         "mindie-sim": {
           "version": "0.7.0",
-          "revision": "b520b1c41b5dcf97ce7a00cbb6578ff9f834907b",
+          "revision": "4040f078c19487c019c87466a0d128821289ccc2",
           "editable": false
         }
       }
