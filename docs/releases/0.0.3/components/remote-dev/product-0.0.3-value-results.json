@@ -2,9 +2,9 @@
   "benchmark_scope": "G0/G1 compares the addition of remote-dev; G1/G2 compares the addition of knowledge retrieval, shipped Skills and explicit retrieval guidance together. G2/G3 measures capture and later reuse, including the seed task. G0/G2 measures their joint effect and cannot attribute a gain to one component.",
   "blocking_reasons": [],
   "collector_source": {
-    "dirty": null,
-    "editable": false,
-    "installation": "installed",
+    "dirty": false,
+    "editable": true,
+    "installation": "explicit_source",
     "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
     "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
     "version": "0.4.1"

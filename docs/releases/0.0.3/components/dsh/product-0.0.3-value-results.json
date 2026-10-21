@@ -2,9 +2,9 @@
   "benchmark_scope": "Native host tasks with controlled MCP and shipped Skills. The task comparisons measure the configured MindIE combination; full plugin loading is verified by the separate native checks.",
   "blocking_reasons": [],
   "collector_source": {
-    "dirty": null,
-    "editable": false,
-    "installation": "installed",
+    "dirty": false,
+    "editable": true,
+    "installation": "explicit_source",
     "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2",
     "source_sha256": "adea61e81228a52651de14193437a3f6884ed31b38c7e1ba80fe7b6ef7cc13a1",
     "version": "0.4.1"
