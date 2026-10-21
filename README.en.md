@@ -48,7 +48,7 @@ When your Agent reads this page, it will automatically verify a **stable `gh` (G
 > GH_USER=$(gh api user --jq .login) && echo "GitHub channel verified for account: $GH_USER"
 > gh auth setup-git
 > ```
-> - **Hard Gate (Never skip or silently ignore failures; a DSH `0.0.2`-only install without community contribution may skip the `gh` gate but still needs `git` and `uv`)**:
+> - **Hard Gate (Never skip or silently ignore failures; a DSH `0.0.3`-only install without community contribution may skip the `gh` gate but still needs `git` and `uv`)**:
 >   - If `gh` is missing: assist the user in installing GitHub CLI for their OS first (macOS: `brew install gh`; Windows: `winget install --id GitHub.cli`; Ubuntu / WSL: `sudo apt update && sudo apt install -y gh`).
 >   - If `gh auth status` is not logged in, the token is invalid, or `gh api user` cannot reach GitHub: **do not proceed to the next step**—guide the user to complete `gh auth login` (or set a valid `GH_TOKEN`) and run `gh auth setup-git` until `gh api user --jq .login` reliably returns their GitHub username.
 >
@@ -132,7 +132,7 @@ When your Agent reads this page, it will automatically verify a **stable `gh` (G
 
 ### Option 2: One-Line Terminal Install for Humans
 
-> **Hard Prerequisite**: Ensure `git`, `uv`, and an authenticated **`gh` (GitHub CLI)** are installed. The DSH `0.0.2` row below does not require `gh` because it enables no contribution or reporting path. Before installing a plugin, run this one-liner to **verify your GitHub channel**:
+> **Hard Prerequisite**: Ensure `git`, `uv`, and an authenticated **`gh` (GitHub CLI)** are installed. The DSH `0.0.3` row below does not require `gh` because it enables no contribution or reporting path. Before installing a plugin, run this one-liner to **verify your GitHub channel**:
 > ```bash
 > gh auth status && gh auth setup-git
 > ```

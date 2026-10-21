@@ -48,7 +48,7 @@ Agent 读取本页面后，会自动校验 **`gh`（GitHub CLI）稳定交互通
 > GH_USER=$(gh api user --jq .login) && echo "GitHub channel verified for account: $GH_USER"
 > gh auth setup-git
 > ```
-> - **门禁要求（严禁跳过或静默忽略；仅安装 DSH `0.0.2` 且不启用社区贡献时可跳过 `gh` 门禁，但仍需 `git` 与 `uv`）**：
+> - **门禁要求（严禁跳过或静默忽略；仅安装 DSH `0.0.3` 且不启用社区贡献时可跳过 `gh` 门禁，但仍需 `git` 与 `uv`）**：
 >   - 若未安装 `gh`：请先按宿主系统协助安装（macOS：`brew install gh`；Windows：`winget install --id GitHub.cli`；Ubuntu / WSL：`sudo apt update && sudo apt install -y gh`）。
 >   - 若 `gh auth status` 未登录、Token 失效或 `gh api user` 无法连通 GitHub：**请勿继续执行后续步骤**，立即引导用户完成 `gh auth login`（或配置有效的 `GH_TOKEN`）并运行 `gh auth setup-git`，直至 `gh api user --jq .login` 稳定返回当前 GitHub 账号名。
 >
@@ -132,7 +132,7 @@ Agent 读取本页面后，会自动校验 **`gh`（GitHub CLI）稳定交互通
 
 ### 方式二：人类终端手动一行安装
 
-> **硬性前置指标**：请确保本机已安装 `git`、`uv` 以及已登录的 **`gh`（GitHub CLI）**。下表 DSH `0.0.2` 不启用贡献与上报，因此不依赖 `gh`。安装前可先在终端运行下方一行命令，完成 **GitHub 通道校验**：
+> **硬性前置指标**：请确保本机已安装 `git`、`uv` 以及已登录的 **`gh`（GitHub CLI）**。下表 DSH `0.0.3` 不启用贡献与上报，因此不依赖 `gh`。安装前可先在终端运行下方一行命令，完成 **GitHub 通道校验**：
 > ```bash
 > gh auth status && gh auth setup-git
 > ```
