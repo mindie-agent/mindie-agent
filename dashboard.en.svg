@@ -20,50 +20,50 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-10-28 10:54 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-10-29 01:34 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
-  <text x="38" y="124" class="font kpi-val">58 ★  ·  52 ⑂</text>
-  <text x="38" y="144" class="font kpi-sub">Org total: 65 Stars · 72 Forks</text>
+  <text x="38" y="124" class="font kpi-val">59 ★  ·  53 ⑂</text>
+  <text x="38" y="144" class="font kpi-sub">Org total: 66 Stars · 74 Forks</text>
   <rect x="256" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="256" y="72" width="4" height="86" rx="2" fill="#10A37F"/>
   <text x="270" y="95" class="font kpi-label">Client Plugin Clones</text>
-  <text x="270" y="124" class="font kpi-val">8,694</text>
-  <text x="270" y="144" class="font kpi-sub">1,526 unique cloners (14d)</text>
+  <text x="270" y="124" class="font kpi-val">9,037</text>
+  <text x="270" y="144" class="font kpi-sub">1,552 unique cloners (14d)</text>
   <rect x="488" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="488" y="72" width="4" height="86" rx="2" fill="#2563EB"/>
   <text x="502" y="95" class="font kpi-label">Total Git Clones</text>
-  <text x="502" y="124" class="font kpi-val">35,974</text>
+  <text x="502" y="124" class="font kpi-val">36,845</text>
   <text x="502" y="144" class="font kpi-sub">Across 13 public repositories</text>
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">3,967</text>
-  <text x="734" y="144" class="font kpi-sub">4,776 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">4,020</text>
+  <text x="734" y="144" class="font kpi-sub">4,873 total asset downloads</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
-  <rect x="40.0" y="210" width="303.7" height="12" rx="3" fill="#10A37F"/>
-  <rect x="345.2" y="210" width="212.1" height="12" rx="3" fill="#D97757"/>
-  <rect x="558.7" y="210" width="238.3" height="12" rx="3" fill="#2563EB"/>
-  <rect x="798.5" y="210" width="120.0" height="12" rx="3" fill="#0EA5E9"/>
+  <rect x="40.0" y="210" width="315.3" height="12" rx="3" fill="#10A37F"/>
+  <rect x="356.8" y="210" width="206.8" height="12" rx="3" fill="#D97757"/>
+  <rect x="565.1" y="210" width="233.3" height="12" rx="3" fill="#2563EB"/>
+  <rect x="799.8" y="210" width="118.7" height="12" rx="3" fill="#0EA5E9"/>
   <circle cx="46" cy="242" r="5" fill="#10A37F"/>
-  <text x="56" y="246" class="font td-repo">OpenAI Codex (34.7%)</text>
+  <text x="56" y="246" class="font td-repo">OpenAI Codex (36.0%)</text>
   <text x="56" y="263" class="mono td-sub">mindie-agent-codex</text>
-  <text x="56" y="279" class="font td-sub">3,015 clones · 450 unique</text>
+  <text x="56" y="279" class="font td-sub">3,253 clones · 459 unique</text>
   <circle cx="266" cy="242" r="5" fill="#D97757"/>
-  <text x="276" y="246" class="font td-repo">Claude Code (24.3%)</text>
+  <text x="276" y="246" class="font td-repo">Claude Code (23.7%)</text>
   <text x="276" y="263" class="mono td-sub">mindie-agent-cc</text>
-  <text x="276" y="279" class="font td-sub">2,110 clones · 336 unique</text>
+  <text x="276" y="279" class="font td-sub">2,139 clones · 338 unique</text>
   <circle cx="486" cy="242" r="5" fill="#2563EB"/>
-  <text x="496" y="246" class="font td-repo">Kimi Code (27.2%)</text>
+  <text x="496" y="246" class="font td-repo">Kimi Code (26.7%)</text>
   <text x="496" y="263" class="mono td-sub">mindie-agent-kimi</text>
-  <text x="496" y="279" class="font td-sub">2,369 clones · 380 unique</text>
+  <text x="496" y="279" class="font td-sub">2,411 clones · 384 unique</text>
   <circle cx="706" cy="242" r="5" fill="#0EA5E9"/>
-  <text x="716" y="246" class="font td-repo">DeepSeek Harness (13.8%)</text>
+  <text x="716" y="246" class="font td-repo">DeepSeek Harness (13.7%)</text>
   <text x="716" y="263" class="mono td-sub">mindie-agent-dsh</text>
-  <text x="716" y="279" class="font td-sub">1,200 clones · 360 unique</text>
+  <text x="716" y="279" class="font td-sub">1,234 clones · 371 unique</text>
   <rect x="24" y="314" width="912" height="469" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="314" width="912" height="38" rx="8" fill="#F1F5F9"/>
   <line x1="24" y1="352" x2="936" y2="352" stroke="#CBD5E1" stroke-width="1"/>
@@ -78,9 +78,9 @@
   <text x="54" y="373" class="mono td-repo">mindie-agent</text>
   <text x="240" y="373" class="font td-cat">Main Entry</text>
   <text x="355" y="373" class="mono td-sub">v0.1.1</text>
-  <text x="540" y="373" text-anchor="end" class="mono td-num">58 / 52</text>
-  <text x="665" y="373" text-anchor="end" class="mono td-bold">1,746</text>
-  <text x="815" y="373" text-anchor="end" class="mono td-num">1,494 (455)</text>
+  <text x="540" y="373" text-anchor="end" class="mono td-num">59 / 53</text>
+  <text x="665" y="373" text-anchor="end" class="mono td-bold">1,787</text>
+  <text x="815" y="373" text-anchor="end" class="mono td-num">1,530 (464)</text>
   <text x="920" y="373" text-anchor="end" class="mono td-num">5</text>
   <rect x="25" y="385" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="385" x2="936" y2="385" stroke="#F1F5F9" stroke-width="1"/>
@@ -89,8 +89,8 @@
   <text x="240" y="406" class="font td-cat">Skills Hub</text>
   <text x="355" y="406" class="mono td-sub">-</text>
   <text x="540" y="406" text-anchor="end" class="mono td-num">4 / 7</text>
-  <text x="665" y="406" text-anchor="end" class="mono td-bold">205</text>
-  <text x="815" y="406" text-anchor="end" class="mono td-num">205 (102)</text>
+  <text x="665" y="406" text-anchor="end" class="mono td-bold">207</text>
+  <text x="815" y="406" text-anchor="end" class="mono td-num">207 (104)</text>
   <text x="920" y="406" text-anchor="end" class="mono td-num">-</text>
   <line x1="24" y1="418" x2="936" y2="418" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="435" r="3.5" fill="#10A37F"/>
@@ -98,9 +98,9 @@
   <text x="240" y="439" class="font td-cat">Client Plugin</text>
   <text x="355" y="439" class="mono td-sub">v0.1.11</text>
   <text x="540" y="439" text-anchor="end" class="mono td-num">0 / 2</text>
-  <text x="665" y="439" text-anchor="end" class="mono td-bold">3,015</text>
-  <text x="815" y="439" text-anchor="end" class="mono td-num">2,498 (450)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">292</text>
+  <text x="665" y="439" text-anchor="end" class="mono td-bold">3,253</text>
+  <text x="815" y="439" text-anchor="end" class="mono td-num">2,713 (459)</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">343</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="468" r="3.5" fill="#D97757"/>
@@ -108,18 +108,18 @@
   <text x="240" y="472" class="font td-cat">Client Plugin</text>
   <text x="355" y="472" class="mono td-sub">v0.1.7</text>
   <text x="540" y="472" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="472" text-anchor="end" class="mono td-bold">2,110</text>
-  <text x="815" y="472" text-anchor="end" class="mono td-num">2,086 (336)</text>
-  <text x="920" y="472" text-anchor="end" class="mono td-num">53</text>
+  <text x="665" y="472" text-anchor="end" class="mono td-bold">2,139</text>
+  <text x="815" y="472" text-anchor="end" class="mono td-num">2,114 (338)</text>
+  <text x="920" y="472" text-anchor="end" class="mono td-num">54</text>
   <line x1="24" y1="484" x2="936" y2="484" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="501" r="3.5" fill="#2563EB"/>
   <text x="54" y="505" class="mono td-repo">mindie-agent-kimi</text>
   <text x="240" y="505" class="font td-cat">Client Plugin</text>
   <text x="355" y="505" class="mono td-sub">v0.1.6</text>
   <text x="540" y="505" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="505" text-anchor="end" class="mono td-bold">2,369</text>
-  <text x="815" y="505" text-anchor="end" class="mono td-num">2,267 (380)</text>
-  <text x="920" y="505" text-anchor="end" class="mono td-num">2,145</text>
+  <text x="665" y="505" text-anchor="end" class="mono td-bold">2,411</text>
+  <text x="815" y="505" text-anchor="end" class="mono td-num">2,309 (384)</text>
+  <text x="920" y="505" text-anchor="end" class="mono td-num">2,146</text>
   <rect x="25" y="517" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="517" x2="936" y2="517" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="534" r="3.5" fill="#0EA5E9"/>
@@ -127,8 +127,8 @@
   <text x="240" y="538" class="font td-cat">Client Plugin</text>
   <text x="355" y="538" class="mono td-sub">v0.1.5</text>
   <text x="540" y="538" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="538" text-anchor="end" class="mono td-bold">1,200</text>
-  <text x="815" y="538" text-anchor="end" class="mono td-num">1,200 (360)</text>
+  <text x="665" y="538" text-anchor="end" class="mono td-bold">1,234</text>
+  <text x="815" y="538" text-anchor="end" class="mono td-num">1,234 (371)</text>
   <text x="920" y="538" text-anchor="end" class="mono td-num">29</text>
   <line x1="24" y1="550" x2="936" y2="550" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="567" r="3.5" fill="#475569"/>
@@ -136,8 +136,8 @@
   <text x="240" y="571" class="font td-cat">Core Runtime</text>
   <text x="355" y="571" class="mono td-sub">v0.13.4</text>
   <text x="540" y="571" text-anchor="end" class="mono td-num">0 / 2</text>
-  <text x="665" y="571" text-anchor="end" class="mono td-bold">6,895</text>
-  <text x="815" y="571" text-anchor="end" class="mono td-num">5,836 (1,691)</text>
+  <text x="665" y="571" text-anchor="end" class="mono td-bold">6,992</text>
+  <text x="815" y="571" text-anchor="end" class="mono td-num">5,903 (1,739)</text>
   <text x="920" y="571" text-anchor="end" class="mono td-num">44</text>
   <rect x="25" y="583" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="583" x2="936" y2="583" stroke="#F1F5F9" stroke-width="1"/>
@@ -145,9 +145,9 @@
   <text x="54" y="604" class="mono td-repo">knowledge-vllm-ascend</text>
   <text x="240" y="604" class="font td-cat">Knowledge Repo</text>
   <text x="355" y="604" class="mono td-sub">knowledge-v1f0362a</text>
-  <text x="540" y="604" text-anchor="end" class="mono td-num">0 / 2</text>
-  <text x="665" y="604" text-anchor="end" class="mono td-bold">3,889</text>
-  <text x="815" y="604" text-anchor="end" class="mono td-num">3,446 (714)</text>
+  <text x="540" y="604" text-anchor="end" class="mono td-num">0 / 3</text>
+  <text x="665" y="604" text-anchor="end" class="mono td-bold">3,988</text>
+  <text x="815" y="604" text-anchor="end" class="mono td-num">2,102 (731)</text>
   <text x="920" y="604" text-anchor="end" class="mono td-num">629</text>
   <line x1="24" y1="616" x2="936" y2="616" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="633" r="3.5" fill="#475569"/>
@@ -155,8 +155,8 @@
   <text x="240" y="637" class="font td-cat">Core Runtime</text>
   <text x="355" y="637" class="mono td-sub">v0.10.8</text>
   <text x="540" y="637" text-anchor="end" class="mono td-num">1 / 2</text>
-  <text x="665" y="637" text-anchor="end" class="mono td-bold">4,093</text>
-  <text x="815" y="637" text-anchor="end" class="mono td-num">3,700 (1,533)</text>
+  <text x="665" y="637" text-anchor="end" class="mono td-bold">4,239</text>
+  <text x="815" y="637" text-anchor="end" class="mono td-num">3,837 (1,608)</text>
   <text x="920" y="637" text-anchor="end" class="mono td-num">45</text>
   <rect x="25" y="649" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="649" x2="936" y2="649" stroke="#F1F5F9" stroke-width="1"/>
@@ -165,8 +165,8 @@
   <text x="240" y="670" class="font td-cat">Core Runtime</text>
   <text x="355" y="670" class="mono td-sub">v0.6.3</text>
   <text x="540" y="670" text-anchor="end" class="mono td-num">0 / 1</text>
-  <text x="665" y="670" text-anchor="end" class="mono td-bold">1,086</text>
-  <text x="815" y="670" text-anchor="end" class="mono td-num">1,002 (234)</text>
+  <text x="665" y="670" text-anchor="end" class="mono td-bold">1,090</text>
+  <text x="815" y="670" text-anchor="end" class="mono td-num">1,004 (237)</text>
   <text x="920" y="670" text-anchor="end" class="mono td-num">24</text>
   <line x1="24" y1="682" x2="936" y2="682" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="699" r="3.5" fill="#D97706"/>
@@ -174,8 +174,8 @@
   <text x="240" y="703" class="font td-cat">Observability</text>
   <text x="355" y="703" class="mono td-sub">v0.2.1</text>
   <text x="540" y="703" text-anchor="end" class="mono td-num">2 / 3</text>
-  <text x="665" y="703" text-anchor="end" class="mono td-bold">749</text>
-  <text x="815" y="703" text-anchor="end" class="mono td-num">688 (153)</text>
+  <text x="665" y="703" text-anchor="end" class="mono td-bold">754</text>
+  <text x="815" y="703" text-anchor="end" class="mono td-num">693 (156)</text>
   <text x="920" y="703" text-anchor="end" class="mono td-num">619</text>
   <rect x="25" y="715" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="715" x2="936" y2="715" stroke="#F1F5F9" stroke-width="1"/>
@@ -184,8 +184,8 @@
   <text x="240" y="736" class="font td-cat">Core Runtime</text>
   <text x="355" y="736" class="mono td-sub">v0.5.4</text>
   <text x="540" y="736" text-anchor="end" class="mono td-num">0 / 1</text>
-  <text x="665" y="736" text-anchor="end" class="mono td-bold">7,367</text>
-  <text x="815" y="736" text-anchor="end" class="mono td-num">6,502 (2,410)</text>
+  <text x="665" y="736" text-anchor="end" class="mono td-bold">7,488</text>
+  <text x="815" y="736" text-anchor="end" class="mono td-num">6,610 (2,472)</text>
   <text x="920" y="736" text-anchor="end" class="mono td-num">62</text>
   <line x1="24" y1="748" x2="936" y2="748" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="44" cy="765" r="3.5" fill="#64748B"/>
@@ -193,8 +193,8 @@
   <text x="240" y="769" class="font td-cat">Benchmark</text>
   <text x="355" y="769" class="mono td-sub">v0.4.4</text>
   <text x="540" y="769" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="769" text-anchor="end" class="mono td-bold">1,250</text>
-  <text x="815" y="769" text-anchor="end" class="mono td-num">1,250 (277)</text>
+  <text x="665" y="769" text-anchor="end" class="mono td-bold">1,263</text>
+  <text x="815" y="769" text-anchor="end" class="mono td-num">1,263 (279)</text>
   <text x="920" y="769" text-anchor="end" class="mono td-num">20</text>
   <text x="24" y="808" class="font footer">Source: GitHub REST API · Stars, Forks, and Release downloads are all-time totals; Git Clones are archived daily (14d unique in parentheses)</text>
 </svg>
