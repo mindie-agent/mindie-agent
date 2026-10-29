@@ -38,6 +38,7 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
+| [**`0.1.2` 补丁发布说明**](releases/0.1.2.md) · [SSH 认证验收记录](releases/0.1.2/ssh-auth-acceptance.json) | [**`0.1.2` Patch Notes**](releases/0.1.2.en.md) · [SSH Authentication Acceptance](releases/0.1.2/ssh-auth-acceptance.json) | 统一 SSH 凭据、公钥安装与恢复、只读密码回退，macOS / Windows PowerShell / WSL2 真实 SSH 与跨组件复用验收 |
 | [**`0.1.1` 补丁发布说明**](releases/0.1.1.md) · [开发试点报告](releases/0.1.1/benchmark-pilot.md) · [原生更新验收回执](releases/0.1.1/native-update-acceptance.json) | [**`0.1.1` Patch Notes**](releases/0.1.1.en.md) · [Dev Pilot Report](releases/0.1.1/benchmark-pilot.en.md) · [Native Update Receipt](releases/0.1.1/native-update-acceptance.json) | 知识功能按会话显式 `/mindie-agent` 启用、整包预算与探索透传、双 Die/实测 HBM 放置、有界诊断准入、捕获 Kernel 耗时绑定、行为判分器、流结算关闭竞态修复、离线工程复现与 `G5` 开发试点、四端 `0.1.2` 正式原生更新验收及维护补丁发布链路 |
 | [**`0.1.0` 特性里程碑发布说明**](releases/0.1.0.md) | [**`0.1.0` Feature Milestone Record**](releases/0.1.0.en.md) | `0.0.1 → 0.1.0` 完整能力演进、`mindie-bench` 双模型 18 任务 `G0–G4` 真机实测、三端 × 四插件全量验收与 [`channels/0.1.json`](../channels/0.1.json) 单组件热修通道 |
 | [`0.1.0` 作者自述：架构演进与工程哲学](releases/0.1.0/design-philosophy.md) | [`0.1.0` Author's Note: Architecture & Engineering Philosophy](releases/0.1.0/design-philosophy.en.md) | 为什么砍掉多 Skill、只做薄插件与双支柱（MCP 工具 + `L1–L4` 知识飞轮）、五大核心组件设计初衷与人机协同思考 |

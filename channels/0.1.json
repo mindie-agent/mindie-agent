@@ -3,16 +3,16 @@
   "schema_version": "mindie-release-channel/1",
   "track": "0.1",
   "milestone_version": "0.1.0",
-  "current_patch_version": "0.1.1",
-  "release_notes": "docs/releases/0.1.1.md",
-  "release_notes_en": "docs/releases/0.1.1.en.md",
+  "current_patch_version": "0.1.2",
+  "release_notes": "docs/releases/0.1.2.md",
+  "release_notes_en": "docs/releases/0.1.2.en.md",
   "independent_update_allowed": true,
   "update_policy": {
     "independent_update_allowed": true,
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
       "verified_mechanism": "channels/0.1.json records the product-verified 12-repository + 7-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 8 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback).",
-      "known_boundaries": "As of 2026-10-27, remote-dev 0.10.8, Codex 0.1.11, Claude Code 0.1.7, Kimi 0.1.6 and DSH 0.1.5 are formally published with verified assets and exact-source benchmarks. Missing-input descriptions and caller/not_sent input_repair now support deliberate agent correction. Existing Codex upgraded normally from 0.1.10 to 0.1.11 without a forced update or manual binding edit; all 72 installed package files match the formal wheel, five hooks remain trusted, and user/consent bytes are unchanged. Formal installed-runtime native CLI acceptance and actual calls in the existing Desktop chat both prove missing port -> add only port=22 -> real SSH exit_code=0 with expected stdout. The existing Desktop tool description remains cached until its natural reload; a fresh native process uses the new catalog. Existing Kimi automatically switched to formal 0.1.6 with remote-dev 0.10.8 and retained newer knowledge 0.13.4; its receipt explicitly requires a host catalog reload. DSH + DeepSeek Flash candidate native correction passed, but no claim is made that all four installed hosts automatically upgraded or that NPU performance was measured. See docs/releases/remote-caller-repair-2026-10-27.json. As of 2026-10-26, independent formal releases diagnostics 0.5.4, remote-dev 0.10.7, Codex 0.1.10, Claude Code 0.1.6, Kimi 0.1.5, and DSH 0.1.4 have verified assets and exact-source benchmarks. This does not promote the retained product component inventory or historical product reports. Kimi 0.1.2 automatically switched to 0.1.5 and repaired its native package on the next scheduled check; registration and a new registered MCP process confirm 29 tools, 660000ms timeout, kimi profile, diagnostics 0.5.4 and remote-dev 0.10.7. Codex 0.1.10 is formally published at 3a6b84012c5c0cc0306bf06a1a236dd2638bd06f after migration, locking, and interrupted local activation fixes in merged PR 69. Isolated actual Desktop acceptance migrates published 0.1.8 with 0.1.9 prepared to candidate 0.1.10, verifies 22 remote tools plus five component entries and normal background retirement, and preserves in-flight calls across native refresh. On the existing user installation, one-time native recovery followed by a normal Desktop restart now activates formal 0.1.10: canonical binding and actual MCP processes agree, normal background plugin/component checks report up_to_date, and the host loads 22 remote tools plus five component entries. Actual diagnostics_status, remote_probe, and remote_exec_command calls pass; the idle exclusive update lock is available, five hooks remain trusted and enabled, and consent bytes are unchanged. This first hop required one-time recovery and a user restart, so it is not claimed as automatic success by the legacy updater; no NPU performance acceptance is inferred. Claude Code and DSH formal-source selection is verified, but automatic activation on this user installation is not. See docs/release-compatibility-and-update.md for the current evidence and host refresh boundaries. Historical acceptance follows: The binding cutover stage takes ~10ms on Codex (unavailable_seconds) and ~15ms on Claude Code (activate_binding.seconds), excluding prior runtime build; end-to-end update preparation (side-by-side uv sync, isolated inventory/API probing, and lock acquisition) runs under bounded multi-second/minute budgets and is never claimed as < 500ms. All 8 runtime/evaluation components and all 4 native host plugins (v0.1.2) are formally published on GitHub Releases, byte-verified, and verified on macOS arm64 for formal native session gating and component alignment (docs/releases/0.1.1/native-update-acceptance.json; automated contract CI runs across Ubuntu/macOS/Windows for Codex/CC/Kimi and on Ubuntu for DSH; Claude Code verified in an isolated native marketplace profile as global CC is not installed on the test host; Codex CLI 0.153.4 and Desktop 0.164.0-alpha.11.1 dual-host 5-hook trust achieved via one-time public app-server config API CAS + native_context alignment rather than automatic native plugin manager inheritance, with formal 0.1.2 session admission verified on Desktop 0.164.0-alpha.11.1; already-loaded Kimi/DSH definitions in running processes reload naturally in new processes without terminating active user hosts), and the 0.1.1 offline CPU engineering reproduction & G5 dev pilot report (docs/releases/0.1.1/benchmark-pilot.json) is archived. Codex 0.1.8 separately verifies default discovery of 11 remote-dev and 5 component MCP tools with no knowledge descriptors or npu-top, six real native MCP calls, and an unforced scheduled update check on macOS arm64 / Desktop 0.164.0-alpha.11.1. The initial 0.1.6 updater failed on changed interrupt targets and required one-time recovery using the verified 0.1.8 updater; it is not claimed as an unassisted successful upgrade. See docs/releases/codex-0.1.8-native-acceptance.json for results and retained unsuccessful attempts."
+      "known_boundaries": "As of 2026-10-29, product 0.1.2 records verified formal releases remote-dev 0.11.1, coordinator 0.7.0, npu-top 0.3.0, Codex 0.1.12, Claude Code 0.1.8, Kimi 0.1.7 and DSH 0.1.6, and aligns diagnostics to existing formal 0.5.4. Shared SSH authentication passed 19 real cases on macOS, native Windows PowerShell (including inherited Git Bash PATH) and actual WSL2. remote-dev exclusively owns the shared user-private plaintext credentials.json and key maintenance; no OS vault or system/master password is used. The channel retains formal knowledge 0.13.4, while Kimi/DSH initial plugin baselines remain 0.13.3; independent updates may select newer formal components. Exact sources, retained failed attempts, native acceptance and host reload boundaries are recorded in docs/releases/0.1.2/ssh-auth-acceptance.json. As of 2026-10-27, remote-dev 0.10.8, Codex 0.1.11, Claude Code 0.1.7, Kimi 0.1.6 and DSH 0.1.5 are formally published with verified assets and exact-source benchmarks. Missing-input descriptions and caller/not_sent input_repair now support deliberate agent correction. Existing Codex upgraded normally from 0.1.10 to 0.1.11 without a forced update or manual binding edit; all 72 installed package files match the formal wheel, five hooks remain trusted, and user/consent bytes are unchanged. Formal installed-runtime native CLI acceptance and actual calls in the existing Desktop chat both prove missing port -> add only port=22 -> real SSH exit_code=0 with expected stdout. The existing Desktop tool description remains cached until its natural reload; a fresh native process uses the new catalog. Existing Kimi automatically switched to formal 0.1.6 with remote-dev 0.10.8 and retained newer knowledge 0.13.4; its receipt explicitly requires a host catalog reload. DSH + DeepSeek Flash candidate native correction passed, but no claim is made that all four installed hosts automatically upgraded or that NPU performance was measured. See docs/releases/remote-caller-repair-2026-10-27.json. As of 2026-10-26, independent formal releases diagnostics 0.5.4, remote-dev 0.10.7, Codex 0.1.10, Claude Code 0.1.6, Kimi 0.1.5, and DSH 0.1.4 have verified assets and exact-source benchmarks. This does not promote the retained product component inventory or historical product reports. Kimi 0.1.2 automatically switched to 0.1.5 and repaired its native package on the next scheduled check; registration and a new registered MCP process confirm 29 tools, 660000ms timeout, kimi profile, diagnostics 0.5.4 and remote-dev 0.10.7. Codex 0.1.10 is formally published at 3a6b84012c5c0cc0306bf06a1a236dd2638bd06f after migration, locking, and interrupted local activation fixes in merged PR 69. Isolated actual Desktop acceptance migrates published 0.1.8 with 0.1.9 prepared to candidate 0.1.10, verifies 22 remote tools plus five component entries and normal background retirement, and preserves in-flight calls across native refresh. On the existing user installation, one-time native recovery followed by a normal Desktop restart now activates formal 0.1.10: canonical binding and actual MCP processes agree, normal background plugin/component checks report up_to_date, and the host loads 22 remote tools plus five component entries. Actual diagnostics_status, remote_probe, and remote_exec_command calls pass; the idle exclusive update lock is available, five hooks remain trusted and enabled, and consent bytes are unchanged. This first hop required one-time recovery and a user restart, so it is not claimed as automatic success by the legacy updater; no NPU performance acceptance is inferred. Claude Code and DSH formal-source selection is verified, but automatic activation on this user installation is not. See docs/release-compatibility-and-update.md for the current evidence and host refresh boundaries. Historical acceptance follows: The binding cutover stage takes ~10ms on Codex (unavailable_seconds) and ~15ms on Claude Code (activate_binding.seconds), excluding prior runtime build; end-to-end update preparation (side-by-side uv sync, isolated inventory/API probing, and lock acquisition) runs under bounded multi-second/minute budgets and is never claimed as < 500ms. All 8 runtime/evaluation components and all 4 native host plugins (v0.1.2) are formally published on GitHub Releases, byte-verified, and verified on macOS arm64 for formal native session gating and component alignment (docs/releases/0.1.1/native-update-acceptance.json; automated contract CI runs across Ubuntu/macOS/Windows for Codex/CC/Kimi and on Ubuntu for DSH; Claude Code verified in an isolated native marketplace profile as global CC is not installed on the test host; Codex CLI 0.153.4 and Desktop 0.164.0-alpha.11.1 dual-host 5-hook trust achieved via one-time public app-server config API CAS + native_context alignment rather than automatic native plugin manager inheritance, with formal 0.1.2 session admission verified on Desktop 0.164.0-alpha.11.1; already-loaded Kimi/DSH definitions in running processes reload naturally in new processes without terminating active user hosts), and the 0.1.1 offline CPU engineering reproduction & G5 dev pilot report (docs/releases/0.1.1/benchmark-pilot.json) is archived. Codex 0.1.8 separately verifies default discovery of 11 remote-dev and 5 component MCP tools with no knowledge descriptors or npu-top, six real native MCP calls, and an unforced scheduled update check on macOS arm64 / Desktop 0.164.0-alpha.11.1. The initial 0.1.6 updater failed on changed interrupt targets and required one-time recovery using the verified 0.1.8 updater; it is not claimed as an unassisted successful upgrade. See docs/releases/codex-0.1.8-native-acceptance.json for results and retained unsuccessful attempts."
     }
   },
   "corpora": {
@@ -58,10 +58,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/diagnostics",
       "package": "mindie-diagnostics",
-      "version": "0.5.3",
-      "tag": "v0.5.3",
-      "commit": "1c465a18e4db59a0889557971b59d6233d8ae726",
-      "revision": "1c465a18e4db59a0889557971b59d6233d8ae726",
+      "version": "0.5.4",
+      "tag": "v0.5.4",
+      "commit": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+      "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -94,11 +94,11 @@
       "role": "shared_component",
       "repository": "mindie-agent/npu-top",
       "package": "npu-top",
-      "version": "0.2.1",
-      "tag": "v0.2.1",
-      "commit": "6737925d0ebb39c1aefda2c933eae0486169333c",
-      "revision": "6737925d0ebb39c1aefda2c933eae0486169333c",
-      "runner_revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2",
+      "version": "0.3.0",
+      "tag": "v0.3.0",
+      "commit": "ff78215dbe94bb3bd16abc6897878918748b8aee",
+      "revision": "ff78215dbe94bb3bd16abc6897878918748b8aee",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
     "remote-dev": {
@@ -106,10 +106,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/remote-dev",
       "package": "remote-dev",
-      "version": "0.10.6",
-      "tag": "v0.10.6",
-      "commit": "0463a13fce9618ec9a51904869d61acb0cdb8538",
-      "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538",
+      "version": "0.11.1",
+      "tag": "v0.11.1",
+      "commit": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+      "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -130,10 +130,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/coordinator",
       "package": "mindie-coordinator",
-      "version": "0.6.3",
-      "tag": "v0.6.3",
-      "commit": "0ec71fb947ab24df8e543dcf056f4f06664baad8",
-      "revision": "0ec71fb947ab24df8e543dcf056f4f06664baad8",
+      "version": "0.7.0",
+      "tag": "v0.7.0",
+      "commit": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2",
+      "revision": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -142,10 +142,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-codex",
       "package": "mindie-agent-codex",
-      "version": "0.1.8",
-      "tag": "v0.1.8",
-      "commit": "543fa3014d47c4327be7eff74f89bcc128870666",
-      "revision": "543fa3014d47c4327be7eff74f89bcc128870666",
+      "version": "0.1.12",
+      "tag": "v0.1.12",
+      "commit": "46a3401904b736fd7dd10a822b8d883be1252acf",
+      "revision": "46a3401904b736fd7dd10a822b8d883be1252acf",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -154,10 +154,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-cc",
       "package": "mindie-agent-cc",
-      "version": "0.1.5",
-      "tag": "v0.1.5",
-      "commit": "661ef2725cde954c77743a113a768a607a5b2fd4",
-      "revision": "661ef2725cde954c77743a113a768a607a5b2fd4",
+      "version": "0.1.8",
+      "tag": "v0.1.8",
+      "commit": "41b57d0bceba5ebcc79e37d8a2f277dcef92eaff",
+      "revision": "41b57d0bceba5ebcc79e37d8a2f277dcef92eaff",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -166,10 +166,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-kimi",
       "package": "mindie-agent-kimi",
-      "version": "0.1.3",
-      "tag": "v0.1.3",
-      "commit": "faf199fb7c76a63e9ff5f94cb1362ebdf203f5a3",
-      "revision": "faf199fb7c76a63e9ff5f94cb1362ebdf203f5a3",
+      "version": "0.1.7",
+      "tag": "v0.1.7",
+      "commit": "9fcdc3206e98638bb157a73891558b822aa5ca27",
+      "revision": "9fcdc3206e98638bb157a73891558b822aa5ca27",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -178,10 +178,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-dsh",
       "package": "mindie-agent-dsh",
-      "version": "0.1.3",
-      "tag": "v0.1.3",
-      "commit": "e9e4ac78d30f2af90f4a3fe0ad3cf314c1857fba",
-      "revision": "e9e4ac78d30f2af90f4a3fe0ad3cf314c1857fba",
+      "version": "0.1.6",
+      "tag": "v0.1.6",
+      "commit": "46b68bc1f1c7d04b9f782a774e1407b801204056",
+      "revision": "46b68bc1f1c7d04b9f782a774e1407b801204056",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -237,6 +237,22 @@
       ],
       "plugin_republish_required": true,
       "summary": "0.1.1 maintenance patch: formal component releases for knowledge v0.13.3 (38a42f6f778cfa555d8918fdcacd12cee4a181f5; per-session manual /mindie-agent gate, whole-delivery token budget estimation, deduplicated delivery receipts, and direct GitHub Release component update discovery/runtime build), remote-dev v0.10.6 (0463a13fce9618ec9a51904869d61acb0cdb8538; primary SSH exception preservation with cleanup_error and dual-Die A3 / measured free HBM normalization), diagnostics v0.5.2 (801a01b2789aed7f58e971a909205a7d40b61077; cooperative JSONL record-boundary intake drain and offline stage-admission budget), sim v0.7.1 (15f93f3f0247b2653d0e9441eae56959e4d16d4e; profiled_kernel cost plans with captured median duration floors), coordinator v0.6.3 (0ec71fb947ab24df8e543dcf056f4f06664baad8; preparation job refresh, factual A5/A3 HBM telemetry, and host-capacity placement admission), and mindie-bench v0.4.4 (a36d8a5ae8633e560d19fee231179c3680149109; behavior-executed verifiers for 6 tasks, strategy-selection continuation isolation, release-kind=patch collector gate, and HTTP/1.1 chunked settlement close-race fix), reusing profiler v0.5.0 and npu-top v0.2.1; formal v0.1.2 releases across all four native host plugins (Codex 0b3c690b95401631782a656d99f2b4487582636a, CC edabca82e02fb313d734c699e75735095effebfd, Kimi 7aecfd22857c313b52d6fe5923292f297884fec0, DSH a38f1cb191f625905aace734e20a2ad196624b60) verified on macOS arm64 for exploration pass-through, session gating, and independent component updates (docs/releases/0.1.1/native-update-acceptance.json), plus the offline CPU engineering reproduction and G5 dev pilot report (docs/releases/0.1.1/benchmark-pilot.md)."
+    },
+    {
+      "patch_version": "0.1.2",
+      "type": "hotfix",
+      "updated_components": [
+        "diagnostics",
+        "remote-dev",
+        "coordinator",
+        "npu-top",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh"
+      ],
+      "plugin_republish_required": true,
+      "summary": "Shared SSH authentication in remote-dev 0.11.1 provides one-time password enrollment, public-key installation and recovery, cross-process/chat/plugin reuse, read-only monitor password fallback, and Git for Windows 2.56 SSH discovery. coordinator 0.7.0 and npu-top 0.3.0 reuse the same store. Codex 0.1.12, Claude Code 0.1.8, Kimi 0.1.7 and DSH 0.1.6 expose remote_auth and pin formal remote-dev 0.11.1; diagnostics aligns to existing formal 0.5.4. Nineteen real SSH tests across macOS, native PowerShell and actual WSL2 pass. Formal assets and source-bound benchmarks are verified; plugin initial baselines, isolated previous-formal updater acceptance and native catalog reload boundaries are recorded separately. The remaining component and seven corpus pins are preserved; historical value results are not relabeled."
     }
   ]
 }
