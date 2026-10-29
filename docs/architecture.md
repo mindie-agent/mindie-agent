@@ -42,7 +42,7 @@ flowchart TB
 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
 | [`knowledge`](https://github.com/mindie-agent/knowledge) | 知识检索引擎：适用条件匹配、继承规则展开、脱敏任务切片、经验提炼校验与社区 PR 投递 |
 | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、昇腾算子、推理核心架构、分布式通信、可观测性、图编译/算子兼容与 Agent 工程治理的 7 大结构化分级知识库（`L1–L4`） |
-| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | SSH 远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
+| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、用户级凭据存储与公钥维护；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
 | [`coordinator`](https://github.com/mindie-agent/coordinator) | 远端昇腾环境与多卡租约管家：机器与容器台账、NPU 拓扑探测（含 A3 双 Die 映射）、NPU 卡与端口防冲突租约、受管任务清理 |
 | [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向开发者的 NPU 集群监控看板：实时 Web 界面与 90 天利用率历史（直接读取 `coordinator` 的 `machines.json`） |
 | [`diagnostics`](https://github.com/mindie-agent/diagnostics) | 本地结构化故障日志、日志自动轮转、离线脱敏诊断包导出与可选的 GitHub Issue 上报（`mindie_diagnostics`） |
@@ -50,6 +50,10 @@ flowchart TB
 | [`sim`](https://github.com/mindie-agent/sim) | 昇腾性能建模与 Roofline 仿真工具（`mindie_sim`）：支持 A2/A3/A5 硬件规格查询、`H2D`/`D2H`/`D2D` 传输耗时估算、Cube/Vector/MTE 算子流水线建模、子图融合收益预估与分布式并行拆解 |
 | [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | 昇腾真机端到端评测套件：覆盖真实研发任务、精度与性能验证、跨任务经验复用评测及版本基准报告 |
 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)、[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace) | 昇腾 AI Infra 开源 Skills 目录，以及支持 Git Worktree 多任务隔离的 `vLLM` + `vLLM-Ascend` 本地开发工作区 |
+
+SSH 认证的唯一实现归 `remote_dev.auth` 所有。`coordinator` 和 `npu-top` 只保存连接信息及 `auth_ref`，复用其认证、密码存储与公钥安装逻辑；同一操作系统用户下，凭据不按进程、聊天或插件隔离。默认凭据文件为 `~/.mindie/ssh/credentials.json`，由用户目录与文件权限保护，不调用系统钥匙串或要求系统登录密码。原生 Windows 与 WSL 各自使用所在环境的用户目录。
+
+普通开发调用在业务提交前完成密码回退与公钥修复，已提交的业务命令不自动重放。只读诊断及监控可在同一次 SSH 握手中回退密码认证，但不修改公钥。共享认证的发布状态和真实平台验收范围以对应版本记录为准。
 
 ## 3. 远端 NPU 任务的执行与资源回收
 
