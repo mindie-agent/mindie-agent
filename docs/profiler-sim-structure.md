@@ -14,7 +14,7 @@
 
 ### Decode 主体与层级计时
 
-`profiler.auto_segment_decode_forwards` 的开发入口位于
+`auto_segment_decode_forwards` 的开发入口位于
 `mindie_profiler.decode_segmentation`，直接消费统一解析器的 CSV/DB 事件与 sim
 现有 `ModelSpec.layer_plans`。它按完整模型拓扑匹配各层的输入 norm、attention/
 GDN/KDA、FFN 及通信，并用词表投影契约闭合一次调用，不要求调用方手写纳秒
@@ -42,6 +42,7 @@ sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 targe
 命中信息保持未知，目录名不能证明这些运行条件。
 
 可复现多 Case 入口为 `profiler/examples/structure/replay_decode_forwards.py`，
+使用 `decode-forward-auto-cases.json` 声明本地来源与独立模型配置，
 结果见 [Decode 主体回放](../../profiler/examples/structure/acceptance-20261029/decode-forward-replay.md)。
 主记分牌同时呈现算子分档达标率和主体对账，二者使用独立分母。
 `graph_execution_envelopes` 解析的 `MODEL_EXECUTE/MODEL_WAIT_COMPLETE` 是辅助
