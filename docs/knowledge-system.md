@@ -6,6 +6,8 @@ MindIE Agent 将可复用的昇腾研发经验组织为带适用条件、代码�
 
 检索引擎与经验提炼运行时由 [`knowledge`](https://github.com/mindie-agent/knowledge) 维护；领域知识分别存放在 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) 等内容仓库中。整体组件分工见[系统架构](architecture.md)，会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，上下文预算与探索机制的扩展设计见[上下文分层、经验演化与开放探索设计](knowledge-context-and-exploration.md)。
 
+手动启用知识能力不意味着每个任务必须检索。入口应按下一步的信息缺口选择直接修复、最小事实探针、查询候选或读取准确引用；当前代码、必要调用方与验证路径已足够时允许零次知识调用。具体协议与本轮实现/验收状态见[2026-10-29 P0 验收记录](audits/2026-10-29-knowledge-p0.md)。下文描述检索及经验系统的能力，不把它们规定为所有任务的必经步骤。
+
 本文说明当前已落地的三套核心机制：
 1. **底层约束基线与前置规则继承（`L1/L2` Foundation & `inherits_from`）**：按芯片型号与仓库条件自动挂载 `_common` 硬件约束与测量规范，并确保上层规程所依赖的前置规则完整注入。
 2. **经验沉淀与跨任务检索复用（`L3` 经验闭环）**：将实机验证通过的排障或适配结论经 `knowledge_distill` 校验后生成知识变更（`reviewed_change`），供后续同类任务检索复用与投票反馈。
