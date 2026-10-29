@@ -68,6 +68,15 @@ sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 targe
 新输入使用独立的 Ascend950DT_9582 profile，避免继承旧示例的 TP1 或通用
 MTE 速率覆盖。
 
+该批次共 659725 条有效事件，自动提取 287 次完整主体，六组执行几何均为
+query=4，每组按实际 batch 对账。`bc375e61` wheel 的六组主体预测全部产出
+数值，但均未达到 15%：低估约 38%–66%。
+[完整结果](../../profiler/examples/structure/acceptance-20261030-high-concurrency/decode-forward-replay.md)
+保留 384 个层的对账；代表 context=4104，窗口内实际 KV 增长仍属未观测条件。
+主体内部未覆盖事件间隙仅占 0.67%–3.62%，不能将全部预测残差归于 Host 空泡。
+区间覆盖包含真实 HCOM 协议等待，不等同 PMU 有效忙时；单 rank 数据不能把
+通信 elapsed 拆成有效搬运和 peer 等待，也不能据此反向调整链路带宽。
+
 同批 1-token 微基准保留实际程序和采集边界。原始时间按整数 ns 解析；非空
 kernel 的完整时间不能当作纯 launch floor，eager Python 提交间隔也不能写成
 图模式每个算子的固定开销。算子分档容差只判定误差，不用于反向增加配方耗时。
