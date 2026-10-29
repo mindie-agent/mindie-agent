@@ -33,6 +33,12 @@ GDN/KDA、FFN 及通信，并用词表投影契约闭合一次调用，不要求
 Dense/MoE 指 Transformer 层内的 FFN 类型，该层的 attention 仍归 attention。
 Embedding、Final Norm、LMHead、MTP/draft 边界与主体分别记录。
 
+新 A5 导出的 `HcclLaunchAicpuKernel` 使用同一条规则：只有 AI_CPU 类型且
+越过后继层输入 norm 的调度后缀才剥离，真实 HCOM 完成时间仍保留。重复导出的
+同起止通信行不增加墙钟跨度。Qwen 混合模型另外按 48 个 GDN / 16 个 GQA
+Transformer 层分组，分组数值包含这些层各自的 FFN 和通信，不冒充单个
+attention kernel 的耗时。
+
 预测复用公开 `mindie_sim.predict(case, scope="body", phase="decode", ...)`：
 保留 padding、真实查询 token 行、层内 TP/EP/PP 通信，排除 embedding/head、
 sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 target verify
@@ -41,12 +47,30 @@ sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 targe
 比较会显式注明均衡假设；未采集的强制负载均衡、接收率及 Prefix Cache
 命中信息保持未知，目录名不能证明这些运行条件。
 
+实际执行的 query/batch 来自完整分段内的张量描述，允许包含图 padding；
+客户端并发单列，不能用它覆盖观察到的执行 batch。上下文使用独立声明的
+代表长度，注明窗口内 KV 增长尚未逐步恢复。Prefix Cache 命中率和聚合 draft
+接收率读取服务计数，不能用配置目标 100% 或 0.8 替代。带 MTP 时，客户端
+每输出 token 的 TPOT 与一次 target verify 主体 Forward 使用不同分母。
+
 可复现多 Case 入口为 `profiler/examples/structure/replay_decode_forwards.py`，
 使用 `decode-forward-auto-cases.json` 声明本地来源与独立模型配置，
 结果见 [Decode 主体回放](../../profiler/examples/structure/acceptance-20261029/decode-forward-replay.md)。
 主记分牌同时呈现算子分档达标率和主体对账，二者使用独立分母。
 `graph_execution_envelopes` 解析的 `MODEL_EXECUTE/MODEL_WAIT_COMPLETE` 是辅助
 图执行证据，用于交叉核查；整个图包络不直接替代切出的模型主体时间。
+
+2026-10-30 新增 A5 TP4 Qwen3.8（c4/c32/c128）和 TP8 Qwen3.6
+（c4/c40/c128）的入口位于
+`profiler/examples/structure/acceptance-20261030-high-concurrency/`，复用 sim 的
+`examples/cases/high-concurrency-20261030/` 输入。各报告保留自己的 runtime
+包身份；历史算子 cohort 与新版主体预测不能仅因显示在同一页就视为同次运行。
+新输入使用独立的 Ascend950DT_9582 profile，避免继承旧示例的 TP1 或通用
+MTE 速率覆盖。
+
+同批 1-token 微基准保留实际程序和采集边界。原始时间按整数 ns 解析；非空
+kernel 的完整时间不能当作纯 launch floor，eager Python 提交间隔也不能写成
+图模式每个算子的固定开销。算子分档容差只判定误差，不用于反向增加配方耗时。
 
 ## 1. 复用已有结构，补齐观测关联
 
