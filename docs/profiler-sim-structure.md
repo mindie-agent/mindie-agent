@@ -34,13 +34,26 @@ Dense/MoE 指 Transformer 层内的 FFN 类型，该层的 attention 仍归 atte
 Embedding、Final Norm、LMHead、MTP/draft 边界与主体分别记录。
 
 对于声明了 mHC 的层，输入边界包含输出张量与后续 norm 输入一致的 `HcPre`，
-跨流插入的 AICPU 调度事件不打断这条结构关系。主体在末层返回多流 residual 的
+跨流插入的 metadata 或 AICPU 调度事件不打断这条结构关系；搜索不会跨过前一
+hidden norm 或 `HcPost`。主体在末层返回多流 residual 的
 `HcPost` 完成后结束；后续 residual collapse、输出头准备与大张量复制单列为
 `output_head_preparation`。原始 A3 V4 Flash 的完整 43 层样本验证了这一边界，
 没有把输出头准备算进末层。新 GLM Flash 的 `SparseFlashMla` 和
 `KvQuantSparseFlashAttentionVllm` 从各自真实 ABI 的 block-table 行数恢复 batch，
 不把 KV cache 分配容量当作活动上下文。已观察到 query 超过 Decode 上限的片段
 即使含 recurrent 算子也不计入 Decode。
+
+部分原始采集仅覆盖返回 hidden states 的 `model.forward`，没有独立
+`compute_logits` 的词表投影。A5 V4.1 DP8 的实际边界是完整 40 层后
+`HcPost → Cast → Mul → ReduceSum → Cast → RmsNorm`。调用方可通过带来源的
+`segmentation_options.forward_closure="mhc_final_norm"` 声明这一闭合方式；
+切分器仍核对完整层序列、每层 FFN、末层多流 residual 与最终 hidden 张量几何。
+Final Norm 和 residual collapse 单列，LMHead 时间保持空缺，不造一个输出头。
+其 `MqsmlaKernel___call__` 的张量字段为 N/A，使用源码符号与实际事件名称一致的
+`source_attention_anchors`，并保留源码版本尚未绑定采集二进制的条件。
+无 MTP 的启动证据通过 `source_decode_query` 声明 q=1；batch 来自各层实测
+hidden 行数，标记为“实测行数 / 源声明 query”，不冒充 block-table 观测。
+这个通道仅提供结构对齐和实测时间，不生成缺失的 tensor contract。
 
 新 A5 导出的 `HcclLaunchAicpuKernel` 使用同一条规则：只有 AI_CPU 类型且
 越过后继层输入 norm 的调度后缀才剥离，真实 HCOM 完成时间仍保留。重复导出的
@@ -73,6 +86,8 @@ sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 targe
 未匹配项按实际未评分活动量列出，不将预测填为零，也不宣称其对应程序一定漏算。
 同一采集的不同 checkpoint / recipe 声明属于独立预测臂，不增加独立采集或
 Forward 数。按样本量暂缓的小几何桶保留实测和 `prediction_deferred` 状态。
+主表按输入回执顺序为每个来源/执行几何选取最后一个已完成预测，另保留所有
+历史预测臂。当前达标率与历史臂达标率分开，暂缓结果不覆盖已完成结果。
 
 对已被 Sim 计费、但实测缺少 tensor descriptor 的源码角色，可输出明确的
 `source_role_reference` 数值。其完整程序或未融合子图边界、通信 peer-ready
