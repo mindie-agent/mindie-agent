@@ -2,7 +2,7 @@
 
 [Profiler 系统](profiler-system.md) · [Sim 系统](simulation-system.md) · [设计原则](design-principles.md)
 
-本文记录 2026-10-29 的开发接口与既有真机产物离线重放验收。实现分别位于 `profiler` 和 `sim` 重写工作树；本轮在本机重新解析历史原始采集，未启动新的 live 采集，也不表示已经正式发布。
+本文记录截至 2026-10-30 的开发接口与既有真机产物离线重放验收。实现分别位于 `profiler` 和 `sim` 重写工作树；本轮在本机重新解析历史原始采集，未启动新的 live 采集，也不表示已经正式发布。
 
 模型结构由 `sim` 维护，原始 profiling 解析与实测关联由 `profiler` 维护。不新建组件，不在 profiler 增加第二套模型目录，不在 sim 保留第二套 CSV/DB 解析器。两者交换有来源的结构和观测，分别保留声明与实测的身份。
 
@@ -99,6 +99,9 @@ MLA 前处理时，即使仍不能区分重复层，也可以报告这一结构�
 工作、vector work、MTE2/MTE3/HBM/link bytes 与 launch 数；后者忽略层号等实例身份，
 保留物理实现、形状、资源工作和子图内部依赖。它们是声明量，不是预测时长，
 导出仍不运行成本引擎。物理工作改变会改变图身份，来源说明本身不会。
+其中节点的 `physical_work` 描述语义算子的工作量，不能直接当作已选资源程序的
+全部搬运流量；分块程序可能增加 staging 或重复读取。成本比较实际执行所选
+recipe，报告同时保留语义契约与实现选择，不把二者混成同一 HBM 流量口径。
 完整 `kernel_bindings` 也进入图与物理身份；同名 recipe 改为另一种资源程序，
 不能继续用旧 mapping 作为同一个实现。捕获 segment 编号属于实例身份，
 不会拆分同构集合；是否处于图捕获模式仍保留为执行条件。
@@ -217,6 +220,32 @@ summary 再绑定 Case、mapping、comparison 和 family 产物；比较端重�
 源内容身份去重；跨声明覆盖取原始事件身份的并集，或仅累加已证明互斥的契约分支。
 不能相加各变体 cohort 数声称新增采集或完整覆盖。原始总事件、能形成 cohort 的事件、
 可评分事件和参考事件分别报告。activity sum 仍是调用时长之和，不是端到端墙钟。
+
+### 组合 recipe 与存储边界
+
+回放 Case 可以同时选择 `programs.matmul.kind=steady_matmul` 和
+`recipes.flash_attention_prefill.kind=staged_gqa_prefill`。前者用于独立投影，
+后者拥有 attention 内部的 QK/PV 工作；同一节点只选择一个 recipe，不把内部矩阵
+再按 steady 计算一次。组合只叠加指定选择，保留已有 GDN 源码实现、融合、
+machine/device 覆盖和模型配置。通过率按组合 Case 的实际 cohort 重新计算，
+不能拼接不同 Case 最好的数值。
+
+张量接口仍需一致：`attention_paged_active_qkv` 与连续 Q/K/V 的
+`attention_active_qkv` 分开匹配。Qwen3.8 的所选历史采集包含连续 prefill
+和 paged decode；`kv_storage=auto` 在所声明的零 context prefill 导出连续接口。
+requested paged prefill 即使选择相同资源 recipe，也不吸收连续接口的事件。
+A3 Qwen3.5/3.6 的新组合从原 paged 声明复制，只加入 staged prefill 配方，
+不会因源配方示例的文件名包含 paged 就替换其独立存储声明。
+
+A3 SCFA 源码变体明确选择 offchip scratch、valid-prefix indices 和
+one-query-per-core 等条件。新 A3 管道速率是带来源的名义分析参数，并不等于
+已测峰值；原 Case 的 device 覆盖仍优先。SWA/CFA 和 SCFA 保持不同 cohort，
+未证明的 context、index 值、dispatch 与层实例继续保留未知。
+
+指定调用次数本身不能确定窗口。`replay_attnres_scope.py` 要求 source SHA 与
+明确的窗口、CSV 行号或完整采集范围；`expected_events` 只验证该范围的计数，
+不搜索恰好含该数量的事件。AttnRes 缺少逐事件 active view、stride 和 scalar
+flags 时继续未评分；声明侧完整程序不能补造采集侧契约。
 
 ## 4. 调用闭环
 
