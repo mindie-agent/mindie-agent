@@ -1,0 +1,1217 @@
+{
+  "schema": "mindie-automatic-update-acceptance/1",
+  "product_version": "0.1.4",
+  "observed_on": "2026-10-29",
+  "platform": "macOS arm64",
+  "scope": {
+    "model_requests": 0,
+    "paid_agent_evaluations": 0,
+    "npu_workloads": 0,
+    "formal_sources_only": true,
+    "manually_edited_runtime_bindings": false,
+    "user_sessions_force_stopped": false,
+    "existing_user_data_preserved": true,
+    "absent_optional_components_installed": false,
+    "replacement_meaning": "New calls resolve managed package and standard python -m command bindings to the selected runtime. Old generations remain for loaded callers; user-owned wrappers and PATH-only commands are outside this migration."
+  },
+  "hosts": {
+    "codex": {
+      "status": "passed",
+      "installation_scope": "Existing user plugin",
+      "host_version": "0.165.0-alpha.1.2",
+      "trigger": "Existing background updater; no direct check or install invoked and no user binding edits",
+      "plugin_before": "0.1.11",
+      "plugin_after": "0.1.13",
+      "plugin_revision": "038fbe33fc1cb3614ba84679ad8f8b7cc55be407",
+      "packages_before": {
+        "mindie-agent-codex": {
+          "version": "0.1.11",
+          "revision": null
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+        },
+        "remote-dev": {
+          "version": "0.11.1",
+          "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+        }
+      },
+      "optional_before": {
+        "remote-dev": {
+          "version": "0.10.6",
+          "revision": null
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.3",
+          "revision": null
+        },
+        "mindie-coordinator": {
+          "version": "0.6.3",
+          "revision": null
+        },
+        "mindie-profiler": {
+          "version": "0.5.0",
+          "revision": null
+        },
+        "mindie-sim": {
+          "version": "0.7.1",
+          "revision": null
+        }
+      },
+      "packages_after": {
+        "mindie-agent-codex": {
+          "version": "0.1.13",
+          "revision": null
+        },
+        "mindie-knowledge": {
+          "version": "0.13.7",
+          "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c"
+        },
+        "remote-dev": {
+          "version": "0.11.1",
+          "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+        },
+        "mindie-coordinator": {
+          "version": "0.7.0",
+          "revision": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2"
+        },
+        "mindie-profiler": {
+          "version": "0.5.1",
+          "revision": "25c789cd42389c893234c5db20eca67e63b8878a"
+        },
+        "mindie-sim": {
+          "version": "0.7.1",
+          "revision": "15f93f3f0247b2653d0e9441eae56959e4d16d4e"
+        }
+      },
+      "readback_at": "2026-10-29T07:58:42.941849+00:00",
+      "receipt": {
+        "status": "up_to_date",
+        "native_stage": "active",
+        "checked_at": 1793260541.775674,
+        "last_successful_check": 1793260577.9533
+      },
+      "managed_command_bindings": {
+        "coordinator": "active managed interpreter",
+        "profiler": "active managed interpreter",
+        "sim": "active managed interpreter"
+      },
+      "managed_command_execution": {
+        "coordinator": {
+          "argument": "--help",
+          "exit_code": 0,
+          "stdout_bytes": 1272,
+          "stdout_sha256": "19bd39deb5fec1b343db324fd60cc06120ea5294a33f60f6e2d6a995dd61d3c2"
+        },
+        "profiler": {
+          "argument": "--help",
+          "exit_code": 0,
+          "stdout_bytes": 393,
+          "stdout_sha256": "af591f1bde554eba49837ccc76a2abcbc3b7872ad2d71d30982d4876d6e98b1e"
+        },
+        "sim": {
+          "argument": "--help",
+          "exit_code": 0,
+          "stdout_bytes": 1999,
+          "stdout_sha256": "406f31ca5fe4bf7b422c2352b9ad65235d5e0bbe7325b4e150732fbd2fa54796"
+        }
+      },
+      "package_bytes": {
+        "files_checked": 73,
+        "mismatches": [],
+        "wheel_sha256": "09c9706885c6248ab1b9c785ae6472b49170c13c698997a2af8b24ef28030340"
+      },
+      "native_package_bytes": {
+        "files_checked": 72,
+        "mismatches": []
+      },
+      "hooks": {
+        "count": 5,
+        "all_trusted": true,
+        "all_enabled": true
+      },
+      "fresh_native_loading": {
+        "method": "Native app-server ephemeral thread/start and mcpServerStatus/list; no model turn",
+        "tool_counts": {
+          "mindie-remote-dev": 23,
+          "mindie-tools": 5
+        },
+        "public_knowledge_tools": false
+      },
+      "community_authorization_unchanged": true,
+      "old_paths_retained": true,
+      "reload_boundary": "Fresh native process; existing Desktop chat cached tools/skills are not claimed refreshed",
+      "retained_probe_failure": {
+        "method": "mcpServerStatus/list",
+        "error": "NativeHooks bounded reader stream ended; retry uses bounded 16MiB per response / 32MiB total read-only native client"
+      },
+      "local_evidence": {
+        "name": "codex-automatic-upgrade.json",
+        "sha256": "fc5de52c9033c8e9c79372da2af2b96e070eb6afb591bc4cd34c1dadad9d0486"
+      },
+      "intermediate_observations": [
+        {
+          "observed_at": "2026-10-29T07:14:52.651411+00:00",
+          "packages": {
+            "mindie-agent-codex": {
+              "version": "0.1.13",
+              "commit": null
+            },
+            "mindie-knowledge": {
+              "version": "0.13.6",
+              "commit": "9af5a82ad557e2120277693854a0571613c8a115"
+            },
+            "remote-dev": {
+              "version": "0.11.1",
+              "commit": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+            },
+            "mindie-diagnostics": {
+              "version": "0.5.4",
+              "commit": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            },
+            "mindie-coordinator": {
+              "version": "0.7.0",
+              "commit": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2"
+            },
+            "mindie-profiler": {
+              "version": "0.5.1",
+              "commit": "25c789cd42389c893234c5db20eca67e63b8878a"
+            },
+            "mindie-sim": {
+              "version": "0.7.1",
+              "commit": "15f93f3f0247b2653d0e9441eae56959e4d16d4e"
+            }
+          },
+          "consent_unchanged": true
+        }
+      ]
+    },
+    "claude_code": {
+      "status": "passed_in_new_isolated_native_profile",
+      "installation_scope": "New fully isolated native Claude Code profile created for repeat acceptance with one consistent HOME, XDG, MindIE config and diagnostics environment. This does not represent the user global plugin or repair the earlier polluted fixture.",
+      "global_mindie_plugin_installed": false,
+      "host_version": "2.1.269",
+      "trigger": "Native registered knowledge MCP initialize/tools-list kept open; existing BackgroundCheck timer installed the compatible plugin, then its normal 300-second cycle independently updated knowledge. No manual update check or component installation.",
+      "plugin_before": "0.1.2",
+      "plugin_before_revision": "edabca82e02fb313d734c699e75735095effebfd",
+      "plugin_after": "0.1.10",
+      "plugin_revision": "8129cf8304fb63475007695825261b04e14e2543",
+      "packages_before": {
+        "mindie-agent-cc": {
+          "version": "0.1.2",
+          "revision": null
+        },
+        "mindie-knowledge": {
+          "version": "0.13.3",
+          "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+        },
+        "remote-dev": {
+          "version": "0.10.6",
+          "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.2",
+          "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+        }
+      },
+      "initial_package_measurement": "Read retained initial immutable runtime after activation; native initial version and source were recorded by the original registered MCP startup.",
+      "intermediate_components": {
+        "mindie-knowledge": "0.13.6",
+        "remote-dev": "0.11.1",
+        "mindie-diagnostics": "0.5.4"
+      },
+      "packages_after": {
+        "mindie-agent-cc": {
+          "version": "0.1.10",
+          "revision": null
+        },
+        "mindie-knowledge": {
+          "version": "0.13.7",
+          "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c"
+        },
+        "remote-dev": {
+          "version": "0.11.1",
+          "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+        },
+        "mindie-profiler": {
+          "installed": false
+        },
+        "mindie-sim": {
+          "installed": false
+        },
+        "mindie-coordinator": {
+          "installed": false
+        },
+        "npu-top": {
+          "installed": false
+        }
+      },
+      "readback_at": "2026-10-29T08:16:27.757651+00:00",
+      "receipt": {
+        "status": "up_to_date",
+        "native_effect": "verified",
+        "activation_effect": "activated",
+        "installation_complete": true,
+        "last_successful_check": 1793261742.500712
+      },
+      "component_activation": {
+        "status": "activated",
+        "switched": true,
+        "seconds": 0.01849808299448341
+      },
+      "long_lived_mcp_before_tools": 5,
+      "long_lived_mcp_after_tools": 6,
+      "fresh_registered_mcp": [
+        {
+          "surface": "knowledge",
+          "exit_code": 0,
+          "tools": [
+            "mindie_status",
+            "knowledge_sync",
+            "knowledge_query",
+            "knowledge_explain",
+            "knowledge_feedback",
+            "knowledge_distill"
+          ],
+          "timeout_ms": 660000,
+          "model_requests": 0,
+          "business_tool_calls": 0
+        },
+        {
+          "surface": "remote",
+          "exit_code": 0,
+          "tools": [
+            "remote_auth",
+            "remote_read",
+            "remote_write",
+            "remote_edit",
+            "remote_multi_edit",
+            "remote_bash",
+            "remote_glob",
+            "remote_grep",
+            "remote_ls",
+            "remote_apply_patch",
+            "remote_job_status",
+            "remote_job_tail",
+            "remote_job_output",
+            "remote_job_stop",
+            "remote_job_stdin",
+            "remote_artifact_manifest",
+            "remote_artifact_pull",
+            "remote_artifact_push",
+            "remote_context_snapshot",
+            "remote_probe",
+            "remote_Read",
+            "remote_Write",
+            "remote_Edit",
+            "remote_Bash",
+            "remote_Glob",
+            "remote_Grep",
+            "remote_TaskOutput",
+            "remote_BashOutput",
+            "remote_NotebookEdit",
+            "remote_TaskStop",
+            "remote_KillShell"
+          ],
+          "timeout_ms": 660000,
+          "model_requests": 0,
+          "business_tool_calls": 0
+        },
+        {
+          "surface": "components",
+          "exit_code": 0,
+          "tools": [
+            "profiler",
+            "sim",
+            "coordinator",
+            "diagnostics_status",
+            "diagnostics_bundle"
+          ],
+          "timeout_ms": 660000,
+          "model_requests": 0,
+          "business_tool_calls": 0
+        }
+      ],
+      "fresh_cached_entry_matches_isolated_canonical": true,
+      "fresh_state_engine_diagnostics_inside_isolation": true,
+      "authority_unchanged_during_independent_component_update": true,
+      "optional_components_installed": false,
+      "manual_runtime_binding_edits": false,
+      "manual_entry_edits": false,
+      "model_requests": 0,
+      "business_tool_calls": 0,
+      "retained_prior_acceptance_error": {
+        "original_plugin_update": "The original isolated profile native 0.1.2 to 0.1.10 timer preserved its canonical/state/engine scope.",
+        "fresh_driver_error": "The driver omitted MINDIE_CC_CONFIG, XDG_DATA_HOME and diagnostics variables at first launch of the new native release, creating a separate default MindIE state/engine/diagnostics profile and runtime. Its fresh-MCP and later .13.7 timer observations did not verify the original isolated profile.",
+        "global_native_plugin_registered": false,
+        "prior_fixture_repaired": false,
+        "prior_default_profile_and_files_retained": true,
+        "scope_statement_corrected": true
+      },
+      "reload_boundary": "The old MCP process observed the new tool catalog after activation; fresh processes from the currently registered native manifest validated all three surfaces and the new cached entry profile.",
+      "old_paths_retained": true,
+      "profile_identity_preserved": {
+        "base_config": true,
+        "state_dir": true,
+        "community_config": true,
+        "claude_config_dir": true,
+        "engine_root": true,
+        "diagnostics_context": true
+      },
+      "contribution_enabled": false,
+      "cleanup": {
+        "owned_registered_mcp_processes": 4,
+        "all_exited_zero_after_stdin_eof": true,
+        "user_sessions_force_stopped": false,
+        "manual_process_termination_in_successful_repeat": false
+      },
+      "fresh_runtime_binding": {
+        "native_version": "0.1.10",
+        "knowledge_version": "0.13.7",
+        "knowledge_revision": "e69aab58ce85abdfc65edc942150d6e3f631164c",
+        "entry_binding_equals_canonical": true,
+        "native_manifest_used_without_command_override": true
+      },
+      "local_evidence": {
+        "name": "cc-automatic-upgrade.json",
+        "sha256": "819397beef2a1b58ef40cc62eef937a409ceea6db9d40648c14e7beb7ee41414"
+      }
+    },
+    "kimi": {
+      "status": "passed_with_documented_recovery",
+      "host_version": "2.3.1",
+      "plugin_after": "0.1.10",
+      "plugin_revision": "2d46dccb0230942164d1b357b94807b22e10a3b4",
+      "packages_after": {
+        "mindie-knowledge": {
+          "version": "0.13.7",
+          "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c"
+        },
+        "remote-dev": {
+          "version": "0.11.1",
+          "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+        },
+        "mindie-profiler": {
+          "installed": false
+        },
+        "mindie-sim": {
+          "installed": false
+        },
+        "mindie-coordinator": {
+          "installed": false
+        },
+        "npu-top": {
+          "installed": false
+        }
+      },
+      "model_requests": 0,
+      "business_tool_calls": 0,
+      "manual_binding_edits": false,
+      "user_sessions_force_stopped": false,
+      "real_user_installation": {
+        "starting_plugin": "0.1.9",
+        "starting_revision": "5adc40fc9b356b81d2f401727fceaa65abb62288",
+        "starting_packages": {
+          "mindie-knowledge": {
+            "version": "0.13.3",
+            "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+          },
+          "remote-dev": {
+            "version": "0.10.6",
+            "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.2",
+            "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+          },
+          "mindie-profiler": {
+            "installed": false
+          },
+          "mindie-sim": {
+            "installed": false
+          },
+          "mindie-coordinator": {
+            "installed": false
+          },
+          "npu-top": {
+            "installed": false
+          }
+        },
+        "recovery_status": "completed",
+        "recovery_trigger": "One user-authorized product updater recover command executed with verified formal 0.1.10 source and active 0.13.7 dependencies",
+        "recovery_returncode": 0,
+        "subsequent_automatic_trigger": "Existing unmodified launchd scheduler, normal 300-second interval; no kickstart or direct check",
+        "subsequent_timer_status": "passed",
+        "subsequent_timer_exit_code": 0,
+        "subsequent_runtime_no_regression": true,
+        "fresh_registered_mcp": [
+          {
+            "surface": "knowledge",
+            "tool_count": 6,
+            "timeout_ms": 210000,
+            "exit_code": 0,
+            "initialized": true,
+            "model_requests": 0,
+            "business_tool_calls": 0
+          },
+          {
+            "surface": "remote",
+            "tool_count": 30,
+            "timeout_ms": 660000,
+            "exit_code": 0,
+            "initialized": true,
+            "model_requests": 0,
+            "business_tool_calls": 0
+          },
+          {
+            "surface": "components",
+            "tool_count": 6,
+            "timeout_ms": 660000,
+            "exit_code": 0,
+            "initialized": true,
+            "model_requests": 0,
+            "business_tool_calls": 0
+          }
+        ],
+        "authorization_unchanged": true,
+        "old_generations_retained": true
+      },
+      "isolated_legacy_first_hop": {
+        "status": "passed",
+        "starting_plugin": "0.1.8+mindie.bootstrap",
+        "starting_source_revision": "c33006cc2a89ad0024396cdf838b1bfd6d6b7f35",
+        "starting_packages": {
+          "mindie-knowledge": {
+            "version": "0.13.6",
+            "revision": "9af5a82ad557e2120277693854a0571613c8a115"
+          },
+          "remote-dev": {
+            "version": "0.11.1",
+            "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.4",
+            "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+          },
+          "mindie-profiler": {
+            "installed": false
+          },
+          "mindie-sim": {
+            "installed": false
+          },
+          "mindie-coordinator": {
+            "installed": false
+          },
+          "npu-top": {
+            "installed": false
+          }
+        },
+        "setup": "Genuine formal 0.1.8 setup and native plugin installation with the previously managed 0.13.6 interpreter; no hand-written active binding",
+        "trigger": "Own isolated launchd StartInterval=300; normal timer only, no RunAtLoad or kickstart for updater",
+        "timer_exit_code": 0,
+        "plugin_after": "0.1.10",
+        "plugin_revision": "2d46dccb0230942164d1b357b94807b22e10a3b4",
+        "packages_after": {
+          "mindie-knowledge": {
+            "version": "0.13.7",
+            "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c"
+          },
+          "remote-dev": {
+            "version": "0.11.1",
+            "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.4",
+            "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+          },
+          "mindie-profiler": {
+            "installed": false
+          },
+          "mindie-sim": {
+            "installed": false
+          },
+          "mindie-coordinator": {
+            "installed": false
+          },
+          "npu-top": {
+            "installed": false
+          }
+        },
+        "fresh_registered_mcp": [
+          {
+            "surface": "knowledge",
+            "tool_count": 6,
+            "timeout_ms": 210000,
+            "exit_code": 0,
+            "initialized": true,
+            "model_requests": 0,
+            "business_tool_calls": 0
+          },
+          {
+            "surface": "remote",
+            "tool_count": 30,
+            "timeout_ms": 660000,
+            "exit_code": 0,
+            "initialized": true,
+            "model_requests": 0,
+            "business_tool_calls": 0
+          },
+          {
+            "surface": "components",
+            "tool_count": 6,
+            "timeout_ms": 660000,
+            "exit_code": 0,
+            "initialized": true,
+            "model_requests": 0,
+            "business_tool_calls": 0
+          }
+        ],
+        "authorization_unchanged": true,
+        "domain_paths_remain_isolated": true,
+        "old_bootstrap_retained": true,
+        "own_scheduler_removed": true,
+        "retained_infrastructure_failure": {
+          "phase": "launchd xpcproxy before Python execution",
+          "exit_code": 78,
+          "reason": "Task temporary-directory stdout creation was denied by the OS",
+          "correction": "Only own scheduler stdout/stderr destinations moved to user Logs directory; same interpreter, source, config and working directory",
+          "read_probe": "An independent no-update launchd probe then read the old source/config and imported actual knowledge 0.13.6 successfully",
+          "automatic_updater_retried_by": "Re-registered own job and waited for normal 300-second interval"
+        }
+      },
+      "retained_product_failure": {
+        "plugin": "0.1.9",
+        "revision": "5adc40fc9b356b81d2f401727fceaa65abb62288",
+        "failure": "Legacy controller activated bootstrap dependencies despite a newer managed component floor; the next timer failed because component_bindings was unavailable",
+        "downgraded_runtime": {
+          "mindie-knowledge": {
+            "version": "0.13.3",
+            "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+          },
+          "remote-dev": {
+            "version": "0.10.6",
+            "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.2",
+            "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+          },
+          "mindie-profiler": {
+            "installed": false
+          },
+          "mindie-sim": {
+            "installed": false
+          },
+          "mindie-coordinator": {
+            "installed": false
+          },
+          "npu-top": {
+            "installed": false
+          }
+        },
+        "original_evidence_preserved": true,
+        "recovery_was_automatic": false
+      },
+      "native_loading_boundary": "Fresh registered MCP processes initialized and listed tools under the selected runtime. Existing host Skill/command catalogs still require a native reload or new session; this does not claim all long-lived host caches hot-refresh.",
+      "local_evidence": {
+        "name": "kimi-automatic-upgrade.json",
+        "sha256": "2bbc636fbb079fd5d3035d4d8e9723ce796c2801c7a432fbe403cb92058cdd6e"
+      }
+    },
+    "dsh": {
+      "host_version": "0.2.0-rc.2",
+      "plugin_before": {
+        "version": "0.1.2",
+        "revision": "a38f1cb191f625905aace734e20a2ad196624b60",
+        "retained_source_files_verified": 47
+      },
+      "plugin_after": {
+        "version": "0.1.9",
+        "revision": "1d67c8ed2e1cc799012650b601198aa8aea3651a",
+        "formal_assets_verified": true
+      },
+      "packages_before": {
+        "mindie-knowledge": {
+          "version": "0.13.3",
+          "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5",
+          "editable": false
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.2",
+          "revision": "801a01b2789aed7f58e971a909205a7d40b61077",
+          "editable": false
+        },
+        "remote-dev": {
+          "version": "0.10.6",
+          "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538",
+          "editable": false
+        }
+      },
+      "packages_after_plugin_update": {
+        "mindie-knowledge": {
+          "version": "0.13.6",
+          "revision": "9af5a82ad557e2120277693854a0571613c8a115",
+          "editable": false
+        },
+        "remote-dev": {
+          "version": "0.11.1",
+          "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+          "editable": false
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+          "editable": false
+        }
+      },
+      "packages_after": {
+        "mindie-knowledge": {
+          "version": "0.13.7",
+          "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c",
+          "editable": false
+        },
+        "remote-dev": {
+          "version": "0.11.1",
+          "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+          "editable": false
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+          "editable": false
+        }
+      },
+      "timer_trigger": {
+        "plugin_update": "Existing web profile normal native startup; built-in 30-second initial timer.",
+        "independent_core_update": "Same native host, unchanged 300-second interval; plugin remains 0.1.9.",
+        "manual_check_or_install": false,
+        "binding_edited_manually": false
+      },
+      "native_loading": {
+        "new_native_process_after_plugin_update": true,
+        "new_native_process_after_independent_core_update": true,
+        "native_plugin_inventory": "active",
+        "empty_native_session_attachment": "completed without prompt",
+        "remote_dev_mcp": "observed real child using selected final runtime",
+        "mindie_tools_mcp": "observed real child using selected final runtime",
+        "knowledge_registration": "Active native host3 generation matches formal source; native knowledge registrations are installed by that generation. No invocation or manual entry was performed.",
+        "remote_timeout_ms": 660000,
+        "mindie_tools_timeout_ms": 660000,
+        "mcp_fail_on_startup_error": true,
+        "acceptance_session_model_request_events": 0
+      },
+      "authorization_files_unchanged": true,
+      "preserved_configuration_files": {
+        "diagnostics.json": true,
+        "mindie-consent.json": true,
+        "mindie-community.json": true,
+        "update.json": true
+      },
+      "needs_host_reload_boundary": "A later up-to-date check overwrites needs_host_reload=false even while the old launcher remains loaded. Activation was verified using fresh native processes, active native inventory and actual MCP children, not that flag.",
+      "retained_failures": [
+        {
+          "version": "0.1.8",
+          "revision": "cb199f33c99c6fcd622e36088ac068440a6f85a4",
+          "run_id": 40832725305,
+          "result": "failed before publish",
+          "cause": "Reply budget incorrectly killed the CLI before business exit 3, producing -9.",
+          "resolution": "0.1.9 separates reply truncation from the 1 MiB execution-output cap; old tag and failed run retained."
+        }
+      ],
+      "acceptance_model_requests": 0,
+      "owned_process_cleanup": "All task-owned native hosts and MCP children exited after idle checks; unrelated workloads were not signalled.",
+      "private_session_or_configuration_data_in_summary": false,
+      "local_evidence": {
+        "name": "dsh-automatic-update.json",
+        "sha256": "462f7b5c83d3d023a3754f0e2261c994bb69f2a28941638524c79647b6406f2f"
+      },
+      "status": "passed",
+      "installation_scope": "Existing user web profile"
+    }
+  },
+  "performance_boundary": {
+    "source": "../../audits/2026-10-29-knowledge-p0.md",
+    "simple_pairs": "Four SFA pairs completed naturally with passing CPU oracle and lower observed time/token use; asymmetric Codex temporary-file errors confound net benefit.",
+    "complex_task_overall_non_regression": "not_passed",
+    "historical_trajectories_rewritten": false,
+    "new_paid_evaluations": false
+  },
+  "formal_releases": [
+    {
+      "repository": "mindie-agent/diagnostics",
+      "version": "0.5.4",
+      "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+      "status": "verified",
+      "release_id": 423378013,
+      "asset_count": 7,
+      "benchmark_sha256": "47dad7d202f29de6a084c1a7113d8a1aa372b59dddb223df168dd0c1874a6123",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "redaction",
+          "npu-fault-triage"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_diagnostics-0.5.4-py3-none-any.whl",
+          "source_matched_files": 25,
+          "generated_metadata": [
+            "mindie_diagnostics-0.5.4.dist-info/licenses/LICENSE",
+            "mindie_diagnostics-0.5.4.dist-info/METADATA",
+            "mindie_diagnostics-0.5.4.dist-info/WHEEL",
+            "mindie_diagnostics-0.5.4.dist-info/entry_points.txt",
+            "mindie_diagnostics-0.5.4.dist-info/top_level.txt",
+            "mindie_diagnostics-0.5.4.dist-info/RECORD"
+          ]
+        },
+        {
+          "name": "mindie_diagnostics-0.5.4.tar.gz",
+          "source_matched_files": 59,
+          "generated_metadata": [
+            "PKG-INFO",
+            "mindie_diagnostics.egg-info/PKG-INFO",
+            "mindie_diagnostics.egg-info/SOURCES.txt",
+            "mindie_diagnostics.egg-info/dependency_links.txt",
+            "mindie_diagnostics.egg-info/entry_points.txt",
+            "mindie_diagnostics.egg-info/requires.txt",
+            "mindie_diagnostics.egg-info/top_level.txt",
+            "setup.cfg"
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/profiler",
+      "version": "0.5.1",
+      "revision": "25c789cd42389c893234c5db20eca67e63b8878a",
+      "status": "verified",
+      "release_id": 427393318,
+      "asset_count": 7,
+      "benchmark_sha256": "03c9d9b40b06540fba3d68aa50a94fb34b09b2ec62f1b2bd3e9b045fb67ff871",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "profiler-analysis-and-attribution"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_profiler-0.5.1-py3-none-any.whl",
+          "source_matched_files": 52,
+          "generated_metadata": [
+            "mindie_profiler-0.5.1.dist-info/licenses/LICENSE",
+            "mindie_profiler-0.5.1.dist-info/METADATA",
+            "mindie_profiler-0.5.1.dist-info/WHEEL",
+            "mindie_profiler-0.5.1.dist-info/entry_points.txt",
+            "mindie_profiler-0.5.1.dist-info/top_level.txt",
+            "mindie_profiler-0.5.1.dist-info/RECORD"
+          ],
+          "generated_assets": {}
+        },
+        {
+          "name": "mindie_profiler-0.5.1.tar.gz",
+          "source_matched_files": 113,
+          "generated_metadata": [
+            "PKG-INFO",
+            "mindie_profiler.egg-info/PKG-INFO",
+            "mindie_profiler.egg-info/SOURCES.txt",
+            "mindie_profiler.egg-info/dependency_links.txt",
+            "mindie_profiler.egg-info/entry_points.txt",
+            "mindie_profiler.egg-info/requires.txt",
+            "mindie_profiler.egg-info/top_level.txt",
+            "setup.cfg"
+          ],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/sim",
+      "version": "0.7.1",
+      "revision": "15f93f3f0247b2653d0e9441eae56959e4d16d4e",
+      "status": "verified",
+      "release_id": 422641611,
+      "asset_count": 7,
+      "benchmark_sha256": "15110b9c7cfbf3d8c9a37efd51a54f1eb33866581c3df38434590f4d5d1b7af8",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "four-layer-roofline-boundary-subgraph",
+          "a3-qwen25-7b-physical-whole-network",
+          "operator-plan-vector-gemm"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_sim-0.7.1-py3-none-any.whl",
+          "source_matched_files": 132,
+          "generated_metadata": [
+            "mindie_sim-0.7.1.dist-info/licenses/LICENSE",
+            "mindie_sim-0.7.1.dist-info/METADATA",
+            "mindie_sim-0.7.1.dist-info/WHEEL",
+            "mindie_sim-0.7.1.dist-info/entry_points.txt",
+            "mindie_sim-0.7.1.dist-info/top_level.txt",
+            "mindie_sim-0.7.1.dist-info/RECORD"
+          ],
+          "generated_assets": {}
+        },
+        {
+          "name": "mindie_sim-0.7.1.tar.gz",
+          "source_matched_files": 190,
+          "generated_metadata": [
+            "PKG-INFO",
+            "mindie_sim.egg-info/PKG-INFO",
+            "mindie_sim.egg-info/SOURCES.txt",
+            "mindie_sim.egg-info/dependency_links.txt",
+            "mindie_sim.egg-info/entry_points.txt",
+            "mindie_sim.egg-info/requires.txt",
+            "mindie_sim.egg-info/top_level.txt",
+            "setup.cfg"
+          ],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/npu-top",
+      "version": "0.3.0",
+      "revision": "ff78215dbe94bb3bd16abc6897878918748b8aee",
+      "status": "verified",
+      "release_id": 427248794,
+      "asset_count": 7,
+      "benchmark_sha256": "f51e5e5ef25a5a58e43fc07b03543e24837e993d40fadfe75ea26c62a4c522f3",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "a2-a3-parser",
+          "dcmi-cause-decoding",
+          "dcmi-persisted-fractional-window"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "npu_top-0.3.0-py3-none-any.whl",
+          "source_matched_files": 25,
+          "generated_metadata": [
+            "npu_top-0.3.0.dist-info/METADATA",
+            "npu_top-0.3.0.dist-info/WHEEL",
+            "npu_top-0.3.0.dist-info/entry_points.txt",
+            "npu_top-0.3.0.dist-info/licenses/LICENSE",
+            "npu_top-0.3.0.dist-info/RECORD"
+          ],
+          "generated_assets": {
+            "npu_top/static/index.html": "5acf8967126742c2b7c52f13e881ecc3565c1de01370e993a0da92f1049bc424",
+            "npu_top/static/assets/index-CL5EqRy3.css": "b601d8ad2d6ba09ce3396a9af3dae306ec30a9bfe5ca1a5ad15972b0a936e345",
+            "npu_top/static/assets/index-HMc77aec.js": "008d30ad6a587d30abb6428f72687bc9872f4621109c725e8d4fbbe0641d0d32"
+          }
+        },
+        {
+          "name": "npu_top-0.3.0.tar.gz",
+          "source_matched_files": 102,
+          "generated_metadata": [
+            "PKG-INFO"
+          ],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/remote-dev",
+      "version": "0.11.1",
+      "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+      "status": "verified",
+      "release_id": 427245027,
+      "asset_count": 7,
+      "benchmark_sha256": "af6feeaf828218a0778123fb840505a69b19f7aec21414999eda9c7c86ea0df3",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "patch-parser-and-tool-protocol",
+          "record-serialization"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "remote_dev-0.11.1-py3-none-any.whl",
+          "source_matched_files": 117,
+          "generated_metadata": [
+            "remote_dev-0.11.1.dist-info/METADATA",
+            "remote_dev-0.11.1.dist-info/WHEEL",
+            "remote_dev-0.11.1.dist-info/entry_points.txt",
+            "remote_dev-0.11.1.dist-info/licenses/LICENSE",
+            "remote_dev-0.11.1.dist-info/RECORD"
+          ]
+        },
+        {
+          "name": "remote_dev-0.11.1.tar.gz",
+          "source_matched_files": 212,
+          "generated_metadata": [
+            "PKG-INFO"
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/knowledge",
+      "version": "0.13.7",
+      "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c",
+      "status": "verified",
+      "release_id": 427585680,
+      "asset_count": 7,
+      "benchmark_sha256": "4aaec3213a7c9eea8a6a548832c1602c7afdd838f4143cfad6b7e2a54ccb8931",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "graded-feed-lifecycle",
+          "technical-tokenization"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_knowledge-0.13.7-py3-none-any.whl",
+          "source_matched_files": 117,
+          "generated_metadata": [
+            "mindie_knowledge-0.13.7.dist-info/METADATA",
+            "mindie_knowledge-0.13.7.dist-info/WHEEL",
+            "mindie_knowledge-0.13.7.dist-info/entry_points.txt",
+            "mindie_knowledge-0.13.7.dist-info/licenses/LICENSE",
+            "mindie_knowledge-0.13.7.dist-info/licenses/LICENSE-CORPUS",
+            "mindie_knowledge-0.13.7.dist-info/RECORD"
+          ],
+          "generated_assets": {}
+        },
+        {
+          "name": "mindie_knowledge-0.13.7.tar.gz",
+          "source_matched_files": 339,
+          "generated_metadata": [
+            "PKG-INFO"
+          ],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/coordinator",
+      "version": "0.7.0",
+      "revision": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2",
+      "status": "verified",
+      "release_id": 427251300,
+      "asset_count": 7,
+      "benchmark_sha256": "2c356909d664b03eca4d79cb6578ac61d15b90e15ace7ba35c22bbdfe0ee048f",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "two-role-placement",
+          "canonical-run-manifest"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_coordinator-0.7.0-py3-none-any.whl",
+          "source_matched_files": 83,
+          "generated_metadata": [
+            "mindie_coordinator-0.7.0.dist-info/METADATA",
+            "mindie_coordinator-0.7.0.dist-info/WHEEL",
+            "mindie_coordinator-0.7.0.dist-info/entry_points.txt",
+            "mindie_coordinator-0.7.0.dist-info/licenses/LICENSE",
+            "mindie_coordinator-0.7.0.dist-info/RECORD"
+          ],
+          "generated_assets": {}
+        },
+        {
+          "name": "mindie_coordinator-0.7.0.tar.gz",
+          "source_matched_files": 251,
+          "generated_metadata": [
+            "PKG-INFO"
+          ],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-codex",
+      "version": "0.1.13",
+      "revision": "038fbe33fc1cb3614ba84679ad8f8b7cc55be407",
+      "status": "verified",
+      "release_id": 427553091,
+      "asset_count": 8,
+      "benchmark_sha256": "c29f513b22f5a64b4bb0073b94f6bd5f9078f91dcba04190eaf18af196f8aef1",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "public-transcript"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_agent_codex-0.1.13-py3-none-any.whl",
+          "source_matched_files": 73,
+          "generated_metadata": [
+            "mindie_agent_codex-0.1.13.dist-info/METADATA",
+            "mindie_agent_codex-0.1.13.dist-info/WHEEL",
+            "mindie_agent_codex-0.1.13.dist-info/top_level.txt",
+            "mindie_agent_codex-0.1.13.dist-info/RECORD"
+          ]
+        },
+        {
+          "name": "mindie_agent_codex-0.1.13.tar.gz",
+          "source_matched_files": 73,
+          "generated_metadata": [
+            "PKG-INFO",
+            "mindie_agent_codex.egg-info/PKG-INFO",
+            "mindie_agent_codex.egg-info/SOURCES.txt",
+            "mindie_agent_codex.egg-info/dependency_links.txt",
+            "mindie_agent_codex.egg-info/requires.txt",
+            "mindie_agent_codex.egg-info/top_level.txt",
+            "setup.cfg"
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-cc",
+      "version": "0.1.10",
+      "revision": "8129cf8304fb63475007695825261b04e14e2543",
+      "status": "verified",
+      "release_id": 427552506,
+      "asset_count": 8,
+      "benchmark_sha256": "d5f5ec2abb4c93ee57ea2b63656b7158f5ca200f5e67d344d4b75b9354057840",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "public-transcript"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_agent_cc-0.1.10-py3-none-any.whl",
+          "source_matched_files": 41,
+          "generated_metadata": [
+            "mindie_agent_cc-0.1.10.dist-info/METADATA",
+            "mindie_agent_cc-0.1.10.dist-info/WHEEL",
+            "mindie_agent_cc-0.1.10.dist-info/licenses/LICENSE",
+            "mindie_agent_cc-0.1.10.dist-info/RECORD"
+          ]
+        },
+        {
+          "name": "mindie_agent_cc-0.1.10.tar.gz",
+          "source_matched_files": 163,
+          "generated_metadata": [
+            "PKG-INFO"
+          ]
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-kimi",
+      "version": "0.1.10",
+      "revision": "2d46dccb0230942164d1b357b94807b22e10a3b4",
+      "status": "verified",
+      "release_id": 427590228,
+      "asset_count": 7,
+      "benchmark_sha256": "b9a57b57236721393f1fb6fc825d02933816dc49eec5d0245c66472b7044d54f",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "public-transcript-parsing"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie-agent-kimi-0.1.10.tar.gz",
+          "source_matched_files": 171,
+          "generated_metadata": [],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-dsh",
+      "version": "0.1.9",
+      "revision": "1d67c8ed2e1cc799012650b601198aa8aea3651a",
+      "status": "verified",
+      "release_id": 427569881,
+      "asset_count": 6,
+      "benchmark_sha256": "391cd71d944d7b04dfe195038a8de286a56de29be9322f010d9ddde27590f949",
+      "benchmark": {
+        "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+        "required_cases": [
+          "public-transcript"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie-agent-dsh-0.1.9.tgz",
+          "source_matched_files": 59,
+          "generated_metadata": [],
+          "generated_assets": {}
+        }
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-bench",
+      "version": "0.4.5",
+      "revision": "7d591e7739332b937ded940e76bcfa4e57645040",
+      "status": "verified",
+      "release_id": 427542748,
+      "asset_count": 7,
+      "benchmark_sha256": "0d7b38809d9a2b557dff1464606a8cb27d4bb3097566b1c5dfa3388791f13fb0",
+      "benchmark": {
+        "runner_revision": "7d591e7739332b937ded940e76bcfa4e57645040",
+        "required_cases": [
+          "retrieval-scoring"
+        ],
+        "release_gate": true
+      },
+      "source_matched_packages": [
+        {
+          "name": "mindie_bench-0.4.5-py3-none-any.whl",
+          "source_matched_files": 159,
+          "generated_metadata": [
+            "mindie_bench-0.4.5.dist-info/METADATA",
+            "mindie_bench-0.4.5.dist-info/WHEEL",
+            "mindie_bench-0.4.5.dist-info/entry_points.txt",
+            "mindie_bench-0.4.5.dist-info/licenses/LICENSE",
+            "mindie_bench-0.4.5.dist-info/RECORD"
+          ]
+        },
+        {
+          "name": "mindie_bench-0.4.5.tar.gz",
+          "source_matched_files": 826,
+          "generated_metadata": [
+            "PKG-INFO"
+          ]
+        }
+      ]
+    }
+  ]
+}

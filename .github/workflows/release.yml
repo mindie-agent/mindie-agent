@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   publish:
-    uses: mindie-agent/mindie-bench/.github/workflows/publish-product.yml@a36d8a5ae8633e560d19fee231179c3680149109
+    uses: mindie-agent/mindie-bench/.github/workflows/publish-product.yml@7d591e7739332b937ded940e76bcfa4e57645040
     with:
-      benchmark-ref: a36d8a5ae8633e560d19fee231179c3680149109
+      benchmark-ref: 7d591e7739332b937ded940e76bcfa4e57645040
       release-kind: patch
