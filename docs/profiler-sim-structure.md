@@ -12,6 +12,41 @@
 结果只以这些报告注明的完整回放、来源身份和限制为准；进行中的回放不提前计入。
 本页末尾保留各轮历史结果，不将早期的能力缺口或旧预测数值当作当前结论。
 
+### Decode 主体与层级计时
+
+`profiler.auto_segment_decode_forwards` 的开发入口位于
+`mindie_profiler.decode_segmentation`，直接消费统一解析器的 CSV/DB 事件与 sim
+现有 `ModelSpec.layer_plans`。它按完整模型拓扑匹配各层的输入 norm、attention/
+GDN/KDA、FFN 及通信，并用词表投影契约闭合一次调用，不要求调用方手写纳秒
+边界。完整层组和短辅助层组分开；声明层数、混合 attention 序列和张量几何
+共同约束分段，单个算子名称不建立层身份。
+
+自动结果注明 `structure_guided_topology_alignment`，属于由声明结构约束的
+事件序列推断，不能改写为 Host/module 的确定 occurrence 绑定。原始事件时间、
+边界行号、匹配条件、不完整片段和尾等待剥离量保留，便于复核；其测得时长
+不反过来选择模型结构或调节预测参数。
+
+`body_forward_span_ms` 是每次完整主体的设备墙钟跨度，报告 mean/P50/P90。
+层内通信和依赖间隙保留，跨调用调度空泡排除；跨后继依赖边界的 AICPU
+调度尾等待单列，不把所有 `allreduceAicpuKernel` 当作无成本。`per_layer_ms`
+按层与采集设备保存分布，不能把重叠层或副本跨度相加当作模型时延。
+Dense/MoE 指 Transformer 层内的 FFN 类型，该层的 attention 仍归 attention。
+Embedding、Final Norm、LMHead、MTP/draft 边界与主体分别记录。
+
+预测复用公开 `mindie_sim.predict(case, scope="body", phase="decode", ...)`：
+保留 padding、真实查询 token 行、层内 TP/EP/PP 通信，排除 embedding/head、
+sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 target verify
+行，不能乘接受率缩小工作量。核对首个 kernel 的 invocation-ready 起点与
+主体完成终点，不扣除 kernel 自身 startup。单卡实测对完整对称 cohort 的
+比较会显式注明均衡假设；未采集的强制负载均衡、接收率及 Prefix Cache
+命中信息保持未知，目录名不能证明这些运行条件。
+
+可复现多 Case 入口为 `profiler/examples/structure/replay_decode_forwards.py`，
+结果见 [Decode 主体回放](../../profiler/examples/structure/acceptance-20261029/decode-forward-replay.md)。
+主记分牌同时呈现算子分档达标率和主体对账，二者使用独立分母。
+`graph_execution_envelopes` 解析的 `MODEL_EXECUTE/MODEL_WAIT_COMPLETE` 是辅助
+图执行证据，用于交叉核查；整个图包络不直接替代切出的模型主体时间。
+
 ## 1. 复用已有结构，补齐观测关联
 
 `sim` 已有模型配置适配、`ModelSpec`、`LayerPlan`、block builder 和算子配方。`mindie_sim.structure.export_structure` 复用 `target_graphs` 与 `RecipeBook.expand`，将调用展开为无时延的 `mindie-model-structure/1`。它不运行成本求解，不加载权重或初始化设备上下文，也不以测量覆盖决定模型结构。
