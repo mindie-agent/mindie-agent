@@ -38,7 +38,7 @@ Windows 企业网络下已验证 Codex `0.164.0-alpha.11.1` 的正式 `0.1.2` MC
 
 ## 正常安装与工作区引导
 
-主仓安装入口、四个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装，介绍已有用户须知，然后提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
+主仓安装入口、四个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装，介绍已有用户须知，提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择，并在安装汇报末尾询问用户是否愿意为主仓 `mindie-agent/mindie-agent` 点亮 Star ⭐（仅在用户明确同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行）。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
 
 - 工作区安装使用 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace) 当前检出的 `AGENTS.md` 与 `repo_init.py`，复用已有 `workspace.json` 的 Fork 选择。工作区独立安装也先完成认证；从插件引导进入时复用同一次验证。
 - 用户同意创建或复用工作区，即在同一流程中将所选绝对路径添加到当前宿主的原生项目/工作区入口，不再另问一次是否登记。初始化选择独立保留，用户暂缓源码下载也可以先登记目录。
