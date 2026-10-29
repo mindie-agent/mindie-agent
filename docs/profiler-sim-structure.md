@@ -33,6 +33,15 @@ GDN/KDA、FFN 及通信，并用词表投影契约闭合一次调用，不要求
 Dense/MoE 指 Transformer 层内的 FFN 类型，该层的 attention 仍归 attention。
 Embedding、Final Norm、LMHead、MTP/draft 边界与主体分别记录。
 
+对于声明了 mHC 的层，输入边界包含输出张量与后续 norm 输入一致的 `HcPre`，
+跨流插入的 AICPU 调度事件不打断这条结构关系。主体在末层返回多流 residual 的
+`HcPost` 完成后结束；后续 residual collapse、输出头准备与大张量复制单列为
+`output_head_preparation`。原始 A3 V4 Flash 的完整 43 层样本验证了这一边界，
+没有把输出头准备算进末层。新 GLM Flash 的 `SparseFlashMla` 和
+`KvQuantSparseFlashAttentionVllm` 从各自真实 ABI 的 block-table 行数恢复 batch，
+不把 KV cache 分配容量当作活动上下文。已观察到 query 超过 Decode 上限的片段
+即使含 recurrent 算子也不计入 Decode。
+
 新 A5 导出的 `HcclLaunchAicpuKernel` 使用同一条规则：只有 AI_CPU 类型且
 越过后继层输入 norm 的调度后缀才剥离，真实 HCOM 完成时间仍保留。重复导出的
 同起止通信行不增加墙钟跨度。Qwen 混合模型另外按 48 个 GDN / 16 个 GQA
