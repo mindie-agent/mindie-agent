@@ -55,6 +55,14 @@ Final Norm 和 residual collapse 单列，LMHead 时间保持空缺，不造一�
 hidden 行数，标记为“实测行数 / 源声明 query”，不冒充 block-table 观测。
 这个通道仅提供结构对齐和实测时间，不生成缺失的 tensor contract。
 
+A3 V4.1 DSpark7 的 TP4 FlashComm 路径显式声明
+`sequence_parallel.factor=4`。切分器逐次核对实测 hidden shard 行数乘以该因子
+等于 `SparseFlashMla` 的 query 行数，并由真实 block-table 恢复 batch。
+40 层主体在末层 `HcPost` 完成后结束；随后 AllGather、mHC collapse 与
+Final Norm 用于确认闭合，后续 3 层 draft 及选取 logits 的 q=7 不改变主体 q=8。
+`DispatchFFNCombine` 的真实 8 输入 / 2 输出 ABI 确认 routed FFN 完成；
+其后的 shared expert 仍属于当前层。专家缓冲容量和客户端并发均不能替代活动 query。
+
 新 A5 导出的 `HcclLaunchAicpuKernel` 使用同一条规则：只有 AI_CPU 类型且
 越过后继层输入 norm 的调度后缀才剥离，真实 HCOM 完成时间仍保留。重复导出的
 同起止通信行不增加墙钟跨度。Qwen 混合模型另外按 48 个 GDN / 16 个 GQA
@@ -88,6 +96,15 @@ sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 targe
 Forward 数。按样本量暂缓的小几何桶保留实测和 `prediction_deferred` 状态。
 主表按输入回执顺序为每个来源/执行几何选取最后一个已完成预测，另保留所有
 历史预测臂。当前达标率与历史臂达标率分开，暂缓结果不覆盖已完成结果。
+算子主表同样按来源/几何选取当前回执，显式给出严格评分事件数占完整主体
+事件数的比例；已匹配子集通过率不能充当整模型通过率。原生算子报告逐 case
+流式读取，避免多份完整 ABI 报告同时膨胀为 Python 对象。
+
+预测回执保留 Sim 实际解析得到的 `model_representation`。输入绑定存在缺陷时，
+以原回执内容 SHA 标记 `superseded-input-binding`，保留原始实测与历史预测，
+撤回其 Body/Layer 达标统计，再使用修复后的 Sim 解析器重新预测。Kimi 的
+HF wrapper 外层量化被忽略问题按此处理；profiler 不增加一套量化解析器，
+也不因纯算术复核通过而把错误模型声明视为有效。
 
 对已被 Sim 计费、但实测缺少 tensor descriptor 的源码角色，可输出明确的
 `source_role_reference` 数值。其完整程序或未融合子图边界、通信 peer-ready
