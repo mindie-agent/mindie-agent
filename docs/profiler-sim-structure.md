@@ -66,6 +66,19 @@ sampling、Host 提交和跨 step 等待。每序列 query 行包括全部 targe
 使用 `decode-forward-auto-cases.json` 声明本地来源与独立模型配置，
 结果见 [Decode 主体回放](../../profiler/examples/structure/acceptance-20261029/decode-forward-replay.md)。
 主记分牌同时呈现算子分档达标率和主体对账，二者使用独立分母。
+`priority_decode_scoreboard.py` 将 Body、Layer 0 / 稳态层组和算子族放在同页，
+保留每行的来源、执行几何、声明变体与 runtime 身份。Body 按绝对毫秒差排序；
+算子按单次误差乘以实测调用数、再除以完整 Forward 数进行优先级排序。
+后者是 kernel activity 差，不是可直接相加的 Body 墙钟误差归因。
+未匹配项按实际未评分活动量列出，不将预测填为零，也不宣称其对应程序一定漏算。
+同一采集的不同 checkpoint / recipe 声明属于独立预测臂，不增加独立采集或
+Forward 数。按样本量暂缓的小几何桶保留实测和 `prediction_deferred` 状态。
+
+对已被 Sim 计费、但实测缺少 tensor descriptor 的源码角色，可输出明确的
+`source_role_reference` 数值。其完整程序或未融合子图边界、通信 peer-ready
+假设与严格 tensor cohort 分开，不将其再次加进 Body 预算。未来的 Body
+预测另保留有界的 family / recipe / program 调度统计及最长十个节点，便于
+定位跨层共有程序的缩放异常；这些跨度仍不可相加代替调度器的完成时间。
 `graph_execution_envelopes` 解析的 `MODEL_EXECUTE/MODEL_WAIT_COMPLETE` 是辅助
 图执行证据，用于交叉核查；整个图包络不直接替代切出的模型主体时间。
 
