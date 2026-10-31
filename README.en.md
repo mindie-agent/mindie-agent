@@ -10,7 +10,7 @@
 
 <!-- mindie-org-versions:main-badges-en:start -->
 <p align="center">
-  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.5.en.md"><img src="https://img.shields.io/badge/release-v0.1.5-7045F5.svg" alt="Release v0.1.5"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.6.en.md"><img src="https://img.shields.io/badge/release-v0.1.6-7045F5.svg" alt="Release v0.1.6"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-cc"><img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757.svg" alt="Claude Code Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-codex"><img src="https://img.shields.io/badge/OpenAI_Codex-Plugin-10A37F.svg" alt="OpenAI Codex Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-kimi"><img src="https://img.shields.io/badge/Kimi_Code-Plugin-2563EB.svg" alt="Kimi Code Plugin"></a>
@@ -60,31 +60,31 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 > Community contribution is off by default. Only after the user enables contribution to a target corpus `<owner/repo>` should you create or reuse that corpus's personal Fork and bind `<GH_USER>/<repo>` as the push target. Do not Fork the main repository, plugin repositories or all domain repositories as an installation step.
 >
 > #### Step 3: Identify your host environment & install the matching plugin
-> Run the **single matching branch** for your host CLI (check `claude --version`, `codex --version`, `kimi --version`, `dsh --version`, or `agy --version` if unsure; current plugin versions are Codex `v0.1.13`, Claude Code `v0.1.10`, Kimi Code `v0.1.10`, DSH `v0.1.9`, and Google Antigravity `v0.1.0`, while shared runtime components discover the latest formal GitHub Releases directly from their official repositories; see [`channels/0.1.json`](./channels/0.1.json) for the full release manifest):
+> Run the **single matching branch** for your host CLI (check `claude --version`, `codex --version`, `kimi --version`, `dsh --version`, or `agy --version` if unsure; current plugin versions are Codex `v0.1.14`, Claude Code `v0.1.11`, Kimi Code `v0.1.11`, DSH `v0.1.10`, and Google Antigravity `v0.1.1`, while shared runtime components discover the latest formal GitHub Releases directly from their official repositories; see [`channels/0.1.json`](./channels/0.1.json) for the full release manifest):
 >
 > - **Branch A — If you are running inside Claude Code (`CLAUDECODE` env or `claude` CLI)**:
 >   ```bash
->   claude plugin marketplace add "https://github.com/mindie-agent/mindie-agent-cc.git#v0.1.10"
+>   claude plugin marketplace add "https://github.com/mindie-agent/mindie-agent-cc.git#v0.1.11"
 >   claude plugin install mindie-agent@mindie-agent-cc --scope user
 >   claude --init-only
 >   claude plugin list --json
 >   claude mcp list
 >   ```
->   *Verification*: Confirm `claude plugin list --json` shows `mindie-agent@mindie-agent-cc` (`0.1.10`) enabled and `claude mcp list` shows `knowledge`, `remote`, and `components` as `Connected`.
+>   *Verification*: Confirm `claude plugin list --json` shows `mindie-agent@mindie-agent-cc` (`0.1.11`) enabled and `claude mcp list` shows `knowledge`, `remote`, and `components` as `Connected`.
 >
 > - **Branch B — If you are running inside OpenAI Codex CLI (`CODEX_CI` / `CODEX_THREAD_ID` env or `codex` CLI)**:
 >   ```bash
->   codex plugin marketplace add https://github.com/mindie-agent/mindie-agent-codex.git --ref v0.1.13
+>   codex plugin marketplace add https://github.com/mindie-agent/mindie-agent-codex.git --ref v0.1.14
 >   codex plugin add mindie-agent@mindie-agent --json
 >   codex plugin list --json
 >   ```
->   *Verification*: Confirm `codex plugin list --json` shows `mindie-agent@mindie-agent` (`0.1.13`) enabled. Let the user know that starting a new session will trigger `SessionStart` to build the locked runtime.
+>   *Verification*: Confirm `codex plugin list --json` shows `mindie-agent@mindie-agent` (`0.1.14`) enabled. Let the user know that starting a new session will trigger `SessionStart` to build the locked runtime.
 >
 > - **Branch C — If you are running inside Kimi Code CLI (`KIMI_CODE_HOME` env or `kimi` CLI)**:
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-kimi-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.10 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
+>   git clone --depth 1 --branch v0.1.11 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
 >   SETUP_OUT=$(python3 "$MINDIE_TMP/scripts/setup.py")
 >   echo "$SETUP_OUT"
 >   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | python3 -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
@@ -96,16 +96,16 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-dsh-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.9 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
+>   git clone --depth 1 --branch v0.1.10 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
 >   uv --native-tls run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
 >   ```
 >   Then install and enable in the DSH Web **Plugins** page:
 >   ```text
->   git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.9
+>   git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.10
 >   ```
 >   Inside a DSH session that has the `plugin_manager` tool, the same step is:
 >   ```text
->   plugin_manager(action="install_bundle", target="git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.9")
+>   plugin_manager(action="install_bundle", target="git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.10")
 >   ```
 >   *Verification*: `setup.py` reports `status: ready`, `activation.status: active`, and `knowledge.status: inactive` (knowledge stays inactive during setup until a session manually invokes `/mindie-agent`); the Plugins page shows `mindie-agent-dsh` enabled. Let the user know to open a **new session** and invoke `/mindie-agent`.
 >
@@ -113,7 +113,7 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-agy-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.0 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
+>   git clone --depth 1 --branch v0.1.1 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
 >   mkdir -p ~/.gemini/plugins
 >   rm -rf ~/.gemini/plugins/mindie-agent
 >   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/plugins/mindie-agent
@@ -300,7 +300,7 @@ Every repository under `@mindie-agent` has a clean, single-purpose boundary and 
 
 | Repository | Version | Role |
 | --- | --- | --- |
-| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(This Repo)* | [`v0.1.5`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.5) | Product entry point, system architecture, engineering design principles, release compatibility contracts, and release records |
+| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(This Repo)* | [`v0.1.6`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.6) | Product entry point, system architecture, engineering design principles, release compatibility contracts, and release records |
 | **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.5`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.5) | End-to-end evaluation harness and live NPU benchmark suite: 20 behavioral-oracle tasks (109 3-state & helper controls), Gate Runner, isolated host runs (native knowledge evaluation wiring & `zsh` temp isolation), component benchmarks, and cross-task reuse evaluation |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | [`main`](https://github.com/mindie-agent/awesome-mindie-skills) | Curated catalogue of open-source Agent Skills for the Ascend NPU AI Infra workflow (covering `vLLM-Ascend`, `AscendC`/`Triton` kernels, accuracy testing, and profiling) |
 | **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | [`main`](https://github.com/mindie-agent/vllm-ascend-workspace) | Lightweight customizable local workspace for `vLLM` + `vLLM-Ascend` development with isolated task Git Worktrees and MindIE Agent integration |
@@ -309,19 +309,19 @@ Every repository under `@mindie-agent` has a clean, single-purpose boundary and 
 
 | Repository | Host Client | Version | Role |
 | --- | --- | --- | --- |
-| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.10`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.10) | Native Claude Code plugin: lifecycle hooks, MCP stdio bridges, and pinned runtime management |
-| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.13`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.13) | Native OpenAI Codex CLI plugin: marketplace packaging, session redaction, and background service management |
-| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.10`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.10) | Native Kimi Code plugin: atomic version switching, redacted session capture, and MCP bridging |
-| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.9`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.9) | Native DSH plugin: `/mindie-agent`, knowledge tools, lifecycle bridging, and `remote-dev` integration |
-| **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.0`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.0) | Native Google Antigravity plugin: per-conversation `/mindie-agent` lease gate, native remote tool aliases, 7-component MCP bridge, and Brain transcript redaction |
+| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.11`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.11) | Native Claude Code plugin: lifecycle hooks, MCP stdio bridges, and pinned runtime management |
+| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.14`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.14) | Native OpenAI Codex CLI plugin: marketplace packaging, session redaction, and background service management |
+| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.11`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.11) | Native Kimi Code plugin: atomic version switching, redacted session capture, and MCP bridging |
+| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.10`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.10) | Native DSH plugin: `/mindie-agent`, knowledge tools, lifecycle bridging, and `remote-dev` integration |
+| **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.1`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.1) | Native Google Antigravity plugin: per-conversation `/mindie-agent` lease gate, native remote tool aliases, 7-component MCP bridge, and Brain transcript redaction |
 
 ### 3. Shared Runtime Components
 
 | Repository | Package / CLI | Version | Role |
 | --- | --- | --- | --- |
-| **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | [`v0.13.7`](https://github.com/mindie-agent/knowledge/releases/tag/v0.13.7) | Graded knowledge unit (L1–L4) management, information-gap retrieval, batch `refs` explanation with shared `known_refs` & `token_budget`, `rejected_history` & `affected_components` provenance, two-layer redaction, and community PR publishing |
+| **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | [`v0.13.8`](https://github.com/mindie-agent/knowledge/releases/tag/v0.13.8) | Graded knowledge unit (L1–L4) management, information-gap retrieval, batch `refs` explanation with shared `known_refs` & `token_budget`, `rejected_history` & `affected_components` provenance, two-layer redaction, and community PR publishing |
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | [`v0.11.2`](https://github.com/mindie-agent/remote-dev/releases/tag/v0.11.2) | SSH file and command tools, shared user-private `~/.mindie/ssh/id_ed25519` credential fallback & public-key management, destructive command safety guard, container execution, background jobs, pooled connections, and artifact transfer |
-| **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | [`v0.7.0`](https://github.com/mindie-agent/coordinator/releases/tag/v0.7.0) | SSH & remote Ascend environment manager: host/key inventory, container binding & provisioning, NPU topology probing (`mindie_probe`, A2/A3 dual-Die/A5), HCCL/RoCE preflight, per-Die HBM lease & compile slot budgets (`mindie_lease`), and managed task execution |
+| **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | [`v0.7.1`](https://github.com/mindie-agent/coordinator/releases/tag/v0.7.1) | SSH & remote Ascend environment manager: host/key inventory, container binding & provisioning, NPU topology probing (`mindie_probe`, A2/A3 dual-Die/A5), HCCL/RoCE preflight, per-Die HBM lease & compile slot budgets (`mindie_lease`), and managed task execution |
 | **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | [`v0.5.3`](https://github.com/mindie-agent/profiler/releases/tag/v0.5.3) | Ascend profiling collection and in-place analysis component: controlled capture, `inventory / analyze / correlate / compare / sql` trace analysis, `analyze_profiling --structure` 3-state topology alignment (`aligned / declared_only / unattributed_observed`) on `mindie-model-structure/1`, `auto_segment_decode_forwards` Decode segmentation, memory breakdown, and cross-run comparison CLI |
 | **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | [`v0.8.1`](https://github.com/mindie-agent/sim/releases/tag/v0.8.1) | Hardware-neutral 5-layer causal performance modeling component: unifies hardware resources, operator families, subgraphs, pure-model costs, and serving constraints (`DP × TP × EP × PP × DCP / DSA-CP / PCP` & PD disaggregation) with 4D efficiency breakdown (`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`), 30ms SLA hardware scaling solver, `mindie-model-structure/1` export, and 856-case fleet calibration |
 | **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | [`v0.3.0`](https://github.com/mindie-agent/npu-top/releases/tag/v0.3.0) | Human-facing Ascend NPU observability dashboard: supports A2 / A3 / A5 fleet monitoring with shared `coordinator` `machines.json` and `~/.mindie/ssh` credential fallback, providing a loopback web UI (`127.0.0.1:8788`), TUI, CLI/MCP, and 90-day SQLite utilization history |
@@ -333,13 +333,13 @@ All public knowledge corpora follow the `mindie-graded-unit/1` graded schema (`L
 
 | Repository | Domain (`domain`) | Units & Pinned Commit | Scope & Coverage |
 | --- | --- | --- | --- |
-| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | `vllm-ascend` | 91 units · [`d3d5bf63`](https://github.com/mindie-agent/knowledge-vllm-ascend/tree/d3d5bf6320e171d4a0f131a6f746858700e0c4cc) | `vLLM-Ascend` & `vLLM-Omni` engineering corpus: 0-day model bring-up, PD disaggregation, MoE EP/MC2, quantization, speculative decoding, ACLGraph/TorchAir, and `vllm-omni` multi-stage omni-modality (`Thinker -> Talker -> Code2Wav` / AR+DiT / TTS / Duplex) pipeline tuning |
-| **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | `operators` | 105 units · [`6f083f81`](https://github.com/mindie-agent/knowledge-operators/tree/6f083f810c0d8eb77b9d7992ba96b19c51dfaf74) | Ascend operators corpus: 910B / 910C (A3) / 950 (A5) hardware constraints, `AscendC`, `Triton-Ascend`, Catlass, FlashAttention/MLA, Matmul/MoE fusion, and `MindIE-SD` custom sparse attention ops & fusion scope analysis |
-| **[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)** | `infer-core` | 109 units · [`b319ab36`](https://github.com/mindie-agent/knowledge-infer-core/tree/b319ab36f1b2d84c5d9c33b123ca2c24e6637f80) | Ascend inference serving & engine core corpus: `cann-recipes-infer` model recipes, `Ascend/MindIE-SD` (`mindiesd`) DiT sparse attention (`RainFusion`/`Ada-BSA`/`EagleQBSA`), step caching (`DiTCache`), 3D VAE state-carry sliced decode, and timestep-aware quantization contracts |
-| **[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)** | `infer-distributed` | 39 units · [`4cfe3db3`](https://github.com/mindie-agent/knowledge-infer-distributed/tree/4cfe3db3f7610acbded3a4c34f7551e88aba9b77) | Distributed inference & collective communication corpus: HCCL troubleshooting, RoCE/HCCS topology, SHMEM, Mooncake/Yuanrong transport, and multi-node `DP/TP/EP/PP/DCP/DSA-CP/PCP` plus DiT Ulysses/Ring/CFG hybrid parallelism & power-cap mitigation |
-| **[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)** | `infer-observability` | 39 units · [`13a308e3`](https://github.com/mindie-agent/knowledge-infer-observability/tree/13a308e33f3c24b7222faa296024739351771f48) | Inference observability, diagnostics & benchmarking corpus: CANN/`plog`/device fault triage, `msprof` profiling workflows, analytic simulation, Window A/B/A `perf-gate`, and 3-tier image/video `accuracy-gate` protocols |
-| **[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)** | `infer-ops-compat` | 34 units · [`bc594941`](https://github.com/mindie-agent/knowledge-infer-ops-compat/tree/bc59494157f0bf000ac7d05f6719aa487d062260) | Graph compilation, custom op registration & migration compatibility corpus: TorchAir/ACLGraph capture, `torch_npu._inductor` pattern pass development, two-stage (`API-first, then compile`) integration, CUDA-to-Ascend migration, and cluster deployment |
-| **[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering)** | `agent-engineering` | 33 units · [`6cf68034`](https://github.com/mindie-agent/knowledge-agent-engineering/tree/6cf68034126486934bf96d96d809c3de1e608b5f) | Agent engineering & governance corpus: multi-agent orchestration, `MindIE-SD` S0–S6 auto-optimization workflow, `kb-lint` governance, two-layer privacy redaction gates, and benchmark evaluation |
+| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | `vllm-ascend` | 91 units · [`1c7bcad6`](https://github.com/mindie-agent/knowledge-vllm-ascend/tree/1c7bcad61f1156389dcf714468acd74c34754268) | `vLLM-Ascend` & `vLLM-Omni` engineering corpus: 0-day model bring-up, PD disaggregation, MoE EP/MC2, quantization, speculative decoding, ACLGraph/TorchAir, and `vllm-omni` multi-stage omni-modality (`Thinker -> Talker -> Code2Wav` / AR+DiT / TTS / Duplex) pipeline tuning |
+| **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | `operators` | 105 units · [`0ac89226`](https://github.com/mindie-agent/knowledge-operators/tree/0ac89226d6a06be24bc503bc38195599e8f831b6) | Ascend operators corpus: 910B / 910C (A3) / 950 (A5) hardware constraints, `AscendC`, `Triton-Ascend`, Catlass, FlashAttention/MLA, Matmul/MoE fusion, and `MindIE-SD` custom sparse attention ops & fusion scope analysis |
+| **[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)** | `infer-core` | 109 units · [`8f759165`](https://github.com/mindie-agent/knowledge-infer-core/tree/8f759165044aae5cf6eaa9762ebadfb732a672e4) | Ascend inference serving & engine core corpus: `cann-recipes-infer` model recipes, `Ascend/MindIE-SD` (`mindiesd`) DiT sparse attention (`RainFusion`/`Ada-BSA`/`EagleQBSA`), step caching (`DiTCache`), 3D VAE state-carry sliced decode, and timestep-aware quantization contracts |
+| **[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)** | `infer-distributed` | 39 units · [`817d48cb`](https://github.com/mindie-agent/knowledge-infer-distributed/tree/817d48cbf5dae80d607292d486cc07b30c405aa6) | Distributed inference & collective communication corpus: HCCL troubleshooting, RoCE/HCCS topology, SHMEM, Mooncake/Yuanrong transport, and multi-node `DP/TP/EP/PP/DCP/DSA-CP/PCP` plus DiT Ulysses/Ring/CFG hybrid parallelism & power-cap mitigation |
+| **[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)** | `infer-observability` | 39 units · [`4b3dd86b`](https://github.com/mindie-agent/knowledge-infer-observability/tree/4b3dd86b365c9e588a1eb47df7dcc6437fdf8a89) | Inference observability, diagnostics & benchmarking corpus: CANN/`plog`/device fault triage, `msprof` profiling workflows, analytic simulation, Window A/B/A `perf-gate`, and 3-tier image/video `accuracy-gate` protocols |
+| **[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)** | `infer-ops-compat` | 34 units · [`c37c9c0f`](https://github.com/mindie-agent/knowledge-infer-ops-compat/tree/c37c9c0f559a27c63948aabc1f5b092de54b8c78) | Graph compilation, custom op registration & migration compatibility corpus: TorchAir/ACLGraph capture, `torch_npu._inductor` pattern pass development, two-stage (`API-first, then compile`) integration, CUDA-to-Ascend migration, and cluster deployment |
+| **[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering)** | `agent-engineering` | 33 units · [`06f41835`](https://github.com/mindie-agent/knowledge-agent-engineering/tree/06f418353d9028aecb3a11fb65ef1b284792c396) | Agent engineering & governance corpus: multi-agent orchestration, `MindIE-SD` S0–S6 auto-optimization workflow, `kb-lint` governance, two-layer privacy redaction gates, and benchmark evaluation |
 <!-- mindie-org-versions:main-ecosystem-en:end -->
 
 ---
@@ -379,7 +379,7 @@ Please follow https://github.com/mindie-agent/mindie-agent/blob/main/CONTRIBUTIN
 ## 🚀 0.1.0 Milestone & Benchmark Record
 
 - **Recent `0.1` Track Highlights** (exact release pins in [`channels/0.1.json`](./channels/0.1.json)):
-  - **`0.1.5` Patch: Native Google Antigravity Plugin & Full `G0–G5` Benchmark Verification ([0.1.5 Release Notes](./docs/releases/0.1.5.en.md) · [中文](./docs/releases/0.1.5.md))**: Introduces the fifth official native host plugin [`mindie-agent-agy v0.1.0`](https://github.com/mindie-agent/mindie-agent-agy) (Google Antigravity), completing adaptation across all 7 shared runtime components (`knowledge 0.13.7`, `remote-dev 0.11.2`, `coordinator 0.7.0`, `profiler 0.5.3`, `sim 0.8.1`, `npu-top 0.3.0`, `diagnostics 0.5.4`) with native Antigravity tool aliases, `AGY_CONVERSATION_ID` lease propagation, and Brain transcript redaction; delivers the full `G0–G5` benchmark evaluation on zero-spoiler colloquial developer bug-report prompts (1-sentence model + config + symptom + raw traceback/log path) across DSH (`deepseek-flash` / `max`) and Codex (`gpt-6.1-sol` / `xhigh`): on the 48-trial L2 primary matrix, `G2` lifts pass rate **4.0x from `12.5% (2/16)` on `G0/G1` to `50.0% (8/16)`** while cutting latency by **`21.2%–47.1%`** (`vllm-ascend` core tasks `0.0% → 37.5%` / DSH `50.0%`, 4 component tasks `25.0% → 62.5%` / Codex `75.0%`); on live A3 NPU L3, `G1` (`remote-dev`) unlocks live verification (`0.0 → 1.0`); on `G3` cross-task distillation, DSH jumps **`0.0 → 1.0`** on Partial RoPE and Codex cuts tool calls by **`58.5%–63.4%`** and wall time by **`-19.8%`** on SFA MTP; on `G4` RSI exploration, Codex achieves **`0.0 → 1.0` (`-27.8%`)** on `dsv4-sparse-mla` and **`-30.9%` speedup** on `triton-spatial-norm`; and on `G5` 5-episode evolution (`82 → 83 → 84` units), Codex verifies zero regression and **`-19.8%` faster (`153.29s`)** execution after accumulating both positive and negative boundary units.
+  - **`0.1.5` Patch: Native Google Antigravity Plugin & Full `G0–G5` Benchmark Verification ([0.1.5 Release Notes](./docs/releases/0.1.5.en.md) · [中文](./docs/releases/0.1.5.md))**: Introduces the fifth official native host plugin [`mindie-agent-agy v0.1.1`](https://github.com/mindie-agent/mindie-agent-agy) (Google Antigravity), completing adaptation across all 7 shared runtime components (`knowledge 0.13.7`, `remote-dev 0.11.2`, `coordinator 0.7.0`, `profiler 0.5.3`, `sim 0.8.1`, `npu-top 0.3.0`, `diagnostics 0.5.4`) with native Antigravity tool aliases, `AGY_CONVERSATION_ID` lease propagation, and Brain transcript redaction; delivers the full `G0–G5` benchmark evaluation on zero-spoiler colloquial developer bug-report prompts (1-sentence model + config + symptom + raw traceback/log path) across DSH (`deepseek-flash` / `max`) and Codex (`gpt-6.1-sol` / `xhigh`): on the 48-trial L2 primary matrix, `G2` lifts pass rate **4.0x from `12.5% (2/16)` on `G0/G1` to `50.0% (8/16)`** while cutting latency by **`21.2%–47.1%`** (`vllm-ascend` core tasks `0.0% → 37.5%` / DSH `50.0%`, 4 component tasks `25.0% → 62.5%` / Codex `75.0%`); on live A3 NPU L3, `G1` (`remote-dev`) unlocks live verification (`0.0 → 1.0`); on `G3` cross-task distillation, DSH jumps **`0.0 → 1.0`** on Partial RoPE and Codex cuts tool calls by **`58.5%–63.4%`** and wall time by **`-19.8%`** on SFA MTP; on `G4` RSI exploration, Codex achieves **`0.0 → 1.0` (`-27.8%`)** on `dsv4-sparse-mla` and **`-30.9%` speedup** on `triton-spatial-norm`; and on `G5` 5-episode evolution (`82 → 83 → 84` units), Codex verifies zero regression and **`-19.8%` faster (`153.29s`)** execution after accumulating both positive and negative boundary units.
   - **`0.1.4` Patch & Core Component Upgrades ([0.1.4 Release Notes](./docs/releases/0.1.4.en.md) · [中文](./docs/releases/0.1.4.md) · [Auto-Update Acceptance](./docs/releases/0.1.4/automatic-update-acceptance.json) · [Knowledge Retrieval & Dual-Host Convergence](./docs/audits/2026-10-29-knowledge-p0.md))**: Delivers information-gap retrieval across all four hosts, shared explanation budgets, exact prerequisite citations, and automated managed-component upgrades; on the natural-language `mindie-bench` task suite, **both DSH (`deepseek-flash` / `max`) and Codex (`gpt-6.1-sol` / `xhigh`) achieve `6/6` natural `completed_pass`** across single-site SFA, two-site DSpark, and complex Profiler reconciliation tasks (DSH complex task converges in **17 calls / `67.05s`** vs. previous 50-call budget exhaustion, and Codex drops from `410.30s` to **16 calls / `132.97s`**); aligns with formal releases `mindie-sim v0.8.1` (5-layer unified causal modeling, 4D efficiency breakdown, 30ms SLA hardware scaling solver, converged across 280 Decode + 15 Prefill cases), `mindie-profiler v0.5.3` (`mindie-model-structure/1` topology-guided alignment & automatic Decode segmentation, 856-case DSH fleet replay / 561 held-out cases with 98.25% within `<= 15%` error), and `remote-dev v0.11.2`.
   - **`0.1.3` / `0.1.2` / `0.1.1` Patches**: [**0.1.3**](./docs/releases/0.1.3.en.md) completes the three-server MCP surface (`knowledge`, `remote`, `components`) across all four hosts; [**0.1.2**](./docs/releases/0.1.2.en.md) delivers shared cross-process user-private SSH credentials and key management ([SSH Acceptance](./docs/releases/0.1.2/ssh-auth-acceptance.json)); [**0.1.1**](./docs/releases/0.1.1.en.md) delivers per-session manual `/mindie-agent` activation, whole-delivery token budget estimation, dual-Die placement, and the `G5` dev pilot report ([Pilot Report](./docs/releases/0.1.1/benchmark-pilot.en.md) · [Native Update Acceptance](./docs/releases/0.1.1/native-update-acceptance.json)).
 

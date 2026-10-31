@@ -23,6 +23,8 @@ jobs:
         run: python3 .github/scripts/check_lf_eol.py
       - name: Verify Channel Version Sync in READMEs
         run: python3 .github/scripts/sync_org_versions.py --check --offline
+      - name: Verify Automatic-Update Readiness Manifest & Schema
+        run: python3 .github/scripts/check_auto_update_readiness.py
       - name: Validate PR Checklist and Review Evidence
         if: github.event_name == 'pull_request'
         env:

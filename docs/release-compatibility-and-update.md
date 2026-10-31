@@ -120,6 +120,11 @@ MindIE Agent 对外发布的是**经过验证的组件与插件组合**。OpenAI
 2. **宿主插件与共享组件的协同单调升级**：
    - 插件选择器根据本机当前安装的宿主版本，选出**当前宿主能用的最高兼容正式版插件 Release**（排除 `draft` 与 `prerelease`）。
    - 当没有更高版本的插件 Release 可用时，宿主更新器直接调用组件更新流程（`component_update.py`），将共享运行时组件独立推进至各组件仓库最新的正式 Release；当升级到新插件 Release 时，也会继承当前已安装组件的版本下界（`max(已安装版本, 新插件基线, 组件正式 Release)`），防止新插件把已独立升级过的组件回退到旧基线。
+3. **发版前自动更新就绪必检项（`check_auto_update_readiness.py`）**：
+   - 任何组件、插件或主版本发布前，必须执行 `python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts`（并在 PR 门禁 `.github/workflows/pr-checklist.yml` 中自动校验通道清单一致性），从三个维度杜绝因漏改或漏检阻塞自动升级：
+     - **知识库语义版本单调性**：`mindie-knowledge` 的 `build_routing_index()` 在重建 `index/routing-manifest.json` 时自动将内容变更单元的 `revision` 递增 1，`publication_check.py` 在 `validate(..., base_revision=...)` 中强制拦截任何修改 `content_sha256` 却未推进 `revision` 的提交，且发版前脚本扫描全部 7 个 `knowledge-*` 仓库历史通道提交至 `HEAD` 的单调性及 `publication-contract.json` 的 `validator.revision` 对齐情况；
+     - **跨仓组件与语料锁定一致性**：核验 5 款宿主插件的 `pyproject.toml`、`uv.lock`、`runtime/active-overrides.txt`、`runtime-requirements.txt`、`product-contract.json`（`verified_commit`）与 `channels/0.1.json` 声明的精确版本及不可变源码 SHA 完全一致；
+     - **本机活跃宿主 CLI 兼容覆盖率**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 等宿主版本，校验其均处于对应插件 `harness-compatibility.json` 的声明支持区间内，防止宿主自动小版本升级后出现 `"no_compatible_release"`。
 
 ---
 

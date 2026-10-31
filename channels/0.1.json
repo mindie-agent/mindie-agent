@@ -3,52 +3,52 @@
   "schema_version": "mindie-release-channel/1",
   "track": "0.1",
   "milestone_version": "0.1.0",
-  "current_patch_version": "0.1.5",
-  "release_notes": "docs/releases/0.1.5.md",
-  "release_notes_en": "docs/releases/0.1.5.en.md",
+  "current_patch_version": "0.1.6",
+  "release_notes": "docs/releases/0.1.6.md",
+  "release_notes_en": "docs/releases/0.1.6.en.md",
   "independent_update_allowed": true,
   "update_policy": {
     "independent_update_allowed": true,
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
       "verified_mechanism": "channels/0.1.json records the product-verified 13-repository + 7-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 8 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py).",
-      "known_boundaries": "The 0.1.5 channel pins verified releases across the 8 shared runtime/evaluation components (knowledge 0.13.7, remote-dev 0.11.2, profiler 0.5.3, sim 0.8.1, coordinator 0.7.0, npu-top 0.3.0, diagnostics 0.5.4, mindie-bench 0.4.5), 5 native host plugins (Codex 0.1.13, Claude Code 0.1.10, Kimi 0.1.10, DSH 0.1.9, Google Antigravity 0.1.0), and 7 public domain corpora. All five host plugins expose the remote NPU and deterministic component/diagnostic tools (diagnostics_status, diagnostics_bundle, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
+      "known_boundaries": "The 0.1.6 channel pins verified releases across the 8 shared runtime/evaluation components (knowledge 0.13.8, remote-dev 0.11.2, profiler 0.5.3, sim 0.8.1, coordinator 0.7.1, npu-top 0.3.0, diagnostics 0.5.4, mindie-bench 0.4.5), 5 native host plugins (Codex 0.1.14, Claude Code 0.1.11, Kimi 0.1.11, DSH 0.1.10, Google Antigravity 0.1.1), and 7 public domain corpora. All five host plugins expose the remote NPU and deterministic component/diagnostic tools (diagnostics_status, diagnostics_bundle, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
     }
   },
   "corpora": {
     "knowledge-infer-core": {
       "repository": "mindie-agent/knowledge-infer-core",
-      "commit": "b319ab36f1b2d84c5d9c33b123ca2c24e6637f80",
+      "commit": "8f759165044aae5cf6eaa9762ebadfb732a672e4",
       "units": 109
     },
     "knowledge-operators": {
       "repository": "mindie-agent/knowledge-operators",
-      "commit": "6f083f810c0d8eb77b9d7992ba96b19c51dfaf74",
+      "commit": "0ac89226d6a06be24bc503bc38195599e8f831b6",
       "units": 105
     },
     "knowledge-vllm-ascend": {
       "repository": "mindie-agent/knowledge-vllm-ascend",
-      "commit": "d3d5bf6320e171d4a0f131a6f746858700e0c4cc",
+      "commit": "1c7bcad61f1156389dcf714468acd74c34754268",
       "units": 91
     },
     "knowledge-infer-distributed": {
       "repository": "mindie-agent/knowledge-infer-distributed",
-      "commit": "4cfe3db3f7610acbded3a4c34f7551e88aba9b77",
+      "commit": "817d48cbf5dae80d607292d486cc07b30c405aa6",
       "units": 39
     },
     "knowledge-infer-observability": {
       "repository": "mindie-agent/knowledge-infer-observability",
-      "commit": "13a308e33f3c24b7222faa296024739351771f48",
+      "commit": "4b3dd86b365c9e588a1eb47df7dcc6437fdf8a89",
       "units": 39
     },
     "knowledge-infer-ops-compat": {
       "repository": "mindie-agent/knowledge-infer-ops-compat",
-      "commit": "bc59494157f0bf000ac7d05f6719aa487d062260",
+      "commit": "c37c9c0f559a27c63948aabc1f5b092de54b8c78",
       "units": 34
     },
     "knowledge-agent-engineering": {
       "repository": "mindie-agent/knowledge-agent-engineering",
-      "commit": "6cf68034126486934bf96d96d809c3de1e608b5f",
+      "commit": "06f418353d9028aecb3a11fb65ef1b284792c396",
       "units": 33
     }
   },
@@ -118,10 +118,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/knowledge",
       "package": "mindie-knowledge",
-      "version": "0.13.7",
-      "tag": "v0.13.7",
-      "commit": "e69aab58ce85abdfc65edc942150d6e3f631164c",
-      "revision": "e69aab58ce85abdfc65edc942150d6e3f631164c",
+      "version": "0.13.8",
+      "tag": "v0.13.8",
+      "commit": "9a4325858e6fadb10715275826a7795843cbbdf4",
+      "revision": "9a4325858e6fadb10715275826a7795843cbbdf4",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -130,10 +130,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/coordinator",
       "package": "mindie-coordinator",
-      "version": "0.7.0",
-      "tag": "v0.7.0",
-      "commit": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2",
-      "revision": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2",
+      "version": "0.7.1",
+      "tag": "v0.7.1",
+      "commit": "d146c55c414bfb92136cf5fb7fa11ae14c673ef0",
+      "revision": "d146c55c414bfb92136cf5fb7fa11ae14c673ef0",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -142,10 +142,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-codex",
       "package": "mindie-agent-codex",
-      "version": "0.1.13",
-      "tag": "v0.1.13",
-      "commit": "038fbe33fc1cb3614ba84679ad8f8b7cc55be407",
-      "revision": "038fbe33fc1cb3614ba84679ad8f8b7cc55be407",
+      "version": "0.1.14",
+      "tag": "v0.1.14",
+      "commit": "967feb54acefbdca549915d27fa97dcd83bd1b1b",
+      "revision": "967feb54acefbdca549915d27fa97dcd83bd1b1b",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -154,10 +154,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-cc",
       "package": "mindie-agent-cc",
-      "version": "0.1.10",
-      "tag": "v0.1.10",
-      "commit": "8129cf8304fb63475007695825261b04e14e2543",
-      "revision": "8129cf8304fb63475007695825261b04e14e2543",
+      "version": "0.1.11",
+      "tag": "v0.1.11",
+      "commit": "ce789bfb82ff6bb2e1f14455be9bb7203669b8d9",
+      "revision": "ce789bfb82ff6bb2e1f14455be9bb7203669b8d9",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -166,10 +166,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-kimi",
       "package": "mindie-agent-kimi",
-      "version": "0.1.10",
-      "tag": "v0.1.10",
-      "commit": "2d46dccb0230942164d1b357b94807b22e10a3b4",
-      "revision": "2d46dccb0230942164d1b357b94807b22e10a3b4",
+      "version": "0.1.11",
+      "tag": "v0.1.11",
+      "commit": "a50087ecceb4c1acfc1b178cfc1c03d62cf8c7cb",
+      "revision": "a50087ecceb4c1acfc1b178cfc1c03d62cf8c7cb",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -178,10 +178,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-dsh",
       "package": "mindie-agent-dsh",
-      "version": "0.1.9",
-      "tag": "v0.1.9",
-      "commit": "1d67c8ed2e1cc799012650b601198aa8aea3651a",
-      "revision": "1d67c8ed2e1cc799012650b601198aa8aea3651a",
+      "version": "0.1.10",
+      "tag": "v0.1.10",
+      "commit": "b1877bbdaeaa2dba7b69f593337f147330504644",
+      "revision": "b1877bbdaeaa2dba7b69f593337f147330504644",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -190,10 +190,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-agy",
       "package": "mindie-agent-agy",
-      "version": "0.1.0",
-      "tag": "v0.1.0",
-      "commit": "4f1fb18aeeb264fe1dbcf7342f38c53980438fa7",
-      "revision": "4f1fb18aeeb264fe1dbcf7342f38c53980438fa7",
+      "version": "0.1.1",
+      "tag": "v0.1.1",
+      "commit": "f162dc84e67a222704c2571ad0c5dd98662d3608",
+      "revision": "f162dc84e67a222704c2571ad0c5dd98662d3608",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -305,6 +305,21 @@
       ],
       "plugin_republish_required": false,
       "summary": "0.1.5 ecosystem expansion and full G0-G5 benchmark verification: introduces mindie-agent-agy v0.1.0 (4f1fb18aeeb264fe1dbcf7342f38c53980438fa7) as the fifth official native host plugin (Google Antigravity), integrating all 7 shared runtime components (mindie-knowledge 0.13.7, remote-dev 0.11.2, mindie-coordinator 0.7.0, mindie-profiler 0.5.3, mindie-sim 0.8.1, npu-top 0.3.0, mindie-diagnostics 0.5.4) with native Antigravity tool aliases, per-conversationId /mindie-agent session leases, AGY_CONVERSATION_ID coordinator propagation, and brain transcript redaction. Synchronizes formal component pins (remote-dev 0.11.2, profiler 0.5.3, sim 0.8.1) and completes the zero-spoiler colloquial-prompt G0-G5 end-to-end benchmark across DSH (deepseek-flash, max) and Codex (gpt-6.1-sol, xhigh): L2 48-trial matrix lifts pass rate 4.0x from 12.5% (2/16, G0/G1) to 50.0% (8/16, G2) with 21.2%-47.1% latency reductions, G3 cross-task flywheel achieves 0.0->1.0 on DSH Partial RoPE and -58.5% to -63.4% tool calls / -19.8% wall time on Codex SFA MTP, G4 RSI exploration achieves 0.0->1.0 (-27.8%) on dsv4-sparse-mla and -30.9% speedup on triton-spatial-norm, and G5 5-episode evolution (82->83->84 units) verifies zero regression with -19.8% faster execution."
+    },
+    {
+      "patch_version": "0.1.6",
+      "type": "hotfix",
+      "updated_components": [
+        "knowledge",
+        "coordinator",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-agent-agy"
+      ],
+      "plugin_republish_required": true,
+      "summary": "0.1.6 automatic-update readiness & host compatibility patch: mindie-knowledge 0.13.8 (9a4325858e6fadb10715275826a7795843cbbdf4) adds automatic unit revision advancement in build_routing_index(), base_revision semantic revision monotonicity enforcement in publication_check.py, monotonic revision repair tolerance in GradedRepository.install_feed(), and antigravity/dsh release-metadata support; mindie-coordinator 0.7.1 (d146c55c414bfb92136cf5fb7fa11ae14c673ef0) adds native Antigravity (agy/antigravity) and AGY_CONVERSATION_ID session discovery; all 7 graded knowledge-* corpora advance validator.revision to 0.13.8 with monotonic unit revisions; and all 5 host plugins (Codex 0.1.14 with Desktop codex-cli 0.166.0-alpha.5.1 support, Claude Code 0.1.11, Kimi 0.1.11, DSH 0.1.10, Antigravity 0.1.1) synchronize component pins and pre-release auto-update readiness gates."
     }
   ]
 }
