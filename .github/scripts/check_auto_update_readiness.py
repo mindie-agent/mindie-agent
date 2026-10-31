@@ -547,6 +547,53 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
     return errors
 
 
+def verify_github_releases(manifest: dict) -> list[str]:
+    """Verify via `gh release view` that every component/plugin in channels/0.1.json has a formal Release."""
+    errors: list[str] = []
+    if not shutil.which("gh"):
+        return ["gh CLI not found in PATH for --verify-github-releases"]
+    comp_entries = manifest.get("components") or {}
+    for key in sorted(comp_entries):
+        entry = comp_entries[key]
+        repo = entry.get("repository", "")
+        version = entry.get("version", "")
+        tag = f"v{version}"
+        res = _run_cmd(
+            ["gh", "release", "view", tag, "-R", repo, "--json", "tagName,isDraft,isPrerelease,assets"],
+            timeout=15.0,
+        )
+        if res.returncode != 0:
+            errors.append(f"{repo}: formal GitHub Release {tag} not found ({res.stderr.strip()})")
+            continue
+        data = json.loads(res.stdout)
+        if data.get("isDraft") or data.get("isPrerelease"):
+            errors.append(
+                f"{repo}: GitHub Release {tag} is draft={data.get('isDraft')} prerelease={data.get('isPrerelease')}"
+            )
+        assets = {a.get("name") for a in (data.get("assets") or []) if isinstance(a, dict)}
+        if not assets:
+            errors.append(f"{repo}: GitHub Release {tag} has 0 uploaded assets")
+        elif "SHA256SUMS" not in assets:
+            errors.append(f"{repo}: GitHub Release {tag} missing SHA256SUMS asset")
+    return errors
+
+
+def verify_doc_and_lf_hygiene(main_repo: Path) -> list[str]:
+    errors: list[str] = []
+    scripts_dir = main_repo / ".github" / "scripts"
+    lf_res = _run_cmd([sys.executable, str(scripts_dir / "check_lf_eol.py")], cwd=main_repo, timeout=15.0)
+    if lf_res.returncode != 0:
+        errors.append(f"check_lf_eol.py failed: {(lf_res.stderr or lf_res.stdout).strip()}")
+    sync_res = _run_cmd(
+        [sys.executable, str(scripts_dir / "sync_org_versions.py"), "--check", "--offline"],
+        cwd=main_repo,
+        timeout=15.0,
+    )
+    if sync_res.returncode != 0:
+        errors.append(f"sync_org_versions.py --check --offline failed: {(sync_res.stderr or sync_res.stdout).strip()}")
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -577,6 +624,11 @@ def main() -> int:
         action="store_true",
         help="Verify that installed local host CLIs (Codex/ChatGPT Desktop, Claude, Kimi) are covered by harness-compatibility.json",
     )
+    parser.add_argument(
+        "--verify-github-releases",
+        action="store_true",
+        help="Verify via gh CLI that every component and plugin in channels/0.1.json has a published formal GitHub Release with SHA256SUMS",
+    )
     args = parser.parse_args()
 
     main_repo = args.channel.resolve().parents[1]
@@ -589,29 +641,46 @@ def main() -> int:
         siblings_roots.append(volumes_code)
 
     manifest = json.loads(args.channel.read_text(encoding="utf-8"))
-    errors: list[str] = []
-    errors.extend(verify_channel_schema(manifest))
-    errors.extend(
-        verify_corpora(main_repo, manifest, siblings_roots, require_siblings=args.require_siblings)
-    )
-    errors.extend(
-        verify_components_and_plugins(
-            manifest,
-            siblings_roots,
-            require_siblings=args.require_siblings,
-            strict_lockstep=args.strict_lockstep,
-        )
-    )
-    errors.extend(verify_flexible_component_compatibility(siblings_roots))
-    if args.verify_local_hosts:
-        errors.extend(verify_local_host_compatibility(siblings_roots))
+    mode = "strict-lockstep" if args.strict_lockstep else "flexible-component-update"
 
+    r1_errors = verify_channel_schema(manifest)
+    r2_errors = verify_corpora(main_repo, manifest, siblings_roots, require_siblings=args.require_siblings)
+    r3_errors = verify_components_and_plugins(
+        manifest,
+        siblings_roots,
+        require_siblings=args.require_siblings,
+        strict_lockstep=args.strict_lockstep,
+    )
+    if args.verify_github_releases:
+        r3_errors.extend(verify_github_releases(manifest))
+    r4_errors = verify_flexible_component_compatibility(siblings_roots)
+    r5_errors = verify_local_host_compatibility(siblings_roots) if args.verify_local_hosts else []
+    r6_errors = verify_doc_and_lf_hygiene(main_repo)
+
+    checklist_rows = [
+        ("R1", f"Channel Schema & Release Track ({mode})", r1_errors),
+        ("R2", "Knowledge Corpus Monotonic Revisions & Validator Floor", r2_errors),
+        ("R3", "Component & Plugin Tag/Commit/Release Integrity", r3_errors),
+        ("R4", "Five-Host Cross-Version Component Compatibility", r4_errors),
+        (
+            "R5",
+            "Local Active Host CLI Compatibility Coverage"
+            + ("" if args.verify_local_hosts else " (skipped; pass --verify-local-hosts)"),
+            r5_errors,
+        ),
+        ("R6", "README / Org Version Sync & Unix LF Line-Ending Hygiene", r6_errors),
+    ]
+
+    for code, label, item_errors in checklist_rows:
+        mark = "x" if not item_errors else " "
+        print(f"- [{mark}] **{code}. {label}**")
+
+    errors = r1_errors + r2_errors + r3_errors + r4_errors + r5_errors + r6_errors
     if errors:
         for err in errors:
             print(f"[auto-update-readiness:FAIL] {err}", file=sys.stderr)
         return 1
 
-    mode = "strict-lockstep" if args.strict_lockstep else "flexible-component-update"
     print(
         f"[auto-update-readiness:OK] ({mode}) channels/0.1.json (v{manifest.get('current_patch_version')}), "
         f"{len(manifest.get('corpora', {}))} corpora, and {len(manifest.get('components', {}))} components/plugins verified."

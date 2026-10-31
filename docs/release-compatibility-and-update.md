@@ -76,7 +76,25 @@ MindIE Agent 对外发布的是**经过验证的组件与插件组合**。OpenAI
    - 宿主插件运行时基线包含 `knowledge`、`remote-dev` 与 `diagnostics`，打包依赖不代表默认暴露知识接口。Codex `0.1.8` 的默认 MCP 仅注册 remote-dev 和确定性组件入口，知识目录由手动 Skill 私有加载；`coordinator`、`profiler`、`sim` 可独立安装并接入这些入口，`npu-top` 保持为面向人的独立看板。其他宿主按各自发布记录核验发现边界。
    - `mindie-bench` 版本独立演进，各仓发布流水线通过固定 Commit SHA 引用其运行器。
 
-在发布任何一个宿主插件 Release 或更新 [`channels/0.1.json`](../channels/0.1.json) 前，维护者需核对以下清单：
+在发布任何一个共享组件、知识库语料、宿主插件 Release 或更新 [`channels/0.1.json`](../channels/0.1.json) 时，**必须强制执行自动化发版必检清单（Release Checklist `R1–R6`）**：
+
+```bash
+# 日常独立组件/语料灵活发版（无需重发宿主插件）：
+python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts --verify-github-releases
+
+# 宿主插件同步重发（当插件自身代码、MCP 目录或 harness-compatibility.json 变更时）：
+python3 .github/scripts/check_auto_update_readiness.py --require-siblings --strict-lockstep --verify-local-hosts --verify-github-releases
+```
+
+脚本会逐项输出并强制拦截以下 `R1–R6` 六项必检门禁（任一项未通过直接返回非零退出码）：
+- [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性，区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
+- [ ] **`R2. Knowledge Corpus Monotonic Revisions & Validator Floor`**：校验 7 个 `knowledge-*` 语料仓自上一通道版本以来所有内容变更单元的 `revision` 严格递增、`publication-contract.json` 的 `validator.revision <= channel knowledge version`，且插件 `verified_commit` 为通道语料 Commit 的合法祖先；
+- [ ] **`R3. Component & Plugin Tag/Commit/Release Integrity`**：校验 `channels/0.1.json` 中全部 13 个组件与插件的本地 Tag 解引用 Commit SHA、远端正式 GitHub Release（`isDraft=false`、`isPrerelease=false`）及 `SHA256SUMS` 资产完整性；
+- [ ] **`R4. Five-Host Cross-Version Component Compatibility`**：校验五端宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的组件基线满足单调下界（`plugin_baseline <= channel_component`）且通过最新 `mindie-knowledge` 跨版本接口校验；
+- [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
+- [ ] **`R6. README / Org Version Sync & Unix LF Line-Ending Hygiene`**：自动调用 `sync_org_versions.py --check --offline` 与 `check_lf_eol.py`，确保主仓中英文 README 版本表、组织首页与全仓 Unix `LF` 换行零偏差。
+
+此外，人工与流水线复核遵循以下细则：
 
 | 发布前检查项 | 核对标准 |
 | --- | --- |

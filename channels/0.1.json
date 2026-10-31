@@ -192,8 +192,8 @@
       "package": "mindie-agent-agy",
       "version": "0.1.1",
       "tag": "v0.1.1",
-      "commit": "f162dc84e67a222704c2571ad0c5dd98662d3608",
-      "revision": "f162dc84e67a222704c2571ad0c5dd98662d3608",
+      "commit": "58de6516793f7d7b795a69882a973049c4023e9b",
+      "revision": "58de6516793f7d7b795a69882a973049c4023e9b",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
