@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-10-31 17:46 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-10-31 19:03 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">4,754</text>
-  <text x="734" y="144" class="font kpi-sub">6,787 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">4,793</text>
+  <text x="734" y="144" class="font kpi-sub">6,938 total asset downloads</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -81,7 +81,7 @@
   <circle cx="40" cy="369" r="3.5" fill="#7045F5"/>
   <text x="50" y="373" class="mono td-repo">mindie-agent</text>
   <text x="268" y="373" class="font td-cat">Main Entry</text>
-  <text x="368" y="373" class="mono td-sub">v0.1.5</text>
+  <text x="368" y="373" class="mono td-sub">v0.1.6</text>
   <text x="545" y="373" text-anchor="end" class="mono td-num">61 / 54</text>
   <text x="665" y="373" text-anchor="end" class="mono td-bold">1,961</text>
   <text x="815" y="373" text-anchor="end" class="mono td-num">1,411 (441)</text>
@@ -100,26 +100,26 @@
   <circle cx="40" cy="435" r="3.5" fill="#10A37F"/>
   <text x="50" y="439" class="mono td-repo">mindie-agent-codex</text>
   <text x="268" y="439" class="font td-cat">Client Plugin</text>
-  <text x="368" y="439" class="mono td-sub">v0.1.13</text>
+  <text x="368" y="439" class="mono td-sub">v0.1.14</text>
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 2</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">3,935</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">2,845 (450)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">611</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">618</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
   <text x="50" y="472" class="mono td-repo">mindie-agent-cc</text>
   <text x="268" y="472" class="font td-cat">Client Plugin</text>
-  <text x="368" y="472" class="mono td-sub">v0.1.10</text>
+  <text x="368" y="472" class="mono td-sub">v0.1.11</text>
   <text x="545" y="472" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="472" text-anchor="end" class="mono td-bold">2,548</text>
   <text x="815" y="472" text-anchor="end" class="mono td-num">2,016 (322)</text>
-  <text x="920" y="472" text-anchor="end" class="mono td-num">166</text>
+  <text x="920" y="472" text-anchor="end" class="mono td-num">168</text>
   <line x1="24" y1="484" x2="936" y2="484" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="501" r="3.5" fill="#2563EB"/>
   <text x="50" y="505" class="mono td-repo">mindie-agent-kimi</text>
   <text x="268" y="505" class="font td-cat">Client Plugin</text>
-  <text x="368" y="505" class="mono td-sub">v0.1.10</text>
+  <text x="368" y="505" class="mono td-sub">v0.1.11</text>
   <text x="545" y="505" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="505" text-anchor="end" class="mono td-bold">2,877</text>
   <text x="815" y="505" text-anchor="end" class="mono td-num">2,441 (417)</text>
@@ -129,7 +129,7 @@
   <circle cx="40" cy="534" r="3.5" fill="#0EA5E9"/>
   <text x="50" y="538" class="mono td-repo">mindie-agent-dsh</text>
   <text x="268" y="538" class="font td-cat">Client Plugin</text>
-  <text x="368" y="538" class="mono td-sub">v0.1.9</text>
+  <text x="368" y="538" class="mono td-sub">v0.1.10</text>
   <text x="545" y="538" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="538" text-anchor="end" class="mono td-bold">1,582</text>
   <text x="815" y="538" text-anchor="end" class="mono td-num">1,582 (430)</text>
@@ -138,7 +138,7 @@
   <circle cx="40" cy="567" r="3.5" fill="#4285F4"/>
   <text x="50" y="571" class="mono td-repo">mindie-agent-agy</text>
   <text x="268" y="571" class="font td-cat">Client Plugin</text>
-  <text x="368" y="571" class="mono td-sub">v0.1.0</text>
+  <text x="368" y="571" class="mono td-sub">v0.1.1</text>
   <text x="545" y="571" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="571" text-anchor="end" class="mono td-bold">0</text>
   <text x="815" y="571" text-anchor="end" class="mono td-num">0 (0)</text>
@@ -148,11 +148,11 @@
   <circle cx="40" cy="600" r="3.5" fill="#475569"/>
   <text x="50" y="604" class="mono td-repo">knowledge</text>
   <text x="268" y="604" class="font td-cat">Core Runtime</text>
-  <text x="368" y="604" class="mono td-sub">v0.13.7</text>
+  <text x="368" y="604" class="mono td-sub">v0.13.8</text>
   <text x="545" y="604" text-anchor="end" class="mono td-num">0 / 2</text>
   <text x="665" y="604" text-anchor="end" class="mono td-bold">7,711</text>
   <text x="815" y="604" text-anchor="end" class="mono td-num">4,861 (1,751)</text>
-  <text x="920" y="604" text-anchor="end" class="mono td-num">94</text>
+  <text x="920" y="604" text-anchor="end" class="mono td-num">97</text>
   <line x1="24" y1="616" x2="936" y2="616" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="633" r="3.5" fill="#475569"/>
   <text x="50" y="637" class="mono td-repo">remote-dev</text>
@@ -167,11 +167,11 @@
   <circle cx="40" cy="666" r="3.5" fill="#475569"/>
   <text x="50" y="670" class="mono td-repo">coordinator</text>
   <text x="268" y="670" class="font td-cat">Core Runtime</text>
-  <text x="368" y="670" class="mono td-sub">v0.7.0</text>
+  <text x="368" y="670" class="mono td-sub">v0.7.1</text>
   <text x="545" y="670" text-anchor="end" class="mono td-num">0 / 1</text>
   <text x="665" y="670" text-anchor="end" class="mono td-bold">1,408</text>
   <text x="815" y="670" text-anchor="end" class="mono td-num">1,245 (406)</text>
-  <text x="920" y="670" text-anchor="end" class="mono td-num">33</text>
+  <text x="920" y="670" text-anchor="end" class="mono td-num">60</text>
   <line x1="24" y1="682" x2="936" y2="682" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="699" r="3.5" fill="#475569"/>
   <text x="50" y="703" class="mono td-repo">profiler</text>
@@ -224,7 +224,7 @@
   <circle cx="40" cy="864" r="3.5" fill="#0D9488"/>
   <text x="50" y="868" class="mono td-repo">knowledge-vllm-ascend</text>
   <text x="268" y="868" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="868" class="mono td-sub">commit@d3d5bf63</text>
+  <text x="368" y="868" class="mono td-sub">commit@1c7bcad6</text>
   <text x="545" y="868" text-anchor="end" class="mono td-num">0 / 4</text>
   <text x="665" y="868" text-anchor="end" class="mono td-bold">4,368</text>
   <text x="815" y="868" text-anchor="end" class="mono td-num">1,894 (719)</text>
@@ -233,7 +233,7 @@
   <circle cx="40" cy="897" r="3.5" fill="#0D9488"/>
   <text x="50" y="901" class="mono td-repo">knowledge-operators</text>
   <text x="268" y="901" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="901" class="mono td-sub">commit@6f083f81</text>
+  <text x="368" y="901" class="mono td-sub">commit@0ac89226</text>
   <text x="545" y="901" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="901" text-anchor="end" class="mono td-bold">243</text>
   <text x="815" y="901" text-anchor="end" class="mono td-num">243 (115)</text>
@@ -243,7 +243,7 @@
   <circle cx="40" cy="930" r="3.5" fill="#0D9488"/>
   <text x="50" y="934" class="mono td-repo">knowledge-infer-core</text>
   <text x="268" y="934" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="934" class="mono td-sub">commit@b319ab36</text>
+  <text x="368" y="934" class="mono td-sub">commit@8f759165</text>
   <text x="545" y="934" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="934" text-anchor="end" class="mono td-bold">183</text>
   <text x="815" y="934" text-anchor="end" class="mono td-num">183 (86)</text>
@@ -252,7 +252,7 @@
   <circle cx="40" cy="963" r="3.5" fill="#0D9488"/>
   <text x="50" y="967" class="mono td-repo">knowledge-infer-distributed</text>
   <text x="268" y="967" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="967" class="mono td-sub">commit@4cfe3db3</text>
+  <text x="368" y="967" class="mono td-sub">commit@817d48cb</text>
   <text x="545" y="967" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="967" text-anchor="end" class="mono td-bold">178</text>
   <text x="815" y="967" text-anchor="end" class="mono td-num">178 (86)</text>
@@ -262,7 +262,7 @@
   <circle cx="40" cy="996" r="3.5" fill="#0D9488"/>
   <text x="50" y="1000" class="mono td-repo">knowledge-infer-observability</text>
   <text x="268" y="1000" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="1000" class="mono td-sub">commit@13a308e3</text>
+  <text x="368" y="1000" class="mono td-sub">commit@4b3dd86b</text>
   <text x="545" y="1000" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="1000" text-anchor="end" class="mono td-bold">178</text>
   <text x="815" y="1000" text-anchor="end" class="mono td-num">178 (87)</text>
@@ -271,7 +271,7 @@
   <circle cx="40" cy="1029" r="3.5" fill="#0D9488"/>
   <text x="50" y="1033" class="mono td-repo">knowledge-infer-ops-compat</text>
   <text x="268" y="1033" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="1033" class="mono td-sub">commit@bc594941</text>
+  <text x="368" y="1033" class="mono td-sub">commit@c37c9c0f</text>
   <text x="545" y="1033" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="1033" text-anchor="end" class="mono td-bold">144</text>
   <text x="815" y="1033" text-anchor="end" class="mono td-num">144 (66)</text>
@@ -281,7 +281,7 @@
   <circle cx="40" cy="1062" r="3.5" fill="#0D9488"/>
   <text x="50" y="1066" class="mono td-repo">knowledge-agent-engineering</text>
   <text x="268" y="1066" class="font td-cat">Knowledge Repo</text>
-  <text x="368" y="1066" class="mono td-sub">commit@6cf68034</text>
+  <text x="368" y="1066" class="mono td-sub">commit@06f41835</text>
   <text x="545" y="1066" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="1066" text-anchor="end" class="mono td-bold">144</text>
   <text x="815" y="1066" text-anchor="end" class="mono td-num">144 (68)</text>

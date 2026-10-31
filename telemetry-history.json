@@ -235,7 +235,7 @@
         "cumulative_views": 553,
         "pkg_downloads": 32,
         "all_asset_downloads": 112,
-        "latest_release": "v0.1.5"
+        "latest_release": "v0.1.6"
       }
     },
     "awesome-mindie-skills": {
@@ -705,9 +705,9 @@
         "views_14d": 15,
         "views_14d_uniques": 13,
         "cumulative_views": 48,
-        "pkg_downloads": 611,
-        "all_asset_downloads": 762,
-        "latest_release": "v0.1.13"
+        "pkg_downloads": 618,
+        "all_asset_downloads": 769,
+        "latest_release": "v0.1.14"
       }
     },
     "mindie-agent-cc": {
@@ -941,9 +941,9 @@
         "views_14d": 5,
         "views_14d_uniques": 3,
         "cumulative_views": 7,
-        "pkg_downloads": 166,
-        "all_asset_downloads": 299,
-        "latest_release": "v0.1.10"
+        "pkg_downloads": 168,
+        "all_asset_downloads": 301,
+        "latest_release": "v0.1.11"
       }
     },
     "mindie-agent-kimi": {
@@ -1179,7 +1179,7 @@
         "cumulative_views": 3,
         "pkg_downloads": 2208,
         "all_asset_downloads": 2329,
-        "latest_release": "v0.1.10"
+        "latest_release": "v0.1.11"
       }
     },
     "mindie-agent-dsh": {
@@ -1415,7 +1415,7 @@
         "cumulative_views": 10,
         "pkg_downloads": 66,
         "all_asset_downloads": 190,
-        "latest_release": "v0.1.9"
+        "latest_release": "v0.1.10"
       }
     },
     "knowledge": {
@@ -1649,9 +1649,9 @@
         "views_14d": 29,
         "views_14d_uniques": 6,
         "cumulative_views": 37,
-        "pkg_downloads": 94,
-        "all_asset_downloads": 456,
-        "latest_release": "v0.13.7"
+        "pkg_downloads": 97,
+        "all_asset_downloads": 508,
+        "latest_release": "v0.13.8"
       }
     },
     "knowledge-vllm-ascend": {
@@ -1887,7 +1887,7 @@
         "cumulative_views": 74,
         "pkg_downloads": 629,
         "all_asset_downloads": 629,
-        "latest_release": "commit@d3d5bf63"
+        "latest_release": "commit@1c7bcad6"
       }
     },
     "remote-dev": {
@@ -2122,7 +2122,7 @@
         "views_14d_uniques": 7,
         "cumulative_views": 17,
         "pkg_downloads": 95,
-        "all_asset_downloads": 480,
+        "all_asset_downloads": 488,
         "latest_release": "v0.11.2"
       }
     },
@@ -2357,9 +2357,9 @@
         "views_14d": 7,
         "views_14d_uniques": 5,
         "cumulative_views": 8,
-        "pkg_downloads": 33,
-        "all_asset_downloads": 108,
-        "latest_release": "v0.7.0"
+        "pkg_downloads": 60,
+        "all_asset_downloads": 178,
+        "latest_release": "v0.7.1"
       }
     },
     "npu-top": {
@@ -2830,7 +2830,7 @@
         "views_14d_uniques": 0,
         "cumulative_views": 0,
         "pkg_downloads": 68,
-        "all_asset_downloads": 365,
+        "all_asset_downloads": 373,
         "latest_release": "v0.5.4"
       }
     },
@@ -3206,7 +3206,7 @@
         "views_14d_uniques": 6,
         "cumulative_views": 17,
         "pkg_downloads": 42,
-        "all_asset_downloads": 127,
+        "all_asset_downloads": 129,
         "latest_release": "v0.5.3"
       }
     },
@@ -3346,7 +3346,7 @@
         "views_14d_uniques": 8,
         "cumulative_views": 15,
         "pkg_downloads": 35,
-        "all_asset_downloads": 104,
+        "all_asset_downloads": 106,
         "latest_release": "v0.8.1"
       }
     },
@@ -3487,7 +3487,7 @@
         "cumulative_views": 8,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@6f083f81"
+        "latest_release": "commit@0ac89226"
       }
     },
     "knowledge-infer-core": {
@@ -3627,7 +3627,7 @@
         "cumulative_views": 7,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@b319ab36"
+        "latest_release": "commit@8f759165"
       }
     },
     "knowledge-infer-distributed": {
@@ -3767,7 +3767,7 @@
         "cumulative_views": 8,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@4cfe3db3"
+        "latest_release": "commit@817d48cb"
       }
     },
     "knowledge-infer-observability": {
@@ -3907,7 +3907,7 @@
         "cumulative_views": 2,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@13a308e3"
+        "latest_release": "commit@4b3dd86b"
       }
     },
     "knowledge-infer-ops-compat": {
@@ -4047,7 +4047,7 @@
         "cumulative_views": 3,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@bc594941"
+        "latest_release": "commit@c37c9c0f"
       }
     },
     "knowledge-agent-engineering": {
@@ -4187,7 +4187,7 @@
         "cumulative_views": 1,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@6cf68034"
+        "latest_release": "commit@06f41835"
       }
     },
     "mindie-agent-agy": {
@@ -4319,9 +4319,9 @@
         "cumulative_views": 0,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "v0.1.0"
+        "latest_release": "v0.1.1"
       }
     }
   },
-  "updated_at_cst": "2026-10-31 17:46"
+  "updated_at_cst": "2026-10-31 19:03"
 }
