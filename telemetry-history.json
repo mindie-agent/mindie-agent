@@ -705,8 +705,8 @@
         "views_14d": 15,
         "views_14d_uniques": 13,
         "cumulative_views": 48,
-        "pkg_downloads": 680,
-        "all_asset_downloads": 839,
+        "pkg_downloads": 699,
+        "all_asset_downloads": 858,
         "latest_release": "v0.1.15"
       }
     },
@@ -2358,7 +2358,7 @@
         "views_14d_uniques": 5,
         "cumulative_views": 8,
         "pkg_downloads": 60,
-        "all_asset_downloads": 178,
+        "all_asset_downloads": 180,
         "latest_release": "v0.7.1"
       }
     },
@@ -2594,7 +2594,7 @@
         "views_14d_uniques": 3,
         "cumulative_views": 31,
         "pkg_downloads": 629,
-        "all_asset_downloads": 697,
+        "all_asset_downloads": 699,
         "latest_release": "v0.3.0"
       }
     },
@@ -3206,7 +3206,7 @@
         "views_14d_uniques": 6,
         "cumulative_views": 17,
         "pkg_downloads": 42,
-        "all_asset_downloads": 129,
+        "all_asset_downloads": 131,
         "latest_release": "v0.5.3"
       }
     },
@@ -3346,7 +3346,7 @@
         "views_14d_uniques": 8,
         "cumulative_views": 15,
         "pkg_downloads": 35,
-        "all_asset_downloads": 106,
+        "all_asset_downloads": 108,
         "latest_release": "v0.8.1"
       }
     },
@@ -4323,5 +4323,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-10-31 21:57"
+  "updated_at_cst": "2026-11-01 00:28"
 }
