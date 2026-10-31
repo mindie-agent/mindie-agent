@@ -705,9 +705,9 @@
         "views_14d": 15,
         "views_14d_uniques": 13,
         "cumulative_views": 48,
-        "pkg_downloads": 636,
-        "all_asset_downloads": 787,
-        "latest_release": "v0.1.14"
+        "pkg_downloads": 677,
+        "all_asset_downloads": 836,
+        "latest_release": "v0.1.15"
       }
     },
     "mindie-agent-cc": {
@@ -1413,8 +1413,8 @@
         "views_14d": 10,
         "views_14d_uniques": 10,
         "cumulative_views": 10,
-        "pkg_downloads": 66,
-        "all_asset_downloads": 190,
+        "pkg_downloads": 70,
+        "all_asset_downloads": 202,
         "latest_release": "v0.1.10"
       }
     },
@@ -2830,7 +2830,7 @@
         "views_14d_uniques": 0,
         "cumulative_views": 0,
         "pkg_downloads": 68,
-        "all_asset_downloads": 373,
+        "all_asset_downloads": 377,
         "latest_release": "v0.5.4"
       }
     },
@@ -4323,5 +4323,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-10-31 19:04"
+  "updated_at_cst": "2026-10-31 19:42"
 }
