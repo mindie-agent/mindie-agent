@@ -36,6 +36,7 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 
 | Document (English) | 中文 | What It Covers |
 |---|---|---|
+| [**`0.1.6` Patch Notes**](releases/0.1.6.en.md) | [**`0.1.6` 补丁发布说明**](releases/0.1.6.md) | Three-layer auto-update readiness guardrails (`R1–R6` release checklist + flexible component floor verification), corpus `revision` monotonicity, and 5-host plugin updates |
 | [**`0.1.5` Patch Notes**](releases/0.1.5.en.md) | [**`0.1.5` 补丁发布说明**](releases/0.1.5.md) | Introduces the fifth official native host plugin Google Antigravity (`mindie-agent-agy v0.1.0`) with full 7-component adaptation and colloquial-prompt `G0–G5` full-matrix benchmark verification (66 L2/L3 trials + G3/G4/G5 flywheels) |
 | [**`0.1.4` Patch Notes**](releases/0.1.4.en.md) · [Automatic Update Acceptance](releases/0.1.4/automatic-update-acceptance.json) | [**`0.1.4` 补丁发布说明**](releases/0.1.4.md) | Information-gap retrieval, shared explanation budgets, exact references and managed binding updates; complex-task non-regression remains unpassed |
 | [**`0.1.3` Patch Notes**](releases/0.1.3.en.md) | [**`0.1.3` 补丁发布说明**](releases/0.1.3.md) | 4-host (Codex / Claude Code / Kimi Code / DSH) 3-server MCP registration and 5 always-on local component/diagnostic tools, plus `profiler 0.5.1` streaming SHA256 digest and SQLite timeout alignment |
@@ -53,6 +54,7 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 
 | Document (English) | 中文 | Scope |
 |---|---|---|
+| [**Historical Postmortems & Guardrails (`0.0.1 → 0.1.6`)**](historical-issues-and-guardrails.en.md) | [**历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）**](historical-issues-and-guardrails.md) | Systematic `P1–P7` root-cause catalog of historical defects across auto-update, harness lifecycles, timeout races, receipt honesty, knowledge/C6 budgets, benchmark soundness, and A3 dual-Die topology, paired with automated gates |
 | [2026-10-29 Benchmark Oracle Hardening & Archive Re-evaluation](audits/2026-10-23-mindie-bench-integrity.md) | [2026-10-29 基准判分器加固与历史归档复判报告](audits/2026-10-23-mindie-bench-integrity.md) | Real subprocess behavioral oracle hardening across all 20 `mindie-bench` tasks (109 three-state and helper controls passed) and zero-model behavioral re-evaluation across 74 primary trials |
 | [Parallel Architecture Review & Fixes (2026-10-24)](architecture-review-20261024.md) · [2026-10-23 Simplification Record](architecture-simplification-20261023.md) | [并行架构评审与修复（2026-10-24）](architecture-review-20261024.md) | Whole-delivery budgeting, exploration pass-through, SSH cleanup & dual-Die placement, behavior task verifiers, and benchmark evidence boundary corrections |
 | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | Cross-repository review at fixed revisions, measured line/branch coverage, findings, and staged changes |

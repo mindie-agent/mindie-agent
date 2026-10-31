@@ -40,6 +40,7 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
+| [**`0.1.6` 补丁发布说明**](releases/0.1.6.md) | [**`0.1.6` Patch Notes**](releases/0.1.6.en.md) | 自动更新防漏改/漏检三道防线（`R1–R6` 必检门禁 + 灵活组件独立更新下界校验）、全量知识库 `revision` 对齐及 5 大宿主插件配套升级 |
 | [**`0.1.5` 补丁发布说明**](releases/0.1.5.md) | [**`0.1.5` Patch Notes**](releases/0.1.5.en.md) | 新增第五款官方原生插件 Google Antigravity（`mindie-agent-agy v0.1.0`）与 7 大组件双向契约适配，完成口语化报障语料 `G0–G5` 全矩阵基准验证（66 场 L2/L3 + G3/G4/G5 飞轮全过） |
 | [**`0.1.4` 补丁发布说明**](releases/0.1.4.md) · [自动升级验收](releases/0.1.4/automatic-update-acceptance.json) | [**`0.1.4` Patch Notes**](releases/0.1.4.en.md) | 按信息缺口检索、统一精读预算、精确依赖引用、受管组件自动绑定更新；保留复杂任务非退化尚未通过的结论 |
 | [**`0.1.3` 补丁发布说明**](releases/0.1.3.md) | [**`0.1.3` Patch Notes**](releases/0.1.3.en.md) | 四宿主（Codex / Claude Code / Kimi Code / DSH）三路 MCP 注册与 5 个本地组件/诊断工具面完备、`profiler 0.5.1` 流式校验与 SQLite 超时收敛 |
@@ -57,6 +58,7 @@
 
 | 文档 | English | 范围 |
 |---|---|---|
+| [**历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）**](historical-issues-and-guardrails.md) | [**Historical Postmortems & Guardrails (`0.0.1 → 0.1.6`)**](historical-issues-and-guardrails.en.md) | 按 `P1–P7` 七大根因域归档历次版本暴露的自动更新、生命周期、超时竞态、回执诚实性、知识预算/C6、评测防失真与 A3 双 Die 拓扑问题及自动化拦截门禁 |
 | [2026-10-29 基准判分器加固与历史归档复判报告](audits/2026-10-23-mindie-bench-integrity.md) | — | 20 个 `mindie-bench` 任务的真实子进程行为级 Oracle 加固（109 项三态与辅助函数/类控制全过）及 74 轮主实验零模型行为级复判账本 |
 | [并行架构评审与修复（2026-10-24）](architecture-review-20261024.md) · [前次简化记录（2026-10-23）](architecture-simplification-20261023.md) | — | 整包预算与去重记账、探索透传、SSH 清理与双 Die 容量放置、评测判分器与证据边界审查记录 |
 | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | 固定源码版本的跨仓扫描、实测行/分支覆盖率、审查结论与分批修改计划 |
