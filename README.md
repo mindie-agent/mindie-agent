@@ -84,11 +84,11 @@
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-kimi-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.11 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
->   SETUP_OUT=$(python3 "$MINDIE_TMP/scripts/setup.py")
+>   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.11 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
+>   SETUP_OUT=$(UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/setup.py")
 >   echo "$SETUP_OUT"
->   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | python3 -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
->   python3 "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
+>   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | uv run --no-project --python 3.13 python -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
+>   uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
 >   ```
 >   *验证标准*：安装脚本成功返回，告知用户可在会话中输入 `/mindie-agent` 使用。
 >
@@ -96,8 +96,8 @@
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-dsh-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.10 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
->   uv --native-tls run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
+>   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.10 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
+>   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
 >   ```
 >   随后在 DSH Web 的 **Plugins** 页面安装并启用：
 >   ```text
@@ -113,11 +113,12 @@
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-agy-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.1 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
->   mkdir -p ~/.gemini/plugins
->   rm -rf ~/.gemini/plugins/mindie-agent
+>   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.1 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
+>   mkdir -p ~/.gemini/config/plugins ~/.gemini/plugins
+>   rm -rf ~/.gemini/config/plugins/mindie-agent ~/.gemini/plugins/mindie-agent
+>   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/config/plugins/mindie-agent
 >   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/plugins/mindie-agent
->   python3 ~/.gemini/plugins/mindie-agent/scripts/setup.py init --workspace-root "$PWD"
+>   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$PWD"
 >   ```
 >   *验证标准*：`setup.py init` 返回 `status: initialized` 且生成 `~/.config/mindie-agent/agy.json`，插件挂载在 `~/.gemini/plugins/mindie-agent`（也可挂载到工作区 `.agents/plugins/mindie-agent`）。提醒用户在会话中输入 `/mindie-agent` 即可按需启用领域知识与 Skill。
 >

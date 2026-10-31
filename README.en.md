@@ -84,11 +84,11 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-kimi-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.11 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
->   SETUP_OUT=$(python3 "$MINDIE_TMP/scripts/setup.py")
+>   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.11 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
+>   SETUP_OUT=$(UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/setup.py")
 >   echo "$SETUP_OUT"
->   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | python3 -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
->   python3 "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
+>   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | uv run --no-project --python 3.13 python -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
+>   uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
 >   ```
 >   *Verification*: Confirm `install_kimi_plugin.py` succeeds and let the user know they can use `/mindie-agent` inside Kimi Code.
 >
@@ -96,8 +96,8 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-dsh-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.10 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
->   uv --native-tls run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
+>   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.10 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
+>   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
 >   ```
 >   Then install and enable in the DSH Web **Plugins** page:
 >   ```text
@@ -113,11 +113,12 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >   ```bash
 >   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-agy-install"
 >   rm -rf "$MINDIE_TMP"
->   git clone --depth 1 --branch v0.1.1 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
->   mkdir -p ~/.gemini/plugins
->   rm -rf ~/.gemini/plugins/mindie-agent
+>   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.1 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
+>   mkdir -p ~/.gemini/config/plugins ~/.gemini/plugins
+>   rm -rf ~/.gemini/config/plugins/mindie-agent ~/.gemini/plugins/mindie-agent
+>   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/config/plugins/mindie-agent
 >   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/plugins/mindie-agent
->   python3 ~/.gemini/plugins/mindie-agent/scripts/setup.py init --workspace-root "$PWD"
+>   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$PWD"
 >   ```
 >   *Verification*: `setup.py init` returns `status: initialized` and writes `~/.config/mindie-agent/agy.json` with the plugin mounted at `~/.gemini/plugins/mindie-agent` (or `.agents/plugins/mindie-agent` for workspace scope). Let the user know they can type `/mindie-agent` inside Antigravity to activate domain knowledge and Skill guidance on demand.
 >
