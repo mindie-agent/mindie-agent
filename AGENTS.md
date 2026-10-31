@@ -1,7 +1,7 @@
 # MindIE Agent
 
 This repository owns product architecture, domain boundaries, and entry documentation (`docs/`).
-Native Harness plugins live in `mindie-agent-codex`, `mindie-agent-cc`, `mindie-agent-kimi`, and `mindie-agent-dsh`.
+Native Harness plugins live in `mindie-agent-codex`, `mindie-agent-cc`, `mindie-agent-kimi`, `mindie-agent-dsh`, and `mindie-agent-agy`.
 Shared runtime components live in `knowledge`, `remote-dev`, `diagnostics`, `profiler`, `sim`, `npu-top`, and `coordinator`.
 
 ## 1. Core Operating Rules (Always Active)

@@ -14,10 +14,12 @@
 | [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | 本地实战经验如何脱敏沉淀、生成检索导航，并与社区公共知识库双向流转 |
 | [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | 后续设计：Token 预算、渐进加载、经验修订与探索回流；含 OO-Harness 条件化策略复用、组件分工与实施步骤 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 原地解析、纳秒区间计量、Host-Device 异步关联、跨 Run 对比与按需采集设计 |
-| [面向 Agent 的 NPU 性能建模与仿真设计](simulation-system.md) | — | `mindie-sim` 硬件 Roofline、算子流水排布、子图融合与整网并行性能建模 |
-| [A3 预测性能与应达性能双模型方案](a3-performance-modeling-plan.md) | — | 当前实现与外部工具审查、调度边界、shape 连锁、CV/MTE 与 KV/D2D 竞争建模及分层验收 |
-| [A3 最低模型覆盖集](a3-model-coverage.md) | — | se-tools 九个模型的逐层结构、状态、特性与双模型验收要求 |
-| [A3 双模型实现与验收](a3-performance-modeling-acceptance.md) | — | 原生调度对照、实际 A3 数据资产、独立算法检查和剩余验收项 |
+| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.8.1` 五层统一因果建模、4D 效率拆解、SLA 硬件配比推演、算子族源码实现与 280 Decode / 15 Prefill / 856 DSH 集群验证 |
+| [Profiler 与 Sim 的结构复用和实测映射](profiler-sim-structure.md) | — | `mindie-model-structure/1` 结构导出、同构算子集合（Cohort）对账、`auto_segment_decode_forwards` 拓扑引导切分与多集群回放结果 |
+| [`mindie-sim` 接口演进与消费者集成说明](simulation-consumer-migration.md) | — | `0.7.x -> 0.8.x` CLI/API 映射以及在四端宿主插件、`profiler` 与 `mindie-bench` 中的集成状态 |
+| [A3 预测性能与应达性能双模型方案](a3-performance-modeling-plan.md) | — | 历史双模型设计与机制追溯；不再规定新版执行入口或实测门槛 |
+| [A3 最低模型覆盖集](a3-model-coverage.md) | — | 历史 se-tools 九模型的逐层结构与状态参考；新版范围不限定 A3 |
+| [A3 双模型实现与验收](a3-performance-modeling-acceptance.md) | — | 旧实现的调度对照、A3 数据与算法检查记录；不作为重写版替换验收 |
 | [A5 通信展开与竞争校准 TODO](a5-communication-calibration-todo.md) | — | 待 A5 实机采集的 AICPU/AIV 展开、资源竞争、样本协议及回填验收矩阵 |
 | [核心能力落地与知识持续演进设计](core-implementation-and-geak-evolution-design.md) | — | 知识上下文预算、经验沉淀回流与组件化落地记录 |
 
@@ -38,6 +40,7 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
+| [**`0.1.5` 补丁发布说明**](releases/0.1.5.md) | [**`0.1.5` Patch Notes**](releases/0.1.5.en.md) | 新增第五款官方原生插件 Google Antigravity（`mindie-agent-agy v0.1.0`）与 7 大组件双向契约适配，完成口语化报障语料 `G0–G5` 全矩阵基准验证（66 场 L2/L3 + G3/G4/G5 飞轮全过） |
 | [**`0.1.4` 补丁发布说明**](releases/0.1.4.md) · [自动升级验收](releases/0.1.4/automatic-update-acceptance.json) | [**`0.1.4` Patch Notes**](releases/0.1.4.en.md) | 按信息缺口检索、统一精读预算、精确依赖引用、受管组件自动绑定更新；保留复杂任务非退化尚未通过的结论 |
 | [**`0.1.3` 补丁发布说明**](releases/0.1.3.md) | [**`0.1.3` Patch Notes**](releases/0.1.3.en.md) | 四宿主（Codex / Claude Code / Kimi Code / DSH）三路 MCP 注册与 5 个本地组件/诊断工具面完备、`profiler 0.5.1` 流式校验与 SQLite 超时收敛 |
 | [**`0.1.2` 补丁发布说明**](releases/0.1.2.md) · [SSH 认证验收记录](releases/0.1.2/ssh-auth-acceptance.json) | [**`0.1.2` Patch Notes**](releases/0.1.2.en.md) · [SSH Authentication Acceptance](releases/0.1.2/ssh-auth-acceptance.json) | 统一 SSH 凭据、公钥安装与恢复、只读密码回退，macOS / Windows PowerShell / WSL2 真实 SSH 与跨组件复用验收 |
@@ -54,5 +57,6 @@
 
 | 文档 | English | 范围 |
 |---|---|---|
+| [2026-10-29 基准判分器加固与历史归档复判报告](audits/2026-10-23-mindie-bench-integrity.md) | — | 20 个 `mindie-bench` 任务的真实子进程行为级 Oracle 加固（109 项三态与辅助函数/类控制全过）及 74 轮主实验零模型行为级复判账本 |
 | [并行架构评审与修复（2026-10-24）](architecture-review-20261024.md) · [前次简化记录（2026-10-23）](architecture-simplification-20261023.md) | — | 整包预算与去重记账、探索透传、SSH 清理与双 Die 容量放置、评测判分器与证据边界审查记录 |
-| [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | 固定源码版本的跨仓扫描、实测行/分支覆盖率、审查结论与分批修改计划；不代表缺陷已修复或硬件已验收 |
+| [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | 固定源码版本的跨仓扫描、实测行/分支覆盖率、审查结论与分批修改计划 |

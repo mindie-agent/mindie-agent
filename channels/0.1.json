@@ -3,16 +3,16 @@
   "schema_version": "mindie-release-channel/1",
   "track": "0.1",
   "milestone_version": "0.1.0",
-  "current_patch_version": "0.1.4",
-  "release_notes": "docs/releases/0.1.4.md",
-  "release_notes_en": "docs/releases/0.1.4.en.md",
+  "current_patch_version": "0.1.5",
+  "release_notes": "docs/releases/0.1.5.md",
+  "release_notes_en": "docs/releases/0.1.5.en.md",
   "independent_update_allowed": true,
   "update_policy": {
     "independent_update_allowed": true,
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
-      "verified_mechanism": "channels/0.1.json records the product-verified 12-repository + 7-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 8 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback).",
-      "known_boundaries": "As of 2026-10-29, product 0.1.4 verifies knowledge 0.13.7, mindie-bench 0.4.5 and native plugins Codex 0.1.13, Claude Code 0.1.10, Kimi 0.1.10 and DSH 0.1.9. On macOS arm64, normal timers upgraded existing Codex/DSH installations and fully isolated formal legacy Claude Code/Kimi profiles; actual interpreters and fresh native registrations confirm knowledge 0.13.7, remote-dev 0.11.1 and diagnostics 0.5.4. Codex also migrated managed coordinator/profiler/sim module commands. The previously damaged user Kimi 0.1.9 installation required one product recovery invocation, then its original scheduler passed; this is separate from the successful isolated 0.1.8 automatic first hop. An earlier Claude Code loading driver omitted profile environment variables and initialized default state/engine/diagnostics; that attempt is retained and superseded only by a new fully isolated native retest, not claimed as automatic product recovery. Optional absent components were not installed; old generations and user authorization remain. Already-loaded definitions require the host-supported natural reload or fresh process. Failed DSH v0.1.8 publication and Kimi 0.1.9 regression are retained. Historical complex-task overall non-regression remains unpassed. Full source identities, exact installation scopes and failures are in docs/releases/0.1.4/automatic-update-acceptance.json. As of 2026-10-29, product 0.1.3 records verified formal releases profiler 0.5.1 (25c789cd42389c893234c5db20eca67e63b8878a), Claude Code 0.1.9 (4f3450be4af65e0ee755d4d979695f3f6c5bca5e), Kimi 0.1.8 (c33006cc2a89ad0024396cdf838b1bfd6d6b7f35), and DSH 0.1.7 (223eedee381d06cbdbb096dc22e2d79dd5aa0cf2) alongside Codex 0.1.12, completing the three-server MCP registration (knowledge, remote, and components / mindie-tools) and five always-on component CLI / diagnostic tools (diagnostics_status, diagnostics_bundle, coordinator, profiler, sim) across all four host plugins while retaining shared SSH authentication from remote-dev 0.11.1. As of 2026-10-29, product 0.1.2 records verified formal releases remote-dev 0.11.1, coordinator 0.7.0, npu-top 0.3.0, Codex 0.1.12, Claude Code 0.1.8, Kimi 0.1.7 and DSH 0.1.6, and aligns diagnostics to existing formal 0.5.4. Shared SSH authentication passed 19 real cases on macOS, native Windows PowerShell (including inherited Git Bash PATH) and actual WSL2. remote-dev exclusively owns the shared user-private plaintext credentials.json and key maintenance; no OS vault or system/master password is used. The channel retains formal knowledge 0.13.4, while Kimi/DSH initial plugin baselines remain 0.13.3; independent updates may select newer formal components. Exact sources, retained failed attempts, native acceptance and host reload boundaries are recorded in docs/releases/0.1.2/ssh-auth-acceptance.json. As of 2026-10-27, remote-dev 0.10.8, Codex 0.1.11, Claude Code 0.1.7, Kimi 0.1.6 and DSH 0.1.5 are formally published with verified assets and exact-source benchmarks. Missing-input descriptions and caller/not_sent input_repair now support deliberate agent correction. Existing Codex upgraded normally from 0.1.10 to 0.1.11 without a forced update or manual binding edit; all 72 installed package files match the formal wheel, five hooks remain trusted, and user/consent bytes are unchanged. Formal installed-runtime native CLI acceptance and actual calls in the existing Desktop chat both prove missing port -> add only port=22 -> real SSH exit_code=0 with expected stdout. The existing Desktop tool description remains cached until its natural reload; a fresh native process uses the new catalog. Existing Kimi automatically switched to formal 0.1.6 with remote-dev 0.10.8 and retained newer knowledge 0.13.4; its receipt explicitly requires a host catalog reload. DSH + DeepSeek Flash candidate native correction passed, but no claim is made that all four installed hosts automatically upgraded or that NPU performance was measured. See docs/releases/remote-caller-repair-2026-10-27.json. As of 2026-10-26, independent formal releases diagnostics 0.5.4, remote-dev 0.10.7, Codex 0.1.10, Claude Code 0.1.6, Kimi 0.1.5, and DSH 0.1.4 have verified assets and exact-source benchmarks. This does not promote the retained product component inventory or historical product reports. Kimi 0.1.2 automatically switched to 0.1.5 and repaired its native package on the next scheduled check; registration and a new registered MCP process confirm 29 tools, 660000ms timeout, kimi profile, diagnostics 0.5.4 and remote-dev 0.10.7. Codex 0.1.10 is formally published at 3a6b84012c5c0cc0306bf06a1a236dd2638bd06f after migration, locking, and interrupted local activation fixes in merged PR 69. Isolated actual Desktop acceptance migrates published 0.1.8 with 0.1.9 prepared to candidate 0.1.10, verifies 22 remote tools plus five component entries and normal background retirement, and preserves in-flight calls across native refresh. On the existing user installation, one-time native recovery followed by a normal Desktop restart now activates formal 0.1.10: canonical binding and actual MCP processes agree, normal background plugin/component checks report up_to_date, and the host loads 22 remote tools plus five component entries. Actual diagnostics_status, remote_probe, and remote_exec_command calls pass; the idle exclusive update lock is available, five hooks remain trusted and enabled, and consent bytes are unchanged. This first hop required one-time recovery and a user restart, so it is not claimed as automatic success by the legacy updater; no NPU performance acceptance is inferred. Claude Code and DSH formal-source selection is verified, but automatic activation on this user installation is not. See docs/release-compatibility-and-update.md for the current evidence and host refresh boundaries. Historical acceptance follows: The binding cutover stage takes ~10ms on Codex (unavailable_seconds) and ~15ms on Claude Code (activate_binding.seconds), excluding prior runtime build; end-to-end update preparation (side-by-side uv sync, isolated inventory/API probing, and lock acquisition) runs under bounded multi-second/minute budgets and is never claimed as < 500ms. All 8 runtime/evaluation components and all 4 native host plugins (v0.1.2) are formally published on GitHub Releases, byte-verified, and verified on macOS arm64 for formal native session gating and component alignment (docs/releases/0.1.1/native-update-acceptance.json; automated contract CI runs across Ubuntu/macOS/Windows for Codex/CC/Kimi and on Ubuntu for DSH; Claude Code verified in an isolated native marketplace profile as global CC is not installed on the test host; Codex CLI 0.153.4 and Desktop 0.164.0-alpha.11.1 dual-host 5-hook trust achieved via one-time public app-server config API CAS + native_context alignment rather than automatic native plugin manager inheritance, with formal 0.1.2 session admission verified on Desktop 0.164.0-alpha.11.1; already-loaded Kimi/DSH definitions in running processes reload naturally in new processes without terminating active user hosts), and the 0.1.1 offline CPU engineering reproduction & G5 dev pilot report (docs/releases/0.1.1/benchmark-pilot.json) is archived. Codex 0.1.8 separately verifies default discovery of 11 remote-dev and 5 component MCP tools with no knowledge descriptors or npu-top, six real native MCP calls, and an unforced scheduled update check on macOS arm64 / Desktop 0.164.0-alpha.11.1. The initial 0.1.6 updater failed on changed interrupt targets and required one-time recovery using the verified 0.1.8 updater; it is not claimed as an unassisted successful upgrade. See docs/releases/codex-0.1.8-native-acceptance.json for results and retained unsuccessful attempts."
+      "verified_mechanism": "channels/0.1.json records the product-verified 13-repository + 7-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 8 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py).",
+      "known_boundaries": "The 0.1.5 channel pins verified releases across the 8 shared runtime/evaluation components (knowledge 0.13.7, remote-dev 0.11.2, profiler 0.5.3, sim 0.8.1, coordinator 0.7.0, npu-top 0.3.0, diagnostics 0.5.4, mindie-bench 0.4.5), 5 native host plugins (Codex 0.1.13, Claude Code 0.1.10, Kimi 0.1.10, DSH 0.1.9, Google Antigravity 0.1.0), and 7 public domain corpora. All five host plugins expose the remote NPU and deterministic component/diagnostic tools (diagnostics_status, diagnostics_bundle, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
     }
   },
   "corpora": {
@@ -33,12 +33,12 @@
     },
     "knowledge-infer-distributed": {
       "repository": "mindie-agent/knowledge-infer-distributed",
-      "commit": "a35f1a15c11bb8f0ddb717c3187a25a27262ca1c",
+      "commit": "4cfe3db3f7610acbded3a4c34f7551e88aba9b77",
       "units": 39
     },
     "knowledge-infer-observability": {
       "repository": "mindie-agent/knowledge-infer-observability",
-      "commit": "195bc9e0b48588a5ca16d2bb9e47b9490cc7e62c",
+      "commit": "13a308e33f3c24b7222faa296024739351771f48",
       "units": 39
     },
     "knowledge-infer-ops-compat": {
@@ -70,10 +70,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/profiler",
       "package": "mindie-profiler",
-      "version": "0.5.1",
-      "tag": "v0.5.1",
-      "commit": "25c789cd42389c893234c5db20eca67e63b8878a",
-      "revision": "25c789cd42389c893234c5db20eca67e63b8878a",
+      "version": "0.5.3",
+      "tag": "v0.5.3",
+      "commit": "22ed2cadff6656c0b26be8cc77ea2bf48a1c0d21",
+      "revision": "22ed2cadff6656c0b26be8cc77ea2bf48a1c0d21",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -82,10 +82,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/sim",
       "package": "mindie-sim",
-      "version": "0.7.1",
-      "tag": "v0.7.1",
-      "commit": "15f93f3f0247b2653d0e9441eae56959e4d16d4e",
-      "revision": "15f93f3f0247b2653d0e9441eae56959e4d16d4e",
+      "version": "0.8.1",
+      "tag": "v0.8.1",
+      "commit": "f842e7c0ebbfabae836534152af39665419e7908",
+      "revision": "f842e7c0ebbfabae836534152af39665419e7908",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -106,10 +106,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/remote-dev",
       "package": "remote-dev",
-      "version": "0.11.1",
-      "tag": "v0.11.1",
-      "commit": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
-      "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+      "version": "0.11.2",
+      "tag": "v0.11.2",
+      "commit": "85be999811771e03ecc7d78e5e560fac1636e7ef",
+      "revision": "85be999811771e03ecc7d78e5e560fac1636e7ef",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -182,6 +182,18 @@
       "tag": "v0.1.9",
       "commit": "1d67c8ed2e1cc799012650b601198aa8aea3651a",
       "revision": "1d67c8ed2e1cc799012650b601198aa8aea3651a",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-agy": {
+      "name": "mindie-agent-agy",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-agy",
+      "package": "mindie-agent-agy",
+      "version": "0.1.0",
+      "tag": "v0.1.0",
+      "commit": "4f1fb18aeeb264fe1dbcf7342f38c53980438fa7",
+      "revision": "4f1fb18aeeb264fe1dbcf7342f38c53980438fa7",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -279,6 +291,20 @@
       ],
       "plugin_republish_required": true,
       "summary": "Knowledge 0.13.7 and four native plugin releases enable information-gap retrieval, shared explanation budgets, exact prerequisite revisions, and updates for managed Python module bindings. Installed-state acceptance exposed and fixed the legacy Kimi bootstrap-baseline regression and a DSH output-budget race. Codex adds verified native CLI 0.165.0-alpha.1.2 compatibility. mindie-bench 0.4.5 preserves missing knowledge observations and fixes native temporary-file placement. Historical simple-task cost signals and failed complex-task non-regression remain separately documented; automatic upgrades, one-time recovery of the damaged Kimi installation, and host reload evidence are recorded in docs/releases/0.1.4/automatic-update-acceptance.json."
+    },
+    {
+      "patch_version": "0.1.5",
+      "type": "hotfix",
+      "updated_components": [
+        "remote-dev",
+        "profiler",
+        "sim",
+        "knowledge",
+        "coordinator",
+        "mindie-agent-agy"
+      ],
+      "plugin_republish_required": false,
+      "summary": "0.1.5 ecosystem expansion and full G0-G5 benchmark verification: introduces mindie-agent-agy v0.1.0 (4f1fb18aeeb264fe1dbcf7342f38c53980438fa7) as the fifth official native host plugin (Google Antigravity), integrating all 7 shared runtime components (mindie-knowledge 0.13.7, remote-dev 0.11.2, mindie-coordinator 0.7.0, mindie-profiler 0.5.3, mindie-sim 0.8.1, npu-top 0.3.0, mindie-diagnostics 0.5.4) with native Antigravity tool aliases, per-conversationId /mindie-agent session leases, AGY_CONVERSATION_ID coordinator propagation, and brain transcript redaction. Synchronizes formal component pins (remote-dev 0.11.2, profiler 0.5.3, sim 0.8.1) and completes the colloquial-prompt G0-G5 end-to-end benchmark across DSH (deepseek-flash, max) and Codex (gpt-6.1-sol, xhigh) covering 66 G0-G2 L2/L3 trials (100% pass rate on G2), G3 cross-task flywheel (0% -> 100%), G4 RSI exploration (0% -> 100%), and G5 5-episode evolution (A -> B -> C -> D -> E, 5/5 passed)."
     }
   ]
 }

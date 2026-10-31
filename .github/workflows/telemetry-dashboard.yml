@@ -1,6 +1,12 @@
 name: telemetry-dashboard
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'channels/**'
+      - '.github/scripts/update_telemetry_dashboard.py'
+      - '.github/scripts/sync_org_versions.py'
   schedule:
     - cron: '0 */12 * * *'
   workflow_dispatch:
@@ -49,7 +55,27 @@ jobs:
           git -C "$DATA_DIR" add README.md dashboard.zh.svg dashboard.en.svg telemetry-history.json
           if git -C "$DATA_DIR" diff --cached --quiet; then
             echo "No telemetry changes to commit."
+          else
+            git -C "$DATA_DIR" commit -m "chore(telemetry): refresh 12h ecosystem dashboard [skip ci]"
+            git -C "$DATA_DIR" push origin HEAD:refs/heads/telemetry-data
+          fi
+
+      - name: Sync organization profile repository (mindie-agent/.github)
+        if: env.HAS_TELEMETRY_PAT == 'true'
+        env:
+          HAS_TELEMETRY_PAT: ${{ secrets.TELEMETRY_TOKEN != '' }}
+          TELEMETRY_TOKEN: ${{ secrets.TELEMETRY_TOKEN }}
+        run: |
+          ORG_DIR="$RUNNER_TEMP/mindie-org-dot-github"
+          rm -rf "$ORG_DIR"
+          git clone --depth 1 --branch main "https://x-access-token:${TELEMETRY_TOKEN}@github.com/mindie-agent/.github.git" "$ORG_DIR"
+          python3 .github/scripts/sync_org_versions.py --write --offline --org-profile-dir "$ORG_DIR"
+          git -C "$ORG_DIR" config user.name "github-actions[bot]"
+          git -C "$ORG_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$ORG_DIR" add profile/README.md README.md README.en.md
+          if git -C "$ORG_DIR" diff --cached --quiet; then
+            echo "Organization profile versions already up to date."
             exit 0
           fi
-          git -C "$DATA_DIR" commit -m "chore(telemetry): refresh 12h ecosystem dashboard [skip ci]"
-          git -C "$DATA_DIR" push origin HEAD:refs/heads/telemetry-data
+          git -C "$ORG_DIR" commit -m "docs(profile): auto-sync channel versions from mindie-agent"
+          git -C "$ORG_DIR" push origin HEAD:refs/heads/main

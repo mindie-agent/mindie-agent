@@ -60,9 +60,9 @@ Public GitHub Issues are assembled deterministically from **allowlisted metadata
 
 ## 4.1 Update Failure Coverage and Reporting Eligibility
 
-Diagnostics 0.5.3 provides a shared `category="update"` recorder policy based on exception types, structured codes and retained causes. It never analyzes free-form exception text. Missing modules and broken artifacts or protocols are product faults; transport, credentials, permissions, cancellation and local prerequisites remain visible locally. Plugins must record failures at their boundaries instead of only saving an updater receipt or marking every update failure non-reportable.
+`diagnostics` (`v0.5.4`) provides a shared `category="update"` recorder policy based on exception types, structured codes, and retained causes. It never analyzes free-form exception text. Missing modules and broken artifacts or protocols are product faults; transport, credentials, permissions, cancellation, and local prerequisites remain visible locally. Plugins record failures at their boundaries instead of only saving an updater receipt or marking every update failure non-reportable.
 
-Codex 0.1.6, Claude Code 0.1.5, Kimi 0.1.3 and DSH 0.1.3 adopt this policy. Codex also covers component-inheritance helper startup failures and updater children that crash before writing a receipt. Trusted inner incident references are reused across outer boundaries. Plugin baselines pin formal diagnostics 0.5.3 and use the package manager to override older transitive diagnostics pins.
+All four host plugins (Codex `v0.1.13`, Claude Code `v0.1.10`, Kimi `v0.1.10`, and DSH `v0.1.9`) adopt this policy, covering component-inheritance helper startup failures and updater children that crash before writing a receipt. Trusted inner incident references are reused across outer boundaries. Plugin baselines pin formal `diagnostics v0.5.4` and use the package manager to override older transitive diagnostics pins.
 
 Recent local failures include `error_code` and `reporting_eligibility`:
 
@@ -86,7 +86,7 @@ To prevent duplicate Issues and retain pending reports across transient network 
    - Faults sharing the same component version, operation, stage, error category, and internal stack frame location produce a deterministic fingerprint. Switching sessions or host CLIs never creates a duplicate Issue for an already reported bug; read-only GitHub lookup links matching faults to the existing Issue without spamming comments.
 2. **Bounded requests and recoverable pending reports**:
    - Each processing cycle operates under a bounded request deadline. Temporary network or GitHub authentication failures preserve pending records, surface the actual error, and defer retries rather than dropping faults after transient read-only lookup failures.
-   - Only a submission that may have reached GitHub without a response is marked `unknown` and reconciled read-only on the next cycle before any write. A subprocess that never started or a request explicitly rejected by the server is never misclassified as `unknown`.
+   - Only a submission that may have reached GitHub without a response is marked `unknown` and reconciled read-only via **bounded 2-attempt outbound reconciliation** before any write. A subprocess that never started or a request explicitly rejected by the server is never misclassified as `unknown`.
    - If GitHub confirms Issue creation but local receipt persistence fails, the local storage error is reported separately without reversing the completed external result. Disabling the contribution switch stops unsent queue items immediately; re-enabling processes only events recorded under the new consent revision.
 3. **No self-reporting loops**:
    - Failures inside the reporter itself stay strictly local so the reporter never files Issues about its own reporting errors.

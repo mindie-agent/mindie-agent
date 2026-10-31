@@ -12,10 +12,10 @@ Brand accent: `#7045F5`. The same high-contrast mark works on light and dark
 backgrounds. Preserve its aspect ratio and transparent outer margin.
 
 The organization profile and adapter READMEs use the shared logo URL in this
-repository. Internal components use their own project headings and a small
-"Part of MindIE Agent" link instead of repeating the large parent logo.
-[remote-dev](https://github.com/mindie-agent/remote-dev/tree/main/assets/brand)
-has a separate terminal-and-connection mark for its independently usable tools.
+repository. Each shared runtime component and benchmark repository maintains its
+own sibling mark in the unified `#7045F5` violet-and-white MindIE Agent visual
+family under its `assets/brand/` directory (`remote-dev`, `knowledge`,
+`coordinator`, `profiler`, `sim`, `npu-top`, `diagnostics`, and `mindie-bench`).
 
 The Codex plugin bundles the logo and icon in both its plugin and entry Skill
 assets so native presentation works offline. When replacing the parent mark,

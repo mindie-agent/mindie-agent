@@ -14,7 +14,9 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 | [Knowledge & Experience System](knowledge-system.en.md) | [知识与经验闭环设计](knowledge-system.md) | How troubleshooting sessions are redacted, indexed into lightweight Markdown packages, and shared with the community |
 | [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | Proposed token budgets, progressive loading, `workflow` decision experience, knowledge growth control, and `L4` exploration feedback, with source comparisons and acceptance criteria |
 | [Profiler System Design](profiler-system.en.md) | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | In-place Ascend profiling analysis, nanosecond interval accounting, Host-to-Device correlation, cross-run comparison, and controlled online capture |
-| [NPU Performance Modeling & Simulation Design](simulation-system.md) | [面向 Agent 的 NPU 性能建模与仿真设计](simulation-system.md) | `mindie-sim` roofline bounds, operator pipeline modeling, subgraph fusion estimation, and distributed parallelism modeling |
+| [General Performance Modeling System](simulation-system.md) | [面向 Agent 的通用性能建模系统](simulation-system.md) | `mindie-sim v0.8.1` 5-layer unified causal modeling, 4D efficiency breakdown, SLA hardware scaling solver, operator family lowerings, and 280 Decode / 15 Prefill / 856 DSH fleet verification |
+| [Shared Structure & Measured Attribution](profiler-sim-structure.md) | [Profiler 与 Sim 的结构复用和实测映射](profiler-sim-structure.md) | `mindie-model-structure/1` structure export, isomorphic Cohort reconciliation, `auto_segment_decode_forwards` topology-guided segmentation, and multi-cluster replay results |
+| [Simulation Interface Evolution & Consumer Integration](simulation-consumer-migration.md) | [`mindie-sim` 接口演进与消费者集成说明](simulation-consumer-migration.md) | `0.7.x -> 0.8.x` CLI/API mapping and integration across all four host plugins, `profiler`, and `mindie-bench` |
 | [Core Implementation & Knowledge Evolution Design](core-implementation-and-geak-evolution-design.md) | [核心能力落地与知识持续演进设计](core-implementation-and-geak-evolution-design.md) | Context token budget, experience distillation loop, and component implementation records |
 
 ## Runtime Lifecycle & Engineering Specifications
@@ -34,6 +36,7 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 
 | Document (English) | 中文 | What It Covers |
 |---|---|---|
+| [**`0.1.5` Patch Notes**](releases/0.1.5.en.md) | [**`0.1.5` 补丁发布说明**](releases/0.1.5.md) | Introduces the fifth official native host plugin Google Antigravity (`mindie-agent-agy v0.1.0`) with full 7-component adaptation and colloquial-prompt `G0–G5` full-matrix benchmark verification (66 L2/L3 trials + G3/G4/G5 flywheels) |
 | [**`0.1.4` Patch Notes**](releases/0.1.4.en.md) · [Automatic Update Acceptance](releases/0.1.4/automatic-update-acceptance.json) | [**`0.1.4` 补丁发布说明**](releases/0.1.4.md) | Information-gap retrieval, shared explanation budgets, exact references and managed binding updates; complex-task non-regression remains unpassed |
 | [**`0.1.3` Patch Notes**](releases/0.1.3.en.md) | [**`0.1.3` 补丁发布说明**](releases/0.1.3.md) | 4-host (Codex / Claude Code / Kimi Code / DSH) 3-server MCP registration and 5 always-on local component/diagnostic tools, plus `profiler 0.5.1` streaming SHA256 digest and SQLite timeout alignment |
 | [**`0.1.2` Patch Notes**](releases/0.1.2.en.md) · [SSH Authentication Acceptance](releases/0.1.2/ssh-auth-acceptance.json) | [**`0.1.2` 补丁发布说明**](releases/0.1.2.md) · [SSH 认证验收记录](releases/0.1.2/ssh-auth-acceptance.json) | Shared SSH credentials, public-key installation and recovery, read-only password fallback, and real SSH and cross-component acceptance on macOS, Windows PowerShell, and WSL2 |
@@ -50,5 +53,6 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 
 | Document (English) | 中文 | Scope |
 |---|---|---|
+| [2026-10-29 Benchmark Oracle Hardening & Archive Re-evaluation](audits/2026-10-23-mindie-bench-integrity.md) | [2026-10-29 基准判分器加固与历史归档复判报告](audits/2026-10-23-mindie-bench-integrity.md) | Real subprocess behavioral oracle hardening across all 20 `mindie-bench` tasks (109 three-state and helper controls passed) and zero-model behavioral re-evaluation across 74 primary trials |
 | [Parallel Architecture Review & Fixes (2026-10-24)](architecture-review-20261024.md) · [2026-10-23 Simplification Record](architecture-simplification-20261023.md) | [并行架构评审与修复（2026-10-24）](architecture-review-20261024.md) | Whole-delivery budgeting, exploration pass-through, SSH cleanup & dual-Die placement, behavior task verifiers, and benchmark evidence boundary corrections |
-| [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | Cross-repository review at fixed revisions, measured line/branch coverage, findings, and staged changes; not a claim that defects are fixed or hardware acceptance is complete |
+| [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | Cross-repository review at fixed revisions, measured line/branch coverage, findings, and staged changes |

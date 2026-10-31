@@ -1,8 +1,8 @@
 # 面向 MindIE Agent 的 Profiler 系统设计
 
-[English](profiler-system.en.md) · [系统架构](architecture.md) · [设计原则](design-principles.md) · [上下文与经验设计](knowledge-context-and-exploration.md) · [文档中心](README.md)
+[English](profiler-system.en.md) · [系统架构](architecture.md) · [结构复用与实测映射](profiler-sim-structure.md) · [设计原则](design-principles.md) · [上下文与经验设计](knowledge-context-and-exploration.md) · [文档中心](README.md)
 
-`mindie_profiler` 是独立仓库 [`mindie-agent/profiler`](https://github.com/mindie-agent/profiler) 维护的昇腾（Ascend）NPU 性能采集、原地解析与对比组件（提供 `mindie-profiler` CLI 与 Python 接口），与诊断上报仓库 [`diagnostics`](https://github.com/mindie-agent/diagnostics) 和四层仿真求解仓库 [`sim`](https://github.com/mindie-agent/sim) 各自独立建仓、职责正交。
+`mindie_profiler` 是独立仓库 [`mindie-agent/profiler`](https://github.com/mindie-agent/profiler) 维护的昇腾（Ascend）NPU 性能采集、原地解析与对比组件（提供 `mindie-profiler` CLI 与 Python 接口），与诊断上报仓库 [`diagnostics`](https://github.com/mindie-agent/diagnostics) 和性能建模仓库 [`sim`](https://github.com/mindie-agent/sim) 各自独立建仓、职责正交。
 
 其核心目标是：**将昇腾 Profiling 产物的格式适配、纳秒级区间核算、Host-Device 异步调用关联与跨 Run 可比性校验固化为确定性、低开销的封闭工具；让通用编程 Agent 无需搬运 GB 级原始文件或重复编写底层解析脚本，即可快速获得可追溯的性能证据并验证端到端优化收益。**
 
@@ -46,12 +46,14 @@ flowchart LR
 | 组件 | 核心职责 | 明确不做的事（边界） |
 | --- | --- | --- |
 | **`mindie_profiler`**（独立仓库 [`profiler`](https://github.com/mindie-agent/profiler)） | 产物发现、Schema 校验、纳秒区间计量、变体聚合、Host-Device 关联、跨 Run 事实对比、显存归因、在线采集窗口控制 | 不维护跨轮 LLM 会话状态、不估算宿主模型 Token 账单、不在 CPU 解析路径 `import torch_npu`、不内置复杂流水周期求解或子图融合仿真（统一委托给独立建模仓库 [`mindie_sim`](simulation-system.md)） |
-| **`mindie_sim`（`mindie-sim`）** | 硬件规格与热态频率下界、算子内微阶段周期依赖图最大环均值求解、Phase 0 子图跨界融合流量/关键路径仿真、整网并行推演（桥接 `msmodeling` / `cannsim` / `npusim`） | 不解析实测 Profiling DB/CSV/Trace 原始事件表；仅接收结构化图/配置与 `mindie_profiler` 实测摘要进行仿真求解与三值对齐 |
+| **`mindie_sim`（`mindie-sim`）** | 复用模型目录、层计划和算子配方展开声明结构（导出 `mindie-model-structure/1`）；由五层因果执行引擎计算算子、子图、纯模型与服务成本，输出 4D 效率拆解与 SLA 配比方案 | 原始 Profiling 解析和实测张量契约由 `profiler` 统一维护；仅显式观测导入路径按需加载 `profiler`，普通仿真无 `profiler` 依赖 |
 | **宿主 Agent + Skill** | 理解用户性能目标（TTFT/TPOT/吞吐/算子时延）、按需调用 `mindie-profiler` 子命令、结合上下文提出假设并设计最小验证实验 | 不把死板的排查步骤写进工具源码，不在本地全量拉取 GB 级原始 Trace |
 | **`remote-dev` + `coordinator`** | 在数据所在远端主机/容器内原地运行 `mindie-profiler` 及受管离线导出作业（`torch_npu.profiler.analyse`），管理设备与端口租约 | 不新建独立的性能任务队列或第二套运行身份（统一复用 `run_id`） |
 | **`npu-top`** | 提供同时间窗口的设备温度、功耗、AICore 频率与显存采样序列 | 不脱离硬件降频信号位仅凭单一温度阈值（如 `>= 85°C`）直接宣判降频 |
 | **`knowledge`（及领域知识仓）** | 存储经过验证的测量与约束基线（`axiom` / `measurement`）、采集与关联规程（`sop`）、瓶颈定界决策经验（`workflow`）与算子/图优化变换（`mutator`），支撑系统 `L1–L4` 架构闭环 | 不收纳每次运行的原始 Trace 或无复用意义的单次 Top-K 报表 |
 | **`mindie-bench`** | 在固定输入、精度裁判与同构环境下验证端到端性能收益 | 不作为日常线上 Profiling 工具的唯一调用入口 |
+
+模型结构与实测解析各司其职：`mindie-sim` 导出 `mindie-model-structure/1`，`mindie-profiler` 将原始事件关联至声明节点或融合子图（如 `MlaPrologV3`、`LightningIndexer`），聚合重复层的同构集合（Cohort），并通过 `auto_segment_decode_forwards` 完成拓扑引导的 Decode 主体自动切分。详细契约与验证结果见[结构复用与实测映射](profiler-sim-structure.md)。
 
 ---
 
@@ -163,9 +165,9 @@ flowchart TB
 
 - **显式阶段与 Step 边界**：`inventory` 自动提取 DB 中的 `ProfilerStep#` 与 `MSTX_EVENTS` 阶段标记（区分 `warmup`、`prefill`、`decode`、`draft`、`verify`、`graph_capture`）；若源文件无标记，要求调用方显式传入 `--window START:END` 或 `--full-range`，绝不靠 Kernel 周期性规律猜测 Step。
 - **混合架构（Dense + MoE + MTP）层切分与主流选择契约**：
-  - **主计算流识别**：选择主计算 `streamId` 时必须按窗口内累计设备执行时长最大值（`argmax_s sum(duration_ns)`）判定，禁止取首个出现事件的 `streamId`（易误选通信辅助流或事件监听流）。
-  - **MLA 子算子内聚**：`MlaPrologV3`、`KvQuantSparseFlashAttention`（`SFA`）及 KV Cache Scatter/Update 属于同一 Transformer 层的 `Attention (MLA)` 内部子算子，严禁将其切分为独立层；在统计 `Attention` vs `MoE` 占比时，单层内的 `AllReduce`/`Dispatch`/`Combine` 归入对应语义块，不把通信算子误当作层边界。
-  - **Dense 前置层 + MoE 主干层 + MTP Draft 层统一 Step 归并**：针对 DeepSeek-V3 / Kimi-K3 / GLM-5 等“前 $K$ 层 Dense + 后 $M$ 层 MoE + 1–2 层 MTP”混合架构，同一 Decode Step 内的 Dense 层、MoE 层与 MTP 验证/起草层必须归并为单个完整 Step（例如 `3 Dense + 75 MoE + 1 MTP = 79 Layers / Step`），严禁按算子类型突变将单个 Step 误拆为 3 个伪 Step。
+  - **主计算流只是观察视角**：若需选取主计算 `streamId`，按窗口内累计设备执行时长最大值（`argmax_s sum(duration_ns)`）判定，禁止取首个出现事件；该视角不能证明层或 Step 边界。
+  - **结构来源与实测关联分开**：Attention 类型、Dense/MoE 层计划及可选 MTP/DSpark 结构复用 `sim` 的声明。`MlaPrologV3`、SFA 与 KV Update 等名称可提供语义候选，确认它们属于哪一层仍需 Host 模块关联或显式事件绑定；不得按 Kernel 顺序或重复次数补造层号。
+  - **可选路径保持可选**：模型配置包含 MTP 不代表本次窗口执行了 MTP。Dense、MoE、draft、verify 是否属于同一次迭代，由原生标记或调用方给定窗口确定；不得按算子类型突变拆出伪 Step，也不得用模型层数强行拼成完整 Step。
 - **投机采样（Speculative Decoding / DSpark）**：不仅统计单次 `draft` / `verify` 的设备耗时，还在报告与对比中关联服务侧的 `mean_acceptance_length` 与 `acceptance_rate`——防止“单次 Verify Kernel 变快但接受长度下降，导致端到端 TPOT 劣化”的假优化。
 - **多维并行与跨 Rank 统计**：按同质角色分组（例如不同 PP Stage 不混算均值）。同时报告 `median_rank_p50` 与**逐 Step 最慢 Rank（`max_rank_per_step`）**分布，防止慢 Rank 轮换时被单 Rank 中位数掩盖长尾。
 
@@ -180,7 +182,7 @@ flowchart TB
 | 子命令 | 典型调用场景 | 核心输入参数 | 有界输出内容 |
 | --- | --- | --- | --- |
 | **`inventory`** | 首次拿到目录或文件，快速盘点有什么数据、能否回答当前问题 | `--root <dir_or_file>` | 发现的 Rank 列表、DB/CSV/JSON 路径与大小、可用表清单（含是否有 `PYTORCH_API` / `TASK_PMU_INFO`）、原生 Step/MSTX 窗口列表、采集起止时间跨度 |
-| **`analyze`** | 计算指定窗口的时间线核算、语义块拆解与变体热点 | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel` | 窗口时间指标（`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`）、6 大语义块占比、带 Shape/Dtype 与源表 Locator 的 Top-K 热点、跨 Rank P50/最慢 Rank、AICPU/PMU 摘要 |
+| **`analyze`** | 计算指定窗口的时间线核算、语义块拆解与变体热点 | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel`；可选 `--structure`、`--bindings` | 窗口时间指标（`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`）、6 大语义块占比、带 Shape/Dtype 与源表 Locator 的 Top-K 热点、跨 Rank P50/最慢 Rank、AICPU/PMU 摘要；提供结构时附带 `structure_mapping` |
 | **`correlate`** | 针对某段设备空隙或热点 Kernel，下钻追查对应的 Host 调用栈与下发关系 | `--root`, `--window START:END`, `--rank`, `--kernel-name <pat>` 或 `--min-gap-ms <val>` | 关联的 `PYTORCH_API` / `MSTX_EVENTS` 同线程父调用栈、`CANN_API` 下发耗时、Host 到 Device 启动延迟及未关联事件比例 |
 | **`compare`** | 优化前后两次 Run 的结构差异与耗时分布 A/B 对比 | `<baseline_report.json> <candidate_report.json>` | 工作负载与环境可比性核查、算子序列/融合/Shape 结构变化、对齐 Step/语义块/算子变体的 P50 差值与置信区间 |
 | **`sql`** | 标准视图无法覆盖的新算子或特殊字段自定义探索 | `--db <path>`, `--query "<SELECT ...>"`, `--limit 50`, `--timeout-s 10` | 强制只读（`mode=ro` + `query_only=ON`）与行数/超时受限的查询结果，支持自动关联 `STRING_IDS` |
@@ -196,6 +198,18 @@ flowchart TB
    - 严格区分同一时间点的可加组件（`included_in_sum`）与不同阶段的独立峰值，如实输出未归因残差（`residual_bytes`）。
 3. **三值分离的算子理论建模（`theoretical_model.py` & `tensor_cast_provider.py`）**
    - 报告中严格并列区分三个数值：实测设备耗时 **`measured_device_ms`**、基于显式 Shape/Dtype 与硬件规格计算的单算子 Roofline 下界 **`ideal_hardware_lower_bound_ms`**、以及由固定版本外部 Provider（如 `msmodeling` / `tensor_cast`）给出的 **`model_predicted_ms`**。缺少 Shape 或硬件映射时保持 `unmodeled`（`None`），绝不用预测值冒充实测值。
+
+### 6.3 共享模型结构、同构 Cohort 与 Decode 自动切分
+
+1. **结构导出与事件关联（`--structure`）**：
+   - `mindie_sim.structure.export_structure` 通过图 Builder 与实现配方导出无时延的 `mindie-model-structure/1`（独立 `OpSpec` DAG 可通过 `export_op_structure` 导出）；`mindie-profiler analyze --structure FILE` 直接消费该清单，无需导入 `mindie_sim`。
+   - 可选传入 `--bindings FILE`（显式事件/节点关系或 Host/Module 范围）、`--correlation FILE`（Host 调用链）与 `--module-trace FILE`（验证了 DB SHA256 的同步模块记录）。
+2. **证据分级与同构集合（Cohort）统计**：
+   - `structure_mapping`（`mindie-profile-structure-mapping/1`）严格区分仅张量匹配的 `candidate` / `ambiguous` 与具备确切调用证据的 `bound`。
+   - 对于多层重复的同构 Transformer 块，自动聚合成同构集合（`cohorts`），输出实测调用数、单次 Mean/P50、`activity_sum_ns` 与 `busy_union_ns`，供 `python -m mindie_sim.cohort_comparison` 直接完成算子级对账。
+3. **拓扑引导的 Decode 主体自动切分（`auto_segment_decode_forwards`）**：
+   - `mindie_profiler.decode_segmentation` 结合统一事件流与 `ModelSpec.layer_plans` 全层拓扑，自动切分每次完整 Decode 主体 Forward 的设备跨度（`body_forward_span_ms`），剥离跨 Step 空泡与异步 `AI_CPU` 尾等待，并从真实 Block-Table 恢复活跃 Batch，与 `mindie-sim` 端到端预测对账。
+   - 在昇腾 A2 同步模块回放（18,000/18,000 事件 100% 绑定）、A3/A5 **280 个 Decode 用例 + 15 个 Prefill 用例**（全部 `<= 15%` 误差）以及 **856 个 DSH 集群 / 561 个盲测用例（98.25% `<= 15%` 误差）**上完成全量验证；详见[结构复用与实测映射](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总)。
 
 ---
 

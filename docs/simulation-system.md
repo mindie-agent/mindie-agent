@@ -1,235 +1,126 @@
-# 面向 MindIE Agent 的 NPU 仿真与边界求解系统设计（`mindie-sim`）
+# 面向 Agent 的通用性能建模系统（`mindie-sim`）
 
-[系统架构](architecture.md) · [Profiler 系统设计](profiler-system.md) · [设计原则](design-principles.md) · [上下文与经验设计](knowledge-context-and-exploration.md) · [文档中心](README.md)
+[系统架构](architecture.md) · [Profiler 系统设计](profiler-system.md) · [结构复用与实测映射](profiler-sim-structure.md) · [设计原则](design-principles.md) · [消费者迁移指南](simulation-consumer-migration.md) · [文档中心](README.md)
 
-**实现边界与 A3 后续工作**：本文描述四层目标设计，不代表所有层级已具备实测预测能力。2026-10-20 的源码审查、框架调度与 shape 传播、CV/MTE 与 KV/D2D 资源竞争建模方案见 [A3 预测性能与应达性能双模型方案](a3-performance-modeling-plan.md)。2026-10-20 基线的整网层主要是调用方阶段耗时的情景分解；后续双模型实现、九模型接入及尚未通过的性能精度验收见 [当前实现与验收记录](a3-performance-modeling-acceptance.md)。外部工具也需要逐项核验设备支持与框架语义。
+`mindie-sim`（Python 包 `mindie_sim`，当前正式版本 `v0.8.1`）是面向编程 Agent 的硬件无关、机理优先（Mechanism-First）性能建模组件。它从模型结构、算子实现和硬件资源声明出发，用**同一个因果执行引擎**计算算子、子图、纯模型与服务场景的成本，并提供 **4D 硬件效率拆解**（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、**SLA 硬件配比推演**与 **`mindie-model-structure/1` 结构导出**。
 
-`mindie_sim`（独立仓库 [`sim`](https://github.com/mindie-agent/sim)，CLI 与包名 `mindie-sim` / `mindie_sim`）是与实测 Profiling 仓库（[`profiler`](https://github.com/mindie-agent/profiler)）和诊断上报仓库（[`diagnostics`](https://github.com/mindie-agent/diagnostics)）完全独立建仓的 **昇腾（Ascend）NPU 仿真、理论边界求解与跨算子融合分析组件**。
-
-其核心目标是：**参考 `cannbot`（`ops/npu-arch`、`pipeline_schedule_model`、`ops-simulator`）、`cannsim` 与 `msmodeling`（`tensor_cast`），提供从底层硬件规格、算子内微阶段流水、算子间子图融合到整网多维并行的完整仿真建模能力；将可编码的数学求解与容量核算固化为确定性引擎，同时严格禁止将源码特化逻辑、未校准阶段耗时或模拟器标称值硬编码为伪实测结论。**
+厂商与芯片型号（如昇腾 910B / A3 910C / A5 950、GPU 等）仅用于选择硬件资源声明与输入适配器，不在执行循环中硬编码专用的经验倍率或时间公式。
 
 ---
 
-## 1. 为什么需要将 `mindie-sim` 独立为专用仿真组件？
+## 1. 目标与建模边界
 
-在复杂的昇腾算子与大模型推理优化（如 Kimi K3 / A5 `DP4 × TP8 × EP64 × DCP8`、`FlashMLA C8`、`MLAPO` 与 `MoE` 融合调优）中，仅靠实测 Profiling（`mindie_profiler`）或单算子粗粒度 Roofline 公式存在三类明显局限：
+`mindie-sim` 的核心目标是提供跨形状、跨模型、跨硬件与并行配置的可靠性能预测与瓶颈定界。系统将以下三个维度显式解耦管理：
 
-1. **名称与职责正交**：
-   - `modeling` 一词在 LLM 研发中极易与模型结构定义（如 `modeling_deepseek.py`）混淆；使用 **`mindie-sim`（`mindie_sim`）** 明确表达其**硬件约束仿真、流水线周期求解与子图/整网性能推演**职责。
-   - `mindie_profiler` 负责**实测产物的采集、原地解析与 A/B 事实对比**；`mindie-sim` 负责**改代码前后的理论下界核算、可融合性预判、微阶段周期求解与敏感性分析**。两者职责正交，通过标准结构化 JSON 对齐，避免单一组件职责膨胀。
-2. **粗粒度 Roofline 无法指导复杂流水与跨界融合决策**：
-   - 单算子总 FLOPs / 峰值算力只能给出理想下界，无法回答“为什么放宽 `PV UB` 或 `Score L0C` 双缓冲后墙钟耗时毫无改善？”（需要 36 节点多 Pipe 周期依赖图求解最大环均值 `II`）；
-   - 也无法在动手改代码前回答“当前应该抠单算子内部指令，还是先把上游 `MLAPO` 输出量化与下游 `pack` 融合掉？”（需要子图级 GM 往返流量核算与并发分支关键路径 $\max(P+C, Q+G)$ 仿真）。
-3. **防止 Agent 陷入“捏造耗时填模型”或“拿模拟器/短采当持续实测”的陷阱**：
-   - 平台 `.ini` 配置文件、模拟器（`cannsim` / `npusim`）天井、短采 Boost 频率与长稳态热降频（Sustained Thermal Clock）之间存在显著差异。必须由专用仿真组件显式管理输入证据层级与可信度边界。
+- **结构正确性（Structural Fidelity）**：严格保留张量 Shape、Dtype、Layout、实际控制分支、物化拷贝、Kernel 边界、数据/流依赖、资源归属与片上容量。消费者算子不能在输入就绪前执行，真实发生的显存拷贝不能凭空消失，绑定在特定计算核或流上的任务不能借用其他核的吞吐供给。
+- **时间建模精度（Timing Fidelity）**：按分析需求选择资源包络（Resource Envelope）、阶段/分块流水（Staged / Tiled Pipeline）或源码级详细程序。不同粒度共享同一套因果执行引擎，无需为了消除单个 Kernel 的微小残差而在模拟器中重写编译器或运行时。
+- **校准与独立验证（Calibration & Validation）**：实测 Profiling 数据既可在声明适用域内校准资源或原语响应曲线，也可作为独立盲测集（Held-out Set）检验预测精度；没有实测数据时，系统直接运行解析机理模型。
+
+系统严禁按模型名称硬编码经验倍率、整网残差回填、固定服务时间底板，或从端到端 TTFT/TPOT 反向拟合单算子参数。物理工作量始终由模型结构与算子契约正向推导。
 
 ---
 
-## 2. 架构边界与四层仿真体系
+## 2. 自底向上的五层组合架构
 
-### 2.1 组件协作关系
+五层结构代表自底向上的组合层次，全部复用同一个因果事件驱动引擎：
 
-```mermaid
-flowchart LR
-    A["宿主 Agent<br/>源码提取 · 提出候选 · 决策"] -->|"1. Phase 0 子图融合与边界仿真"| S["mindie-sim<br/>hardware / subgraph / pipeline / net"]
-    P["mindie_profiler<br/>实测耗时 · PMU · 暴露通信"] -->|"实测校准数据注入"| S
-    E["外部底座（按需只读接入）<br/>CANN .ini · cannsim · npusim · msmodeling"] --> S
-    S -->|"结构化下界 · 限制环 · 可融合收益区间"| A
-    A -->|"2. 触发预置零负担准入阶梯 G0–G3"| G["Gate Runner (remote-dev / mindie-bench)"]
-```
-
-| 组件 | 唯一核心职责 | 明确不做的事（防重复造轮子边界） |
+| 层次 | 输入与核心职责 | 工程产出与边界 |
 | --- | --- | --- |
-| **`mindie-sim`（`mindie_sim`）** | 四层仿真与求解：硬件规格/片上容量核算、算子内微阶段周期依赖图求解、子图跨算子融合与关键路径分析、整网多维并行推演（桥接 `msmodeling` / `npusim`） | 不解析实测 Profiling DB/CSV/Trace 原始事件表、不管理远端进程或 NPU 租约、不维护跨会话知识库 |
-| **`mindie_profiler`** | 实测 Profiling 采集控制、`inventory / analyze / correlate / compare / sql` 原地解析与跨 Run 事实对比 | 不内置复杂流水图求解器或子图融合推演逻辑；需要理论对照时直接调用 `mindie_sim` 公开接口 |
-| **宿主 Agent + Skill** | 从 C++/Python 源码提取微阶段拓扑或子图结构，调用 `mindie-sim` 预判收益边界，先定跨算子融合边界再做单算子调优 | 不手写临时最大环均值求解脚本，不凭感觉捏造未测微阶段耗时 |
-| **`mindie-bench`** | 评测驱动器、预置零负担准入脚手架（`G0–G3` Gate Runner）与独立裁判 | 100% `import` 调用 `mindie_sim` 与 `mindie_profiler`，严禁在评测仓内复制建模公式或求解器 |
-
-### 2.2 自底向上的四级仿真粒度（避免与系统架构 `L1–L4` 及片上 `L1 Buffer` 混淆，统一按仿真粒度命名）
+| **1. 物理资源与服务**<br/>（Physical Resources & Services） | 容量、工作量单位、供给速率、参与核数、片上缓冲（`L1 Buffer / L0A / L0B / L0C / UB / L2 Cache`）与互联链路；处理共享资源竞争与有限流水深度 | 基于 `Hardware` / `Device` / `Link` 声明计算 Cube、Vector、MTE/HBM 搬运与集合通信链路的执行耗时与重叠率 |
+| **2. 算子族与源码实现**<br/>（Operator Families & Lowerings） | 语义算子与显式软件实现选择（`runtime.kernels.lowerings`），生成资源包络、分块流水或源码级资源程序；保留真实 Kernel 调用边界 | 支持通用解析配方及 GDN Prefill、GQA、MLA Decode、MLA Prolog、LightningIndexer、RMSNorm、AddRMSNorm、Grouped GEMM、动态 INT8 量化等显式源码实现 |
+| **3. 结构与子图**<br/>（Structure & Subgraphs） | 组合投影、Attention、FFN/MoE、状态更新、布局转换与 `DP`/`TP`/`EP`/`PP`/`DCP`（Decode Context Parallelism）/`DSA-CP`（DeepSeek Sparse Attention Context Parallelism）/`PCP`（Prefill Context Parallelism）通信；处理流间依赖、EP Rendezvous 与显式子图融合（`native_fusion`） | 通过 `graph_costs` / `graph` 计算子图关键路径、流间重叠、片上缓存可行性与融合前后 HBM 流量变化 |
+| **4. 纯模型前向**<br/>（Pure Model Forward） | 完整模型层计划（`LayerPlan`）展开、算子重复次数、累计成本与设备图完成时间；不引入外部请求到达或服务排队 | `operators --scope model` 输出独立算子成本之和，`graph --scope model` 与 `predict(scope="body"\|"model")` 输出纯模型前向时延与 4D 效率拆解 |
+| **5. 服务约束与 SLA 求解**<br/>（Serving Constraints & SLA Solver） | 在纯模型成本之上叠加请求到达、Continuous Batching、KV Cache 容量、PD 分离与 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 并行拓扑及 Host 调度开销，评估 TTFT / TPOT | 输出请求级服务指标，并通过 `scale_case_hardware` / `solve_hardware_sla_throughput` 提供面向目标 TPOT（如 `<= 30ms`）的最小卡数、最大可行并发 `B* = min(B*_SLA, B*_VRAM)`、最优并行拓扑与硬件缩放推演 |
 
 ```mermaid
-flowchart TB
-    S_NET["整网与多维并行仿真层（net / tensor_cast）<br/>DP×TP×EP×PP×DCP + DSpark 接受率摊销 + Prefix Cache 命中折算 → Step / TTFT / TPOT 分解"]
-    S_SUB["子图与跨算子融合仿真层（subgraph / fusion）<br/>Producer-Consumer DAG：核算可消除 GM 往返字节、Layout/Scale 契约相容性、并发关键路径 max(P+C, Q+G)"]
-    S_PIPE["算子内微阶段流水仿真层（pipeline / schedule）<br/>MTE2/MTE1/M/FIX/V/MTE3 周期依赖图 → Karp 最大环均值求解最小周期 P / II、关键限制环与双缓冲松弛度"]
-    S_HW["底层硬件规格与热态边界层（hardware / thermal）<br/>CANN .ini + cannsim + npu-smi：L1 Buffer/L0A/L0B/L0C/UB 容量对齐与冲突检查、链路 B/cycle、持续热态频率折算"]
-
-    S_HW --> S_PIPE --> S_SUB --> S_NET
+flowchart LR
+    H["硬件资源声明与可选原语校准"] --> O["算子族与显式实现选择"]
+    M["模型结构与张量契约"] --> O
+    O --> G["结构 / 子图 / 纯模型图"]
+    G --> S["请求调度与 SLA 服务约束"]
+    O --> E["统一因果执行引擎"]
+    G --> E
+    S --> E
+    E --> R["时延预测 · 4D 效率拆解 · SLA 配比方案"]
+    P["profiler 实测观测与同构 Cohort"] --> V["边界对齐的独立精度验证"]
+    R --> V
 ```
 
 ---
 
-## 3. 多型号兼容架构（A2 / A3 / A5 全谱系 SKU 接口设计）
+## 3. 组件职责与公开接口
 
-昇腾 **A2（910B 系列）**、**A3（910C / `910_93` 双 Die 系列）**与 **A5（950DT / 950PR 系列）**绝非三个固定常数的单一芯片，同一世代下包含大量具体 SKU（子型号），其 **Cube 核数、Vector 核数、各级片上与 HBM/L2 访存带宽、显存容量、持续热态频率以及封装拓扑（单 Die vs 双 Die 合封）**均存在显著差异：
+### 3.1 跨组件分工
 
-- **A2 家族示例**：`Ascend910B1`、`Ascend910B2`、`Ascend910B2C`、`Ascend910B3`、`Ascend910B4`、`Ascend910B4-1` 等（例如 `24 AIC / 48 AIV` vs `20 AIC / 40 AIV`；`64 GiB` vs `32 GiB` HBM；不同频率与 HBM 带宽档位）。
-- **A3 家族示例**：`Ascend910_9391`、`Ascend910_9392`、`Ascend910_9381`、`Ascend910_9382`、`Ascend910_9372`、`Ascend910_9362` 等（单卡双 Die 合封，`Phy-ID` 成对映射，需严格区分 **Per-Die 资源**与 **Per-Package 双 Die 聚合资源**，以及 Die 间 SIO/HCCS 与卡间互联带宽）。
-- **A5 家族示例**：`Ascend950DT_9581`、`Ascend950DT_9582`、`Ascend950DT_9599`、`Ascend950PR_*` 等（例如同为 `950DT`，`9581` 与 `9582` 的 `.ini` 与实机 HBM 容量 `144 GiB` vs `96 GiB` 不同；`DT` 的 `4.0 TB/s` 与 `PR` 的 `1.6 TB/s` 访存口径不同）。
+| 组件 | 核心职责 |
+| --- | --- |
+| **`mindie_sim`** | 模型/算子结构展开与无时延导出（`mindie-model-structure/1`）、五层因果性能预测、4D 硬件效率拆解、SLA 硬件配比推演、候选方案对比（`study`）以及与实测 Cohort / Decode 主体的精度对账 |
+| **`mindie_profiler`** | 昇腾 `msprof` 采集控制、原始 CSV/SQLite 统一流式解析、观测张量契约提取、`mindie-profiler analyze --structure`（MCP `analyze_profiling`）三态拓扑对齐（`aligned / declared_only / unattributed_observed`）、拓扑引导 Decode 自动切分（`auto_segment_decode_forwards`）与跨版本对比 |
+| **宿主 Agent** | 结合研发任务选择建模粒度，调用 `sim` 与 `profiler` 定位性能瓶颈、筛选算子融合或并行方案，并在真机上验证收益 |
+| **`remote-dev` / `coordinator`** | 提供远端容器执行、物理拓扑探测与 NPU/端口租约管理；本地纯机理仿真无需申请 NPU 租约 |
 
-为此，`mindie-sim` 严禁将 `"A2"` / `"A3"` / `"A5"` 硬编码为三条静态规格常量，而是采用**“四维解耦 Schema + 三级动态解析与覆盖协议”**：
+### 3.2 CLI 与 Python 核心入口
 
-### 3.1 四维硬件能力解耦 Schema（`DeviceCapabilityProfile`）
+Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`mindie_sim.target_operators`、`mindie_sim.graph_costs`、`mindie_sim.target_graphs`、`mindie_sim.study`、`mindie_sim.structure.export_structure` 与 `mindie_sim.cohort_comparison`。命令行入口通过 `mindie-sim <subcommand>` 调用：
 
-将任意 NPU 子型号的硬件能力拆解为四个独立可参数化、可局部覆盖的结构体：
+| CLI / 模块入口 | 核心用途与输出边界 |
+| --- | --- |
+| `catalog` / `inspect CASE` | 读取模型声明或展开完整层结构，零权重加载、零设备上下文初始化 |
+| `operators CASE --phase ... --tokens ... --scope body\|model` | 计算生产配方下的独立算子成本，输出 `sum_of_isolated_device_programs` 及各算子族占比 |
+| `graph CASE --phase ... --tokens ... --scope body\|model` | 在统一因果引擎中组合数据依赖、多流并发与 EP 集合通信，输出纯设备图或含 Host 提交（`--include-submission`）的完成时间与关键路径 |
+| `predict CASE` | 执行纯模型（`scope="body"\|"model"`）或服务级请求仿真，输出端到端时延、4D 硬件效率拆解与瓶颈定界 |
+| `study MANIFEST` | 在一致的结构、路由与计时边界下批量评估显式候选方案（如并行切分、算子实现、融合策略），输出可比候选排序 |
+| `accuracy PACKET` | 对齐硬件、实现、阶段、Shape 与计时边界，在独立盲测集（Held-out）上输出误差分布、趋势一致性与配置排序准确率 |
+| `python -m mindie_sim.structure CASE ...` | 复用 `target_graphs` 与配方展开导出无时延的 `mindie-model-structure/1` JSON，供 `mindie-profiler` 关联实测事件 |
+| `python -m mindie_sim.cohort_comparison CASE REPORT -o RESULT` | 消费 `mindie-profiler` 输出的同构算子集合（Cohort）报告，按 `> 50 µs`（15% 相对容差）与 `<= 50 µs`（15 µs 绝对容差）完成单次与累计耗时对账 |
+| `calibrate` / `bind-profiler` / `fit-rate` / `fit-service` | 导入显式身份匹配的原语样本或拟合单资源通道的服务速率曲线，严格隔离训练集与盲测集 |
+| `migrate-case CASE` | 将旧版声明显式转换为当前 `Case` 结构 |
 
-1. **`cube_spec`（Cube 计算与 L1/L0 存储规格）**：
-   - `aic_count_per_die`：单 Die AIC 核数（如 `20`、`24`、`32`）；
-   - `ops_per_cycle_per_aic`：按数据类型（`fp8_e4m3`, `fp8_e5m2`, `int8`, `bf16`, `fp16`, `fp32`）解耦的每周期每核理想 FLOPs/MACs；
-   - `l1_kib`, `l0a_kib`, `l0b_kib`, `l0c_kib`：单 AIC 对应的片上各级容量与对齐粒度。
-2. **`vector_spec`（Vector 计算与 UB 存储规格）**：
-   - `aiv_count_per_die`：单 Die AIV 核数（如 `40`、`48`、`64`）及 `aiv_per_aic_ratio`（通常为 `2:1`）；
-   - `simd_width_bytes`（如 `256B`）、各精度每周期向量算力；
-   - `physical_ub_kib` vs `allocatable_ub_kib`（显式区分硬件物理 UB 与扣除系统保留后的可分配 UB，如 `256 KiB` vs `248 KiB`）。
-3. **`memory_hierarchy_spec`（HBM / L2 / 片上 Pipe 访存与全路径通信带宽规格）**：
-   - `platform_config_hbm_mib` vs `verified_runtime_hbm_mib`（显式并列配置显存与实机可用显存）；
-   - `hbm_peak_bw_gbps` vs `sustained_hbm_bw_gbps`（支持区分白皮书/理论峰值与实测 sustained 带宽）；
-   - `l2_capacity_mib`、单核/整 Die `GM/L2 Cache -> L1 Buffer`、`L1 Buffer -> L0A/B`、`L0C -> UB/FIXP`、`UB <-> GM` 的每周期字节上限（`B/cycle`）；
-   - `transfer_channels`（全路径 7 类跨卡/跨机/主机-设备传输通道规格）：统一覆盖 **`d2d_intra_package`**（A3 双 Die `SIO`）、**`d2d_intra_node`**（机内 `HCCS` / `HCCS_SW` / `UB-Mesh`）、**`d2d_inter_node`**（机间 `RoCEv2` / `IB` / 跨节点 `UB`）、**`h2d`**（本地 Host $\to$ NPU）、**`d2h`**（NPU $\to$ 本地 Host）、**`rh2d`**（远端 Host / 分布式 KV 池 $\to$ 本地 NPU）与 **`rd2h`**（本地 NPU $\to$ 远端 Host / 分布式 KV 池）。
-4. **`clock_and_topology_spec`（频率与封装拓扑规格）**：
-   - `arch_family`（`"A2"` / `"A3"` / `"A5"`，仅决定指令集代际特性与片上 Pipe 拓扑类型，不绑定具体核数/容量）；
-   - `soc_version`（精确 SKU 名，如 `"Ascend910B3"`、`"Ascend910_9382"`、`"Ascend950DT_9582"`）；
-   - `dies_per_package`（A2/A5 为 `1`，A3 双 Die 为 `2`）；
-   - `configured_clock_mhz`（标称频率）与 `sustained_clock_mhz_range`（长稳态热态频率区间，如 `[1250, 1300]`）。
+### 3.3 4D 硬件效率拆解、反事实 Roofline 拟合与 SLA 硬件配比推演
 
-### 3.2 三级动态解析与兼容覆盖优先级（Resolution Precedence）
+每次模型或子图仿真除输出预测耗时（`TTFT`、`TPOT`、`body_forward_span_ms`）外，还直接给出面向硬件架构师与调优 Agent 的可解释指标：
 
-```mermaid
-flowchart LR
-    P1["1. 基础层：CANN .ini + 内置精确 SKU 表 + 外部 JSON/TOML 扩展<br/>(platform_config/<soc_version>.ini / cannsim)"]
-    P2["2. 校准层：实机运行时探针覆盖<br/>(npu-smi info / board / common / acl.rt.get_soc_name)"]
-    P3["3. 实验层：调用方显式字段级 Override<br/>(--sustained-mhz / --allocatable-ub-kib / 自定义 JSON)"]
-    P1 --> P2 --> P3
-```
+1. **4D 硬件效率拆解与 `0.80x MBU` 反事实 Roofline 拟合**：
+   - **`Cube_MFU`**：矩阵计算单元（Cube Core）有效算力利用率；
+   - **`Vec_MFU`**：向量计算单元（Vector Core）有效算力利用率；
+   - **`MBU`**：高带宽显存（HBM）有效带宽利用率（并提供 `0.80x MBU` 反事实多管线 Roofline 目标拟合，量化算子优化上限）；
+   - **`Link_Util`**：片间/机间互联链路（HCCS / RoCE）有效带宽利用率；
+   - **`CV_Overlap`**：Cube 与 Vector 流水线并行掩盖率，以及主导瓶颈分类（`Cube / Vector / Memory / Comm / Schedule`）。
+2. **面向 SLA 的硬件缩放与最大吞吐求解器（`scale_case_hardware` / `solve_hardware_sla_throughput`）**：
+   - 给定模型配置、上下文长度、目标并发与延迟约束（如 Decode `TPOT <= 30ms`），支持对 `hbm_bw_scale`、`cube_flops_scale`、`vector_ops_scale`、`link_bw_scale`、`hbm_capacity_scale` 进行无损反事实硬件缩放，通过单调二分搜索联合求解 SLA 延迟上限 `B*_SLA` 与显存容量上限 `B*_VRAM` 的可行最优并发 `B* = min(B*_SLA, B*_VRAM)`，给出满足 SLA 的**最小卡数（`Min_Cards`）**、**最优 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 并行配比**与**最大服务吞吐**。
 
-1. **第一级（CANN `.ini` 原生解析 + 可扩展 SKU 注册表）**：
-   - 支持直接传入远端或本地 CANN 路径下的 `<soc_version>.ini`（自动解析 `[SoCInfo]`、`[AICoreSpec]`、`[MemorySpec]` 中的核数、频率、各级缓存与显存大小），无需为每个新子型号修改 Python 源码；
-   - 支持通过外部 `--sku-profile <custom_sku.json>` 零代码接入尚未发布的新硬件型号。
-2. **第二级（实机探针自动修正与冲突留痕）**：
-   - 当提供 `npu-smi info` 快照或在线探测结果时，自动用实机测得的 `verified_runtime_hbm_mib`、实机 `soc_version` 与物理卡/Die 映射覆盖静态默认配置，并在输出 `discrepancies` 数组中记录静态配置与实机值的偏差。
-3. **第三级（未知或模糊型号的安全降级铁律）**：
-   - 若调用方仅传入模糊大类（如仅指定 `"A2"` 或 `"A3"` 而无具体 `soc_version`、`.ini` 或 `npu-smi` 探针），**严禁静默假装成某一个具体子型号去计算算力/访存绝对耗时下界**！
-   - 此时仅执行与具体 SKU 核数/容量无关的拓扑检查（或该世代公共的最小片上约束），而将依赖具体核数、带宽或容量的下界字段显式置为 `null`，返回 `unmodeled_reason="ambiguous_soc_sku_requires_exact_soc_or_ini_or_probe"`。
+### 3.4 算子族源码实现选择（`runtime.kernels.lowerings`）
 
-### 3.3 全路径通信与主机-设备传输建模（`D2D` 机内/机间 + `H2D`/`D2H` + `RH2D`/`RD2H`）
+通过 `runtime.kernels.lowerings` 可在普通模型前端显式启用特定算子族的源码级建模配方（未显式指定的算子族默认使用通用解析配方）：
 
-在多卡多机并行（`TP / EP / PP / DCP`）、PD 分离（Prefill-Decode Disaggregation）、分布式 KV Cache 池（如 Mooncake / Memcache）以及 Prefix Cache Offload/Prefetch 场景中，端到端性能不仅取决于算子计算与 `D2D` 集合通信，还高度受制于 **`H2D` / `D2H` / `RH2D` / `RD2H`** 链路瓶颈。`mindie-sim` 对七类传输链路进行完整建模：
-
-```mermaid
-flowchart LR
-    subgraph RemoteNode["远端节点 / 分布式 KV 池"]
-        RHost["Remote Host DRAM"]
-        RNPU["Remote NPU HBM"]
-    end
-    subgraph LocalNode["本地节点"]
-        LHost["Local Host DRAM<br/>(Pinned vs Pageable)"]
-        LNPU0["Local NPU Die 0 HBM"]
-        LNPU1["Local NPU Die 1 / Peer NPU HBM"]
-    end
-
-    LNPU0 <-->|"1. d2d_intra_package (SIO)<br/>2. d2d_intra_node (HCCS / HCCS_SW / UB)"| LNPU1
-    RNPU <-->|"3. d2d_inter_node (RoCEv2 / IB / UB)"| LNPU0
-    LHost <-->|"4. h2d / 5. d2h<br/>(PCIe LnkSta / Host-UB)"| LNPU0
-    RHost <-->|"6a. rh2d / 7a. rd2h (direct_rdma)<br/>RNIC ↔ RoCE ↔ NPU HBM"| LNPU0
-    RHost <-->|"6b. rh2d / 7b. rd2h (host_staged)<br/>Network ↔ Local Host DRAM ↔ Local PCIe"| LHost
-```
-
-| 传输类别 | 物理链路与拓扑层级 | 确定性求解模型（Codifiable） | 实机探针与严禁硬编码项（Non-Hardcodable） |
-| --- | --- | --- | --- |
-| **`d2d_intra_package`** | A3 双 Die 合封内部 `SIO` 总线（`Phy-ID 2k <-> 2k+1`） | $\alpha_{\text{sio}} + B / \text{BW}_{\text{sio}}$；分层集合通信中作为 Tier-0 规约/分发跳 | 单 Die 机型（A2/A5）无此层；由 `npu-smi info -t topo` 识别 `SIO` 拓扑矩阵 |
-| **`d2d_intra_node`** | 机内 `HCCS` 全互联（A2）、`HCCS_SW` 交换网（A3）或 `UB-Mesh`（A5） | 支持 `ring`、`halving_doubling`、`mesh_direct`、`all_to_all` 数据量系数（如 $\frac{N-1}{N}B$、$\frac{2(N-1)}{N}B$）与单向/双向带宽求解 | 严禁把整机聚合带宽当作单卡单向有效带宽；区分单向峰值与全双工并发有效带宽 |
-| **`d2d_inter_node`** | 机间 `RoCEv2` / `IB` / 跨机超节点 `UB` | 支持多层级分层集合通信（`intra_package` + `intra_node` + `inter_node`）及 MoE 跨机 `AllToAll` Dispatch/Combine 建模 | 区分单卡单 Rail 带宽与多卡并发网卡拥塞折扣；小包场景显式计入 $\alpha_{\text{roce}}$ 启动延迟 |
-| **`h2d` / `d2h`** | 本地 Host DRAM $\leftrightarrow$ NPU HBM（PCIe Gen4/Gen5 或 Host-UB） | 区分 `pinned`（DMA 直传：$\alpha_{\text{pcie}} + B / \text{BW}_{\text{pcie}}$）与 `pageable`（叠加 Host 内存拷贝天井：$\text{BW}_{\text{eff}} = \min(\text{BW}_{\text{pcie}}, \text{BW}_{\text{dram\_stage}})$），以及 `H2D+D2H` 全双工与同 NUMA 多卡共享 Root Complex 争用 | **严禁硬编码白皮书 PCIe 速率**：如常驻 A2（`173.125.1.2`）实机 `lspci` 显示 `LnkCap: 32GT/s (Gen5 x16)`，但实际运行降级为 **`LnkSta: 16GT/s (Gen4 x16)`**，理论峰值相差 2 倍！必须支持解析 `lspci` / 实测带宽覆盖 |
-| **`rh2d` / `rd2h`** | 远端 Host DRAM / 分布式 KV 池 $\leftrightarrow$ 本地 NPU HBM | 显式区分两条物理路径：<br>1. **`direct_rdma`（直通路径）**：$\alpha_{\text{rdma}} + B / \min(\text{BW}_{\text{rnic}}, \text{BW}_{\text{roce}}, \text{BW}_{\text{npu\_nic}})$；<br>2. **`host_staged`（本地 Host 跳板路径，$K$ 分块流水）**：$\alpha_{\text{net}} + \alpha_{\text{pcie}} + \frac{B}{K \cdot \max(\text{BW}_{\text{net}}, \text{BW}_{\text{h2d/d2h}})} + \frac{B}{\min(\text{BW}_{\text{net}}, \text{BW}_{\text{h2d/d2h}})}$，并计入对本地 `H2D`/`D2H` 通道的带宽占用 | 若未指定且未探测 `transport_mode`（`direct_rdma` vs `host_staged`），必须同时输出两条路径的上下界区间并标注 `transport_mode_unverified`，严禁静默假设零拷贝直通 |
-
----
-
-## 4. 核心铁律：哪些必须编码固化？哪些绝不能硬编码？
-
-`mindie-sim` 的设计核心在于严格区分**确定性数学/物理规则（必须编码固化）**与**源码特化/实测校准事实（绝不能硬编码）**：
-
-| 仿真粒度 | **必须编码固化的部分（Codifiable Deterministic Engine）** | **绝不能硬编码的部分（Non-Hardcodable / Input & Calibration Driven）** |
+| 语义选择器 | 已接入实现标识 | 适用域与建模边界 |
 | --- | --- | --- |
-| **`hardware`：硬件规格、片上存储与热态/互联边界** | 1. **平台规格与拓扑读取核验器**：解析 CANN `.ini`、`cannsim` 链路常数表、`npu-smi`（含 `-t topo` 互联矩阵）与 `lspci` PCIe 协商速率（`LnkCap` vs `LnkSta`）。<br>2. **片上存储容量与对齐核算器**：校验 `L1 Buffer`、`L0A`、`L0B`、`L0C`、`UB` 分配总量、32B/256B 对齐规则、Ping-Pong 槽位及附加区域（如 `L1B` 中 MX Scale 偏移）是否发生地址覆盖。<br>3. **热态频率折算与 $(W-C)$ 敏感性矩阵**：给定算术工作量、PMU 计数周期 $C$、墙钟周期 $W$ 与持续热态频率区间 $[f_{\min}, f_{\max}]$，确定性计算参考下界、达标所需最小频率及敏感性表。<br>4. **全路径传输与分层集合通信求解器**：确定性计算 `d2d_intra_package` / `d2d_intra_node` / `d2d_inter_node` / `h2d` / `d2h` / `rh2d` / `rd2h` 的 $\alpha$-$\beta$ 传输耗时下界、`direct_rdma` vs `host_staged` 跳板流水耗时以及多卡共享链路争用。 | 1. **严禁将 `.ini`、白皮书 PCIe/RoCE 标称值或模拟器值硬编码为真机常数**：例如 `.ini` 标注 144 GiB HBM 但实机 `npu-smi` 为 96 GiB；`LnkCap` 为 Gen5 x16 (`32GT/s`) 但实机 `LnkSta` 降级为 Gen4 x16 (`16GT/s`)；标称 `1650 MHz` 但持续热态实为 `1250–1300 MHz`。<br>2. **严禁在未确认 `direct_rdma` 时把 `RH2D`/`RD2H` 硬编码为单跳网卡直通，或把短采高频外推为持续热态达标**。 |
-| **`pipeline`：算子内微阶段流水** | 1. **多相位周期依赖图展开器**：支持将含奇偶翻转（如每轮 5 次 B-load 导致 Ping/Pong 互换）的单 Tile 微阶段定义自动展开为双相位（或多相位）超周期有向图。<br>2. **Karp 最大环均值求解器（Maximum Cycle-Mean Solver）**：对任意含周期距离 $d$ 的有向边 $u \to v$（满足 $\text{offset}(v) - \text{offset}(u) + d \cdot P \ge \text{service}(u)$），精确求解最小超周期 $P$、单 Tile 启动间隔 $II$、识别所有紧约束环（Critical Recurrence Cycles），并计算无量纲拓扑自检（`--self-check`）与缓冲槽位变体（如 `B=1 \to 2`）的理论松弛量。<br>3. **`npusim` 受控调用封装**：自动处理 `npusim record` 命令组装、指定代表核采样与单次调用边界。 | 1. **严禁在工具内硬编码特定算子的 C++ 发射顺序或隐式同步关系**：例如 FlashMLA 中 `v1_main`/`v1_sum` 的拆分边界、`P3` 无反向信号量而依赖 `V2(j)` 等待 `PV-FIX(j)` 的传递性安全证明，必须由 Agent 从源码提取为显式 Graph JSON 输入给求解器。<br>2. **严禁捏造未实测的微阶段服务时长或硬编码“经验效率折扣（如 $\times 0.7$）”**：未校准阶段必须保持 `null`（此时仅运行拓扑自检或符号化下界分析，拒绝输出伪造的周期预测值）；严禁将聚合 `PipeUtilization` 百分比简单除以微阶段个数填入模型；严禁假设“指令数减少 = 服务时间减少”。 |
-| **`subgraph`：子图与跨算子融合** | 1. **子图中间流量与往返核算器**：给定 Producer-Consumer 子图 DAG 与张量契约（Shape/Dtype/Stride/Scale），自动计算合并相邻节点（如消除 `MM3 FP32 -> GM -> AIV Cast BF16` 或 `FlashMLA -> GM -> pack`）可消除的逻辑 GM 读写字节数与 Kernel Launch 次数。<br>2. **并发分支与通信掩盖关键路径求解器**：支持表达串行、多流并发与通信重叠关系（如 $\text{tail} = \max(P+C, Q+G)$），结合 `mindie_profiler` 实测节点耗时与 `comm_nonoverlap_ms`，直接算出优化或消除某节点 $X$ 的端到端净收益上下界 $[0, \Delta_{\max}]$。 | 1. **严禁将“逻辑 GM 请求字节数 / HBM 峰值带宽”硬编码为必省耗时**：当工作集（如 99% 共享前缀的 12.3 MiB 唯一物理页）可驻留于 128 MiB L2 Cache 时，HBM 增量流量可接近零。<br>2. **严禁将 `AICPU HcclLaunch` 下发耗时当作设备通信完成时间 $C$ 代入关键路径公式**。<br>3. 跨算子融合是否破坏特定路由/图捕获 Fallback（如 `ZeroExpertRouter` 或非对齐分支），必须结合框架源码契约判定。 |
-| **`net`：整网与多维并行** | 1. **确定性并行切分与 `msmodeling`（`tensor_cast`）桥接器**：在锁定干净 Git commit 的前提下调用 `AnalyticPerformanceModel`，并计算 `DP/TP/EP/PP/DCP` 切分、投机采样（`DSpark` 平均接受长度 $\alpha$）与 `Prefix Cache` 命中率下的整网 Step 理论耗时分解。 | 1. 严禁在未校验 `msmodeling` 源码版本或算子不支持时用本地粗略公式伪造上游预测值（必须返回显式 `unmodeled_reason`）。<br>2. 真实负载下的 MoE 专家负载偏斜、EPLB 等待与动态接受率退化必须由真机 Profiling 回填。 |
+| `gdn_prefill` | `gdn_prefill_arch35` | 覆盖 GDN 线性注意力 Prefill 的卷积与 Prepare/H/O 阶段、投影及分块流水 |
+| `gqa_attention` | `vllm_triton_unified_attention_2d_pointer` | BF16/FP16 因果或非因果 GQA Attention，按 `compute_capability` 匹配源码分块几何 |
+| `mla_prolog` | `vllm_ascend_mla_prolog_v3` | 覆盖 MLA 前处理（Q/KV 投影、归一化、RoPE、Q Absorption 与 Cache 写入）的融合子图边界 |
+| `mla_decode` | `vllm_triton_mla_decode_tuple` | BF16 Dense Latent Decode，保留 Tuple Query 拼接、Zero Fill 与两阶段依赖 Kernel |
+| `rmsnorm` / `add_rmsnorm` | `vllm_cuda_rms_norm` | 标准 RMSNorm 与残差融合 AddRMSNorm，保留完整行归约与下游消费者依赖 |
+| `grouped_gemm` | `ascendc_grouped_nd_bf16` | MoE Gate/Up 与 Down 分组矩阵乘，支持显式整数路由（`runtime.routing.realizations`）或均衡活跃专家分布 |
+| `quantize` | `cuda_dynamic_int8_quant_symmetric_no_azp` | 逐行 FP32 Scale 的对称动态 INT8 量化生产链，保留独立量化 Kernel 边界 |
 
 ---
 
-## 4. 标准工作流：Phase 0 跨界融合先行分析 $\to$ 单算子微架构深挖
+## 4. 与 `mindie-profiler` 的结构对齐与实测校准
 
-为避免“先在单算子内部耗费数天排流水、触顶后才无奈发现应该和上下游算子融合，导致原算子输入/输出布局推倒重来”，`mindie-sim` 与四端插件共同确立**“先看子图融合、再抠单算子流水”**的正向工作流：
+`mindie-sim` 与 `mindie-profiler` 通过声明结构导出与实测观测报告形成闭环，详见[结构复用与实测映射](profiler-sim-structure.md)：
 
-### Phase 0：子图级可融合性先行分析（Upfront Subgraph & Fusion Triage）
-
-在动手优化任何单个算子之前，先对目标模块（如整层 MLA/Attention 或整层 MoE）运行 `mindie-profiler analyze` + `mindie-sim subgraph`：
-
-1. **扫描高价值跨界融合机会（可合项）**：
-   - **生产者末端融合（Producer Output Fusion）**：上游算子写出 GM 前是否能直接完成下游所需的 Quant / Cast / Layout 打包？（如 `MLAPO` 末端直接产出 FlashMLA 所需 Q/KV 格式，或 `MM3` 通过 `FIXPIPE` 直出 BF16 省去 `9 MiB/call` 的 FP32 GM 往返与 AIV Cast 同步）。
-   - **消费者前端/写回融合（Consumer / Writeback Fusion）**：核心算子写回 GM 时能否直接按最终 wire layout 落盘，从而消除独立的 `pack` / `concat` / `transpose` helper？（如 FlashMLA 直接输出 wire layout 消除 `21–23 µs` 的独立 `pack`）。
-   - **轻量算子链合并**：如 `RMSNorm + Dynamic/MX Quant` 融合、`MoE Gating TopK + 逻辑转物理专家 ID 映射（log2phy）` 融合。
-2. **明确不可融合的硬边界（不可合项）**：
-   - 算子间存在跨卡 Collective 同步屏障且无独立分支可重叠；
-   - 合并后片上 `L1 Buffer`（`512 KiB`）或 `UB`（`248 KiB`）驻留峰值超限，会迫使原有常驻张量（如 Resident-Q）退回 GM 重载；
-   - 数学语义要求全归约完成后才能执行的步骤（如 `DCP merge` 的跨分片 LSE FP32 归一化，只能与下游消费者融合而不能省略）。
-3. **核算关键路径兑现比**：
-   - 通过 `mindie-sim subgraph` 代入 $\max(P+C, Q+G)$ 等并发拓扑，确认候选融合点是否位于未被通信掩盖的暴露关键路径上，优先实施端到端兑现比最高的融合方案并锁定新的算子 I/O 契约。
-
-### Phase 1：在新 I/O 契约下进行单算子微阶段周期仿真（Intra-Kernel Pipeline Simulation）
-
-当算子边界与 I/O 契约锁定后，针对耗时占比最高的核心算子运行 `mindie-sim hardware` + `mindie-sim pipeline`：
-
-1. **先算热态算力/带宽必要下界与频率余量**：
-   - 若在持续热态频率（如 `1280 MHz`）下，纯算术参考下界已逼近目标（如目标 `350 µs` 而纯 Cube 下界已达 `346 µs`、实测 MAC 计数折算已达 `372 µs`），立即明确**“仅靠加 Buffer 或排流水无法达标，必须同时减少实际算术/搬运服务量或调整模块级预算”**。
-2. **构建微阶段周期依赖图并求解紧约束环**：
-   - 将源码中的 `MTE2/MTE1/M/FIX/V/MTE3` 发射顺序与槽位复用边输入 `mindie-sim pipeline`，检查候选改动（如放宽某个槽位 `B=1 \to 2`）是否真正落在限制环上，以及是否会触碰 `248 KiB` UB 或 `256 KiB` L0C 硬上限。
-3. **按需单次 `npusim` 指令级校准**：
-   - 当聚合 PMU 无法区分纯算术周期与资源冲突阻塞时，调用受控 `npusim` 对单次调用的代表核采集指令起止 tick，校准微阶段服务时长后再求解。
+1. **统一结构导出（`mindie-model-structure/1`）**：`mindie-sim` 从模型配置或 `OpSpec` DAG 导出包含语义节点、层/块归属（`layer / block / role`）、张量契约（`contract`）、物理工作量签名（`physical_work / physical_signature`）与融合子图边界（`subgraphs` / `resource_boundary`）的结构清单。
+2. **同构算子集合（Cohort）对账**：对于模型中重复出现的同构层，无需强行猜测单个事件属于第几层；`mindie-profiler` 将相同契约、相同物理工作量的事件聚合成 Cohort，由 `mindie_sim.cohort_comparison` 直接比对单次耗时（Mean / P50）与整组累计耗时。
+3. **拓扑引导 Decode 主体自动切分与端到端对账**：`mindie-profiler` 的 `auto_segment_decode_forwards` 利用 `sim` 层计划自动从完整推理 Trace 中切出每次 Decode 主体 Forward 的精确设备墙钟跨度（`body_forward_span_ms`），并与 `mindie_sim.predict(..., scope="body", phase="decode")` 进行端到端对比。
+4. **统一的回放与验证流水线**：`profiler/examples/structure/pipeline.py` 提供覆盖 `--stage decode|prefill|operators|engine|generalization|all` 的一站式重放与记分牌生成。
 
 ---
 
-## 5. CLI 与 Python 接口设计
+## 5. 验证体系与多集群泛化实测结果
 
-`mindie-sim` 提供无状态 CLI（`python -m mindie_sim <subcommand>`）与类型化 Python API：
-
-| 子命令 | 核心功能 | 关键输入 | 输出契约（JSON） |
-| --- | --- | --- | --- |
-| **`hardware`** | 核查目标板卡规格、片上存储分配方案、互联拓扑（`D2D`/`H2D`/`D2H`/`RH2D`/`RD2H`）与热态频率下界 | `--soc` / `--ini` / `--sku-profile` / `--npu-smi-file` / `--topo-file` / `--pcie-link-info`, `--buffers <alloc.json>`, `--workload <flops_bytes.json>`, `--transfers <transfer_plan.json>` | 板卡配置 vs 实机容量对照、7 类传输通道带宽/路径下界（含 PCIe 降级与 `RH2D`/`RD2H` 直通 vs 跳板对比）、各片上 Buffer 诊断、热态频率下界表与 $(W-C)$ 敏感性矩阵 |
-| **`pipeline`** | 算子内微阶段周期依赖图构建、拓扑自检与最大环均值求解 | `--graph <microstage_graph.json>`, `--durations <measured_or_null.json>`, `--compare-variant <alt_graph.json>`, `--self-check` | 双相位/多相位展开图、拓扑合法性自检结果、`minimum_period_ns`、`minimum_tile_ii_ns`、关键限制环列表及变体松弛对比 |
-| **`subgraph`** | 子图跨算子融合收益预判、7 类标准可融合模式扫描与并发关键路径核算 | `--dag <subgraph_dag.json>`, `--profile-report <analyze.json>`, `--candidate-fusion <fusion_spec.json>` | 可消除 GM 往返字节数、片上容量可行性、7 类标准融合模式（`add_rmsnorm_dynamic_quant`、`qkv_rope_reshape_cache`、`mla_prologue_epilogue`、`lightning_indexer_topk`、`moe_gating_topk_dispatch`、`gmm_swiglu_dynamic_quant`、`dit_usp_teacache_block`）收益、并发掩盖下的端到端理论省时区间 $[0, \Delta_{\max}]$ 与不可合原因 |
-| **`net`** | 整网与多维并行理论预测、HBM KV/混合状态容量规划与 PD/EPD 分离配比优化 | `--model-spec <spec.json>`, `--parallel <dp_tp_ep_pp_dcp.json>`, `--provider-source <msmodeling_dir>` | 三值分离报告（`ideal_hardware_lower_bound_ms`, `model_predicted_ms`, `measured_device_ms`）、Step/TPOT 分解、`plan_hbm_kv_capacity` 显存预算及 `optimize_pd_disaggregation_ratio` 最优 P:D 配比 |
-
-### 5.0 服务容量规划、PD/EPD 分离配比与扩展模型架构目录（`serving_planner.py` & `model_catalog.py`）
-
-结合 [`Ascend/msmodeling`](https://gitcode.com/Ascend/msmodeling)（`tensor_cast` / `serving_cast`）、[`cann-recipes-infer`](https://gitcode.com/cann/cann-recipes-infer) 与 [`vllm-ascend`](https://github.com/vllm-project/vllm-ascend) 的工程实践，`mindie-sim` 内置了整网容量与服务配比求解器：
-
-1. **HBM KV 与混合状态精确容量核算（`plan_hbm_kv_capacity`）**：
-   - 从单卡可用 HBM 中确定性扣除 TP/EP/PP 切分权重、`eplb_redundant_experts` 冗余专家权重、运行时 Workspace、`ACLGraph` 分桶图捕获池（`aclgraph_bucket_count` $\times$ `aclgraph_per_bucket_mib`）与 HCCL 通信缓冲区（`hccl_buffsize_mib`）；
-   - **线性注意力/循环状态防高估守卫**：显式区分随 `seq_len` 线性增长的 Attention KV Cache 与仅随并发请求数 `max_num_seqs`（$\mathcal{O}(1)$ in `seq_len`）增长的 `GDN` / `KDA` / `Mamba` 循环与卷积状态；
-   - **跨层 KV/Index Owner 去重守卫**：针对 `MiniMax-M3`、`DeepSeek-V4`、`Gemma4` 等跨层共享 KV 或稀疏 Indexer 的架构，仅对物理 Owner 层（`physical_kv_owner_layers`）计入物理块分配，防止对 Consumer 层重复扣减显存。
-2. **PD 分离与 EPD 三段式最优配比求解（`optimize_pd_disaggregation_ratio`）**：
-   - 在给定 `ttft_slo_ms`、`tpot_slo_ms` 以及非对称 TP 约束（`tp_p >= tp_d` 且 `tp_p % tp_d == 0`）下，对比 `direct_rdma`、`mooncake_layerwise` / `hixl_layerwise`（计算与逐层 KV 推送重叠）与 `host_staged` 传输瓶颈，求解最优整数 `prefill_instances : decode_instances`（及多模态 `encoder_instances`）配比，并输出 `colocated` vs `pd_disaggregated` vs `epd_disaggregated` 单卡有效吞吐对比。
-3. **扩展模型架构预设目录（`ARCHITECTURE_PRESET_CATALOG`）**：
-   - 在保留 9 个基础校准模型的同时，扩展支持 `qwen3.5-moe`（3:1 `GDN`+`GQA`）、`bailing-v3`（`KDA`+`MLA` + `Latent MoE` 降维分发）、`minimax-m3`（2:1 跨层 KV 共享 + Sparse Indexer）、`longcat-flash-lite`（`MLA` + N-gram + `zero_expert_num` 恒等专家）与 `hunyuan-video-dit`（3D Patch 展开 + `TeaCache` + `USP`）等架构不变量校验。
-
-### 5.1 硬件锚定性能评分（`HAP`）与 MFU / 带宽利用率闭环
-
-为解决传统加速比（Speedup）在基线较慢时虚高、无法反映候选算子逼近硬件物理极限程度的问题，`mindie-sim` 吸收了 [`cann-bench`](https://gitcode.com/cann/cann-bench) 的**硬件锚定性能（Hardware-Anchored Performance，`HAP`）**与 [`cannbot-skills`](https://gitcode.com/cann/cannbot-skills) 的 **`MFU` / Pipe 瓶颈归因**方法，将 `mindie-sim` 求解出的硬件理论时间下界 $T_{\text{HW}}$（`t_hw_us`）直接作为性能评分锚点：
-
-$$\text{HAP}_i = \frac{T_{\text{baseline},i} - T_{\text{HW},i}}{(T_{\text{cand},i} - T_{\text{HW},i}) + (T_{\text{baseline},i} - T_{\text{HW},i})}$$
-
-- **物理直觉与单调饱和特性**：当候选耗时退化（$T_{\text{cand}} > T_{\text{baseline}}$）时 $\text{HAP} \in (0, 0.5)$；与基线持平（$T_{\text{cand}} = T_{\text{baseline}}$）时 $\text{HAP} = 0.5$；优于基线（$T_{\text{cand}} < T_{\text{baseline}}$）时 $\text{HAP} \in (0.5, 1.0)$；逼近或超越硬件理论下界（$T_{\text{cand}} \le T_{\text{HW}}$）时 $\text{HAP} \ge 1.0$。
-- **异常锚点安全守卫**：当 $T_{\text{cand}} \le 0$、$T_{\text{HW}} \le 0$ 或分母 $(T_{\text{cand}} - T_{\text{HW}}) + (T_{\text{baseline}} - T_{\text{HW}}) \le 0$ 时，`compute_hap_score` 显式返回 `None`，绝不产出 $\pm\infty$ 或负分。
-- **联合输出 MFU 与受限 Pipe**：`evaluate_operator_hap` 同时返回算子在目标 SKU 上的理论下界 $T_{\text{HW}}$、主导受限单元（`cube_bound` / `vector_bound` / `mte_bound`）、实测算力利用率（`achieved_mfu`）、带宽利用率（`achieved_bw_utilization`）与 `hap_score`，直接供给 `mindie-bench` 与 `mode="explore"` 门禁决策。
-
----
-
-## 6. 分级测试验收标准（遵循 [`testing-architecture.md`](testing-architecture.md)）
-
-- **Tier 0（纯内存核心求解与核算单测，`< 5s`）**：
-  - 使用 K3/A5 真机验证过的 Golden 图定义（如 C8 FlashMLA 18 微阶段 / 36 展开节点 `pv1`/`pv2`/`score2` 拓扑、MLAPO `dcp1`/`dcp8` 子图与 L1B scale 偏移配置），验证 Karp 最大环均值求解器精度、奇偶相位翻转、片上存储超限/覆盖拦截、热态频率敏感性矩阵及 $\max(P+C, Q+G)$ 关键路径核算；验证缺失阶段时长时拒绝伪造预测值。
-- **Tier 1（本地组件契约与外部 Provider 边界测试，`< 15s`）**：
-  - 验证 CANN `.ini` / `npu-smi` 快照解析、固定 commit `msmodeling`（`tensor_cast`）只读桥接与脏工作区拒绝契约、以及 `mindie_profiler` 调用 `mindie_sim` 对齐实测与仿真结果。
-- **Tier 2（常备 A2/A3 真机硬件探测与轻量校准集成，`@pytest.mark.live_npu`，`< 25s`）**：
-  - 在常驻 A2/A3 沙箱上采集真实 `npu-smi` 硬件信息与单算子/子图轻量 Profile，端到端跑通 `mindie-sim hardware` 与 `subgraph` 校准链路。
+- **有界内存与零权重控制面**：仿真主循环严格保持 `O(Active State)` 内存占用，不加载模型权重、不初始化 `torch_npu`/CANN 上下文；在 Qwen3.8 / Qwen3.5 / Qwen3.6 / Kimi K3 / GLM5.3 / DeepSeek V4.1 等 14 个完整模型图基准上，单进程峰值 RSS 仅为 **`287.6 MiB`**（严格低于 `512 MiB` 目标红线），任务完成后存活对象清零。
+- **跨芯片、跨模型的真实硬件收敛结果**：
+  - **Decode 主体预测**：覆盖 A3 / A5 集群的 **280 个真实 Decode 用例**（含高低并发、TP/DP/EP、MTP 与 FlashComm 场景）全部收敛在 **`<= 15%`** 误差容差内；
+  - **Prefill 阶段预测**：**15 个完整 Prefill 用例**全部收敛在 **`<= 15%`** 误差容差内；
+  - **大规模集群盲测泛化（DSH Fleet Generalization）**：在 **856 个 DSH 真实集群用例（含 561 个独立 Held-out 盲测用例）**上，端到端预测准确率达到 **98.25%（误差 `<= 15%`）**。
+- **四端宿主与评测套件全量集成**：`mindie-sim v0.8.1` 已通过 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi` 与 `mindie-agent-dsh` 的 `components` / `mindie-tools` MCP 服务在四端统一暴露，并与 `mindie-bench` 的 `sim-causal-modeling-boundaries` 基准完成闭环验证（接口迁移说明见[消费者迁移指南](simulation-consumer-migration.md)）。

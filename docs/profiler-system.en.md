@@ -1,6 +1,6 @@
 # Profiler System Design for MindIE Agent
 
-[中文](profiler-system.md) · [Architecture](architecture.en.md) · [Design Principles](design-principles.en.md) · [Context & Experience Design](knowledge-context-and-exploration.en.md) · [Documentation](README.en.md)
+[中文](profiler-system.md) · [Architecture](architecture.en.md) · [Shared Structure and Measured Attribution](profiler-sim-structure.md) · [Design Principles](design-principles.en.md) · [Context & Experience Design](knowledge-context-and-exploration.en.md) · [Documentation](README.en.md)
 
 `mindie_profiler` is a standalone Ascend NPU performance collection, in-place analysis, and comparison package maintained in [`mindie-agent/profiler`](https://github.com/mindie-agent/profiler) (exposing both the `mindie-profiler` CLI and Python APIs), orthogonal to [`diagnostics`](https://github.com/mindie-agent/diagnostics) and [`sim`](https://github.com/mindie-agent/sim).
 
@@ -46,12 +46,14 @@ flowchart LR
 | Component | Core Responsibility | Explicit Non-Goals (Boundaries) |
 | --- | --- | --- |
 | **`mindie_profiler`** (standalone repository [`profiler`](https://github.com/mindie-agent/profiler)) | Artifact discovery, schema verification, nanosecond interval accounting, variant-aware aggregation, Host-to-Device correlation, cross-run factual comparison, memory attribution, online profile window control | Never tracks cross-turn LLM session state (`known_refs` or context compaction), never estimates host LLM token bills, never imports `torch_npu` on the CPU analysis path, and never embeds multi-pipe cycle solving or subgraph fusion simulation (delegated to standalone [`mindie_sim`](simulation-system.md)) |
-| **`mindie_sim` (`mindie-sim`)** | Hardware spec & thermal frequency bounds, intra-operator micro-stage dependency cycle solving, Phase 0 subgraph fusion traffic/critical-path simulation, and whole-network parallelism projection (bridging `msmodeling` / `cannsim` / `npusim`) | Never parses raw Profiling DB/CSV/Trace event tables; consumes only structured graph/config inputs and `mindie_profiler` measured summaries |
+| **`mindie_sim` (`mindie-sim`)** | Expand declared model/operator structures (`mindie-model-structure/1`) from the model catalog, layer plans, and recipes; compute operator, subgraph, pure-model, and serving costs on one 5-layer causal engine with 4D efficiency breakdown and SLA hardware scaling | Raw capture parsing and observed tensor contracts belong to `profiler`. Only explicit observation-import adapters load `profiler` on demand; ordinary simulation has no `profiler` dependency |
 | **Host Agent + Skill** | Understand user targets (TTFT/TPOT/throughput/operator latency), invoke `mindie-profiler` subcommands progressively, formulate hypotheses, and run minimal verification experiments | Never hardcodes rigid troubleshooting pipelines into tool code; never pulls multi-GB raw traces to the local machine |
 | **`remote-dev` + `coordinator`** | Execute `mindie-profiler` and managed offline export jobs (`torch_npu.profiler.analyse`) in place on the remote container; manage NPU and port leases | Never creates a separate performance job scheduler or duplicate run identity (reuses `run_id`) |
 | **`npu-top`** | Provide time-aligned device temperature, power, AICore frequency, and HBM sampling series | Never declares thermal throttling from a temperature threshold alone (e.g., `>= 85°C`) without explicit hardware throttling signal bits |
 | **`knowledge` (and domain repos)** | Store verified measurement & constraint baselines (`axiom` / `measurement`), capture/correlation procedures (`sop`), bottleneck decision workflows (`workflow`), and operator/graph code transforms (`mutator`) supporting the `L1–L4` execution architecture | Never stores raw traces or one-off Top-K reports lacking cross-task reuse value |
 | **`mindie-bench`** | Verify end-to-end numerical correctness and performance gains under matched inputs and hardware conditions | Never acts as the sole entry point for routine interactive profiling |
+
+Model structure and measured trace parsing each have a single owner: `mindie-sim` exports `mindie-model-structure/1`, while `mindie-profiler` maps raw events onto declared nodes or fused subgraphs (such as `MlaPrologV3` and `LightningIndexer`), aggregates repeated isomorphic layer candidates into Cohorts, and automatically segments steady-state Decode forwards via `auto_segment_decode_forwards`. See [Shared Structure and Measured Attribution](profiler-sim-structure.md) for the full contract and multi-cluster verification results.
 
 ---
 
@@ -163,9 +165,9 @@ Each event carries three distinct dimensions:
 
 - **Explicit Phase and Step Boundaries**: `inventory` extracts native `ProfilerStep#` and `MSTX_EVENTS` markers (`warmup`, `prefill`, `decode`, `draft`, `verify`, `graph_capture`) from the DB when present; otherwise the caller must supply explicit `--window START:END` or `--full-range` bounds—steps are never guessed from repeating kernel patterns.
 - **Hybrid Architecture (Dense + MoE + MTP) Layer Segmentation & Compute Stream Selection Contract**:
-  - **Primary Compute Stream Selection**: Always select the primary compute `streamId` by maximum cumulative device execution duration (`argmax_s sum(duration_ns)`), never by the first-seen event (which often picks an auxiliary HCCL or event-watch stream).
-  - **MLA Sub-Kernel Cohesion**: Treat `MlaPrologV3`, `KvQuantSparseFlashAttention` (`SFA`), and KV Cache Scatter/Update as internal sub-kernels of a single Transformer layer's `Attention (MLA)` block rather than layer boundaries.
-  - **Unified Step Grouping Across Dense Prefix + MoE Trunk + MTP Draft Layers**: For hybrid models (DeepSeek-V3 / Kimi-K3 / GLM-5 with $K$ dense prefix layers + $M$ MoE trunk layers + MTP draft layers), group all three regimes within one decode pass into a single logical step (e.g., `3 Dense + 75 MoE + 1 MTP = 79 Layers / Step`) rather than splitting one step into 3 pseudo-steps on operator-pattern transitions.
+  - **Primary Stream Is an Observation View**: When selecting a primary compute `streamId`, use maximum cumulative device execution duration (`argmax_s sum(duration_ns)`), not the first-seen event. The selected stream does not establish layer or step boundaries.
+  - **Separate Declared Structure from Event Attribution**: Reuse sim's attention types, Dense/MoE layer plans and optional MTP/DSpark declarations. Names such as `MlaPrologV3`, SFA and KV Update suggest semantic roles; assigning them to a particular layer still requires a Host module association or an explicit event binding. Kernel order and repetition counts do not prove layer identity.
+  - **Optional Paths Remain Optional**: MTP in a model configuration does not establish that the selected capture executed MTP. Native markers or caller-supplied windows determine whether Dense, MoE, draft and verify belong to one iteration. Operator-pattern transitions must not invent steps, and declared layer counts must not force incomplete observations into a complete step.
 - **Speculative Decoding (DSpark / MTP)**: Alongside `draft` and `verify` kernel timings, reports and comparisons track serving-side `mean_acceptance_length` and `acceptance_rate` to prevent false optimizations where a faster Verify kernel degrades acceptance length and hurts end-to-end TPOT.
 - **Multi-Dimensional Parallelism & Cross-Rank Aggregation**: Group only homogeneous ranks (e.g., never average across distinct PP stages). Report both `median_rank_p50` and the **per-step slowest rank (`max_rank_per_step`)** distribution so rotating stragglers are not masked by per-rank medians.
 
@@ -180,7 +182,7 @@ Each event carries three distinct dimensions:
 | Subcommand | Typical Agent Use Case | Key Inputs | Bounded Output |
 | --- | --- | --- | --- |
 | **`inventory`** | First look at a directory or file to discover ranks, tables, native steps, and time bounds | `--root <dir_or_file>` | Discovered ranks, DB/CSV/JSON paths and byte sizes, available tables (including `PYTORCH_API` / `TASK_PMU_INFO` presence), native Step/MSTX windows, capture time span |
-| **`analyze`** | Compute windowed interval accounting, semantic block shares, and variant-aware hotspots | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel` | Window metrics (`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`), 6 semantic block shares, Top-K hotspots with Shape/Dtype and source Locators, cross-rank P50/straggler stats, AICPU/PMU summaries |
+| **`analyze`** | Compute windowed interval accounting, semantic block shares, and variant-aware hotspots | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel`; optional `--structure` and `--bindings` | Window metrics (`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`), 6 semantic block shares, Top-K hotspots with Shape/Dtype and source Locators, cross-rank P50/straggler stats, AICPU/PMU summaries; `structure_mapping` when structure is supplied |
 | **`correlate`** | Drill down into a specific device gap or hotspot kernel to inspect its Host call stack and launch chain | `--root`, `--window START:END`, `--rank`, `--kernel-name <pat>` or `--min-gap-ms <val>` | Matched `PYTORCH_API` / `MSTX_EVENTS` same-thread parent call stacks, `CANN_API` launch durations, Host-to-Device launch delay, and uncorrelated event ratio |
 | **`compare`** | A/B comparison of structural changes and duration distributions across two runs | `<baseline_report.json> <candidate_report.json>` | Workload/environment comparability checks, operator sequence/fusion/shape diffs, aligned step/block/variant P50 deltas and confidence intervals |
 | **`sql`** | Read-only SQL escape hatch for custom investigation of new operators or unmapped columns | `--db <path>`, `--query "<SELECT ...>"`, `--limit 50`, `--timeout-s 10` | Read-only (`mode=ro` + `query_only=ON`), row- and timeout-bounded query results with automatic `STRING_IDS` resolution helpers |
@@ -196,6 +198,18 @@ Each event carries three distinct dimensions:
    - Separates co-temporal additive components (`included_in_sum`) from non-coincident phase peaks, reporting unattributed `residual_bytes` honestly.
 3. **Three-Way Separation in Theoretical Modeling (`theoretical_model.py` & `tensor_cast_provider.py`)**
    - Keeps **`measured_device_ms`**, single-operator Roofline lower bound **`ideal_hardware_lower_bound_ms`**, and external provider prediction **`model_predicted_ms`** (e.g., pinned `msmodeling` / `tensor_cast`) strictly separate. Missing shapes or unverified hardware mappings remain `unmodeled` (`None`).
+
+### 6.3 Shared Structure, Isomorphic Cohorts, and Automatic Decode Segmentation
+
+1. **Structure Export & Event Attribution (`--structure`)**:
+   - `mindie_sim.structure.export_structure` exports a duration-free `mindie-model-structure/1` manifest through the graph builders and recipes (standalone `OpSpec` DAGs use `export_op_structure`); `mindie-profiler analyze --structure FILE` consumes this manifest directly without importing `mindie_sim`.
+   - Callers can supply `--bindings FILE` (explicit event/node bindings or Host/Module scopes), `--correlation FILE` (Host call chains), and `--module-trace FILE` (DB-SHA256-verified synchronized module records).
+2. **Evidence Grading & Isomorphic Cohort Accounting**:
+   - `structure_mapping` (`mindie-profile-structure-mapping/1`) distinguishes tensor-only matches (`candidate` / `ambiguous`) from occurrence-proven bindings (`bound`).
+   - Repeated isomorphic Transformer blocks are grouped into `cohorts` with measured invocation counts, single-call Mean/P50, `activity_sum_ns`, and `busy_union_ns`, which `python -m mindie_sim.cohort_comparison` reconciles directly against predicted operator costs.
+3. **Topology-Guided Decode Forward Segmentation (`auto_segment_decode_forwards`)**:
+   - `mindie_profiler.decode_segmentation` aligns the unified event stream against `ModelSpec.layer_plans` to automatically segment each complete Decode body forward (`body_forward_span_ms`), stripping cross-step bubbles and asynchronous `AI_CPU` tail waits while recovering active batch sizes from observed block tables.
+   - Verified across the Ascend A2 synchronized module replay (18,000/18,000 events `bound`), **280 Decode + 15 Prefill cases** on A3/A5 (`<= 15%` error), and **856 DSH fleet cases / 561 held-out cases (98.25% within `<= 15%` error)**; see [Shared Structure and Measured Attribution](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总).
 
 ---
 

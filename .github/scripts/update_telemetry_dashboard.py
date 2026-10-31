@@ -17,7 +17,7 @@ dashboards (dashboard.zh.svg, dashboard.en.svg) plus a detailed Markdown report.
 
 [Timeouts & Locks]
 - Each GitHub REST API request enforces a bounded 15-second HTTP timeout.
-- Total script execution across 13+ repositories completes within < 60 seconds.
+- Total script execution across 21 repositories completes within < 90 seconds.
 
 [Side-Effect Policy]
 - Read-only against GitHub REST APIs; writes output artifacts strictly into the
@@ -37,6 +37,7 @@ import urllib.request
 
 ORG = "mindie-agent"
 HTTP_TIMEOUT_SECONDS = 15
+DEFAULT_CHANNEL_PATH = Path(__file__).resolve().parents[2] / "channels" / "0.1.json"
 
 CORE_REPOS: list[tuple[str, str, str, str]] = [
     # (repo, category_zh, category_en, badge_color)
@@ -46,13 +47,22 @@ CORE_REPOS: list[tuple[str, str, str, str]] = [
     ("mindie-agent-cc", "客户端插件", "Client Plugin", "#D97757"),
     ("mindie-agent-kimi", "客户端插件", "Client Plugin", "#2563EB"),
     ("mindie-agent-dsh", "客户端插件", "Client Plugin", "#0EA5E9"),
+    ("mindie-agent-agy", "客户端插件", "Client Plugin", "#4285F4"),
     ("knowledge", "运行时组件", "Core Runtime", "#475569"),
-    ("knowledge-vllm-ascend", "领域知识库", "Knowledge Repo", "#0D9488"),
     ("remote-dev", "运行时组件", "Core Runtime", "#475569"),
     ("coordinator", "运行时组件", "Core Runtime", "#475569"),
+    ("profiler", "运行时组件", "Core Runtime", "#475569"),
+    ("sim", "运行时组件", "Core Runtime", "#475569"),
     ("npu-top", "NPU 监控", "Observability", "#D97706"),
     ("diagnostics", "运行时组件", "Core Runtime", "#475569"),
     ("mindie-bench", "评测工具", "Benchmark", "#64748B"),
+    ("knowledge-vllm-ascend", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-operators", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-infer-core", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-infer-distributed", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-infer-observability", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-infer-ops-compat", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-agent-engineering", "领域知识库", "Knowledge Repo", "#0D9488"),
 ]
 
 PLUGIN_REPOS: list[tuple[str, str, str]] = [
@@ -60,6 +70,7 @@ PLUGIN_REPOS: list[tuple[str, str, str]] = [
     ("mindie-agent-cc", "Claude Code", "#D97757"),
     ("mindie-agent-kimi", "Kimi Code", "#2563EB"),
     ("mindie-agent-dsh", "DeepSeek Harness", "#0EA5E9"),
+    ("mindie-agent-agy", "Google Antigravity", "#4285F4"),
 ]
 
 
@@ -121,7 +132,47 @@ def merge_daily_series(
     return dict(sorted(merged.items()))
 
 
-def collect_org_telemetry(token: str, history: dict) -> tuple[dict, list[dict]]:
+def load_channel_pins(channel_path: Path) -> dict[str, str]:
+    if not channel_path.is_file():
+        return {}
+    data = json.loads(channel_path.read_text(encoding="utf-8"))
+    pins: dict[str, str] = {}
+    patch_ver = data.get("current_patch_version")
+    if patch_ver:
+        pins["mindie-agent"] = f"v{patch_ver}"
+    for name, comp in data.get("components", {}).items():
+        tag = comp.get("tag") or (f"v{comp['version']}" if comp.get("version") else "")
+        if tag:
+            pins[name] = str(tag)
+    for name, corp in data.get("corpora", {}).items():
+        commit = str(corp.get("commit") or "")
+        if commit:
+            pins[name] = f"commit@{commit[:8]}"
+    return pins
+
+
+def resolve_repo_version(repo: str, releases: list, channel_pins: dict[str, str], token: str) -> str:
+    # Domain knowledge corpora are pinned by commit in channels/0.1.json and do not cut software releases.
+    if repo.startswith("knowledge-") and repo in channel_pins:
+        return channel_pins[repo]
+    if releases:
+        tag = str(releases[0].get("tag_name") or "").strip()
+        if tag:
+            return tag
+    if repo in channel_pins:
+        return channel_pins[repo]
+    tags = github_get(f"/repos/{ORG}/{repo}/tags?per_page=1", token)
+    if isinstance(tags, list) and tags:
+        tag_name = str(tags[0].get("name") or "").strip()
+        if tag_name:
+            return tag_name
+    head = github_get(f"/repos/{ORG}/{repo}/commits/HEAD", token)
+    if isinstance(head, dict) and head.get("sha"):
+        return f"commit@{str(head['sha'])[:8]}"
+    return "-"
+
+
+def collect_org_telemetry(token: str, history: dict, channel_pins: dict[str, str]) -> tuple[dict, list[dict]]:
     repos_meta = history.setdefault("repositories", {})
     rows: list[dict] = []
 
@@ -162,9 +213,7 @@ def collect_org_telemetry(token: str, history: dict) -> tuple[dict, list[dict]]:
 
         pkg_dl = 0
         all_asset_dl = 0
-        latest_tag = "-"
-        if releases:
-            latest_tag = str(releases[0].get("tag_name") or "-")
+        latest_tag = resolve_repo_version(repo, releases, channel_pins, token)
         for rel in releases:
             for asset in rel.get("assets", []):
                 dc = int(asset.get("download_count", 0))
@@ -357,7 +406,7 @@ def render_svg(rows: list[dict], updated_at_cst: str, lang: str) -> str:
             )
             cur_x += seg_w
 
-    leg_w = (width - 80) // 4
+    leg_w = (width - 80) // len(PLUGIN_REPOS)
     for idx, (repo_name, host_name, color) in enumerate(PLUGIN_REPOS):
         r_data = by_repo[repo_name]
         lx = 40 + idx * leg_w
@@ -387,10 +436,10 @@ def render_svg(rows: list[dict], updated_at_cst: str, lang: str) -> str:
         ]
     )
 
-    col_repo = 40
-    col_cat = 240
-    col_ver = 355
-    col_sf = 540
+    col_repo = 36
+    col_cat = 268
+    col_ver = 368
+    col_sf = 545
     col_ccum = 665
     col_c14 = 815
     col_dl = 920
@@ -515,6 +564,7 @@ def render_markdown_report(rows: list[dict], updated_at_cst: str) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Update MindIE Agent telemetry dashboard artifacts.")
     parser.add_argument("--output-dir", required=True, help="Directory containing telemetry-history.json and SVG outputs.")
+    parser.add_argument("--channel-file", default=str(DEFAULT_CHANNEL_PATH), help="Path to channels/0.1.json.")
     args = parser.parse_args()
 
     token = os.environ.get("TELEMETRY_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
@@ -524,13 +574,14 @@ def main() -> None:
     out_dir = Path(args.output_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     history_path = out_dir / "telemetry-history.json"
+    channel_pins = load_channel_pins(Path(args.channel_file).resolve())
 
     cst_tz = timezone(timedelta(hours=8))
     updated_at_cst = datetime.now(cst_tz).strftime("%Y-%m-%d %H:%M")
 
     history = load_history(history_path)
     history["updated_at_cst"] = updated_at_cst
-    history, rows = collect_org_telemetry(token, history)
+    history, rows = collect_org_telemetry(token, history, channel_pins)
 
     history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (out_dir / "dashboard.zh.svg").write_text(render_svg(rows, updated_at_cst, "zh"), encoding="utf-8")

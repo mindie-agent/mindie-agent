@@ -165,3 +165,105 @@ SFA 首个 DSH 配对的未缓存输入为 87,572 → 61,039，缓存输入为 3
 正式覆盖已安装旧运行时还需要 knowledge 新 Release、配套兼容资料、插件 Release，以及安装后版本回读。本轮源码集成更新四端精确 pin/lock，使新更新代码与对应 knowledge API 一起进入开发基线；这不等同于正式发布或已安装环境切换。
 
 完整 16 次尝试、未完成和不确定请求的实际消耗保留在 bench 的 `reports/p0-adaptive-knowledge-20261029/modern/README.md` 与 `attempt-results.json`。7 次 Codex 尝试中有一次用量不完整；没有已验证费率，不报告美元成本。所有模型任务已结束，没有后台付费尝试仍在运行。
+
+## 后续本地整改：离线条件、收敛与组件桥
+
+以下记录 2026-10-29 在当前主线 checkout 上完成的本地整改，与上面的冻结实验分开。
+knowledge 基线为 `87a80ee6`（0.13.7），四端依次为 Codex `dbdd7de9`（0.1.13）、
+Claude Code `3a062e29`（0.1.10）、Kimi `e1f1f309`（0.1.10）、DSH `2011a43a`
+（0.1.9），bench 为 `90e66615`。这些 SHA 标识修改前主线；本节结果来自其上的
+未提交改动，不是 Release、安装切换或新一轮真实模型配对。
+
+### 条件继承的修正位置
+
+`graded` 没有把父子条件合并为一个宽松字典，而是将 `inherits_from` 的完整闭包
+作为必需前提，逐条检查实际条件。该机制对 UB/L1 对齐等硬件规则是必要的；
+本次保留其三值求值与整条预算裁剪，只补充明确的不变量说明和行为回归。
+错误出在语料把相关主题当成必要依赖。
+
+七库共检查 450 个单元、667 条原始直接依赖。本次修订两个库的七个单元并递增
+revision、重建 routing/shard 索引：
+
+- `infer-observability`：msprof 时钟公理不再依赖某次观测机器的拓扑摘要；
+  SQLite CTE 解析和 pseudo-fast rank 排障不再要求无关的 910B/910C、现场采集
+  或另一固定分析器版本前提。正文仍要求检查真实格式、时钟和统计边界。
+- `infer-distributed`：Dynamo 队列/取消、KV router 和 Mooncake 主机 API 规程
+  去除无关 SoC、TGI 实现或 Ascend PD 部署依赖；HCCL 日志分析可先定位 rank
+  参与差异，设备/链路检查和现场恢复验收仅在实际需要的分支执行。
+
+七个真实单元的旧版/新版 query 与 explain 对照均确认：不补充 SoC 也能加载
+适用的通用规程。硬件反例仍确认 UB/L1 公理在仅有 `fixture:two-rank` 时返回
+`condition_unknown`，显式错误芯片返回 mismatch。两个修改库各保存
+`docs/evidence/2026-10-29-offline-condition-scope.json`；原有 `content_digest`
+按已核实的历史算法重新计算。七库索引检查全部通过。
+
+历史 profiler 专用 SOP 位于私有评测语料，未进入当前七库主线，且含该 fixture
+的精确答案数字。本次未复制它到主线，也未修改历史冻结语料、任务事实或回执。
+
+### 任务结束与 C6 准入
+
+四端 Skill 增加一致边界：请求的不变量和受影响行为验证通过后输出完成结果；
+只有具体失败、必需验收或新证据才继续增加分支。离线修复不补造硬件条件，
+通过后不继续扩展无证据的多参数/兼容 fallback。没有增加模型路由、调度层或状态机。
+
+DSH 历史轨迹和驱动均表明，预算内最后一次请求仍可产生合法完成事件；旧 G5 A
+失败不是驱动漏记。共享 `native_capture_payload()` 现在对四端都显式要求
+`native_completed`，补齐 Codex/CC 在会话身份先于完成出现时的采集缺口。
+Kimi 当前实现将身份和完成同时绑定在 resume hint 上，本次是统一显式契约，
+不宣称已复现其独立绕过漏洞。准入失败记录 `capture.stage=native_admission`
+及宿主错误，并明确 `capture_model_calls=0`；业务 oracle 的通过结论保留。
+
+实际安装的 CC/Kimi 二进制通过本地协议 provider 返回完成事件后均能准入。
+移除真实 CC 事件流的终态事件，旧入口会准入而新入口拒绝；移除 Kimi resume
+hint 后两版均拒绝。该负对照没有付费模型调用，只验证完成信号和产物绑定。
+
+### 组件桥与验证
+
+四端 sim/profiler 描述已统一，并保留 Codex 原有的新版 sim 描述与测试。
+真实 CLI 契约覆盖 operators/graph/predict 边界、空 stdout 的文件输出、错误
+退出码/stderr，以及 partial study 保留报告但不将失败候选列入排名。
+离线 profiler 不要求 NPU 租约，导出数据进入 sim 前仍需显式身份和边界映射。
+
+最终复验使用明确的 sim 0.8.0 wheel，SHA256 为
+`20831058a4221e7a3e9feedb4d025086c6d37630c59bcddf3bfbe439ace9401e`。
+该 wheel 尚未正式发布；测试通过 `MINDIE_SIM_CONTRACT_PYTHON` 选择临时解释器，
+未改插件发布 pin 或用户 profile。旧 sim 依赖环境会明确跳过新版专属契约，
+不能据旧环境的通过结果声称完成新版验收。本次下表四端结果均没有 skip。
+
+| 范围 | 最终本地结果 |
+| --- | --- |
+| Codex 组件、capture、catalog | 74 passed / 8.76s |
+| Claude Code 组件桥 | 18 passed / 2.19s |
+| Kimi 组件桥（沿用 CI 的 `pythonpath=tests scripts`） | 14 passed / 2.34s |
+| DSH 组件桥 | 13 passed / 2.13s |
+| knowledge 受影响闭包、预算与变更测试 | 64 passed、1 skipped / 0.76s；skip 是既有 operators 历史目录测试 |
+| bench 完成态、采集与预算回归 | 43 passed / 16.34s |
+| 四端、knowledge、bench 的 LF 检查与受影响 diff 检查 | 通过 |
+
+Codex catalog 在当前精确锁定的 `remote-dev 0.11.1@2a750ec8` 上为 9/9，
+快照无需修改。上文针对旧 0.10.8 的七项差异保留为历史结果；不能用旧测试环境
+重录当前快照。profiler/coordinator 同样使用插件的精确 pin（0.5.1 / 0.7.0）。
+七个语料库未配置代码仓同款 `.gitattributes`/`.editorconfig`，因此不将借用的
+LF 脚本配置检查称为全通过；本次检查未发现语料 CRLF。
+
+这些结果证明条件适用性、组件契约和完成态准入修正。它们不证明真实模型已经
+在复杂任务上总成本不退化，也不等于 G5 A 到 C6 提炼成功。新的真实配对仍应
+保留 profiler 的 50-turn 和 G5 A 的原始 80-turn 预算，固定两臂任务、oracle
+与模型身份，报告所有尝试；不以提高预算、补造硬件或筛选一次成功改写历史结论。
+
+---
+
+## 2026-10-31 自然语言测试语料重写与双宿主（DSH + Codex）实测闭环
+
+完成上述离线条件与收敛边界整改后，我们进一步将 `mindie-bench` 下全部 20 个 `tasks/zh-vague/*/instruction.md` 任务提示词还原为真实开发者的自然人话描述（移除开头的审计免责段落、移除括号内逐行剧透代码改法的提示、修正 `dspark-mrv2-drafter-crash-zh-vague` 中误导性的 `build_for_drafting` 除法描述，并将 4 个组件题从字典答案清单改为自然排障/契约说明），同时全部重跑通过零模型行为级 `soundness` 校验（20/20 任务 `before_reward=0.0, after_reward=1.0`）。
+
+在此基础上，使用包含最新 9 组件构建（`mindie-knowledge 0.13.7`、`remote-dev 0.11.2`、`mindie-diagnostics 0.5.4`、`mindie-profiler 0.5.3`、`mindie-sim 0.8.1`、`mindie-coordinator 0.7.0`、`npu-top 0.3.0`、`mindie-agent-codex 0.1.13`、`mindie-agent-dsh 0.1.9`）的受管运行时与解耦了伪硬件依赖的语料库（`commit 7ff5325`），在 **DSH（`deepseek-flash` / `max`）** 与 **Codex（`gpt-6.1-sol` / `xhigh`）** 上分别对单点修复（`sfa-mtp-seq-lens-eval-zh-vague`）、双点投机解码崩溃修复（`dspark-mrv2-drafter-crash-zh-vague`）与复杂多阶段归因修复（`profiler-msprof-straggler-and-hbm-fix-zh`）进行了端到端实测（完整产物见 `mindie-bench` 的 `reports/human-corpus-eval-20261031/`）：
+
+| 宿主与模型 | 任务 (`instance_id`) | Trial ID | 终态与判分 | 墙钟耗时 | 首次有效修改 | 模型请求数 | 知识调用 (`query`/`explain`) | Token 用量 (`uncached` / `cached` / `output`) | 相比整改前（2026-10-29）的变化 |
+| --- | --- | --- | --- | ---: | ---: | ---: | :---: | --- | --- |
+| **DSH** (`deepseek-flash`, `max`) | `sfa-mtp-seq-lens-eval-zh-vague` | `8cc48da37785` | `completed_pass` (`1.0`) | `227.83s` | `37.88s` | `38` | `0 / 0` | `80,902 / 2,755,200 / 38,697` | 自然完成，37.88s 即完成首次源码修改 |
+| **DSH** (`deepseek-flash`, `max`) | `dspark-mrv2-drafter-crash-zh-vague` | `f3d8c90ca2be` | `completed_pass` (`1.0`) | `217.02s` | `104.24s` | `47` | `5 / 0` | `120,441 / 4,459,520 / 34,466` | 整改前因提示词误导 `build_for_drafting` 耗尽 60 轮预算未完成；整改后 **217.02s 自然完成并通过原版行为裁判** |
+| **DSH** (`deepseek-flash`, `max`) | `profiler-msprof-straggler-and-hbm-fix-zh` | `24e9f9cc1873` | `completed_pass` (`1.0`) | **`67.05s`** | `45.42s` | **`17`** | `2 / 1` | `66,912 / 898,048 / 11,917` | 整改前因 `condition_unknown` 与过度扩展耗尽 50 轮预算（`286.52s`）；整改后 **17 轮、`67.05s` 自然收敛通过（提速 4.2x，Token 下降约 80%）** |
+| **Codex** (`gpt-6.1-sol`, `xhigh`) | `sfa-mtp-seq-lens-eval-zh-vague` | `df166dc93d0a` | `completed_pass` (`1.0`) | `114.76s` | `61.59s` | `8` | `0 / 0` | `366,472 / 0 / 5,827` | 8 轮请求、`114.76s` 自然完成（前两轮因 Tailscale 远端网关 502 记为 `unknown` 并完整保留） |
+| **Codex** (`gpt-6.1-sol`, `xhigh`) | `dspark-mrv2-drafter-crash-zh-vague` | `6e25c153c562` | `completed_pass` (`1.0`) | **`165.99s`** | `135.57s` | **`10`** | `0 / 0` | `532,920 / 0 / 8,142` | **10 轮请求、`165.99s` 自然完成**，直接通过未修改的冻结行为裁判 |
+| **Codex** (`gpt-6.1-sol`, `xhigh`) | `profiler-msprof-straggler-and-hbm-fix-zh` | `6c190ec1ce19` | `completed_pass` (`1.0`) | **`132.97s`** | `77.85s` | **`16`** | `1 / 1` | `876,913 / 53,760 / 7,718` | 整改前需 23–33 轮、`373s–410s`；整改后 **16 轮、`132.97s` 自然收敛通过（提速约 3x）** |

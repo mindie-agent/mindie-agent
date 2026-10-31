@@ -15,7 +15,7 @@ flowchart TB
     P --> R["remote-dev：远端文件编辑、命令与后台作业"]
     P --> D["diagnostics：本地故障日志与可选 Issue 上报"]
     P --> PR["profiler：昇腾 Profiling 采集、解析与跨轮次对比"]
-    P --> S["sim：硬件 Roofline、算子流水与分布式并行性能建模"]
+    P --> S["sim：通用资源、算子族、图与服务约束建模"]
     K <--> F["vLLM-Ascend / operators 等领域知识库"]
     T["按需安装的 TaskClient / coordinator"] --> Q["机器台账、容器绑定、NPU 与端口租约"]
     Q --> R
@@ -27,10 +27,8 @@ flowchart TB
 
 四个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
 - **领域知识按需激活**：输入 `/mindie-agent`（在 Codex 中也可使用 `$mindie-agent`）即可按当前任务加载昇腾领域知识与工作流引导。
-- **Agent 工具默认暴露**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 显式输入计算、`diagnostics` 本地诊断和状态查询通过 MCP 可发现、可独立调用，不依赖知识会话启用；仍遵守各自的配置、权限和资源租约。`knowledge` 的名称、描述和参数不进入未启用聊天的默认工具目录；`npu-top` 是面向人的看板，不作为 Agent 工具暴露。
-- **经验沉淀按授权运行**：当前 session 手动 `/mindie-agent` 后，宿主生命周期事件才可驱动会话采集与经验提炼；记录本地材料和社区贡献还需满足用户保存的授权与项目范围。
-
-当前 Codex `0.1.8` 实现上述 MCP 发现边界；其他宿主插件仍需分别按此契约实现和验收，本次发布不代表它们已经完成验证。 [本机原生验收记录](releases/codex-0.1.8-native-acceptance.json)覆盖默认目录、六项 MCP 调用与周期更新检查；旧 `0.1.6` 更新器的迁移失败及一次性恢复单独记录。
+- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模与 `diagnostics` 本地诊断通过三服务 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在四端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行。
+- **经验沉淀按授权运行**：仅当当前会话显式调用 `/mindie-agent` 且满足用户保存的本地授权与项目范围时，宿主生命周期事件才会触发脱敏会话采集与经验提炼。
 
 默认插件依赖 `knowledge`、`remote-dev` 和 `diagnostics`；`coordinator`、`profiler`、`sim` 与 `npu-top` 可按团队环境独立安装或组合使用。
 
@@ -40,20 +38,21 @@ flowchart TB
 | --- | --- |
 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品架构、领域边界、入口文档、跨仓规范与发布记录；不包含运行时代码或 MCP 服务 |
 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
-| [`knowledge`](https://github.com/mindie-agent/knowledge) | 知识检索引擎：适用条件匹配、继承规则展开、脱敏任务切片、经验提炼校验与社区 PR 投递 |
-| [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、昇腾算子、推理核心架构、分布式通信、可观测性、图编译/算子兼容与 Agent 工程治理的 7 大结构化分级知识库（`L1–L4`） |
-| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、用户级凭据存储与公钥维护；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
-| [`coordinator`](https://github.com/mindie-agent/coordinator) | 远端昇腾环境与多卡租约管家：机器与容器台账、NPU 拓扑探测（含 A3 双 Die 映射）、NPU 卡与端口防冲突租约、受管任务清理 |
-| [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向开发者的 NPU 集群监控看板：实时 Web 界面与 90 天利用率历史（直接读取 `coordinator` 的 `machines.json`） |
-| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | 本地结构化故障日志、日志自动轮转、离线脱敏诊断包导出与可选的 GitHub Issue 上报（`mindie_diagnostics`） |
-| [`profiler`](https://github.com/mindie-agent/profiler) | 昇腾 Profiling 采集与原地解析工具：支持 `inventory / analyze / correlate / compare / sql`，提供 Host-Device 关联、显存拆解与跨轮次耗时对比（`mindie_profiler`） |
-| [`sim`](https://github.com/mindie-agent/sim) | 昇腾性能建模与 Roofline 仿真工具（`mindie_sim`）：支持 A2/A3/A5 硬件规格查询、`H2D`/`D2H`/`D2D` 传输耗时估算、Cube/Vector/MTE 算子流水线建模、子图融合收益预估与分布式并行拆解 |
-| [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | 昇腾真机端到端评测套件：覆盖真实研发任务、精度与性能验证、跨任务经验复用评测及版本基准报告 |
+| [`knowledge`](https://github.com/mindie-agent/knowledge) | 知识检索引擎：适用条件匹配、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、脱敏任务切片、经验提炼校验与社区 PR 投递 |
+| [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 7 大结构化分级知识库（`L1–L4`） |
+| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
+| [`coordinator`](https://github.com/mindie-agent/coordinator) | 远端昇腾环境与多卡租约管家：机器与容器台账、NPU 拓扑探测（含 A2/A3 双 Die/A5 映射）、HCCL/RoCE 预检、单 Die 显存租约预算与并发编译槽位控制、NPU 卡与端口防冲突租约、受管任务清理 |
+| [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向开发者的 NPU 集群监控看板：支持 A2/A3/A5 集群监控、共享读取 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环实时 Web 界面（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天利用率历史 |
+| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | 本地结构化故障日志（4×1 MiB 自动轮转）、离线脱敏诊断包导出与带 2 次有界外发对账重试（bounded 2-attempt outbound reconciliation）的可选 GitHub Issue 上报（`mindie_diagnostics`） |
+| [`profiler`](https://github.com/mindie-agent/profiler) | 昇腾 Profiling 采集与原地解析工具：支持 `inventory / analyze / correlate / compare / sql`，提供 Host-Device 关联、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）、`auto_segment_decode_forwards` Decode 自动切分、显存拆解与跨轮次耗时对比（`mindie_profiler`） |
+| [`sim`](https://github.com/mindie-agent/sim) | 硬件无关的五层因果性能建模组件（`mindie_sim`）：统一组合物理资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持 4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、30ms SLA 硬件缩放求解、模型结构导出及 856 用例跨集群校准（见[建模系统](simulation-system.md)） |
+| [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | 昇腾真机端到端评测套件：覆盖 20 个行为级验证任务（109 项三态与辅助变体对照）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、跨任务经验复用评测及版本基准报告 |
 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)、[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace) | 昇腾 AI Infra 开源 Skills 目录，以及支持 Git Worktree 多任务隔离的 `vLLM` + `vLLM-Ascend` 本地开发工作区 |
 
-SSH 认证的唯一实现归 `remote_dev.auth` 所有。`coordinator` 和 `npu-top` 只保存连接信息及 `auth_ref`，复用其认证、密码存储与公钥安装逻辑；同一操作系统用户下，凭据不按进程、聊天或插件隔离。默认凭据文件为 `~/.mindie/ssh/credentials.json`，由用户目录与文件权限保护，不调用系统钥匙串或要求系统登录密码。原生 Windows 与 WSL 各自使用所在环境的用户目录。
+### 跨组件核心协作边界
 
-普通开发调用在业务提交前完成密码回退与公钥修复，已提交的业务命令不自动重放。只读诊断及监控可在同一次 SSH 握手中回退密码认证，但不修改公钥。共享认证的发布状态和真实平台验收范围以对应版本记录为准。
+- **共享 SSH 认证底座（`remote_dev.auth`）**：SSH 认证与密钥维护由 `remote-dev` 统一实现，`coordinator` 与 `npu-top` 仅保存端点配置与 `auth_ref` 引用。同一操作系统用户下的不同进程、会话与宿主插件共享 `~/.mindie/ssh/credentials.json`（由用户目录权限保护，不依赖系统钥匙串或系统登录密码；Windows 与 WSL 各自使用所在环境的用户目录）。普通开发调用在业务命令提交前自动完成密码回退与公钥修复，已提交的业务命令绝不盲目重放；只读诊断与监控探针可在握手阶段回退密码认证而不修改远端公钥。
+- **`sim` 与 `profiler` 的结构与实测协同**：`mindie-sim` 负责声明模型与算子拓扑结构（Case 前端与 `OpSpec` DAG 统一导出 `mindie-model-structure/1`），并由单一五层因果执行引擎完成资源、算子族、子图、纯模型与服务约束的机理预测、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）及 SLA 硬件配比求解；`mindie-profiler` 负责原始 `msprof` CSV/SQLite 解析、张量形状提取以及基于 `mindie-model-structure/1` 的拓扑引导 Decode 步切分（`auto_segment_decode_forwards`）与事件归因。两者通过结构导出与实测 Cohort / Decode Body 统计解耦协同，详见[性能建模系统](simulation-system.md)、[Profiler 系统设计](profiler-system.md)与[结构复用与实测映射](profiler-sim-structure.md)。
 
 ## 3. 远端 NPU 任务的执行与资源回收
 
@@ -78,7 +77,7 @@ SSH 认证的唯一实现归 `remote_dev.auth` 所有。`coordinator` 和 `npu-t
 > [!NOTE]
 > **术语约定说明**：
 > - 知识库中的 `tier: L1..L4` 与 `category`（`axiom`/`measurement`、`sop`、`workflow`、`mutator`）一一对应，仅用于区分知识条目的工程角色，不代表结论的置信度；证据可靠程度由 `evidence_strength`（`hardware_spec`、`reproduced_empirical`、`single_observation`、`hypothesis`）独立标记。
-> - `mindie-sim` 的四类建模粒度统一称为**硬件规格（`hardware`）/ 算子流水（`pipeline`）/ 子图融合（`subgraph`）/ 整网并行（`net`）**；昇腾片上存储统一写全称 **`L1 Buffer` / `L0A` / `L0B` / `L0C` / `UB` / `L2 Cache`**；工程测试分级统一使用 **`Tier 0 – Tier 3`**。
+> - `mindie-sim` 按**物理资源 → 算子族 → 结构/子图 → 纯模型 → 服务约束**组合，建模精度和实测校准是独立维度；旧四层 CLI 不再是新版接口。昇腾片上存储统一写全称 **`L1 Buffer` / `L0A` / `L0B` / `L0C` / `UB` / `L2 Cache`**；工程测试分级统一使用 **`Tier 0 – Tier 3`**。
 
 ## 5. 三类核心研发场景的验证标准
 

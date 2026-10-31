@@ -6,6 +6,8 @@ MindIE Agent organizes reusable Ascend engineering experience into structured kn
 
 The retrieval and distillation runtime lives in [`knowledge`](https://github.com/mindie-agent/knowledge); domain corpora live in [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend), [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators), and companion repositories. See [Architecture](architecture.en.md) for component boundaries, [Harness Boundaries](harness-boundary-and-lifecycle.en.md) for session identity and user consent, and [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) for extended context-budget and exploration specifications.
 
+Knowledge retrieval follows **Information-Gap Retrieval**: when local code, call stacks, and verification commands are already sufficient to advance a fix directly, zero knowledge calls are required; when a task faces cross-module troubleshooting, hardware specification, or architectural gaps, the agent queries candidates via `knowledge_query` on demand and expands only selected high-value citations via `knowledge_read_ref` (see [2026-10-29 On-Demand Knowledge Retrieval Acceptance](audits/2026-10-29-knowledge-p0.md)).
+
 This document describes the three core mechanisms implemented in the runtime:
 1. **Foundational baselines and premise inheritance (`L1/L2` Foundation & `inherits_from`)**: automatically mounting condition-matched `_common` hardware constraints and measurement rules, and injecting complete parent premises whenever a child workflow or SOP is retrieved.
 2. **Experience distillation and cross-task reuse (`L3` Experience Loop)**: turning verified troubleshooting or optimization milestones into reviewed knowledge updates (`reviewed_change`) via `knowledge_distill`, ready for retrieval and feedback in subsequent tasks.
@@ -45,6 +47,16 @@ Knowledge units are organized by **semantic `category`** (the `tier: L1..L4` fie
 - **Strict inheritance graph validation**: Every parent unit must exist; missing dependencies or cycles raise an immediate validation error;
 - **Lossless premise injection**: At query time, each parent in the closure **independently checks its own applicability conditions** before its full body is injected into `inherited_rules`—premises are never truncated mid-rule.
 
+`inherits_from` declares a required execution premise, not a topic category or a
+general reference. Host-side parsing, interval accounting and communication-log
+triage should depend on the relevant software and data semantics. Sharing the
+Ascend domain does not make a particular SoC's alignment rules or one capture's
+machine topology a prerequisite. UB/L1 alignment, device counters and specific
+interconnect behavior retain their actual hardware conditions. Split general and
+device-specific procedures where their applicability differs; do not bypass
+parent conditions based on the child's `L2/L3` tier or invent `soc` / `npu_model`
+facts to obtain a rule's body.
+
 ### 3.2 Condition Matching and Automatic Baseline Mounting (`foundation_baseline`)
 
 `query(query, conditions=..., domain_path=..., token_budget=..., limit=...)` evaluates `match_conditions` across all candidates:
@@ -59,13 +71,13 @@ When a query provides hardware or repository `conditions`, any condition-matched
   - `unit-ascend-910b-a3-memory-alignment-and-tiling-axioms`
   - `unit-ascend-operator-roofline-and-four-view-measurement`
 
-### 3.3 Token Budget Allocation and `inherited_rules`
+### 3.3 Token Budget Allocation, `known_refs` Deduplication, and `inherited_rules`
 
-Each query hit includes `id`, `revision`, `tier`, `category`, `evidence_strength`, `conditions`, `provenance`, `applicability`, `route`, `score`, and `inherited_rules`. Token budget is allocated to matched `L1` premises first before workflow excerpts, ensuring long workflows never crowd out essential hardware alignment or numerical parity rules.
+Each query hit includes `id`, `revision`, `tier`, `category`, `evidence_strength`, `conditions`, `provenance` (including `affected_components` and `rejected_history` anti-regression records), `applicability`, `route`, `score`, and `inherited_rules`. Token budget (`token_budget`) is allocated to matched `L1` premises first before workflow excerpts, ensuring long workflows never crowd out essential hardware alignment or numerical parity rules.
 
-### 3.4 Exact Revision Inspection, Subword Tokenization, and Declarative Retrieval Evaluation
+### 3.4 Batch Exact Revision Inspection (`refs` / `known_refs`), Subword Tokenization, and Declarative Retrieval Evaluation
 
-`GradedRepository.query` attaches `ref`, `unit_ref`, and `feedback_ref` to each hit and records the observed revision via `feedback.observe`. Agents can read the exact revision via `explain` and record `helpful` / `not_helpful` votes via `feedback.record_vote`.
+`GradedRepository.query` attaches `ref`, `unit_ref`, and `feedback_ref` to each hit and records the observed revision via `feedback.observe`. Agents can read single or batch `refs` at their exact revision via `explain` (or MCP `knowledge_read_ref`) under a shared `inherits_from` dependency closure and response `token_budget`, passing `known_refs` for already-visible revisions to avoid redundant expansion, and record `helpful` / `not_helpful` votes via `feedback.record_vote`.
 
 To balance exact API symbol matching with semantic recall, the retrieval engine incorporates **Ascend identifier subword tokenization and declarative retrieval evaluation** distilled from [CANNBot Knowledge](https://gitcode.com/cann/cannbot-knowledge) and the `vllm-ascend` ecosystem:
 - **Compound symbol and subword dual indexing**: CamelCase, PascalCase, `snake_case`, digit-boundary identifiers, and Ascend ecosystem compound names (`DataCopyPad`, `PipeBarrier`, `SetFlag`/`WaitFlag`, `GatedDeltaNet`, `Ascend910B4`, `npu_fused_infer_attention_score`, `npugraph_ex`, `torchair`, `msmodelslim`, `dspark`, `dflash`, `xlite`, `eplb`, `hixl`, `lmcache`, `mooncake`, `sfa_v1`, `dsa_v1`, `mla_v1`, `fa3_v1`, `quarot`, `teacache`, `mindiesd`, `vllm_omni`, `rainfusion`, `rf_v2`, `rf_v3`, `ada_bsa`, `eagleqbsa`, `ditcache`, `cache_dit`, `taylorseer`, `code2wav`, `token2wav`, `llm2tts`, `flashgen`, `taehv`, `yuanrong`, `msmemscope`, `msprof`, `msprobe`, `serving_cast`, `tensor_cast`) are indexed both as full compound tokens and as constituent subwords, preserving exact-symbol boosts while preventing false misses on sub-concepts;
@@ -74,7 +86,7 @@ To balance exact API symbol matching with semantic recall, the retrieval engine 
   - `knowledge-vllm-ascend` (`91` units): covers 15 design docs, 30 feature guides, 45+ official model tutorials, 30+ `vllm_ascend` source subsystems, 46 local 0-day model branch families, PD disaggregation handoff & accuracy gates (`L1–L3`), and `vllm-project/vllm-omni` multi-stage omni-modality pipelines (`AsyncOmni` / `Thinker -> Talker -> Code2Wav`, `NPUARModelRunner`, TTS/Audio/Duplex, and DiT serving);
   - `knowledge-infer-core` (`109` units): covers 26 model optimization recipes, 16 `model-infer-*` skills, and common acceleration modules from `cann-recipes-infer`, quantization/accuracy workflows from `Ascend/msagent`, and `Ascend/MindIE-SD` (`mindiesd`) DiT sparse attention (`RainFusion` / `Ada-BSA` / `EagleQBSA`), step caching (`DiTCache` / `CustomCache`), 3D causal VAE/TAEHV state-carry sliced decode, and timestep-aware quantization contracts;
   - `knowledge-operators` (`105` units, including `15` ablation-backed `L4` mutators): covers AscendC / Triton-Ascend / TileLang / PyPTO / Catlass kernel development, `cann/ops-transformer` fused operator contracts, model-specific custom ops, and `MindIE-SD` custom sparse attention / Catlass `matmul_add` / Triton operators and fusion scope pipeline analysis;
-  - `knowledge-infer-distributed` (`39` units): covers `Mooncake`, `dynamo`, HCCL multi-node collectives, SHMEM symmetric memory, PD/EPD disaggregation transport, and `MindIE-SD` / `vllm-omni` hybrid sequence parallelism (Ulysses + Ring + CFG), FlashAttention + AllToAll power-cap mitigation, dynamic-pruning EPLB, $c/f$ comm-masking evaluation, and `YuanrongConnector`;
+  - `knowledge-infer-distributed` (`39` units): covers `Mooncake`, `dynamo`, HCCL multi-node collectives, SHMEM symmetric memory, PD/EPD disaggregation transport, and multi-node `DP/TP/EP/PP/DCP/DSA-CP/PCP`, `MindIE-SD` / `vllm-omni` hybrid sequence parallelism (Ulysses + Ring + CFG), FlashAttention + AllToAll power-cap mitigation, dynamic-pruning EPLB, $c/f$ comm-masking evaluation, and `YuanrongConnector`;
   - `knowledge-infer-observability` (`39` units): covers `msmodeling`, `msprof-analyze`, `msmemscope`, `mskpp`, `ops-test-kit` (TTK), service-level profiling, and `MindIE-SD` Window A/B/A `perf-gate` and 3-tier image/video `accuracy-gate` protocols;
   - `knowledge-infer-ops-compat` (`34` units): covers AutoFuse, GE/TorchAir graph compilation, SuperKernel, multi-stream/prefetch, container/driver setup, Volcano/MindIE Motor orchestration, and `MindIE-SD` `torch_npu._inductor` pattern pass development and two-stage (`API-first, then compile`) integration;
   - `knowledge-agent-engineering` (`33` units): covers multi-agent optimization workflows, SOTA exploration loops, `ais_bench` coreset compression, automated Git bisect bug fixing, skill security auditing, and `MindIE-SD` S0–S6 end-to-end model auto-optimization and `kb-lint` governance.

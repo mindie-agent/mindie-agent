@@ -12,7 +12,7 @@
 
 ## ⚡ 一句话让你的 Agent 开始贡献
 
-不需要自己先去啃完十几篇架构文档。打开你的 **Claude Code**、**OpenAI Codex CLI**、**Kimi Code** 或 **DeepSeek Harness**，复制下面这段话并填上你的想法：
+不需要自己先去啃完十几篇架构文档。打开你的 **Claude Code**、**OpenAI Codex CLI**、**Kimi Code**、**DeepSeek Harness** 或 **Google Antigravity**，复制下面这段话并填上你的想法：
 
 ```text
 我想给 MindIE Agent 贡献一个改动：<在这里一句话描述你想加的特性、修复的 Bug 或补充的昇腾知识>。
@@ -103,7 +103,7 @@ flowchart LR
 | 你想贡献的内容 | 目标仓库 |
 | --- | --- |
 | **整体架构、工程设计原则、跨组件发布契约、总入口文档** | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) *(本仓库)* |
-| **Claude Code / Codex / Kimi / DSH 原生插件适配与生命周期 Hook** | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) · [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) · [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) · [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) |
+| **Claude Code / Codex / Kimi / DSH / Antigravity 原生插件适配与生命周期 Hook** | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) · [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) · [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) · [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) · [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) |
 | **昇腾领域知识条目（`L1–L4` 工程规范、排障 SOP、工作流、算子/推理调优模式）** | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) · [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) · [`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core) 等 7 大公共知识库 |
 | **知识检索引擎、条件匹配、脱敏采集与经验提炼飞轮** | [`knowledge`](https://github.com/mindie-agent/knowledge) |
 | **远端 SSH / 容器执行、多机 NPU 协调租约、实时监控看板、CANN 故障分诊** | [`remote-dev`](https://github.com/mindie-agent/remote-dev) · [`coordinator`](https://github.com/mindie-agent/coordinator) · [`npu-top`](https://github.com/mindie-agent/npu-top) · [`diagnostics`](https://github.com/mindie-agent/diagnostics) |

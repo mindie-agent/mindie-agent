@@ -12,7 +12,7 @@ So the easiest way to contribute is simple: **hand your idea to your coding Agen
 
 ## ⚡ Contribute in One Sentence (Agent-First Workflow)
 
-No need to read through a dozen architecture docs yourself first. Open **Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, or **DeepSeek Harness**, and paste this prompt with your idea:
+No need to read through a dozen architecture docs yourself first. Open **Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**, or **Google Antigravity**, and paste this prompt with your idea:
 
 ```text
 I want to contribute a change to MindIE Agent: <describe your feature, bugfix, or Ascend knowledge addition in one sentence>.
@@ -102,7 +102,7 @@ Each repository under `@mindie-agent` has a single, clear responsibility:
 | What You Want to Contribute | Target Repository |
 | --- | --- |
 | **System architecture, engineering design principles, release contracts, top-level docs** | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) *(This Repo)* |
-| **Claude Code / Codex / Kimi / DSH native plugin adapters & lifecycle hooks** | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) · [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) · [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) · [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) |
+| **Claude Code / Codex / Kimi / DSH / Antigravity native plugin adapters & lifecycle hooks** | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) · [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) · [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) · [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) · [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) |
 | **Ascend domain knowledge units (`L1–L4` rules, SOPs, workflows, kernel/inference optimizations)** | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) · [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) · [`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core) and the other public corpora |
 | **Knowledge retrieval engine, condition matching, redaction & distillation flywheel** | [`knowledge`](https://github.com/mindie-agent/knowledge) |
 | **Remote SSH/container execution, multi-agent NPU leases, live dashboard, CANN fault triage** | [`remote-dev`](https://github.com/mindie-agent/remote-dev) · [`coordinator`](https://github.com/mindie-agent/coordinator) · [`npu-top`](https://github.com/mindie-agent/npu-top) · [`diagnostics`](https://github.com/mindie-agent/diagnostics) |
