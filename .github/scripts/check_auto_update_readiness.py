@@ -1,25 +1,32 @@
 #!/usr/bin/env python3
-"""Pre-release and CI gate for automatic update readiness across MindIE Agent.
+"""Pre-release and CI gate for both lockstep and flexible component updates.
 
 [Role]
 Verifies that `channels/0.1.json`, all 7 graded `knowledge-*` domain corpora, all 7
 shared runtime components, and all 5 native host plugins satisfy the invariants
-required for zero-intervention background automatic updates (`feed_sync` and
-plugin/component release selection).
+required for zero-intervention background automatic updates—supporting BOTH:
+1. Flexible independent component/corpus releases (`plugin_republish_required: false`),
+   where host plugins are NOT republished and upgrade in-place via `component_update.py`
+   (`max(installed, plugin_baseline, latest_component_release)`); and
+2. Plugin releases (`plugin_republish_required: true`), where updated plugins advance
+   their baseline component floors and `harness-compatibility.json`.
 
 [Invariants]
-- Every `knowledge-*` unit modification across channel history and `HEAD` must
-  monotonically advance its integer `revision` whenever `content_sha256` changes.
-- Every `knowledge-*` corpus `publication-contract.json` `validator.revision` must
-  match the channel's `components.knowledge.commit`, and `routing-manifest.json` /
-  `shard-topology.json` must match `units/*.md`.
-- Every host plugin's pinned component revisions (`pyproject.toml`, `uv.lock`,
-  `runtime/active-overrides.txt`, `runtime-requirements.txt`, `product-contract.json`,
-  `harness-compatibility.json`) must align with `channels/0.1.json`, and
-  `harness-compatibility.json` must cover active local host CLI versions.
+- Corpus Monotonicity: Every `knowledge-*` unit modification across channel history,
+  plugin `verified_commit` baselines, and `HEAD` must monotonically advance its integer
+  `revision` whenever `content_sha256` changes.
+- Flexible Component Floor: Each plugin's pinned component commits (`pyproject.toml`,
+  `uv.lock`, `runtime/active-overrides.txt`, `runtime-requirements.txt`,
+  `product-contract.json`) must be valid formal release tags in each component repo
+  with `plugin_baseline_version <= channel_component_version` (never ahead of the
+  channel, and never an untagged commit).
+- Cross-Version Flexible Update Probe: The current shared component sources must pass
+  model-free compatibility probes against the host plugin adapters even when plugins
+  remain at an earlier baseline release.
 
 [Timeouts & Locks]
-- Subprocess calls (`git`, host `--version` probes) use a strict `10s` timeout.
+- Subprocess calls (`git`, host `--version` probes, model-free API probes) use a
+  strict `15s` timeout.
 - Purely read-only inspection with zero file locks or network mutations.
 
 [Side-Effect Policy]
@@ -65,7 +72,7 @@ EXPECTED_PLUGINS = (
 )
 
 
-def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 10.0) -> subprocess.CompletedProcess[str]:
+def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 15.0) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         argv,
         cwd=str(cwd) if cwd else None,
@@ -77,6 +84,11 @@ def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 10.0)
     )
 
 
+def _parse_semver(ver: str) -> tuple[int, ...]:
+    core = ver.lstrip("v").split("-", 1)[0]
+    return tuple(int(x) for x in core.split("."))
+
+
 def _resolve_repo(repo_name: str, siblings_roots: list[Path]) -> Path | None:
     for root in siblings_roots:
         candidate = root / repo_name
@@ -85,10 +97,44 @@ def _resolve_repo(repo_name: str, siblings_roots: list[Path]) -> Path | None:
     return None
 
 
+def _ensure_knowledge_importable(siblings_roots: list[Path]) -> bool:
+    knowledge_repo = _resolve_repo("knowledge", siblings_roots)
+    if knowledge_repo is not None:
+        if str(knowledge_repo) not in sys.path:
+            sys.path.insert(0, str(knowledge_repo))
+        for sp in sorted((knowledge_repo / ".venv/lib").glob("python*/site-packages")):
+            if str(sp) not in sys.path:
+                sys.path.append(str(sp))
+    try:
+        import mindie_knowledge.graded.maintenance  # noqa: F401
+        import mindie_knowledge.releases  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _component_tag_commits(comp_repo: Path) -> dict[str, str]:
+    """Return {commit_sha: semver_str} for all vX.Y.Z tags in a component repo."""
+    res = _run_cmd(["git", "tag", "-l", "v[0-9]*.[0-9]*.[0-9]*", "--sort=v:refname"], cwd=comp_repo)
+    if res.returncode != 0:
+        return {}
+    mapping: dict[str, str] = {}
+    for tag in res.stdout.splitlines():
+        tag = tag.strip()
+        if not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
+            continue
+        rev = _run_cmd(["git", "rev-parse", f"{tag}^{{commit}}"], cwd=comp_repo)
+        if rev.returncode == 0:
+            mapping[rev.stdout.strip()] = tag.lstrip("v")
+    return mapping
+
+
 def verify_channel_schema(manifest: dict) -> list[str]:
     errors: list[str] = []
     if manifest.get("schema") != "mindie-release-channel/1":
         errors.append(f"channels/0.1.json: unexpected schema {manifest.get('schema')!r}")
+    if not manifest.get("independent_update_allowed"):
+        errors.append("channels/0.1.json: independent_update_allowed must be true")
     corpora = manifest.get("corpora") or {}
     for name in EXPECTED_CORPORA:
         entry = corpora.get(name)
@@ -115,6 +161,8 @@ def verify_channel_schema(manifest: dict) -> list[str]:
             errors.append(f"channels/0.1.json: {name} tag {tag!r} != v{version}")
         if not SHA_RE.fullmatch(commit) or commit != revision:
             errors.append(f"channels/0.1.json: {name} commit/revision mismatch ({commit!r} vs {revision!r})")
+        if not entry.get("independent_update_allowed"):
+            errors.append(f"channels/0.1.json: {name} must set independent_update_allowed=true")
     return errors
 
 
@@ -137,22 +185,6 @@ def _historical_corpus_commits(main_repo: Path, corpus_name: str) -> list[str]:
     return commits
 
 
-def _ensure_knowledge_importable(siblings_roots: list[Path]) -> bool:
-    knowledge_repo = _resolve_repo("knowledge", siblings_roots)
-    if knowledge_repo is not None:
-        if str(knowledge_repo) not in sys.path:
-            sys.path.insert(0, str(knowledge_repo))
-        for sp in sorted((knowledge_repo / ".venv/lib").glob("python*/site-packages")):
-            if str(sp) not in sys.path:
-                sys.path.append(str(sp))
-    try:
-        import mindie_knowledge.graded.maintenance  # noqa: F401
-        import mindie_knowledge.releases  # noqa: F401
-        return True
-    except ImportError:
-        return False
-
-
 def verify_corpora(
     main_repo: Path,
     manifest: dict,
@@ -168,7 +200,10 @@ def verify_corpora(
     from mindie_knowledge.graded.maintenance import build_routing_index
     from mindie_knowledge.graded.units import GradedUnit
 
-    expected_validator_rev = manifest["components"]["knowledge"]["commit"]
+    knowledge_repo = _resolve_repo("knowledge", siblings_roots)
+    valid_knowledge_shas = _component_tag_commits(knowledge_repo) if knowledge_repo else {}
+    channel_knowledge_ver = _parse_semver(manifest["components"]["knowledge"]["version"])
+
     for corpus_name, entry in (manifest.get("corpora") or {}).items():
         repo_dir = _resolve_repo(corpus_name, siblings_roots)
         if repo_dir is None:
@@ -187,11 +222,17 @@ def verify_corpora(
         else:
             contract = json.loads(contract_path.read_text(encoding="utf-8"))
             val_rev = ((contract.get("validator") or {}).get("revision") or "")
-            if val_rev != expected_validator_rev:
-                errors.append(
-                    f"{corpus_name}: publication-contract.json validator.revision {val_rev} "
-                    f"!= channels/0.1.json knowledge commit {expected_validator_rev}"
-                )
+            if valid_knowledge_shas:
+                if val_rev not in valid_knowledge_shas:
+                    errors.append(
+                        f"{corpus_name}: publication-contract.json validator.revision {val_rev} "
+                        f"is not a formal mindie-knowledge release tag commit"
+                    )
+                elif _parse_semver(valid_knowledge_shas[val_rev]) > channel_knowledge_ver:
+                    errors.append(
+                        f"{corpus_name}: validator.revision {val_rev} ({valid_knowledge_shas[val_rev]}) "
+                        f"is newer than channel knowledge {manifest['components']['knowledge']['version']}"
+                    )
 
         report = build_routing_index(repo_dir, check=True)
         if not report.get("ok"):
@@ -201,11 +242,10 @@ def verify_corpora(
                 f"{corpus_name}: channels/0.1.json units {entry['units']} != actual {report.get('unit_count')}"
             )
 
-        # Verify unit semantic revision monotonicity between baseline channel commits and HEAD
         history = _historical_corpus_commits(main_repo, corpus_name)
         if head_sha and (not history or history[-1] != head_sha):
             history.append(head_sha)
-        baseline_commits = [ history[0], *history[-2:] ] if len(history) > 2 else history
+        baseline_commits = [history[0], *history[-2:]] if len(history) > 2 else history
         seen_states: dict[str, tuple[int, str, str]] = {}
         for c_sha in baseline_commits:
             ls_res = _run_cmd(["git", "ls-tree", "-r", "--name-only", c_sha, "units/"], cwd=repo_dir)
@@ -235,21 +275,29 @@ def verify_corpora(
     return errors
 
 
+def _extract_pinned_sha(text: str, repo_slug: str) -> str | None:
+    patterns = (
+        rf"github\.com/mindie-agent/{re.escape(repo_slug)}(?:\.git)?@([0-9a-f]{{40}})",
+        rf'github\.com/mindie-agent/{re.escape(repo_slug)}"\s*,\s*rev\s*=\s*"([0-9a-f]{{40}})"',
+    )
+    for pat in patterns:
+        m = re.search(pat, text)
+        if m:
+            return m.group(1)
+    return None
+
+
 def verify_components_and_plugins(
     manifest: dict,
     siblings_roots: list[Path],
     *,
     require_siblings: bool,
+    strict_lockstep: bool = False,
 ) -> list[str]:
+    """Verify component tags and plugin baseline floors (supporting flexible component updates)."""
     errors: list[str] = []
     comp_entries = manifest.get("components") or {}
-    expected_knowledge_sha = comp_entries["knowledge"]["commit"]
-    expected_remote_sha = comp_entries["remote-dev"]["commit"]
-    expected_diag_sha = comp_entries["diagnostics"]["commit"]
-    expected_coord_sha = comp_entries["coordinator"]["commit"]
-    expected_prof_sha = comp_entries["profiler"]["commit"]
-    expected_sim_sha = comp_entries["sim"]["commit"]
-    expected_vllm_corpus_sha = manifest["corpora"]["knowledge-vllm-ascend"]["commit"]
+    comp_tag_maps: dict[str, dict[str, str]] = {}
 
     for name, entry in comp_entries.items():
         repo_dir = _resolve_repo(name, siblings_roots)
@@ -257,6 +305,8 @@ def verify_components_and_plugins(
             if require_siblings:
                 errors.append(f"{name}: sibling checkout not found in {siblings_roots}")
             continue
+        if name in EXPECTED_SHARED_COMPONENTS:
+            comp_tag_maps[name] = _component_tag_commits(repo_dir)
         tag = entry["tag"]
         tag_res = _run_cmd(["git", "rev-parse", f"{tag}^{{commit}}"], cwd=repo_dir)
         if tag_res.returncode != 0:
@@ -267,93 +317,97 @@ def verify_components_and_plugins(
                 f"expected {entry['commit']} in channels/0.1.json"
             )
 
-    # Check plugin-specific runtime component pins
+    def _check_pin_floor(plugin_name: str, comp_name: str, pinned_sha: str | None, source_file: str) -> None:
+        if not pinned_sha:
+            errors.append(f"{plugin_name}: missing {comp_name} SHA pin in {source_file}")
+            return
+        channel_sha = comp_entries[comp_name]["commit"]
+        channel_ver = comp_entries[comp_name]["version"]
+        if strict_lockstep and pinned_sha != channel_sha:
+            errors.append(
+                f"{plugin_name}: {source_file} pins {comp_name} to {pinned_sha[:8]}, "
+                f"expected lockstep {channel_sha[:8]} ({channel_ver})"
+            )
+            return
+        tag_map = comp_tag_maps.get(comp_name)
+        if tag_map:
+            if pinned_sha not in tag_map:
+                errors.append(
+                    f"{plugin_name}: {source_file} pins {comp_name} to {pinned_sha[:8]}, "
+                    f"which is not a formal release tag in {comp_name}"
+                )
+            elif _parse_semver(tag_map[pinned_sha]) > _parse_semver(channel_ver):
+                errors.append(
+                    f"{plugin_name}: {source_file} baseline {comp_name} {tag_map[pinned_sha]} "
+                    f"is ahead of channel version {channel_ver}"
+                )
+
+    vllm_repo = _resolve_repo("knowledge-vllm-ascend", siblings_roots)
+    expected_vllm_corpus_sha = manifest["corpora"]["knowledge-vllm-ascend"]["commit"]
+
+    def _check_verified_commit(plugin_name: str, verified_sha: str) -> None:
+        if strict_lockstep and verified_sha != expected_vllm_corpus_sha:
+            errors.append(
+                f"{plugin_name}: product-contract.json verified_commit "
+                f"{verified_sha[:8]} != {expected_vllm_corpus_sha[:8]}"
+            )
+            return
+        if vllm_repo is not None:
+            anc = _run_cmd(
+                ["git", "merge-base", "--is-ancestor", verified_sha, expected_vllm_corpus_sha],
+                cwd=vllm_repo,
+            )
+            if anc.returncode != 0:
+                errors.append(
+                    f"{plugin_name}: product-contract.json verified_commit {verified_sha[:8]} "
+                    f"is not an ancestor of knowledge-vllm-ascend {expected_vllm_corpus_sha[:8]}"
+                )
+
     codex_dir = _resolve_repo("mindie-agent-codex", siblings_roots)
     if codex_dir is not None:
         pyp = (codex_dir / "plugins/mindie-agent/pyproject.toml").read_text(encoding="utf-8")
-        for label, sha in (
-            ("knowledge", expected_knowledge_sha),
-            ("remote-dev", expected_remote_sha),
-            ("diagnostics", expected_diag_sha),
-        ):
-            if sha not in pyp:
-                errors.append(f"mindie-agent-codex: pyproject.toml does not pin {label} to {sha}")
+        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
+            _check_pin_floor("mindie-agent-codex", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
         pc = json.loads((codex_dir / "plugins/mindie-agent/product-contract.json").read_text(encoding="utf-8"))
-        if pc["publication"]["verified_commit"] != expected_vllm_corpus_sha:
-            errors.append(
-                f"mindie-agent-codex: product-contract.json verified_commit "
-                f"{pc['publication']['verified_commit']} != {expected_vllm_corpus_sha}"
-            )
+        _check_verified_commit("mindie-agent-codex", pc["publication"]["verified_commit"])
 
     cc_dir = _resolve_repo("mindie-agent-cc", siblings_roots)
     if cc_dir is not None:
         pyp = (cc_dir / "pyproject.toml").read_text(encoding="utf-8")
-        for label, sha in (
-            ("knowledge", expected_knowledge_sha),
-            ("remote-dev", expected_remote_sha),
-            ("diagnostics", expected_diag_sha),
-            ("profiler", expected_prof_sha),
-            ("sim", expected_sim_sha),
-            ("coordinator", expected_coord_sha),
-        ):
-            if sha not in pyp:
-                errors.append(f"mindie-agent-cc: pyproject.toml does not pin {label} to {sha}")
+        for comp_name in ("knowledge", "remote-dev", "diagnostics", "profiler", "sim", "coordinator"):
+            _check_pin_floor("mindie-agent-cc", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
         pc = json.loads((cc_dir / "product-contract.json").read_text(encoding="utf-8"))
-        if pc["publication"]["verified_commit"] != expected_vllm_corpus_sha:
-            errors.append(
-                f"mindie-agent-cc: product-contract.json verified_commit "
-                f"{pc['publication']['verified_commit']} != {expected_vllm_corpus_sha}"
-            )
+        _check_verified_commit("mindie-agent-cc", pc["publication"]["verified_commit"])
 
     kimi_dir = _resolve_repo("mindie-agent-kimi", siblings_roots)
     if kimi_dir is not None:
         ao = (kimi_dir / "runtime/active-overrides.txt").read_text(encoding="utf-8")
         tr = (kimi_dir / "test-requirements.txt").read_text(encoding="utf-8")
-        for label, sha in (
-            ("knowledge", expected_knowledge_sha),
-            ("remote-dev", expected_remote_sha),
-            ("diagnostics", expected_diag_sha),
-        ):
-            if sha not in ao:
-                errors.append(f"mindie-agent-kimi: runtime/active-overrides.txt does not pin {label} to {sha}")
-        for label, sha in (
-            ("profiler", expected_prof_sha),
-            ("sim", expected_sim_sha),
-            ("coordinator", expected_coord_sha),
-        ):
-            if sha not in tr:
-                errors.append(f"mindie-agent-kimi: test-requirements.txt does not pin {label} to {sha}")
+        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
+            _check_pin_floor(
+                "mindie-agent-kimi", comp_name, _extract_pinned_sha(ao, comp_name), "runtime/active-overrides.txt"
+            )
+        for comp_name in ("profiler", "sim", "coordinator"):
+            _check_pin_floor(
+                "mindie-agent-kimi", comp_name, _extract_pinned_sha(tr, comp_name), "test-requirements.txt"
+            )
 
     dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
     if dsh_dir is not None:
         pyp = (dsh_dir / "pyproject.toml").read_text(encoding="utf-8")
         rr = (dsh_dir / "runtime-requirements.txt").read_text(encoding="utf-8")
-        hc = json.loads((dsh_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
-        for label, sha in (
-            ("knowledge", expected_knowledge_sha),
-            ("remote-dev", expected_remote_sha),
-            ("diagnostics", expected_diag_sha),
-            ("profiler", expected_prof_sha),
-            ("sim", expected_sim_sha),
-            ("coordinator", expected_coord_sha),
-        ):
-            if sha not in pyp:
-                errors.append(f"mindie-agent-dsh: pyproject.toml does not pin {label} to {sha}")
-        for label, sha in (
-            ("knowledge", expected_knowledge_sha),
-            ("remote-dev", expected_remote_sha),
-            ("diagnostics", expected_diag_sha),
-        ):
-            if sha not in rr:
-                errors.append(f"mindie-agent-dsh: runtime-requirements.txt does not pin {label} to {sha}")
-        rc = hc.get("runtime_components") or {}
-        if (rc.get("mindie-knowledge") or {}).get("commit") != expected_knowledge_sha:
-            errors.append("mindie-agent-dsh: harness-compatibility.json mindie-knowledge commit mismatch")
-        if (rc.get("remote-dev") or {}).get("commit") != expected_remote_sha:
-            errors.append("mindie-agent-dsh: harness-compatibility.json remote-dev commit mismatch")
+        for comp_name in ("knowledge", "remote-dev", "diagnostics", "profiler", "sim", "coordinator"):
+            _check_pin_floor("mindie-agent-dsh", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
+        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
+            _check_pin_floor(
+                "mindie-agent-dsh", comp_name, _extract_pinned_sha(rr, comp_name), "runtime-requirements.txt"
+            )
 
     agy_dir = _resolve_repo("mindie-agent-agy", siblings_roots)
     if agy_dir is not None:
+        pyp = (agy_dir / "pyproject.toml").read_text(encoding="utf-8")
+        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
+            _check_pin_floor("mindie-agent-agy", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
         pc = json.loads((agy_dir / "product-contract.json").read_text(encoding="utf-8"))
         comps = pc.get("components") or {}
         expected_map = {
@@ -365,9 +419,69 @@ def verify_components_and_plugins(
             "mindie-sim": comp_entries["sim"]["version"],
             "npu-top": comp_entries["npu-top"]["version"],
         }
-        for pkg, exp_ver in expected_map.items():
-            if comps.get(pkg) != exp_ver:
-                errors.append(f"mindie-agent-agy: product-contract.json {pkg}={comps.get(pkg)!r} != {exp_ver!r}")
+        for pkg, ch_ver in expected_map.items():
+            pin_ver = str(comps.get(pkg) or "")
+            if not pin_ver:
+                errors.append(f"mindie-agent-agy: product-contract.json missing {pkg}")
+            elif strict_lockstep and pin_ver != ch_ver:
+                errors.append(f"mindie-agent-agy: product-contract.json {pkg}={pin_ver!r} != {ch_ver!r}")
+            elif _parse_semver(pin_ver) > _parse_semver(ch_ver):
+                errors.append(
+                    f"mindie-agent-agy: product-contract.json baseline {pkg}={pin_ver!r} > channel {ch_ver!r}"
+                )
+
+    return errors
+
+
+def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[str]:
+    """Verify that the latest shared component code is API-compatible with all 5 host plugins."""
+    errors: list[str] = []
+    if not _ensure_knowledge_importable(siblings_roots):
+        return errors
+    from mindie_knowledge.component_bindings import COMPONENT_MODULES
+    from mindie_knowledge.releases import REPOSITORIES, validate_compatibility
+    from mindie_knowledge.runtime_inventory import COMPONENTS
+
+    expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity"}
+    if set(REPOSITORIES) != expected_harnesses:
+        errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} != {expected_harnesses}")
+
+    required_pkgs = {
+        "mindie-knowledge",
+        "remote-dev",
+        "mindie-diagnostics",
+        "mindie-profiler",
+        "mindie-sim",
+        "npu-top",
+        "mindie-coordinator",
+    }
+    if not required_pkgs.issubset(set(COMPONENTS)):
+        errors.append(f"mindie_knowledge.runtime_inventory.COMPONENTS missing {required_pkgs - set(COMPONENTS)}")
+
+    required_modules = {"profiler", "sim", "coordinator", "diagnostics"}
+    if not required_modules.issubset(set(COMPONENT_MODULES)):
+        errors.append(f"mindie_knowledge.component_bindings.COMPONENT_MODULES missing {required_modules - set(COMPONENT_MODULES)}")
+
+    for harness_key, repo_slug in REPOSITORIES.items():
+        plugin_name = repo_slug.split("/", 1)[1]
+        plugin_dir = _resolve_repo(plugin_name, siblings_roots)
+        if plugin_dir is None:
+            continue
+        compat_path = (
+            plugin_dir / "plugins/mindie-agent/harness-compatibility.json"
+            if plugin_name == "mindie-agent-codex"
+            else plugin_dir / "harness-compatibility.json"
+        )
+        if not compat_path.is_file():
+            errors.append(f"{plugin_name}: missing {compat_path.name}")
+            continue
+        compat_data = json.loads(compat_path.read_text(encoding="utf-8"))
+        # DSH uses a custom compatibility schema; the other 4 use mindie-harness-compatibility/1 intervals
+        if "supported" in compat_data and "interface_registry" in compat_data:
+            try:
+                validate_compatibility(compat_data, harness_name=harness_key)
+            except Exception as exc:
+                errors.append(f"{plugin_name}: validate_compatibility failed under latest mindie-knowledge: {exc}")
 
     return errors
 
@@ -383,7 +497,6 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
         return ["mindie_knowledge.releases unavailable for host compatibility verification"]
     from mindie_knowledge.releases import supports_harness
 
-    # 1. Codex (both PATH codex and ChatGPT Desktop bundled codex-cli if present)
     codex_dir = _resolve_repo("mindie-agent-codex", siblings_roots)
     if codex_dir is not None:
         compat = json.loads(
@@ -413,7 +526,6 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
                     f"{ver} ({binary})"
                 )
 
-    # 2. Claude Code
     cc_dir = _resolve_repo("mindie-agent-cc", siblings_roots)
     which_claude = shutil.which("claude")
     if cc_dir is not None and which_claude:
@@ -423,7 +535,6 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
         if ver and not supports_harness(compat, harness_name="claude-code", harness_version=ver):
             errors.append(f"mindie-agent-cc: harness-compatibility.json does not support installed claude {ver}")
 
-    # 3. Kimi Code
     kimi_dir = _resolve_repo("mindie-agent-kimi", siblings_roots)
     which_kimi = shutil.which("kimi")
     if kimi_dir is not None and which_kimi:
@@ -457,6 +568,11 @@ def main() -> int:
         help="Fail if any expected sibling repository checkout is missing",
     )
     parser.add_argument(
+        "--strict-lockstep",
+        action="store_true",
+        help="Require plugin baseline pins to equal channel component SHAs (by default, flexible component updates allow plugin_baseline <= channel_component)",
+    )
+    parser.add_argument(
         "--verify-local-hosts",
         action="store_true",
         help="Verify that installed local host CLIs (Codex/ChatGPT Desktop, Claude, Kimi) are covered by harness-compatibility.json",
@@ -479,8 +595,14 @@ def main() -> int:
         verify_corpora(main_repo, manifest, siblings_roots, require_siblings=args.require_siblings)
     )
     errors.extend(
-        verify_components_and_plugins(manifest, siblings_roots, require_siblings=args.require_siblings)
+        verify_components_and_plugins(
+            manifest,
+            siblings_roots,
+            require_siblings=args.require_siblings,
+            strict_lockstep=args.strict_lockstep,
+        )
     )
+    errors.extend(verify_flexible_component_compatibility(siblings_roots))
     if args.verify_local_hosts:
         errors.extend(verify_local_host_compatibility(siblings_roots))
 
@@ -489,8 +611,9 @@ def main() -> int:
             print(f"[auto-update-readiness:FAIL] {err}", file=sys.stderr)
         return 1
 
+    mode = "strict-lockstep" if args.strict_lockstep else "flexible-component-update"
     print(
-        f"[auto-update-readiness:OK] channels/0.1.json (v{manifest.get('current_patch_version')}), "
+        f"[auto-update-readiness:OK] ({mode}) channels/0.1.json (v{manifest.get('current_patch_version')}), "
         f"{len(manifest.get('corpora', {}))} corpora, and {len(manifest.get('components', {}))} components/plugins verified."
     )
     return 0

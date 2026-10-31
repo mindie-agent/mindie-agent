@@ -120,10 +120,12 @@ MindIE Agent 对外发布的是**经过验证的组件与插件组合**。OpenAI
 2. **宿主插件与共享组件的协同单调升级**：
    - 插件选择器根据本机当前安装的宿主版本，选出**当前宿主能用的最高兼容正式版插件 Release**（排除 `draft` 与 `prerelease`）。
    - 当没有更高版本的插件 Release 可用时，宿主更新器直接调用组件更新流程（`component_update.py`），将共享运行时组件独立推进至各组件仓库最新的正式 Release；当升级到新插件 Release 时，也会继承当前已安装组件的版本下界（`max(已安装版本, 新插件基线, 组件正式 Release)`），防止新插件把已独立升级过的组件回退到旧基线。
-3. **发版前自动更新就绪必检项（`check_auto_update_readiness.py`）**：
-   - 任何组件、插件或主版本发布前，必须执行 `python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts`（并在 PR 门禁 `.github/workflows/pr-checklist.yml` 中自动校验通道清单一致性），从三个维度杜绝因漏改或漏检阻塞自动升级：
-     - **知识库语义版本单调性**：`mindie-knowledge` 的 `build_routing_index()` 在重建 `index/routing-manifest.json` 时自动将内容变更单元的 `revision` 递增 1，`publication_check.py` 在 `validate(..., base_revision=...)` 中强制拦截任何修改 `content_sha256` 却未推进 `revision` 的提交，且发版前脚本扫描全部 7 个 `knowledge-*` 仓库历史通道提交至 `HEAD` 的单调性及 `publication-contract.json` 的 `validator.revision` 对齐情况；
-     - **跨仓组件与语料锁定一致性**：核验 5 款宿主插件的 `pyproject.toml`、`uv.lock`、`runtime/active-overrides.txt`、`runtime-requirements.txt`、`product-contract.json`（`verified_commit`）与 `channels/0.1.json` 声明的精确版本及不可变源码 SHA 完全一致；
+3. **发版前自动更新就绪必检项（`check_auto_update_readiness.py`，原生支持灵活组件独立发版与全量同步发版双模式）**：
+   - 任何共享组件、知识库语料、宿主插件或主版本发布前，必须执行 `python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts`（并在 PR 门禁 `.github/workflows/pr-checklist.yml` 中自动校验通道清单一致性），从三个维度杜绝因漏改或漏检阻塞自动升级：
+     - **知识库语义版本单调性**：`mindie-knowledge` 的 `build_routing_index()` 在重建 `index/routing-manifest.json` 时自动将内容变更单元的 `revision` 递增 1，`publication_check.py` 在 `validate(..., base_revision=...)` 中强制拦截任何修改 `content_sha256` 却未推进 `revision` 的提交，且发版前脚本扫描全部 7 个 `knowledge-*` 仓库历史通道提交至 `HEAD` 的单调性及 `publication-contract.json` 的 `validator.revision` 对齐情况（允许 `validator.revision <= channel knowledge version`）；
+     - **灵活组件独立升级下界校验（默认 `flexible-component-update` 模式）与锁步发版校验（`--strict-lockstep` 模式）**：
+       - **日常独立组件/语料发版（无需重发 5 款宿主插件）**：默认模式下，`check_auto_update_readiness.py` 校验 5 款宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的每个组件 SHA 均对应官方组件仓库的正式 Release Tag 且满足 `plugin_baseline_version <= channel_component_version`，同时校验 `product-contract.json` 的 `verified_commit` 是通道语料提交的合法祖先，并执行跨版本 API 兼容性检查（`verify_flexible_component_compatibility`）。这样单独发布任意共享组件（如 `knowledge`、`remote-dev`、`diagnostics`、`coordinator`、`profiler`、`sim`、`npu-top`）或推送 `knowledge-*` 语料时，无需重发任何宿主插件，已安装的五端宿主即可通过各自的 `component_update.py`（`mindie_knowledge.component_runtime.discover` + `build`）独立发现并原地原子切换至最新组件正式版；
+       - **插件同步重发（`--strict-lockstep`）**：当插件自身适配器代码、MCP Schema 或 `harness-compatibility.json` 发生变更需要重发插件时，传入 `--strict-lockstep` 额外强制插件源码基线 SHA 与通道最新版本完全相等；
      - **本机活跃宿主 CLI 兼容覆盖率**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 等宿主版本，校验其均处于对应插件 `harness-compatibility.json` 的声明支持区间内，防止宿主自动小版本升级后出现 `"no_compatible_release"`。
 
 ---
