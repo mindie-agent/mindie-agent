@@ -1,6 +1,6 @@
 # 📊 MindIE Agent 开源仓库与下载统计
 
-> **最近更新**：`2026-11-01 08:24 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
+> **最近更新**：`2026-11-01 10:59 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
 
 ![MindIE Agent Repository & Download Statistics](./dashboard.zh.svg)
 
@@ -18,7 +18,7 @@
 | 运行时组件 | [`knowledge`](https://github.com/mindie-agent/knowledge) | `v0.13.8` | 0 | 2 | **7,711** | 4,861 (1,751) | 29 (6) | 97 (510) |
 | 运行时组件 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | `v0.11.2` | 1 | 2 | **4,952** | 3,748 (1,742) | 16 (7) | 95 (514) |
 | 运行时组件 | [`coordinator`](https://github.com/mindie-agent/coordinator) | `v0.7.1` | 0 | 1 | **1,408** | 1,245 (406) | 7 (5) | 60 (180) |
-| 运行时组件 | [`profiler`](https://github.com/mindie-agent/profiler) | `v0.5.5` | 0 | 0 | **607** | 607 (278) | 17 (6) | 45 (140) |
+| 运行时组件 | [`profiler`](https://github.com/mindie-agent/profiler) | `v0.5.5` | 0 | 0 | **607** | 607 (278) | 17 (6) | 48 (149) |
 | 运行时组件 | [`sim`](https://github.com/mindie-agent/sim) | `v0.8.2` | 0 | 0 | **983** | 983 (362) | 15 (8) | 38 (117) |
 | NPU 监控 | [`npu-top`](https://github.com/mindie-agent/npu-top) | `v0.3.0` | 2 | 3 | **885** | 725 (165) | 12 (3) | 629 (699) |
 | 运行时组件 | [`diagnostics`](https://github.com/mindie-agent/diagnostics) | `v0.5.4` | 0 | 1 | **8,334** | 5,818 (2,535) | 0 (0) | 68 (379) |
@@ -30,7 +30,7 @@
 | 领域知识库 | [`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability) | `commit@4b3dd86b` | 0 | 0 | **178** | 178 (87) | 2 (2) | 0 (0) |
 | 领域知识库 | [`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat) | `commit@c37c9c0f` | 0 | 0 | **144** | 144 (66) | 3 (3) | 0 (0) |
 | 领域知识库 | [`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | `commit@06f41835` | 0 | 0 | **144** | 144 (68) | 1 (1) | 0 (0) |
-| **合计** | **22 个公开仓库** | — | **68** | **77** | **44,843** | **32,801** | — | **4,886** (7,101) |
+| **合计** | **22 个公开仓库** | — | **68** | **77** | **44,843** | **32,801** | — | **4,889** (7,110) |
 
 ## 数据文件
 
