@@ -2,7 +2,7 @@
 
 [系统架构](architecture.md) · [Profiler 系统设计](profiler-system.md) · [结构复用与实测映射](profiler-sim-structure.md) · [设计原则](design-principles.md) · [消费者迁移指南](simulation-consumer-migration.md) · [文档中心](README.md)
 
-`mindie-sim`（Python 包 `mindie_sim`，当前正式版本 `v0.8.1`）是面向编程 Agent 的硬件无关、机理优先（Mechanism-First）性能建模组件。它从模型结构、算子实现和硬件资源声明出发，用**同一个因果执行引擎**计算算子、子图、纯模型与服务场景的成本，并提供 **4D 硬件效率拆解**（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、**SLA 硬件配比推演**与 **`mindie-model-structure/1` 结构导出**。
+`mindie-sim`（Python 包 `mindie_sim`，当前正式版本 `v0.9.0`）是面向编程 Agent 的硬件无关、机理优先（Mechanism-First）性能建模组件。它从模型结构、算子实现和硬件资源声明出发，用**同一个因果执行引擎**计算算子、子图、纯模型与服务场景的成本，并提供**确定性 Case 合成器（`compose`）**、**`async_scheduling` 异步调度延迟释放 KV 显存公理模型**、**4D 硬件效率拆解**（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、**SLA 硬件缩放与多维拓扑/PD 分离精确 Pareto 求解（`sla` / `sweep`）**、**多 DP 偏斜/MoE EPLB/Chunked-Prefill 干扰屏障物理力学（`skew`）**与 **`mindie-model-structure/1` 结构导出**。
 
 厂商与芯片型号（如昇腾 910B / A3 910C / A5 950、GPU 等）仅用于选择硬件资源声明与输入适配器，不在执行循环中硬编码专用的经验倍率或时间公式。
 
@@ -66,9 +66,12 @@ Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`
 | CLI / 模块入口 | 核心用途与输出边界 |
 | --- | --- |
 | `catalog` / `inspect CASE` | 读取模型声明或展开完整层结构，零权重加载、零设备上下文初始化 |
+| `compose --model ... --hardware ...` | 从内置模型目录或 HuggingFace `config.json` 与 `a2/a3/a5` 硬件别名确定性合成 `Case`（支持量化排除、层数/专家数覆盖与 `--async-scheduling`） |
 | `operators CASE --phase ... --tokens ... --scope body\|model` | 计算生产配方下的独立算子成本，输出 `sum_of_isolated_device_programs` 及各算子族占比 |
 | `graph CASE --phase ... --tokens ... --scope body\|model` | 在统一因果引擎中组合数据依赖、多流并发与 EP 集合通信，输出纯设备图或含 Host 提交（`--include-submission`）的完成时间与关键路径 |
 | `predict CASE` | 执行纯模型（`scope="body"\|"model"`）或服务级请求仿真，输出端到端时延、4D 硬件效率拆解与瓶颈定界 |
+| `efficiency CASE` / `sla CASE` | 输出 4D 硬件效率拆解、`0.80x MBU` 反事实 Roofline 目标，以及同步/异步调度（`async_scheduling`）下的 SLA 并发上限（`b_vram_max_sync` / `b_vram_max_async`）与最小卡数 |
+| `sweep CASE [--mode topology\|pd]` / `skew CASE` | 枚举 `DP/TP/EP/PP/PCP` 并行切分与 P/D 分离配比的精确无支配 Pareto 前沿；量化多 DP 上下文偏斜 AllToAllV 同步屏障、MoE 路由失衡（含 EPLB）与 Chunked-Prefill 最大安全块 $C_{\max}^*$ |
 | `study MANIFEST` | 在一致的结构、路由与计时边界下批量评估显式候选方案（如并行切分、算子实现、融合策略），输出可比候选排序 |
 | `accuracy PACKET` | 对齐硬件、实现、阶段、Shape 与计时边界，在独立盲测集（Held-out）上输出误差分布、趋势一致性与配置排序准确率 |
 | `python -m mindie_sim.structure CASE ...` | 复用 `target_graphs` 与配方展开导出无时延的 `mindie-model-structure/1` JSON，供 `mindie-profiler` 关联实测事件 |
@@ -122,5 +125,6 @@ Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`
 - **跨芯片、跨模型的真实硬件收敛结果**：
   - **Decode 主体预测**：覆盖 A3 / A5 集群的 **280 个真实 Decode 用例**（含高低并发、TP/DP/EP、MTP 与 FlashComm 场景）全部收敛在 **`<= 15%`** 误差容差内；
   - **Prefill 阶段预测**：**15 个完整 Prefill 用例**全部收敛在 **`<= 15%`** 误差容差内；
-  - **大规模集群盲测泛化（DSH Fleet Generalization）**：在 **856 个 DSH 真实集群用例（含 561 个独立 Held-out 盲测用例）**上，端到端预测准确率达到 **98.25%（误差 `<= 15%`）**。
-- **四端宿主与评测套件全量集成**：`mindie-sim v0.8.1` 已通过 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi` 与 `mindie-agent-dsh` 的 `components` / `mindie-tools` MCP 服务在四端统一暴露，并与 `mindie-bench` 的 `sim-causal-modeling-boundaries` 基准完成闭环验证（接口迁移说明见[消费者迁移指南](simulation-consumer-migration.md)）。
+  - **Wave 5 三芯片样本内体制校准（A2 + A3 + A5）**：覆盖 A2（`565/565`）、A3（`580/580`）与 A5（`508/508`）共 **202 个 Cohort-Phase、1,653 份** 实测 Golden Profiles（含 `4K..400K` 超长上下文与合成少专家 MoE），实现 **`1,653 / 1,653 = 100.00% <= 10%`** 样本内误差收敛（平均绝对误差 `2.77%`，中位数 `2.11%`）；
+  - **大规模集群盲测泛化（DSH Fleet Generalization）**：在独立的 **856 个 DSH 真实集群用例**上整体预测准确率达到 **`841 / 856 = 98.25%`（误差 `<= 15%`）**，其中 **561 个独立 Held-out 盲测用例**达到 **`546 / 561 = 97.33%`（误差 `<= 15%`）**。
+- **五端宿主与评测套件全量集成**：`mindie-sim v0.9.0` 已通过 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi`、`mindie-agent-dsh` 与 `mindie-agent-agy` 的 `components` / `mindie-tools` MCP 服务在五端统一暴露，并与 `mindie-bench` 的 `sim-causal-modeling-boundaries` 基准完成闭环验证（接口迁移说明见[消费者迁移指南](simulation-consumer-migration.md)）。

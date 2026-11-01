@@ -2,31 +2,22 @@
 """Pre-release and CI gate for both lockstep and flexible component updates.
 
 [Role]
-Verifies that `channels/0.1.json`, all 7 graded `knowledge-*` domain corpora, all 7
-shared runtime components, and all 5 native host plugins satisfy the invariants
-required for zero-intervention background automatic updates—supporting BOTH:
-1. Flexible independent component/corpus releases (`plugin_republish_required: false`),
-   where host plugins are NOT republished and upgrade in-place via `component_update.py`
-   (`max(installed, plugin_baseline, latest_component_release)`); and
-2. Plugin releases (`plugin_republish_required: true`), where updated plugins advance
-   their baseline component floors and `harness-compatibility.json`.
+Verifies that `channels/0.1.json`, all 7 `knowledge-*` domain corpora, all 7 shared
+runtime components, and all 5 native host plugins satisfy zero-intervention update
+invariants for both flexible independent component/corpus releases (`max(installed,
+plugin_baseline, latest_component_release)`) and lockstep plugin releases.
 
 [Invariants]
 - Corpus Monotonicity: Every `knowledge-*` unit modification across channel history,
   plugin `verified_commit` baselines, and `HEAD` must monotonically advance its integer
   `revision` whenever `content_sha256` changes.
-- Flexible Component Floor: Each plugin's pinned component commits (`pyproject.toml`,
-  `uv.lock`, `runtime/active-overrides.txt`, `runtime-requirements.txt`,
-  `product-contract.json`) must be valid formal release tags in each component repo
-  with `plugin_baseline_version <= channel_component_version` (never ahead of the
-  channel, and never an untagged commit).
-- Cross-Version Flexible Update Probe: The current shared component sources must pass
-  model-free compatibility probes against the host plugin adapters even when plugins
-  remain at an earlier baseline release.
+- Flexible Component Floor: Each plugin's pinned component commits must resolve to
+  formal release tags in each component repo with `plugin_baseline <= channel_component`.
+- Cross-Version Compatibility Probe: Shared component sources must pass model-free
+  compatibility checks against all 5 host plugin adapters.
 
 [Timeouts & Locks]
-- Subprocess calls (`git`, host `--version` probes, model-free API probes) use a
-  strict `15s` timeout.
+- Subprocess probes (`git`, host `--version`, sync checks) enforce a strict `15s` timeout.
 - Purely read-only inspection with zero file locks or network mutations.
 
 [Side-Effect Policy]
@@ -129,12 +120,33 @@ def _component_tag_commits(comp_repo: Path) -> dict[str, str]:
     return mapping
 
 
-def verify_channel_schema(manifest: dict) -> list[str]:
+def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
     errors: list[str] = []
     if manifest.get("schema") != "mindie-release-channel/1":
         errors.append(f"channels/0.1.json: unexpected schema {manifest.get('schema')!r}")
     if not manifest.get("independent_update_allowed"):
         errors.append("channels/0.1.json: independent_update_allowed must be true")
+    cpv = str(manifest.get("current_patch_version") or "")
+    if not cpv:
+        errors.append("channels/0.1.json: missing current_patch_version")
+    expected_rn = f"docs/releases/{cpv}.md"
+    expected_rn_en = f"docs/releases/{cpv}.en.md"
+    if manifest.get("release_notes") != expected_rn:
+        errors.append(f"channels/0.1.json: release_notes {manifest.get('release_notes')!r} != {expected_rn!r}")
+    if manifest.get("release_notes_en") != expected_rn_en:
+        errors.append(f"channels/0.1.json: release_notes_en {manifest.get('release_notes_en')!r} != {expected_rn_en!r}")
+
+    patch_releases = manifest.get("patch_releases") or []
+    if not isinstance(patch_releases, list) or not patch_releases:
+        errors.append("channels/0.1.json: patch_releases must be a non-empty list")
+    else:
+        latest_patch = patch_releases[-1]
+        if str(latest_patch.get("patch_version") or "") != cpv:
+            errors.append(
+                f"channels/0.1.json: patch_releases[-1].patch_version "
+                f"{latest_patch.get('patch_version')!r} != current_patch_version {cpv!r}"
+            )
+
     corpora = manifest.get("corpora") or {}
     for name in EXPECTED_CORPORA:
         entry = corpora.get(name)
@@ -163,6 +175,33 @@ def verify_channel_schema(manifest: dict) -> list[str]:
             errors.append(f"channels/0.1.json: {name} commit/revision mismatch ({commit!r} vs {revision!r})")
         if not entry.get("independent_update_allowed"):
             errors.append(f"channels/0.1.json: {name} must set independent_update_allowed=true")
+
+    kb = str(((manifest.get("update_policy") or {}).get("implementation_status") or {}).get("known_boundaries") or "")
+    kb_tokens = [
+        f"The {cpv} channel pins",
+        *(f"{k} {components[k]['version']}" for k in (*EXPECTED_SHARED_COMPONENTS, "mindie-bench") if k in components),
+        f"Codex {components.get('mindie-agent-codex', {}).get('version', '')}",
+        f"Claude Code {components.get('mindie-agent-cc', {}).get('version', '')}",
+        f"Kimi {components.get('mindie-agent-kimi', {}).get('version', '')}",
+        f"DSH {components.get('mindie-agent-dsh', {}).get('version', '')}",
+        f"Google Antigravity {components.get('mindie-agent-agy', {}).get('version', '')}",
+    ]
+    for token in kb_tokens:
+        if token and token not in kb:
+            errors.append(f"channels/0.1.json: known_boundaries missing or out of sync for {token!r}")
+
+    for rel_file in (expected_rn, expected_rn_en):
+        rel_path = main_repo / rel_file
+        if not rel_path.is_file():
+            errors.append(f"{rel_file}: release notes file not found")
+            continue
+        rel_txt = rel_path.read_text(encoding="utf-8")
+        for name, entry in components.items():
+            ver = entry.get("version", "")
+            sha = entry.get("commit", "")
+            row_pat = rf"\|\s*`{re.escape(name)}`\s*\|[^|\n]+\|\s*`{re.escape(str(ver))}`\s*\|\s*`{re.escape(str(sha))}`\s*\|"
+            if not re.search(row_pat, rel_txt):
+                errors.append(f"{rel_file}: table row for {name} does not match channel ({ver} / {sha[:8]})")
     return errors
 
 
@@ -643,7 +682,7 @@ def main() -> int:
     manifest = json.loads(args.channel.read_text(encoding="utf-8"))
     mode = "strict-lockstep" if args.strict_lockstep else "flexible-component-update"
 
-    r1_errors = verify_channel_schema(manifest)
+    r1_errors = verify_channel_schema(manifest, main_repo)
     r2_errors = verify_corpora(main_repo, manifest, siblings_roots, require_siblings=args.require_siblings)
     r3_errors = verify_components_and_plugins(
         manifest,

@@ -209,7 +209,7 @@ Each event carries three distinct dimensions:
    - Repeated isomorphic Transformer blocks are grouped into `cohorts` with measured invocation counts, single-call Mean/P50, `activity_sum_ns`, and `busy_union_ns`, which `python -m mindie_sim.cohort_comparison` reconciles directly against predicted operator costs.
 3. **Topology-Guided Decode Forward Segmentation (`auto_segment_decode_forwards`)**:
    - `mindie_profiler.decode_segmentation` aligns the unified event stream against `ModelSpec.layer_plans` to automatically segment each complete Decode body forward (`body_forward_span_ms`), stripping cross-step bubbles and asynchronous `AI_CPU` tail waits while recovering active batch sizes from observed block tables.
-   - Verified across the Ascend A2 synchronized module replay (18,000/18,000 events `bound`), **280 Decode + 15 Prefill cases** on A3/A5 (`<= 15%` error), and **856 DSH fleet cases / 561 held-out cases (98.25% within `<= 15%` error)**; see [Shared Structure and Measured Attribution](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总).
+   - Verified across the Ascend A2 synchronized module replay (18,000/18,000 events `bound`), **280 Decode + 15 Prefill cases** on A3/A5 (`<= 15%` error), and **856 DSH fleet cases (`841/856 = 98.25%` overall, `546/561 = 97.33%` on independent held-out cases within `<= 15%` error)**; see [Shared Structure and Measured Attribution](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总).
 
 ---
 

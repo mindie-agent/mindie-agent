@@ -2,7 +2,7 @@
 
 [Profiler 系统设计](profiler-system.md) · [Sim 建模系统](simulation-system.md) · [系统架构](architecture.md) · [设计原则](design-principles.md) · [文档中心](README.md)
 
-本文说明 [`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v0.5.3`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v0.8.1`）如何共享模型结构声明、关联昇腾真机 Profiling 事件，并完成算子同构集合（Cohort）与 Decode / Prefill 主体的端到端精度对账。
+本文说明 [`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v0.5.5`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v0.9.0`）如何共享模型结构声明、关联昇腾真机 Profiling 事件，并完成算子同构集合（Cohort）与 Decode / Prefill 主体的端到端精度对账。
 
 模型与算子拓扑结构由 `mindie-sim` 统一维护并导出为 `mindie-model-structure/1`；原始 `msprof` CSV/SQLite 解析、张量契约提取与实测事件归因由 `mindie-profiler` 统一维护。两者通过结构化文件解耦协作，既不在 `profiler` 中维护第二套模型目录，也不在 `sim` 中维护第二套 CSV/SQLite 解析器。
 
@@ -103,7 +103,7 @@ python profiler/examples/structure/pipeline.py --stage all
 
 ### 5.2 多架构与大规模集群验证结果
 
-通过 `mindie-profiler v0.5.3` 与 `mindie-sim v0.8.1` 的统一流水线（详见 `profiler` 仓库 `examples/structure/pipeline.py` 与 `docs/profiler-system.md`），系统已完成从单模块、单算子 Cohort 到跨集群整网前向的分层闭环验证：
+通过 `mindie-profiler v0.5.5` 与 `mindie-sim v0.9.0` 的统一流水线（详见 `profiler` 仓库 `examples/structure/pipeline.py`、`examples/structure/wave5_generalization_eval.py` 与 `docs/profiler-system.md`），系统已完成从单模块、单算子 Cohort 到跨集群整网前向的分层闭环验证：
 
 | 验证维度 | 覆盖范围与数据规模 | 验证结果 |
 | --- | --- | --- |
@@ -112,4 +112,5 @@ python profiler/examples/structure/pipeline.py --stage all
 | **13 类典型架构与子图映射** | GQA、MLA（含 `MlaPrologV3`）、DSA（含 `LightningIndexer`）、SharedKV、GDN、KDA、MoE、mHC 等（8 份全量采集，668,835 事件） | 完整生成节点级与子图级候选、同构 Cohort 及未映射分类诊断，峰值 RSS `<= 331 MiB` |
 | **Decode 主体自动切分与预测收敛** | 覆盖 A3 / A5 集群的 **280 个真实 Decode 用例**（含 Qwen3.5/3.6/3.8、GLM5.3、DeepSeek V4/V4.1、Kimi K3，覆盖高低并发、TP/DP/EP、MTP 与 FlashComm） | **280 / 280 用例全部收敛在 `<= 15%` 误差容差内** |
 | **Prefill 主体预测收敛** | **15 个完整 Prefill 用例**（含长序列 Chunked Prefill 与混合注意力） | **15 / 15 用例全部收敛在 `<= 15%` 误差容差内** |
-| **DSH 集群大规模盲测泛化** | **856 个 DSH 集群真实采集用例**（其中 **561 个独立 Held-out 盲测用例**） | 端到端预测准确率达 **98.25%（误差 `<= 15%`）** |
+| **Wave 5 三芯片全量校准评估** | 覆盖 **A2（565 份）+ A3（580 份）+ A5（508 份）** 共 **202 个 Cohort-Phase、1,653 份** 实测 Golden Profiles（含 `4K..400K` 超长上下文与合成少专家 MoE） | **`1,653 / 1,653 = 100.00% <= 10%`**（平均误差 `2.77%`，中位数 `2.11%`） |
+| **DSH 集群大规模盲测泛化** | **856 个 DSH 集群真实采集用例**（其中 **561 个独立 Held-out 盲测用例**） | 整体预测准确率达 **`841 / 856 = 98.25%`**，独立 Held-out 盲测子集达 **`546 / 561 = 97.33%`**（误差 `<= 15%`） |

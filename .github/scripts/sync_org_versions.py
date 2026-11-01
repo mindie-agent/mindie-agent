@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Synchronize and verify release versions across MindIE Agent and org profile READMEs.
+"""Synchronize and verify release versions across MindIE Agent docs, releases, and READMEs.
 
 [Role]
 Reads the canonical product channel manifest (channels/0.1.json), optionally cross-checks
-latest formal GitHub Releases via REST API, and synchronizes or verifies bounded version
-marker blocks and install-playbook version pins across mindie-agent (README.md,
-README.en.md) and mindie-agent/.github (profile/README.md, README.md, README.en.md).
+latest formal GitHub Releases via REST API, and synchronizes or verifies channel internal
+summaries, release notes (docs/releases/<patch>.md & .en.md), docs/*.md version pins, and
+README marker blocks across mindie-agent and mindie-agent/.github.
 
 [Invariants]
 - channels/0.1.json is the single source of truth for channel track, current patch
-  version, 12 component/plugin release tags, and 7 domain corpus revisions/unit counts.
+  version, 13 component/plugin release tags, and 7 domain corpus revisions/unit counts.
 - Bounded HTML comment markers (<!-- mindie-org-versions:<id>:start/end -->) must wrap
   every generated section; missing or unbalanced markers raise an immediate RuntimeError.
 - All file writes preserve Unix LF (\n) line endings and UTF-8 encoding without silent
@@ -161,8 +161,8 @@ def render_main_ecosystem_zh(m: dict) -> str:
             f"| **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | {rel_link('knowledge', c['knowledge']['tag'])} | 结构化分级知识单元（L1–L4）管理、按信息缺口条件检索、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、双层脱敏采集与社区 PR 发布 |",
             f"| **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | {rel_link('remote-dev', c['remote-dev']['tag'])} | SSH 远端文件读写与命令执行、共享用户私有 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁、Docker 容器直连、后台长作业管理、连接复用与产物同步 |",
             f"| **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | {rel_link('coordinator', c['coordinator']['tag'])} | 远端昇腾环境与多 Agent 资源协调器：SSH 主机/多机互通配置、容器开通与绑定、NPU 拓扑探测（兼容 A2/A3 双 Die/A5）、HCCL/RoCE 预检、单 Die 显存租约预算与并发编译槽位控制及端口防冲突 |",
-            f"| **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | {rel_link('profiler', c['profiler']['tag'])} | 昇腾 Profiling 采集与解析组件：受控采集、`msprof` 产物就地只读分析（`inventory / analyze / correlate / compare / sql`）、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）与 `auto_segment_decode_forwards` Decode 自动切分、显存拆解及跨版本对比 CLI |",
-            f"| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | {rel_link('sim', c['sim']['tag'])} | 硬件无关的五层因果性能建模组件：统一组合硬件资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持 4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、30ms SLA 硬件缩放求解器、`mindie-model-structure/1` 导出及 856 用例跨集群校准 |",
+            f"| **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | {rel_link('profiler', c['profiler']['tag'])} | 昇腾 Profiling 采集与解析组件：受控采集、`msprof` 产物就地只读分析（`inventory / analyze / correlate / compare / sql / camodel / kernels`）、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）与 Decode/Prefill 自动切分、显存拆解及跨版本对比 CLI |",
+            f"| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | {rel_link('sim', c['sim']['tag'])} | 硬件无关的五层因果性能建模组件：统一组合硬件资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持确定性 Case 合成（`compose`）、`async_scheduling` 显存延迟释放、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、SLA/PD Pareto 求解（`sla / sweep`）、多 DP 偏斜屏障力学（`skew`）及 Wave 5 跨 A2/A3/A5 1,653 份实测 Profile 100% <=10% 样本内校准与独立 856 例 DSH 集群评测（整体 841/856=98.25%，其中 561 例 Held-out 盲测 546/561=97.33% <=15%） |",
             f"| **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | {rel_link('npu-top', c['npu-top']['tag'])} | 昇腾 NPU 可视化监控看板：支持 A2 / A3 / A5 集群监控、共享读取 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环 Web 实时状态页（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天 SQLite 利用率热力图 |",
             f"| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` / `mindie_diagnostics` | {rel_link('diagnostics', c['diagnostics']['tag'])} | 故障诊断与日志组件：支持 CANN 错误码与 `plog` 根因分析、4×1 MiB 本地轮转日志、离线脱敏诊断包与带 2 次有界外发对账重试的可选 GitHub Issue 白名单上报 |",
             "",
@@ -215,8 +215,8 @@ def render_main_ecosystem_en(m: dict) -> str:
             f"| **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | {rel_link('knowledge', c['knowledge']['tag'])} | Graded knowledge unit (L1–L4) management, information-gap retrieval, batch `refs` explanation with shared `known_refs` & `token_budget`, `rejected_history` & `affected_components` provenance, two-layer redaction, and community PR publishing |",
             f"| **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | {rel_link('remote-dev', c['remote-dev']['tag'])} | SSH file and command tools, shared user-private `~/.mindie/ssh/id_ed25519` credential fallback & public-key management, destructive command safety guard, container execution, background jobs, pooled connections, and artifact transfer |",
             f"| **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | {rel_link('coordinator', c['coordinator']['tag'])} | SSH & remote Ascend environment manager: host/key inventory, container binding & provisioning, NPU topology probing (`mindie_probe`, A2/A3 dual-Die/A5), HCCL/RoCE preflight, per-Die HBM lease & compile slot budgets (`mindie_lease`), and managed task execution |",
-            f"| **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | {rel_link('profiler', c['profiler']['tag'])} | Ascend profiling collection and in-place analysis component: controlled capture, `inventory / analyze / correlate / compare / sql` trace analysis, `analyze_profiling --structure` 3-state topology alignment (`aligned / declared_only / unattributed_observed`) on `mindie-model-structure/1`, `auto_segment_decode_forwards` Decode segmentation, memory breakdown, and cross-run comparison CLI |",
-            f"| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | {rel_link('sim', c['sim']['tag'])} | Hardware-neutral 5-layer causal performance modeling component: unifies hardware resources, operator families, subgraphs, pure-model costs, and serving constraints (`DP × TP × EP × PP × DCP / DSA-CP / PCP` & PD disaggregation) with 4D efficiency breakdown (`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`), 30ms SLA hardware scaling solver, `mindie-model-structure/1` export, and 856-case fleet calibration |",
+            f"| **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | {rel_link('profiler', c['profiler']['tag'])} | Ascend profiling collection and in-place analysis component: controlled capture, `inventory / analyze / correlate / compare / sql / camodel / kernels` trace analysis, `analyze_profiling --structure` 3-state topology alignment (`aligned / declared_only / unattributed_observed`) on `mindie-model-structure/1`, Decode/Prefill segmentation, memory breakdown, and cross-run comparison CLI |",
+            f"| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | {rel_link('sim', c['sim']['tag'])} | Hardware-neutral 5-layer causal performance modeling component: unifies hardware resources, operator families, subgraphs, pure-model costs, and serving constraints (`DP × TP × EP × PP × DCP / DSA-CP / PCP` & PD disaggregation) with deterministic Case synthesis (`compose`), `async_scheduling` delayed KV release, 4D efficiency breakdown (`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`), SLA/PD Pareto solvers (`sla / sweep`), multi-DP skew barrier mechanics (`skew`), and Wave 5 1,653-profile A2/A3/A5 in-sample calibration (100% <=10% error) and separate 856-case DSH fleet evaluation (841/856=98.25% overall, 546/561=97.33% independent held-out <=15%) |",
             f"| **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | {rel_link('npu-top', c['npu-top']['tag'])} | Human-facing Ascend NPU observability dashboard: supports A2 / A3 / A5 fleet monitoring with shared `coordinator` `machines.json` and `~/.mindie/ssh` credential fallback, providing a loopback web UI (`127.0.0.1:8788`), TUI, CLI/MCP, and 90-day SQLite utilization history |",
             f"| **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` / `mindie_diagnostics` | {rel_link('diagnostics', c['diagnostics']['tag'])} | Local fault logging and diagnostics component: CANN/`plog` deterministic error analysis, bounded 4×1 MiB JSONL rotation, redacted support bundles, and opt-in GitHub Issue reporting with bounded 2-attempt outbound reconciliation |",
             "",
@@ -302,8 +302,8 @@ def render_org_ecosystem(m: dict) -> str:
             f"| [`knowledge`](https://github.com/mindie-agent/knowledge) | `mindie-knowledge` | {rel_link('knowledge', c['knowledge']['tag'])} | **知识与经验引擎**：L1–L4 分级知识单元、按信息缺口条件检索、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、`rejected_history` / `affected_components` 溯源、双层隐私脱敏与社区 PR 发布 |",
             f"| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | `remote-dev` | {rel_link('remote-dev', c['remote-dev']['tag'])} | **SSH 远端开发引擎**：远端文件读写、精确补丁、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与密钥维护、破坏性命令安全拦截门禁、容器直连、受管后台作业与产物同步 |",
             f"| [`coordinator`](https://github.com/mindie-agent/coordinator) | `mindie-coordinator` | {rel_link('coordinator', c['coordinator']['tag'])} | **昇腾 NPU 环境协调器**：SSH 主机/多机互通、容器池开通与绑定、NPU 拓扑探测（兼容 A2/A3 双 Die/A5）、HCCL/RoCE 预检、单 Die 显存租约预算与并发编译槽位控制及端口防冲突 |",
-            f"| [`profiler`](https://github.com/mindie-agent/profiler) | `mindie-profiler` | {rel_link('profiler', c['profiler']['tag'])} | **昇腾实测性能剖析组件**：受控采集、`msprof` 原地只读解析（`inventory / analyze / correlate / compare / sql`）、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）与 `auto_segment_decode_forwards` Decode 自动切分 |",
-            f"| [`sim`](https://github.com/mindie-agent/sim) | `mindie-sim` | {rel_link('sim', c['sim']['tag'])} | **五层因果性能建模组件**：统一建模硬件资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持 4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、30ms SLA 硬件缩放求解与 856 用例跨集群校准 |",
+            f"| [`profiler`](https://github.com/mindie-agent/profiler) | `mindie-profiler` | {rel_link('profiler', c['profiler']['tag'])} | **昇腾实测性能剖析组件**：受控采集、`msprof` 原地只读解析（`inventory / analyze / correlate / compare / sql / camodel / kernels`）、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）与 Decode/Prefill 自动切分 |",
+            f"| [`sim`](https://github.com/mindie-agent/sim) | `mindie-sim` | {rel_link('sim', c['sim']['tag'])} | **五层因果性能建模组件**：统一建模硬件资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持 `compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD Pareto 求解与 Wave 5 1,653 份 Profile 样本内校准及独立 856 例 DSH 集群评测 |",
             f"| [`npu-top`](https://github.com/mindie-agent/npu-top) | `npu-top` | {rel_link('npu-top', c['npu-top']['tag'])} | **NPU 集群状态看板**：支持 A2 / A3 / A5 集群监控、共享 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环 Web 看板（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天利用率热力图 |",
             f"| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | `mindie-diagnostics` | {rel_link('diagnostics', c['diagnostics']['tag'])} | **结构化诊断底座**：CANN/`plog` 确定性报错解析、4×1 MiB 本地 JSONL 轮转日志、离线脱敏支持包与带 2 次有界外发对账重试的可选白名单 GitHub Issue 故障上报 |",
             "",
@@ -358,6 +358,232 @@ def render_org_readme_en(m: dict) -> str:
     )
 
 
+def render_release_table(m: dict, lang: str) -> str:
+    c = m["components"]
+    rows = [
+        ("mindie-agent-codex", "原生客户端插件（OpenAI Codex CLI）", "Native Host Plugin (OpenAI Codex CLI)"),
+        ("mindie-agent-cc", "原生客户端插件（Claude Code）", "Native Host Plugin (Claude Code)"),
+        ("mindie-agent-kimi", "原生客户端插件（Kimi Code CLI）", "Native Host Plugin (Kimi Code CLI)"),
+        ("mindie-agent-dsh", "原生客户端插件（DeepSeek Harness）", "Native Host Plugin (DeepSeek Harness)"),
+        ("mindie-agent-agy", "原生客户端插件（Google Antigravity）", "Native Host Plugin (Google Antigravity)"),
+        ("knowledge", "共享运行时组件", "Shared Runtime Component"),
+        ("remote-dev", "共享运行时组件", "Shared Runtime Component"),
+        ("coordinator", "共享运行时组件", "Shared Runtime Component"),
+        ("profiler", "共享运行时组件", "Shared Runtime Component"),
+        ("sim", "共享运行时组件", "Shared Runtime Component"),
+        ("npu-top", "共享运行时组件", "Shared Runtime Component"),
+        ("diagnostics", "共享运行时组件", "Shared Runtime Component"),
+        ("mindie-bench", "评测运行器与基准套件", "Evaluation Runner & Benchmark Suite"),
+    ]
+    header = "| 仓库 | 角色 | 版本 | 标签源码 SHA |" if lang == "zh" else "| Repository | Role | Version | Tag Source SHA |"
+    lines = [header, "| --- | --- | --- | --- |"]
+    for key, role_zh, role_en in rows:
+        entry = c[key]
+        role = role_zh if lang == "zh" else role_en
+        lines.append(f"| `{key}` | {role} | `{entry['version']}` | `{entry['commit']}` |")
+    return "\n".join(lines)
+
+
+def sync_release_notes_prose(text: str, m: dict) -> str:
+    c = m["components"]
+    replacements = [
+        (
+            r"\bSim [0-9.]+ / Profiler [0-9.]+\b",
+            f"Sim {c['sim']['version']} / Profiler {c['profiler']['version']}",
+        ),
+        (r"`Codex v[0-9.]+`", f"`Codex v{c['mindie-agent-codex']['version']}`"),
+        (r"`Claude Code v[0-9.]+`", f"`Claude Code v{c['mindie-agent-cc']['version']}`"),
+        (r"`Kimi v[0-9.]+`", f"`Kimi v{c['mindie-agent-kimi']['version']}`"),
+        (r"`DSH v[0-9.]+`", f"`DSH v{c['mindie-agent-dsh']['version']}`"),
+        (r"`Google Antigravity v[0-9.]+`", f"`Google Antigravity v{c['mindie-agent-agy']['version']}`"),
+        (r"`mindie-knowledge v[0-9.]+`", f"`mindie-knowledge v{c['knowledge']['version']}`"),
+        (r"`mindie-coordinator v[0-9.]+`", f"`mindie-coordinator v{c['coordinator']['version']}`"),
+        (r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{c['profiler']['version']}`"),
+        (r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{c['sim']['version']}`"),
+        (r"`mindie-sim [0-9.]+`", f"`mindie-sim {c['sim']['version']}`"),
+        (r"`mindie-profiler [0-9.]+`", f"`mindie-profiler {c['profiler']['version']}`"),
+    ]
+    for pat, repl in replacements:
+        text = re.sub(pat, repl, text)
+    return text
+
+
+def sync_channel_internal_fields(channel_path: Path, m: dict, write: bool) -> list[str]:
+    raw_text = channel_path.read_text(encoding="utf-8")
+    data = json.loads(raw_text)
+    cpv = str(data["current_patch_version"])
+    c = data["components"]
+
+    data["release_notes"] = f"docs/releases/{cpv}.md"
+    data["release_notes_en"] = f"docs/releases/{cpv}.en.md"
+
+    impl = (data.get("update_policy") or {}).get("implementation_status") or {}
+    kb = str(impl.get("known_boundaries") or "")
+    if kb:
+        kb = re.sub(r"^The [0-9.]+ channel pins", f"The {cpv} channel pins", kb)
+        kb_map = [
+            (r"knowledge [0-9.]+", f"knowledge {c['knowledge']['version']}"),
+            (r"remote-dev [0-9.]+", f"remote-dev {c['remote-dev']['version']}"),
+            (r"profiler [0-9.]+", f"profiler {c['profiler']['version']}"),
+            (r"sim [0-9.]+", f"sim {c['sim']['version']}"),
+            (r"coordinator [0-9.]+", f"coordinator {c['coordinator']['version']}"),
+            (r"npu-top [0-9.]+", f"npu-top {c['npu-top']['version']}"),
+            (r"diagnostics [0-9.]+", f"diagnostics {c['diagnostics']['version']}"),
+            (r"mindie-bench [0-9.]+", f"mindie-bench {c['mindie-bench']['version']}"),
+            (r"Codex [0-9.]+", f"Codex {c['mindie-agent-codex']['version']}"),
+            (r"Claude Code [0-9.]+", f"Claude Code {c['mindie-agent-cc']['version']}"),
+            (r"Kimi [0-9.]+", f"Kimi {c['mindie-agent-kimi']['version']}"),
+            (r"DSH [0-9.]+", f"DSH {c['mindie-agent-dsh']['version']}"),
+            (r"Google Antigravity [0-9.]+", f"Google Antigravity {c['mindie-agent-agy']['version']}"),
+        ]
+        for pat, repl in kb_map:
+            kb = re.sub(pat, repl, kb)
+        impl["known_boundaries"] = kb
+
+    patch_releases = data.get("patch_releases") or []
+    if patch_releases and str(patch_releases[-1].get("patch_version")) == cpv:
+        summary = str(patch_releases[-1].get("summary") or "")
+        sum_map = [
+            (
+                r"mindie-knowledge [0-9.]+ \([0-9a-f]{40}\)",
+                f"mindie-knowledge {c['knowledge']['version']} ({c['knowledge']['commit']})",
+            ),
+            (
+                r"mindie-coordinator [0-9.]+ \([0-9a-f]{40}\)",
+                f"mindie-coordinator {c['coordinator']['version']} ({c['coordinator']['commit']})",
+            ),
+            (
+                r"mindie-sim [0-9.]+ \([0-9a-f]{40}\)",
+                f"mindie-sim {c['sim']['version']} ({c['sim']['commit']})",
+            ),
+            (
+                r"mindie-profiler [0-9.]+ \([0-9a-f]{40}\)",
+                f"mindie-profiler {c['profiler']['version']} ({c['profiler']['commit']})",
+            ),
+            (r"Codex [0-9.]+", f"Codex {c['mindie-agent-codex']['version']}"),
+            (r"Claude Code [0-9.]+", f"Claude Code {c['mindie-agent-cc']['version']}"),
+            (r"Kimi [0-9.]+", f"Kimi {c['mindie-agent-kimi']['version']}"),
+            (r"DSH [0-9.]+", f"DSH {c['mindie-agent-dsh']['version']}"),
+            (r"Antigravity [0-9.]+", f"Antigravity {c['mindie-agent-agy']['version']}"),
+        ]
+        for pat, repl in sum_map:
+            summary = re.sub(pat, repl, summary)
+        patch_releases[-1]["summary"] = summary
+
+    rendered = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    m.update(data)
+    if rendered != raw_text.replace("\r\n", "\n"):
+        if write:
+            channel_path.write_text(rendered, encoding="utf-8", newline="\n")
+            print(f"Updated {channel_path}")
+            return []
+        return [f"Out-of-sync internal fields in {channel_path} (run sync_org_versions.py --write)"]
+    return []
+
+
+def sync_docs_versions(repo_root: Path, m: dict, write: bool) -> list[str]:
+    c = m["components"]
+    cpv = m["current_patch_version"]
+    sim_v = c["sim"]["version"]
+    prof_v = c["profiler"]["version"]
+    know_v = c["knowledge"]["version"]
+    rdev_v = c["remote-dev"]["version"]
+    diag_v = c["diagnostics"]["version"]
+    coord_v = c["coordinator"]["version"]
+    bench_v = c["mindie-bench"]["version"]
+    codex_v = c["mindie-agent-codex"]["version"]
+    cc_v = c["mindie-agent-cc"]["version"]
+    kimi_v = c["mindie-agent-kimi"]["version"]
+    dsh_v = c["mindie-agent-dsh"]["version"]
+    agy_v = c["mindie-agent-agy"]["version"]
+
+    errors: list[str] = []
+
+    def _transform_docs_readme(txt: str) -> str:
+        return re.sub(
+            r"\| \[(?:面向 Agent 的通用性能建模系统|General Performance Modeling System)\]\(simulation-system\.md\)([^\n]*?)`mindie-sim v[0-9.]+`",
+            lambda match: match.group(0).rsplit("`mindie-sim v", 1)[0] + f"`mindie-sim v{sim_v}`",
+            txt,
+        )
+
+    def _transform_sim_doc(txt: str) -> str:
+        txt = re.sub(r"当前正式版本 `v[0-9.]+`", f"当前正式版本 `v{sim_v}`", txt)
+        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
+        return txt
+
+    def _transform_prof_sim_doc(txt: str) -> str:
+        txt = re.sub(
+            r"\[`mindie-profiler`\]\(https://github\.com/mindie-agent/profiler\)（`v[0-9.]+`）与 \[`mindie-sim`\]\(https://github\.com/mindie-agent/sim\)（`v[0-9.]+`）",
+            f"[`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v{prof_v}`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v{sim_v}`）",
+            txt,
+        )
+        txt = re.sub(r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`", txt)
+        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
+        return txt
+
+    def _transform_consumer_migration(txt: str) -> str:
+        txt = re.sub(r"当前正式版 `v[0-9.]+`", f"当前正式版 `v{sim_v}`", txt)
+        txt = re.sub(r"`mindie-profiler`（`v[0-9.]+`）", f"`mindie-profiler`（`v{prof_v}`）", txt)
+        txt = re.sub(r"`mindie-bench`（`v[0-9.]+`）", f"`mindie-bench`（`v{bench_v}`）", txt)
+        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
+        txt = re.sub(r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`", txt)
+        row_versions = {
+            "mindie-agent-codex": codex_v,
+            "mindie-agent-cc": cc_v,
+            "mindie-agent-kimi": kimi_v,
+            "mindie-agent-dsh": dsh_v,
+            "mindie-agent-agy": agy_v,
+            "mindie-profiler": prof_v,
+            "mindie-bench": bench_v,
+        }
+        for name, ver in row_versions.items():
+            txt = re.sub(
+                rf"(\| \*\*`{re.escape(name)}`\*\* \| )`v[0-9.]+`",
+                rf"\1`v{ver}`",
+                txt,
+            )
+        return txt
+
+    def _transform_next_steps(txt: str, is_en: bool) -> str:
+        suffix = ".en.md" if is_en else ".md"
+        txt = re.sub(
+            rf"`v0\.1\.1`–\[`v[0-9.]+`\]\(releases/[0-9.]+{re.escape(suffix)}\)",
+            f"`v0.1.1`–[`v{cpv}`](releases/{cpv}{suffix})",
+            txt,
+        )
+        pairs = [
+            (r"`knowledge v[0-9.]+`", f"`knowledge v{know_v}`"),
+            (r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`"),
+            (r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`"),
+            (r"`remote-dev v[0-9.]+`", f"`remote-dev v{rdev_v}`"),
+            (r"`diagnostics v[0-9.]+`", f"`diagnostics v{diag_v}`"),
+            (r"`coordinator v[0-9.]+`", f"`coordinator v{coord_v}`"),
+            (r"`mindie-bench v[0-9.]+`", f"`mindie-bench v{bench_v}`"),
+            (r"`Codex v[0-9.]+`", f"`Codex v{codex_v}`"),
+            (r"`Claude Code v[0-9.]+`", f"`Claude Code v{cc_v}`"),
+            (r"`Kimi v[0-9.]+`", f"`Kimi v{kimi_v}`"),
+            (r"`DSH v[0-9.]+`", f"`DSH v{dsh_v}`"),
+            (r"`Google Antigravity v[0-9.]+`", f"`Google Antigravity v{agy_v}`"),
+        ]
+        for pat, repl in pairs:
+            txt = re.sub(pat, repl, txt)
+        return txt
+
+    targets = [
+        (repo_root / "docs" / "README.md", _transform_docs_readme),
+        (repo_root / "docs" / "README.en.md", _transform_docs_readme),
+        (repo_root / "docs" / "simulation-system.md", _transform_sim_doc),
+        (repo_root / "docs" / "profiler-sim-structure.md", _transform_prof_sim_doc),
+        (repo_root / "docs" / "simulation-consumer-migration.md", _transform_consumer_migration),
+        (repo_root / "docs" / "mechanism-first-performance-modeling-design.md", _transform_sim_doc),
+        (repo_root / "docs" / "next-steps.md", lambda t: _transform_next_steps(t, False)),
+        (repo_root / "docs" / "next-steps.en.md", lambda t: _transform_next_steps(t, True)),
+    ]
+    for path, fn in targets:
+        errors.extend(process_file(path, fn, write))
+    return errors
+
+
 def replace_marker_block(text: str, block_id: str, new_body: str) -> str:
     start_tag = f"<!-- mindie-org-versions:{block_id}:start -->"
     end_tag = f"<!-- mindie-org-versions:{block_id}:end -->"
@@ -391,86 +617,26 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
             text,
         )
 
-    text = re.sub(
-        r"mindie-agent-cc\.git#v[0-9.]+",
-        f"mindie-agent-cc.git#v{cc_v}",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent@mindie-agent-cc`（`[0-9.]+`）",
-        f"`mindie-agent@mindie-agent-cc`（`{cc_v}`）",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent@mindie-agent-cc` \(`[0-9.]+`\)",
-        f"`mindie-agent@mindie-agent-cc` (`{cc_v}`)",
-        text,
-    )
-    text = re.sub(
-        r"mindie-agent-codex\.git --ref v[0-9.]+",
-        f"mindie-agent-codex.git --ref v{codex_v}",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent@mindie-agent`（`[0-9.]+`）",
-        f"`mindie-agent@mindie-agent`（`{codex_v}`）",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent@mindie-agent` \(`[0-9.]+`\)",
-        f"`mindie-agent@mindie-agent` (`{codex_v}`)",
-        text,
-    )
-    text = re.sub(
-        r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-kimi\.git",
-        f"--branch v{kimi_v} https://github.com/mindie-agent/mindie-agent-kimi.git",
-        text,
-    )
-    text = re.sub(
-        r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-dsh\.git",
-        f"--branch v{dsh_v} https://github.com/mindie-agent/mindie-agent-dsh.git",
-        text,
-    )
-    text = re.sub(
-        r"mindie-agent-dsh\.git#v[0-9.]+",
-        f"mindie-agent-dsh.git#v{dsh_v}",
-        text,
-    )
-    text = re.sub(
-        r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-agy\.git",
-        f"--branch v{agy_v} https://github.com/mindie-agent/mindie-agent-agy.git",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent-agy v[0-9.]+`",
-        f"`mindie-agent-agy v{agy_v}`",
-        text,
-    )
-    text = re.sub(
-        r"remote-dev@v[0-9.]+",
-        f"remote-dev@v{rdev_v}",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent-cc v[0-9.]+`",
-        f"`mindie-agent-cc v{cc_v}`",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent-codex v[0-9.]+`",
-        f"`mindie-agent-codex v{codex_v}`",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent-kimi v[0-9.]+`",
-        f"`mindie-agent-kimi v{kimi_v}`",
-        text,
-    )
-    text = re.sub(
-        r"`mindie-agent-dsh v[0-9.]+`",
-        f"`mindie-agent-dsh v{dsh_v}`",
-        text,
-    )
+    pairs = [
+        (r"mindie-agent-cc\.git#v[0-9.]+", f"mindie-agent-cc.git#v{cc_v}"),
+        (r"`mindie-agent@mindie-agent-cc`（`[0-9.]+`）", f"`mindie-agent@mindie-agent-cc`（`{cc_v}`）"),
+        (r"`mindie-agent@mindie-agent-cc` \(`[0-9.]+`\)", f"`mindie-agent@mindie-agent-cc` (`{cc_v}`)"),
+        (r"mindie-agent-codex\.git --ref v[0-9.]+", f"mindie-agent-codex.git --ref v{codex_v}"),
+        (r"`mindie-agent@mindie-agent`（`[0-9.]+`）", f"`mindie-agent@mindie-agent`（`{codex_v}`）"),
+        (r"`mindie-agent@mindie-agent` \(`[0-9.]+`\)", f"`mindie-agent@mindie-agent` (`{codex_v}`)"),
+        (r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-kimi\.git", f"--branch v{kimi_v} https://github.com/mindie-agent/mindie-agent-kimi.git"),
+        (r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-dsh\.git", f"--branch v{dsh_v} https://github.com/mindie-agent/mindie-agent-dsh.git"),
+        (r"mindie-agent-dsh\.git#v[0-9.]+", f"mindie-agent-dsh.git#v{dsh_v}"),
+        (r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-agy\.git", f"--branch v{agy_v} https://github.com/mindie-agent/mindie-agent-agy.git"),
+        (r"`mindie-agent-agy v[0-9.]+`", f"`mindie-agent-agy v{agy_v}`"),
+        (r"remote-dev@v[0-9.]+", f"remote-dev@v{rdev_v}"),
+        (r"`mindie-agent-cc v[0-9.]+`", f"`mindie-agent-cc v{cc_v}`"),
+        (r"`mindie-agent-codex v[0-9.]+`", f"`mindie-agent-codex v{codex_v}`"),
+        (r"`mindie-agent-kimi v[0-9.]+`", f"`mindie-agent-kimi v{kimi_v}`"),
+        (r"`mindie-agent-dsh v[0-9.]+`", f"`mindie-agent-dsh v{dsh_v}`"),
+    ]
+    for pat, repl in pairs:
+        text = re.sub(pat, repl, text)
     return text
 
 
@@ -510,6 +676,29 @@ def main() -> int:
         token = os.environ.get("TELEMETRY_TOKEN") or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
         errors.extend(verify_live_releases(manifest, token))
 
+    errors.extend(sync_channel_internal_fields(channel_path, manifest, args.write))
+    cpv = str(manifest["current_patch_version"])
+    errors.extend(
+        process_file(
+            repo_root / "docs" / "releases" / f"{cpv}.md",
+            lambda txt: sync_release_notes_prose(
+                replace_marker_block(txt, "release-table-zh", render_release_table(manifest, "zh")),
+                manifest,
+            ),
+            args.write,
+        )
+    )
+    errors.extend(
+        process_file(
+            repo_root / "docs" / "releases" / f"{cpv}.en.md",
+            lambda txt: sync_release_notes_prose(
+                replace_marker_block(txt, "release-table-en", render_release_table(manifest, "en")),
+                manifest,
+            ),
+            args.write,
+        )
+    )
+    errors.extend(sync_docs_versions(repo_root, manifest, args.write))
     errors.extend(
         process_file(
             repo_root / "README.md",
@@ -580,7 +769,7 @@ def main() -> int:
 
     print(
         f"OK: All managed version blocks match channels/0.1.json "
-        f"(mindie-agent v{manifest['current_patch_version']}, 12 components, 7 corpora)."
+        f"(mindie-agent v{manifest['current_patch_version']}, 13 components, 7 corpora)."
     )
     return 0
 

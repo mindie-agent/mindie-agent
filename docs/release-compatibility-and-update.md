@@ -87,12 +87,12 @@ python3 .github/scripts/check_auto_update_readiness.py --require-siblings --stri
 ```
 
 脚本会逐项输出并强制拦截以下 `R1–R6` 六项必检门禁（任一项未通过直接返回非零退出码）：
-- [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性，区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
+- [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性、内部描述字段（`known_boundaries`、`patch_releases[-1]`）与当前版本说明（`docs/releases/<patch>.md` 及 `.en.md` 十三仓版本与 SHA 表）的一致性，并区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
 - [ ] **`R2. Knowledge Corpus Monotonic Revisions & Validator Floor`**：校验 7 个 `knowledge-*` 语料仓自上一通道版本以来所有内容变更单元的 `revision` 严格递增、`publication-contract.json` 的 `validator.revision <= channel knowledge version`，且插件 `verified_commit` 为通道语料 Commit 的合法祖先；
 - [ ] **`R3. Component & Plugin Tag/Commit/Release Integrity`**：校验 `channels/0.1.json` 中全部 13 个组件与插件的本地 Tag 解引用 Commit SHA、远端正式 GitHub Release（`isDraft=false`、`isPrerelease=false`）及 `SHA256SUMS` 资产完整性；
 - [ ] **`R4. Five-Host Cross-Version Component Compatibility`**：校验五端宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的组件基线满足单调下界（`plugin_baseline <= channel_component`）且通过最新 `mindie-knowledge` 跨版本接口校验；
 - [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
-- [ ] **`R6. README / Org Version Sync & Unix LF Line-Ending Hygiene`**：自动调用 `sync_org_versions.py --check --offline` 与 `check_lf_eol.py`，确保主仓中英文 README 版本表、组织首页与全仓 Unix `LF` 换行零偏差。
+- [ ] **`R6. README / Release Notes / Docs / Org Version Sync & Unix LF Line-Ending Hygiene`**：自动调用 `sync_org_versions.py --check --offline` 与 `check_lf_eol.py`，确保 `channels/0.1.json` 内部字段、`docs/releases/<patch>.md`（及 `.en.md`）、`docs/*.md` 版本引用、主仓中英文 `README` 版本表、组织首页与全仓 Unix `LF` 换行零偏差。
 
 此外，人工与流水线复核遵循以下细则：
 
@@ -106,7 +106,7 @@ python3 .github/scripts/check_auto_update_readiness.py --require-siblings --stri
 | **6. 组合闭环复核** | 确认所有底层依赖组件 Release 均已就绪后再发布插件 Release 或更新 `channels/0.1.json` |
 | **7. 发布 benchmark 随包交付** | 每个代码仓的新 Release 均附带基于该 Tag 精确源码、在干净工作区上运行通过的基准测试报告 |
 | **8. 既有安装升级验收** | 从仍受支持的已发布插件及其旧更新器出发验证候选准备、失败保留旧代与空闲切换；检查最终宿主包保留 MCP 超时、环境变量和用户授权，并核对实际加载的工具目录与参数。隔离候选源验证须明确标注；正式发布后，再验证正常后台发现与激活路径 |
-| **9. 主仓与组织主页版本表同步** | 更新 `channels/0.1.json` 时运行 `python3 .github/scripts/sync_org_versions.py --write --org-profile-dir <path-to-.github>`（并通过 `pr-checklist.yml` 中的 `--check --offline` 门禁），确保主仓 `README.md` / `README.en.md`、[`mindie-agent/.github`](https://github.com/mindie-agent/.github) 组织首页与 21 仓库统计看板版本完全一致 |
+| **9. 全仓文档、发布说明与组织主页版本表同步** | 更新 `channels/0.1.json` 时运行 `python3 .github/scripts/sync_org_versions.py --write --org-profile-dir <path-to-.github>`（并通过 `pr-checklist.yml` 中的 `--check --offline` 门禁），确保 `channels/0.1.json` 内部摘要、`docs/releases/<patch>.md`（及 `.en.md`）、`docs/*.md`、主仓 `README.md` / `README.en.md`、[`mindie-agent/.github`](https://github.com/mindie-agent/.github) 组织首页与 21 仓库统计看板版本完全一致 |
 
 组件独立更新适用于宿主插件接口不变的组件修复。若变更涉及原生工具目录、宿主 MCP 超时、插件环境变量或常驻启动器自身代码，必须发布包含这些变更的插件版本。更新回执应区分“候选已准备”“安装绑定已切换”与“宿主已加载新定义”：磁盘上的版本或组件指针更新，不能单独证明常驻宿主中的新接口已经生效。沿用宿主支持的刷新边界；需要自然重载或新进程时，保留活动会话，并明确记录该边界。
 

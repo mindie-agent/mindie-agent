@@ -209,7 +209,7 @@ flowchart TB
    - 对于多层重复的同构 Transformer 块，自动聚合成同构集合（`cohorts`），输出实测调用数、单次 Mean/P50、`activity_sum_ns` 与 `busy_union_ns`，供 `python -m mindie_sim.cohort_comparison` 直接完成算子级对账。
 3. **拓扑引导的 Decode 主体自动切分（`auto_segment_decode_forwards`）**：
    - `mindie_profiler.decode_segmentation` 结合统一事件流与 `ModelSpec.layer_plans` 全层拓扑，自动切分每次完整 Decode 主体 Forward 的设备跨度（`body_forward_span_ms`），剥离跨 Step 空泡与异步 `AI_CPU` 尾等待，并从真实 Block-Table 恢复活跃 Batch，与 `mindie-sim` 端到端预测对账。
-   - 在昇腾 A2 同步模块回放（18,000/18,000 事件 100% 绑定）、A3/A5 **280 个 Decode 用例 + 15 个 Prefill 用例**（全部 `<= 15%` 误差）以及 **856 个 DSH 集群 / 561 个盲测用例（98.25% `<= 15%` 误差）**上完成全量验证；详见[结构复用与实测映射](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总)。
+   - 在昇腾 A2 同步模块回放（18,000/18,000 事件 100% 绑定）、A3/A5 **280 个 Decode 用例 + 15 个 Prefill 用例**（全部 `<= 15%` 误差）以及 **856 个 DSH 集群用例（整体 `841/856 = 98.25%`，其中 561 个独立盲测用例 `546/561 = 97.33%` `<= 15%` 误差）**上完成全量验证；详见[结构复用与实测映射](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总)。
 
 ---
 

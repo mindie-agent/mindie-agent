@@ -310,6 +310,8 @@
       "patch_version": "0.1.6",
       "type": "hotfix",
       "updated_components": [
+        "profiler",
+        "sim",
         "knowledge",
         "coordinator",
         "mindie-agent-codex",
@@ -319,7 +321,7 @@
         "mindie-agent-agy"
       ],
       "plugin_republish_required": true,
-      "summary": "0.1.6 automatic-update readiness & host compatibility patch: mindie-knowledge 0.13.8 (9a4325858e6fadb10715275826a7795843cbbdf4) adds automatic unit revision advancement in build_routing_index(), base_revision semantic revision monotonicity enforcement in publication_check.py, monotonic revision repair tolerance in GradedRepository.install_feed(), and antigravity/dsh release-metadata support; mindie-coordinator 0.7.1 (d146c55c414bfb92136cf5fb7fa11ae14c673ef0) adds native Antigravity (agy/antigravity) and AGY_CONVERSATION_ID session discovery; all 7 graded knowledge-* corpora advance validator.revision to 0.13.8 with monotonic unit revisions; and all 5 host plugins (Codex 0.1.14 with Desktop codex-cli 0.166.0-alpha.5.1 support, Claude Code 0.1.11, Kimi 0.1.11, DSH 0.1.10, Antigravity 0.1.1) synchronize component pins and pre-release auto-update readiness gates."
+      "summary": "0.1.6 automatic-update readiness, Wave 5 multi-chip calibration & 5-host compatibility patch: mindie-knowledge 0.13.8 (9a4325858e6fadb10715275826a7795843cbbdf4) adds automatic unit revision advancement in build_routing_index(), base_revision semantic revision monotonicity enforcement in publication_check.py, monotonic revision repair tolerance in GradedRepository.install_feed(), and antigravity/dsh release-metadata support; mindie-coordinator 0.7.1 (d146c55c414bfb92136cf5fb7fa11ae14c673ef0) adds native Antigravity (agy/antigravity) and AGY_CONVERSATION_ID session discovery; mindie-sim 0.9.0 (f5608b4943f515c401d2f9b12fffb579a1e2571b) adds async_scheduling HBM delayed-release modeling, Case composer, Wave 5 catalog, topology/PD Pareto solvers, and skew barrier mechanics; mindie-profiler 0.5.5 (7cdd56b6cc9e0e7f603368393497487dd2dbfe39) adds AddRmsNormQuant/SparseFlashMla/DP-partner prefill segmentation and 1,653/1,653 <=10% Wave 5 A2/A3/A5 in-sample regime calibration; all 7 graded knowledge-* corpora advance validator.revision to 0.13.8 with monotonic unit revisions; and all 5 host plugins (Codex 0.1.16 with Desktop codex-cli 0.166.0-alpha.5.1 support, Claude Code 0.1.12, Kimi 0.1.12, DSH 0.1.11, Antigravity 0.1.2) synchronize component pins, MCP tool descriptions, enterprise-network/Windows/LF install hardening, and pre-release auto-update readiness gates."
     }
   ]
 }

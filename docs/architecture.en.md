@@ -2,7 +2,7 @@
 
 [中文](architecture.md) · [Documentation](README.en.md)
 
-MindIE Agent adds Ascend domain knowledge retrieval, remote container execution, multi-NPU resource coordination, and profiling tools to existing AI coding agents (Claude Code, OpenAI Codex, Kimi Code, and DeepSeek Harness). Current work focuses on **vLLM-Ascend framework development and Ascend operator optimization** across three core scenarios: **new model bring-up (0-day adaptation), model and operator performance tuning, and runtime fault diagnosis**.
+MindIE Agent adds Ascend domain knowledge retrieval, remote container execution, multi-NPU resource coordination, and profiling tools to existing AI coding agents (Claude Code, OpenAI Codex, Kimi Code, DeepSeek Harness, and Google Antigravity). Current work focuses on **vLLM-Ascend framework development and Ascend operator optimization** across three core scenarios: **new model bring-up (0-day adaptation), model and operator performance tuning, and runtime fault diagnosis**.
 
 This document describes component responsibilities and how they work together. See the [release records](README.en.md) for formal versions and benchmark results, [Knowledge System](knowledge-system.en.md) for how engineering experience is organized and retrieved, [Harness Boundaries](harness-boundary-and-lifecycle.en.md) for session identity and user consent, and [Design Principles](design-principles.en.md) for engineering guidelines.
 
@@ -10,7 +10,7 @@ This document describes component responsibilities and how they work together. S
 
 ```mermaid
 flowchart TB
-    H["Codex / Claude Code / Kimi Code / DSH"] --> P["Thin native host plugins"]
+    H["Codex / Claude Code / Kimi Code / DSH / Antigravity"] --> P["Thin native host plugins"]
     P --> K["knowledge: domain routing, condition matching & experience distillation"]
     P --> R["remote-dev: remote files, commands & background jobs"]
     P --> D["diagnostics: local fault logs & opt-in Issue reporting"]
@@ -25,9 +25,9 @@ flowchart TB
     B --> H
 ```
 
-Each plugin preserves its host agent's native session loop, tool calling, and lifecycle:
+Each of the five plugins preserves its host agent's native session loop, tool calling, and lifecycle:
 - **On-demand domain guidance**: Invoke `/mindie-agent` (or `$mindie-agent` in Codex) to load Ascend domain knowledge and workflow guidance for your current task.
-- **Engineering tools ready by default**: `remote-dev`, `coordinator` probes and leases, `profiler` capture and analysis, `sim` performance modeling, and `diagnostics` status/bundle tools are exposed across all four hosts through the three-server MCP surface (`knowledge`, `remote`, and `components` / `mindie-tools`) and can be called directly without activating a knowledge session. Unactivated chats do not load the `knowledge` tool catalog, while `npu-top` runs as a human-facing web dashboard rather than an Agent tool.
+- **Engineering tools ready by default**: `remote-dev`, `coordinator` probes and leases, `profiler` capture and analysis, `sim` performance modeling, and `diagnostics` status/bundle tools are exposed across all five hosts through the MCP surface (`knowledge`, `remote`, and `components` / `mindie-tools`) and can be called directly without activating a knowledge session. Unactivated chats do not load the `knowledge` tool catalog, while `npu-top` runs as a human-facing web dashboard (and optional read-only MCP tool).
 - **Authorized experience capture**: Only when a session explicitly invokes `/mindie-agent` and satisfies saved user consent and project scope do host lifecycle hooks capture redacted session transcripts and distill reusable experience.
 
 By default, plugins use `knowledge`, `remote-dev`, and `diagnostics`. `coordinator`, `profiler`, `sim`, and `npu-top` can be installed standalone or combined as needed.
@@ -37,7 +37,7 @@ By default, plugins use `knowledge`, `remote-dev`, and `diagnostics`. `coordinat
 | Repository | Responsibility |
 | --- | --- |
 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | Product architecture, domain boundaries, documentation entry point, cross-repo specifications, and release records; contains no runtime bootstrap or MCP server code |
-| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex), [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc), [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi), [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | Native client plugins: session identification, lifecycle hooks, redacted session transcript capture, MCP bridges, and pinned component versions |
+| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex), [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc), [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi), [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh), [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) | Native client plugins: session identification, lifecycle hooks, redacted session transcript capture, MCP bridges, and pinned component versions |
 | [`knowledge`](https://github.com/mindie-agent/knowledge) | Knowledge engine: condition-matched retrieval, batch `refs` explanation with shared `known_refs` and `token_budget`, `rejected_history` and `affected_components` provenance, redacted task blocks, experience distillation validation, and community PR publishing |
 | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend), [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators), [`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core), [`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed), [`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability), [`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat), [`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | Seven public graded engineering knowledge corpora (`L1–L4`) covering `vLLM-Ascend`, Ascend operators, inference engine internals, distributed communication (including `DP/TP/EP/PP/DCP/DSA-CP/PCP`), observability, graph/operator compatibility, and Agent engineering governance |
 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | Shared SSH authentication, user-scoped `~/.mindie/ssh/id_ed25519` credential fallback and public-key maintenance, destructive-command safety guards; file access, surgical edits, search, patch sync, container command execution, and background job management |
