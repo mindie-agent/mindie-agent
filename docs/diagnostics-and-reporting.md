@@ -127,3 +127,21 @@
 - **零 NPU 权重 Safetensors 头部与量化契约快检（`inspect_safetensors_checkpoint`）**：在申请 NPU 租约前，仅读取 `.safetensors` 前 8 字节头部长度与 JSON 元数据（`< 100ms`），自动校验分片完整性、文件截断、各层 Dtype 字节分布，拦截“`config.json` 声明 W8A8/W4A8 量化但 `routed_expert` 权重仍为 BF16/F16”的隐性显存暴涨，以及 `head_dim` 未对齐昇腾 32B UB 边界风险。
 - **Linux `/proc/<pid>` 磁盘 I/O `D` 状态（`wchan`）与真 NPU 挂死区分**：`fleet_probe` 与 `npu-top` 同步采集 NPU 进程的 `/proc/<pid>/status`（`State`）与 `/proc/<pid>/wchan`，当 AICore 利用率为 `0%` 但进程处于 `D` 态（如 `lock_page_killable` / `nfs_*` / `folio_wait*`）时显式标记 `disk_io_wait=True`，防止将冷存储/NFS 权重读取误判为 HCCL 通信死锁并误杀进程。
 - **推理基准测试有效性审计（`audit_inference_benchmark_validity`）**：自动识别并拦截未剔除 Warmup/图编译耗时、使用 `--load-format dummy` 或未校准量化权重报告精度、投机解码（MTP/EAGLE/DSpark）缺失 `acceptance_rate` / `mean_accepted_tokens` 折算、`output_len < 32` 冒充长稳态 TPOT、PD 分离静默回退本地重算（`transferred_kv_bytes == 0`）、`--enforce-eager` 与 `cudagraph_mode` 冲突或 C++ 算子重编后未清理 `.torchair_cache`、以及跨 VPN/广域网运行压测客户端导致的网络 RTT 失真。
+
+---
+
+## 8. 通用三原语 NPU 精度、状态污染与内存踩踏定位工具集（`mindie_diagnostics.precision`）
+
+针对模型长上下文发散、多步投机（MTP/EAGLE）接受率跌落、多 DP 空批状态串味、自定义算子累加漂移以及 `NPUGraph` 静态缓冲区别名踩踏，`diagnostics` 提供**零业务侵入、仅依赖公开 PyTorch 接口**的通用三原语定位工具集（`mindie_diagnostics.precision`）：
+
+| 故障现象与日志签名（Symptom） | 推荐原语（Primitive） | 核心调用方式与判定输出 |
+| --- | --- | --- |
+| **跨步/跨 Rank 状态修改、共享缓冲覆写、Workspace 切片踩踏**（如 MTP `step 0` 的 `seq_lens`/`cum_query_lens` 在构建 `step 1` 后被原地覆盖、Idle DP `_dummy_run` 污染 `GDN`/`KDA`/`Mamba` 状态缓存、变长 Chunk workspace 越界踩踏） | **`npu-watch`**（`StorageGraph`、`MemoryWatchpoint`、`WatchRingBuffer`） | `StorageGraph(a=t0, b=t1).shares_storage("a", "b")` / `.overlapping_views()` 检测底层 `untyped_storage` 别名与字节区间重叠；`with MemoryWatchpoint(module, must_preserve={"state": t}) as wp:` 在首个修改保护张量的算子/子模块边界精确定位违规写操作（`wp.report()["first_violation"]`）；`WatchRingBuffer` 提供 `NPUGraph` 捕获安全的设备侧零同步环形快照与首个 `NaN`/`Inf` 锁存 |
+| **单算子/归约/量化数值漂移或跨次运行非确定性抖动**（如 BF16/FP16 均值方差累加 `max_abs_err` 超标、W8A8/MXFP8 量化固损 vs 算子核实现 Bug、原子归约跨次抖动） | **`call-repro`**（`capture_call`、`replay_call`、`FakeQuantContract`） | `cap = capture_call(fn_or_mod, *args, **kwargs)` 保存调用前后完整 `StorageGraph` 快照；`replay_call(cap, fn_or_mod, mode="reference_check", reference_atol=..., reference_rtol=...)` 自动提升浮点张量与 `TorchFunctionMode` 归约至 FP32 参照比对，或通过 `repeat=N, det_lock=True` 与 `FakeQuantContract` 区分“非确定性原子抖动 (`nondeterministic_jitter`)”、“量化固损 (`quantization_inherent_loss`)”与“算子实现缺陷 (`real_numerical_bug`)” |
+| **多模块/端到端逐层精度发散（Eager vs `NPUGraph`、多卡 TP/EP/CP vs 单卡、新旧分支对比）** | **`lockstep-diff`**（`LockstepDiffer`、`slim_moe_checkpoint`） | `LockstepDiffer(ref_mod, cand_mod).compare(*args, **kwargs)` 沿模块树锁定**首个超过 ULP/噪声底限的发散层**（`first_divergent_layer`）及发散类型（`nonfinite_overflow` / `storage_stomp` / `layout_or_view_bug` / `accumulation_drift`）；配合 `slim_moe_checkpoint` 将超大 MoE 权重裁剪为单机可跑的确定性小权重进行秒级复现 |
+
+### 底层依赖边界说明（公开接口 vs 扩展探测）
+
+- **业务模型层（`vllm-ascend` / `MindIE-SD`）零定制接口**：无需业务代码预埋任何自定义 Hook 或专有协议，完全通过标准 `torch.nn.Module` 公开接口（`register_forward_pre_hook(..., with_kwargs=True)`、`register_forward_hook(..., with_kwargs=True)`、`named_modules()`、`named_parameters()`、`named_buffers()`）及标准 HuggingFace `config.json` / `.safetensors` 文件工作。
+- **PyTorch 公开运行时接口**：存储拓扑与别名检测基于 `tensor.untyped_storage()`、`storage.data_ptr()`（0 字节空存储回退至对象标识）、`storage.nbytes()`、`tensor.as_strided()`、`tensor.view(torch.uint8)`；FP32 参照重放基于公开的 `torch.overrides.TorchFunctionMode` 与 `torch.autocast`；设备侧异步事件与确定性控制基于 `torch.npu.current_stream()`、`torch.npu.Event()` 与 `torch.use_deterministic_algorithms()`。
+- **仅有的两处框架内部/扩展触点**：(1) 在 `FakeQuant` 与 `FP32` 参照重放期间，为避免触发 `nn.Module.__setattr__` 参数类型拦截或重复注册 Hook，在 `try...finally` 块内对 `submodule._parameters` / `submodule._buffers` 字典执行临时原地替换并严格恢复；(2) 通过 `getattr(torch_npu, "get_npu_format", None)` 可选探测昇腾私有 `ACL_FORMAT_FRACTAL_NZ (29)` 格式，避免对非标准排布张量直接切片字节视图。
