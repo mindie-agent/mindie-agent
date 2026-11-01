@@ -5,7 +5,7 @@
 本文说明 MindIE Agent 如何记录本地结构化诊断日志、帮助 Agent 在遇到工具报错时快速定位阶段与原因，以及可选的“自动工具故障上报”是如何严格保护用户隐私并防止重复提交的。
 
 - 遵循准则：[工程设计原则与演进准则](design-principles.md)
-- 核心组件仓库：[`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics)
+- 核心组件仓库：[`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics)（MindIE Agent 自身 DFX 与故障上报）· [`mindie-agent/debugger`](https://github.com/mindie-agent/debugger)（目标 NPU 负载故障分诊、三原语精度定位与 `ACLGraph` 调试）
 - 版本与实测记录：[版本发布记录](README.md#版本记录与路线图)
 
 ---
@@ -37,7 +37,8 @@
 | --- | --- |
 | **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh`） | 记录原生入口、Hook、MCP 启动与协议层故障，提供清晰的配置开关与状态查询入口 |
 | **业务运行时组件**（`knowledge` / `remote-dev`） | 在内部发生真实故障的边界记录阶段、版本、耗时、退出码与清理结果；严格区分“用户远端命令正常返回非零退出码”与“MindIE 工具自身缺陷” |
-| **诊断组件**（`diagnostics`） | 负责日志格式校验、严格字段白名单脱敏、本地磁盘滚动清理、故障指纹去重、有限重试预算控制与 GitHub Issue 自动提交 |
+| **诊断组件**（`diagnostics`） | **仅负责 MindIE Agent 自身内部 DFX**：日志格式校验、严格字段白名单脱敏、本地磁盘滚动清理、故障指纹去重、有限重试预算控制与 GitHub Issue 自动提交 |
+| **NPU 调试组件**（`debugger` / `mindie_debugger`） | **专门面向被调优的目标 NPU 业务负载**（`vllm-ascend`、`MindIE-SD`、CANN 算子）：提供确定性昇腾 NPU 日志分诊（`npu_fault_triage`）、通用三原语精度/内存踩踏定位（`precision`）与 `ACLGraph` 捕获/重放逐层 Dump 工具（`aclgraph`），与 Agent 自身 DFX 严格职责隔离 |
 | **GitHub 仓库维护者** | 根据上报的结构化故障证据排查根因并发布修复版本 |
 
 如果底层共享组件已经记录了某次错误，它会把诊断关联编号直接传给上层插件，避免同一故障在底层和外层被重复记录两次。
@@ -101,9 +102,9 @@
 
 ---
 
-## 7. 确定性昇腾 NPU 与 CANN 故障分诊（`npu_fault_triage`）
+## 7. 确定性昇腾 NPU 与 CANN 故障分诊（`mindie_debugger.npu_fault_triage`）
 
-除记录工具自身诊断日志外，`diagnostics` 组件还内置了吸收自 [CANNBot Skills](https://gitcode.com/cann/cannbot-skills) 的**零模型依赖、确定性昇腾 NPU 运行时故障分诊器（`triage_npu_fault`）**，帮助 Agent 从容器或主机的报错日志中直接识别根因分类、提取标准错误码并给出对应的 CANN 原生取证工具命令：
+为保持职责唯一性，面向**被调优目标 NPU 业务负载**的日志分诊与精度调试已独立剥离至 [`mindie-agent/debugger`](https://github.com/mindie-agent/debugger)（`mindie-debugger` / `mindie_debugger`）。其中内置吸收自 [CANNBot Skills](https://gitcode.com/cann/cannbot-skills) 的**零模型依赖、确定性昇腾 NPU 运行时故障分诊器（`mindie_debugger.npu_fault_triage.triage_npu_fault`）**，帮助 Agent 从容器或主机的报错日志中直接识别根因分类、提取标准错误码并给出对应的 CANN 原生取证工具命令：
 
 | 故障分类（`category`） | 典型 CANN / 驱动错误码与特征签名 | 关联的 CANN 确定性取证与恢复指引 |
 | --- | --- | --- |
@@ -130,15 +131,16 @@
 
 ---
 
-## 8. 通用三原语 NPU 精度、状态污染与内存踩踏定位工具集（`mindie_diagnostics.precision`）
+## 8. 通用三原语 NPU 精度、内存踩踏与 `ACLGraph` 调试工具集（`mindie_debugger`）
 
-针对模型长上下文发散、多步投机（MTP/EAGLE）接受率跌落、多 DP 空批状态串味、自定义算子累加漂移以及 `NPUGraph` 静态缓冲区别名踩踏，`diagnostics` 提供**零业务侵入、仅依赖公开 PyTorch 接口**的通用三原语定位工具集（`mindie_diagnostics.precision`）：
+针对模型长上下文发散、多步投机（MTP/EAGLE）接受率跌落、多 DP 空批状态串味、自定义算子累加漂移以及 `vllm-ascend` / `MindIE-SD` 默认图引擎 **`ACLGraph`（`torch.npu.NPUGraph`）** 的捕获/重放发散，`debugger`（`mindie_debugger.precision` 与 `mindie_debugger.aclgraph`）提供**零业务侵入、仅依赖公开 PyTorch 接口**的定位工具集：
 
 | 故障现象与日志签名（Symptom） | 推荐原语（Primitive） | 核心调用方式与判定输出 |
 | --- | --- | --- |
 | **跨步/跨 Rank 状态修改、共享缓冲覆写、Workspace 切片踩踏**（如 MTP `step 0` 的 `seq_lens`/`cum_query_lens` 在构建 `step 1` 后被原地覆盖、Idle DP `_dummy_run` 污染 `GDN`/`KDA`/`Mamba` 状态缓存、变长 Chunk workspace 越界踩踏） | **`npu-watch`**（`StorageGraph`、`MemoryWatchpoint`、`WatchRingBuffer`） | `StorageGraph(a=t0, b=t1).shares_storage("a", "b")` / `.overlapping_views()` 检测底层 `untyped_storage` 别名与字节区间重叠；`with MemoryWatchpoint(module, must_preserve={"state": t}) as wp:` 在首个修改保护张量的算子/子模块边界精确定位违规写操作（`wp.report()["first_violation"]`）；`WatchRingBuffer` 提供 `NPUGraph` 捕获安全的设备侧零同步环形快照与首个 `NaN`/`Inf` 锁存 |
 | **单算子/归约/量化数值漂移或跨次运行非确定性抖动**（如 BF16/FP16 均值方差累加 `max_abs_err` 超标、W8A8/MXFP8 量化固损 vs 算子核实现 Bug、原子归约跨次抖动） | **`call-repro`**（`capture_call`、`replay_call`、`FakeQuantContract`） | `cap = capture_call(fn_or_mod, *args, **kwargs)` 保存调用前后完整 `StorageGraph` 快照；`replay_call(cap, fn_or_mod, mode="reference_check", reference_atol=..., reference_rtol=...)` 自动提升浮点张量与 `TorchFunctionMode` 归约至 FP32 参照比对，或通过 `repeat=N, det_lock=True` 与 `FakeQuantContract` 区分“非确定性原子抖动 (`nondeterministic_jitter`)”、“量化固损 (`quantization_inherent_loss`)”与“算子实现缺陷 (`real_numerical_bug`)” |
 | **多模块/端到端逐层精度发散（Eager vs `NPUGraph`、多卡 TP/EP/CP vs 单卡、新旧分支对比）** | **`lockstep-diff`**（`LockstepDiffer`、`slim_moe_checkpoint`） | `LockstepDiffer(ref_mod, cand_mod).compare(*args, **kwargs)` 沿模块树锁定**首个超过 ULP/噪声底限的发散层**（`first_divergent_layer`）及发散类型（`nonfinite_overflow` / `storage_stomp` / `layout_or_view_bug` / `accumulation_drift`）；配合 `slim_moe_checkpoint` 将超大 MoE 权重裁剪为单机可跑的确定性小权重进行秒级复现 |
+| **`ACLGraph`（`torch.npu.NPUGraph`）图内中间层逐 Replay 步无同步 Dump、捕获阻塞定位与静态地址追踪** | **`aclgraph`**（`ACLGraphDumper`、`ACLGraphCaptureGuard`、`ACLGraphAddressTracker`） | 解决常规 PyTorch Hook 在 `g.replay()` 期间不触发、或调 `.cpu()` 导致 `207008` 捕获失败的难题：`ACLGraphDumper` 在 `torch.npu.graph(g)` 捕获期间将零分配设备侧 D2D 拷贝（`torch.where(..., out=slot_buf)`）烘焙进静态图，每次 `g.replay()` 配合 `dumper.advance_step()` 自动落盘各层中间张量，并通过 `dumper.compare_with_eager(eager_fn, *args, step_index=k)` 直接锁定图中首个发散层；`ACLGraphCaptureGuard` 精确定位捕获区内的 `.item()`/`.tolist()`/`bool(tensor)`/`.cpu()` 违规代码行；`ACLGraphAddressTracker` 拦截静态输入缓冲 `data_ptr()` 漂移与 `slot_mapping` Padded 尾部未填 `-1` 导致的 KV Cache 脏写 |
 
 ### 底层依赖边界说明（公开接口 vs 扩展探测）
 

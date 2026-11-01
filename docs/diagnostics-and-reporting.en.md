@@ -5,7 +5,7 @@
 This document explains how MindIE Agent records bounded local diagnostic logs, helps Agents pinpoint the exact stage and cause of a tool failure, and supports opt-in GitHub Issue reporting with strict privacy guarantees and deduplication.
 
 - Governed by: [Engineering Design Principles](design-principles.en.md)
-- Core Component Repository: [`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics)
+- Core Component Repositories: [`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics) (MindIE Agent self-DFX & Issue reporting) · [`mindie-agent/debugger`](https://github.com/mindie-agent/debugger) (Target NPU workload fault triage, 3-primitive precision debugging & `ACLGraph` debugging)
 - Release & Verification Records: [Release Records & Roadmap](README.en.md#release-records--roadmap)
 
 ---
@@ -37,7 +37,8 @@ When a remote command or background indexing step fails, a vague error string wa
 | --- | --- |
 | **Harness Plugin Adapters** (`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh`) | Log native entrypoint, Hook, MCP startup, and protocol errors; provide setup toggles and human-readable status |
 | **Runtime Components** (`knowledge` / `remote-dev`) | Record stage, version, monotonic duration, exit code, and cleanup outcome at the exact boundary where an internal fault occurs, cleanly separating normal user-command exits from internal tool bugs |
-| **Diagnostics Engine** (`diagnostics`) | Enforce log schemas, allowlist-only redaction, bounded disk rotation, fingerprint deduplication, finite retry budgets, and GitHub Issue creation |
+| **Diagnostics Engine** (`diagnostics`) | **Strictly scoped to MindIE Agent's own internal DFX**: enforce log schemas, allowlist-only redaction, bounded disk rotation, fingerprint deduplication, finite retry budgets, and GitHub Issue creation |
+| **Target NPU Debugger** (`debugger` / `mindie_debugger`) | **Scoped exclusively to target NPU workloads** (`vllm-ascend`, `MindIE-SD`, CANN operators): deterministic Ascend NPU fault log triage (`npu_fault_triage`), 3-primitive precision/memory-stomp localization (`precision`), and `ACLGraph` capture/replay layerwise dumping (`aclgraph`) |
 | **GitHub Maintainers** | Investigate reported fault evidence and ship fixes |
 
 When a shared component has already logged an internal fault, it passes a trusted diagnostic reference ID to the outer plugin layer so the same error is never logged or reported twice.
@@ -101,9 +102,9 @@ To prevent duplicate Issues and retain pending reports across transient network 
 
 ---
 
-## 7. Deterministic Ascend NPU & CANN Fault Triage (`npu_fault_triage`)
+## 7. Deterministic Ascend NPU & CANN Fault Triage (`mindie_debugger.npu_fault_triage`)
 
-Beyond internal tool telemetry, `diagnostics` includes a **zero-LLM, deterministic Ascend NPU runtime fault classifier (`triage_npu_fault`)** distilled from [CANNBot Skills](https://gitcode.com/cann/cannbot-skills), enabling Agents to classify CANN error codes and immediately invoke the right native forensic utilities:
+To preserve strict single-responsibility boundaries, target NPU workload log triage and precision debugging live in the dedicated [`mindie-agent/debugger`](https://github.com/mindie-agent/debugger) repository (`mindie-debugger` / `mindie_debugger`). It includes a **zero-LLM, deterministic Ascend NPU runtime fault classifier (`mindie_debugger.npu_fault_triage.triage_npu_fault`)** distilled from [CANNBot Skills](https://gitcode.com/cann/cannbot-skills), enabling Agents to classify CANN error codes and immediately invoke the right native forensic utilities:
 
 | Fault Category (`category`) | Canonical CANN / Driver Error Codes & Signatures | Deterministic CANN Toolchain Triage & Remediation |
 | --- | --- | --- |
@@ -130,15 +131,16 @@ Complementing runtime fault triage, `coordinator` ([`env_manager.py`](https://gi
 
 ---
 
-## 8. Universal 3-Primitive NPU Precision, State-Corruption & Memory-Stomp Toolkit (`mindie_diagnostics.precision`)
+## 8. Universal 3-Primitive NPU Precision, Memory-Stomp & `ACLGraph` Debugging Toolkit (`mindie_debugger`)
 
-For long-context divergence, multi-step speculative decoding (`MTP`/`EAGLE`) acceptance drops, idle-DP state cross-contamination, custom-op reduction drift, and `NPUGraph` static-buffer aliasing, `diagnostics` provides a **zero-intrusion, public-PyTorch-API** 3-primitive localization toolkit (`mindie_diagnostics.precision`):
+For long-context divergence, multi-step speculative decoding (`MTP`/`EAGLE`) acceptance drops, idle-DP state cross-contamination, custom-op reduction drift, and **`ACLGraph` (`torch.npu.NPUGraph`)** capture/replay divergence in `vllm-ascend` and `MindIE-SD`, `debugger` (`mindie_debugger.precision` and `mindie_debugger.aclgraph`) provides a **zero-intrusion, public-PyTorch-API** localization toolkit:
 
 | Symptom & Log Signature | Recommended Primitive | Core Invocation & Diagnostic Verdict |
 | --- | --- | --- |
 | **Cross-Step / Cross-Rank State Mutation, Shared-Buffer Overwrite, or Workspace Slice Stomp** (e.g., MTP `step 0` `seq_lens`/`cum_query_lens` overwritten after building `step 1`, idle DP `_dummy_run` mutating persistent `GDN`/`KDA`/`Mamba` state, variable-length chunk workspace stomp) | **`npu-watch`** (`StorageGraph`, `MemoryWatchpoint`, `WatchRingBuffer`) | `StorageGraph(a=t0, b=t1).shares_storage("a", "b")` / `.overlapping_views()` detects `untyped_storage` aliasing and byte-range overlaps; `with MemoryWatchpoint(module, must_preserve={"state": t}) as wp:` pinpoints the first submodule/call mutating protected state (`wp.report()["first_violation"]`); `WatchRingBuffer` provides `NPUGraph`-capture-safe, zero-sync device ring snapshots and a first-fault `NaN`/`Inf` latch |
 | **Single-Operator / Reduction / Quantization Numerical Drift or Run-to-Run Jitter** (e.g., BF16/FP16 mean/var accumulation `max_abs_err` exceeding threshold, W8A8/MXFP8 quantization loss vs. kernel bug, non-deterministic atomic reduction jitter) | **`call-repro`** (`capture_call`, `replay_call`, `FakeQuantContract`) | `cap = capture_call(fn_or_mod, *args, **kwargs)` captures pre/post `StorageGraph` snapshots; `replay_call(cap, fn_or_mod, mode="reference_check", reference_atol=..., reference_rtol=...)` promotes floating-point inputs and `TorchFunctionMode` reductions to FP32, or combines `repeat=N, det_lock=True` and `FakeQuantContract` to separate `nondeterministic_jitter`, `quantization_inherent_loss`, and `real_numerical_bug` |
 | **Multi-Module / End-to-End Progressive Divergence (Eager vs. `NPUGraph`, TP/EP/CP vs. Single-Card, Old vs. New Branch)** | **`lockstep-diff`** (`LockstepDiffer`, `slim_moe_checkpoint`) | `LockstepDiffer(ref_mod, cand_mod).compare(*args, **kwargs)` locates the **first module boundary exceeding the ULP/jitter noise floor** (`first_divergent_layer`) and classifies `nonfinite_overflow` / `storage_stomp` / `layout_or_view_bug` / `accumulation_drift`; pairs with `slim_moe_checkpoint` to shrink large MoE checkpoints into deterministic single-node reproducers |
+| **`ACLGraph` (`torch.npu.NPUGraph`) In-Graph Replay Layerwise Dumping, Capture-Blocker Localization & Static Pointer Tracking** | **`aclgraph`** (`ACLGraphDumper`, `ACLGraphCaptureGuard`, `ACLGraphAddressTracker`) | Solves the problem that standard PyTorch hooks do not fire during `g.replay()` and `.cpu()` crashes capture (`207008`): `ACLGraphDumper` bakes zero-allocation, zero-sync D2D copies (`torch.where(..., out=slot_buf)`) into the captured `ACLGraph` so every `g.replay()` + `dumper.advance_step()` records intermediate layer tensors on-device, and `dumper.compare_with_eager(eager_fn, *args, step_index=k)` pinpoints `first_divergent_layer`; `ACLGraphCaptureGuard` pinpoints exact `file:line` `.item()`/`.tolist()`/`bool(tensor)`/`.cpu()` calls inside capture; `ACLGraphAddressTracker` flags rebound input `data_ptr()` and unmasked `slot_mapping >= 0` padded tails |
 
 ### Underlying Dependency Boundary (Public APIs vs. Extension Probes)
 
