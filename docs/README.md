@@ -23,6 +23,10 @@
 | [A5 通信展开与竞争校准 TODO](a5-communication-calibration-todo.md) | — | 待 A5 实机采集的 AICPU/AIV 展开、资源竞争、样本协议及回填验收矩阵 |
 | [核心能力落地与知识持续演进设计](core-implementation-and-geak-evolution-design.md) | — | 知识上下文预算、经验沉淀回流与组件化落地记录 |
 
+## 算子开发
+
+- [从 MindIE 发起算子开发](operator-workflow.md)：独立 workflow、默认 Codex 生成/优化、CANNBot 按需准备与作业回收。
+
 ## 运行机制与工程规范
 
 | 文档 | English | 核心内容 |
