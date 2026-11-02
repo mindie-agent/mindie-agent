@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent 开源仓库与下载统计</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-02 19:45 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-02 22:56 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release 下载量</text>
-  <text x="734" y="124" class="font kpi-val">5,065</text>
-  <text x="734" y="144" class="font kpi-sub">含全部附件共 7,711 次</text>
+  <text x="734" y="124" class="font kpi-val">5,071</text>
+  <text x="734" y="144" class="font kpi-sub">含全部附件共 7,735 次</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">客户端插件拉取分布</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -105,7 +105,7 @@
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 2</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">4,407</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">3,219 (461)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">828</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">831</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
@@ -191,7 +191,7 @@
   <text x="545" y="736" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="736" text-anchor="end" class="mono td-bold">1,326</text>
   <text x="815" y="736" text-anchor="end" class="mono td-num">1,326 (507)</text>
-  <text x="920" y="736" text-anchor="end" class="mono td-num">41</text>
+  <text x="920" y="736" text-anchor="end" class="mono td-num">44</text>
   <line x1="24" y1="748" x2="936" y2="748" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="765" r="3.5" fill="#D97706"/>
   <text x="50" y="769" class="mono td-repo">npu-top</text>
@@ -234,7 +234,7 @@
   <circle cx="40" cy="897" r="3.5" fill="#0D9488"/>
   <text x="50" y="901" class="mono td-repo">knowledge-operators</text>
   <text x="268" y="901" class="font td-cat">领域知识库</text>
-  <text x="368" y="901" class="mono td-sub">commit@0ac89226</text>
+  <text x="368" y="901" class="mono td-sub">commit@bf8150d4</text>
   <text x="545" y="901" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="901" text-anchor="end" class="mono td-bold">263</text>
   <text x="815" y="901" text-anchor="end" class="mono td-num">263 (126)</text>
@@ -244,7 +244,7 @@
   <circle cx="40" cy="930" r="3.5" fill="#0D9488"/>
   <text x="50" y="934" class="mono td-repo">knowledge-infer-core</text>
   <text x="268" y="934" class="font td-cat">领域知识库</text>
-  <text x="368" y="934" class="mono td-sub">commit@8f759165</text>
+  <text x="368" y="934" class="mono td-sub">commit@f0d8e7cf</text>
   <text x="545" y="934" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="934" text-anchor="end" class="mono td-bold">194</text>
   <text x="815" y="934" text-anchor="end" class="mono td-num">194 (91)</text>
@@ -282,7 +282,7 @@
   <circle cx="40" cy="1062" r="3.5" fill="#0D9488"/>
   <text x="50" y="1066" class="mono td-repo">knowledge-agent-engineering</text>
   <text x="268" y="1066" class="font td-cat">领域知识库</text>
-  <text x="368" y="1066" class="mono td-sub">commit@06f41835</text>
+  <text x="368" y="1066" class="mono td-sub">commit@3cf3f10c</text>
   <text x="545" y="1066" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="1066" text-anchor="end" class="mono td-bold">166</text>
   <text x="815" y="1066" text-anchor="end" class="mono td-num">166 (81)</text>

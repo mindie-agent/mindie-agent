@@ -753,8 +753,8 @@
         "views_14d": 16,
         "views_14d_uniques": 13,
         "cumulative_views": 50,
-        "pkg_downloads": 828,
-        "all_asset_downloads": 987,
+        "pkg_downloads": 831,
+        "all_asset_downloads": 990,
         "latest_release": "v0.1.16"
       }
     },
@@ -1762,7 +1762,7 @@
         "views_14d_uniques": 7,
         "cumulative_views": 38,
         "pkg_downloads": 100,
-        "all_asset_downloads": 617,
+        "all_asset_downloads": 619,
         "latest_release": "v0.13.9"
       }
     },
@@ -2266,7 +2266,7 @@
         "views_14d_uniques": 9,
         "cumulative_views": 24,
         "pkg_downloads": 98,
-        "all_asset_downloads": 619,
+        "all_asset_downloads": 621,
         "latest_release": "v0.11.3"
       }
     },
@@ -3022,7 +3022,7 @@
         "views_14d_uniques": 0,
         "cumulative_views": 0,
         "pkg_downloads": 68,
-        "all_asset_downloads": 469,
+        "all_asset_downloads": 475,
         "latest_release": "v0.5.4"
       }
     },
@@ -3585,8 +3585,8 @@
         "views_14d": 29,
         "views_14d_uniques": 10,
         "cumulative_views": 29,
-        "pkg_downloads": 41,
-        "all_asset_downloads": 150,
+        "pkg_downloads": 44,
+        "all_asset_downloads": 161,
         "latest_release": "v0.9.1"
       }
     },
@@ -3743,7 +3743,7 @@
         "cumulative_views": 8,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@0ac89226"
+        "latest_release": "commit@bf8150d4"
       }
     },
     "knowledge-infer-core": {
@@ -3899,7 +3899,7 @@
         "cumulative_views": 7,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@8f759165"
+        "latest_release": "commit@f0d8e7cf"
       }
     },
     "knowledge-infer-distributed": {
@@ -4523,7 +4523,7 @@
         "cumulative_views": 1,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@06f41835"
+        "latest_release": "commit@3cf3f10c"
       }
     },
     "mindie-agent-agy": {
@@ -4667,5 +4667,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-02 19:45"
+  "updated_at_cst": "2026-11-02 22:56"
 }
