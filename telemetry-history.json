@@ -232,7 +232,7 @@
         }
       },
       "latest_snapshot": {
-        "stars": 62,
+        "stars": 65,
         "forks": 54,
         "clones_14d": 1383,
         "clones_14d_uniques": 444,
@@ -729,8 +729,8 @@
         "views_14d": 15,
         "views_14d_uniques": 13,
         "cumulative_views": 49,
-        "pkg_downloads": 736,
-        "all_asset_downloads": 895,
+        "pkg_downloads": 793,
+        "all_asset_downloads": 952,
         "latest_release": "v0.1.16"
       }
     },
@@ -973,8 +973,8 @@
         "views_14d": 5,
         "views_14d_uniques": 3,
         "cumulative_views": 7,
-        "pkg_downloads": 179,
-        "all_asset_downloads": 320,
+        "pkg_downloads": 182,
+        "all_asset_downloads": 323,
         "latest_release": "v0.1.12"
       }
     },
@@ -1706,7 +1706,7 @@
         "views_14d_uniques": 7,
         "cumulative_views": 38,
         "pkg_downloads": 97,
-        "all_asset_downloads": 540,
+        "all_asset_downloads": 546,
         "latest_release": "v0.13.8"
       }
     },
@@ -2194,7 +2194,7 @@
         "views_14d_uniques": 9,
         "cumulative_views": 23,
         "pkg_downloads": 95,
-        "all_asset_downloads": 542,
+        "all_asset_downloads": 550,
         "latest_release": "v0.11.2"
       }
     },
@@ -2926,7 +2926,7 @@
         "views_14d_uniques": 0,
         "cumulative_views": 0,
         "pkg_downloads": 68,
-        "all_asset_downloads": 413,
+        "all_asset_downloads": 419,
         "latest_release": "v0.5.4"
       }
     },
@@ -3318,7 +3318,7 @@
         "views_14d_uniques": 7,
         "cumulative_views": 18,
         "pkg_downloads": 48,
-        "all_asset_downloads": 151,
+        "all_asset_downloads": 155,
         "latest_release": "v0.5.5"
       }
     },
@@ -3466,7 +3466,7 @@
         "views_14d_uniques": 10,
         "cumulative_views": 29,
         "pkg_downloads": 41,
-        "all_asset_downloads": 126,
+        "all_asset_downloads": 130,
         "latest_release": "v0.9.0"
       }
     },
@@ -4499,5 +4499,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-02 01:21"
+  "updated_at_cst": "2026-11-02 11:10"
 }
