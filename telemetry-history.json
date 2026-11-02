@@ -753,9 +753,9 @@
         "views_14d": 16,
         "views_14d_uniques": 13,
         "cumulative_views": 50,
-        "pkg_downloads": 831,
-        "all_asset_downloads": 990,
-        "latest_release": "v0.1.16"
+        "pkg_downloads": 856,
+        "all_asset_downloads": 1023,
+        "latest_release": "v0.1.17"
       }
     },
     "mindie-agent-cc": {
@@ -1005,9 +1005,9 @@
         "views_14d": 5,
         "views_14d_uniques": 3,
         "cumulative_views": 7,
-        "pkg_downloads": 185,
-        "all_asset_downloads": 326,
-        "latest_release": "v0.1.12"
+        "pkg_downloads": 189,
+        "all_asset_downloads": 334,
+        "latest_release": "v0.1.13"
       }
     },
     "mindie-agent-kimi": {
@@ -1257,9 +1257,9 @@
         "views_14d": 2,
         "views_14d_uniques": 2,
         "cumulative_views": 3,
-        "pkg_downloads": 2217,
-        "all_asset_downloads": 2346,
-        "latest_release": "v0.1.12"
+        "pkg_downloads": 2238,
+        "all_asset_downloads": 2377,
+        "latest_release": "v0.1.13"
       }
     },
     "mindie-agent-dsh": {
@@ -1509,9 +1509,9 @@
         "views_14d": 14,
         "views_14d_uniques": 13,
         "cumulative_views": 14,
-        "pkg_downloads": 72,
-        "all_asset_downloads": 208,
-        "latest_release": "v0.1.11"
+        "pkg_downloads": 74,
+        "all_asset_downloads": 214,
+        "latest_release": "v0.1.12"
       }
     },
     "knowledge": {
@@ -1761,9 +1761,9 @@
         "views_14d": 30,
         "views_14d_uniques": 7,
         "cumulative_views": 38,
-        "pkg_downloads": 100,
-        "all_asset_downloads": 619,
-        "latest_release": "v0.13.9"
+        "pkg_downloads": 103,
+        "all_asset_downloads": 662,
+        "latest_release": "v0.13.10"
       }
     },
     "knowledge-vllm-ascend": {
@@ -2015,7 +2015,7 @@
         "cumulative_views": 74,
         "pkg_downloads": 629,
         "all_asset_downloads": 629,
-        "latest_release": "commit@bfaf97b9"
+        "latest_release": "commit@a0f890b7"
       }
     },
     "remote-dev": {
@@ -2265,9 +2265,9 @@
         "views_14d": 23,
         "views_14d_uniques": 9,
         "cumulative_views": 24,
-        "pkg_downloads": 98,
-        "all_asset_downloads": 621,
-        "latest_release": "v0.11.3"
+        "pkg_downloads": 101,
+        "all_asset_downloads": 664,
+        "latest_release": "v0.11.4"
       }
     },
     "coordinator": {
@@ -2517,9 +2517,9 @@
         "views_14d": 7,
         "views_14d_uniques": 5,
         "cumulative_views": 8,
-        "pkg_downloads": 63,
-        "all_asset_downloads": 212,
-        "latest_release": "v0.7.2"
+        "pkg_downloads": 66,
+        "all_asset_downloads": 225,
+        "latest_release": "v0.7.3"
       }
     },
     "npu-top": {
@@ -2769,9 +2769,9 @@
         "views_14d": 13,
         "views_14d_uniques": 4,
         "cumulative_views": 32,
-        "pkg_downloads": 629,
-        "all_asset_downloads": 701,
-        "latest_release": "v0.3.0"
+        "pkg_downloads": 665,
+        "all_asset_downloads": 769,
+        "latest_release": "v0.3.1"
       }
     },
     "diagnostics": {
@@ -3021,9 +3021,9 @@
         "views_14d": 0,
         "views_14d_uniques": 0,
         "cumulative_views": 0,
-        "pkg_downloads": 68,
-        "all_asset_downloads": 475,
-        "latest_release": "v0.5.4"
+        "pkg_downloads": 108,
+        "all_asset_downloads": 584,
+        "latest_release": "v0.5.5"
       }
     },
     "mindie-bench": {
@@ -3273,9 +3273,9 @@
         "views_14d": 49,
         "views_14d_uniques": 4,
         "cumulative_views": 49,
-        "pkg_downloads": 46,
-        "all_asset_downloads": 129,
-        "latest_release": "v0.4.5"
+        "pkg_downloads": 49,
+        "all_asset_downloads": 136,
+        "latest_release": "v0.4.6"
       }
     },
     "profiler": {
@@ -3429,9 +3429,9 @@
         "views_14d": 18,
         "views_14d_uniques": 7,
         "cumulative_views": 18,
-        "pkg_downloads": 48,
-        "all_asset_downloads": 177,
-        "latest_release": "v0.5.5"
+        "pkg_downloads": 51,
+        "all_asset_downloads": 190,
+        "latest_release": "v0.5.6"
       }
     },
     "sim": {
@@ -3585,9 +3585,9 @@
         "views_14d": 29,
         "views_14d_uniques": 10,
         "cumulative_views": 29,
-        "pkg_downloads": 44,
-        "all_asset_downloads": 161,
-        "latest_release": "v0.9.1"
+        "pkg_downloads": 47,
+        "all_asset_downloads": 178,
+        "latest_release": "v0.9.2"
       }
     },
     "knowledge-operators": {
@@ -4661,11 +4661,539 @@
         "views_14d": 5,
         "views_14d_uniques": 4,
         "cumulative_views": 5,
-        "pkg_downloads": 6,
-        "all_asset_downloads": 8,
+        "pkg_downloads": 8,
+        "all_asset_downloads": 14,
+        "latest_release": "v0.1.3"
+      }
+    },
+    "mindie-agent-wb": {
+      "daily_clones": {
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-02": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "daily_views": {
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-02": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "latest_snapshot": {
+        "stars": 0,
+        "forks": 0,
+        "clones_14d": 0,
+        "clones_14d_uniques": 0,
+        "cumulative_clones": 0,
+        "cumulative_clone_uniques": 0,
+        "views_14d": 0,
+        "views_14d_uniques": 0,
+        "cumulative_views": 0,
+        "pkg_downloads": 2,
+        "all_asset_downloads": 6,
         "latest_release": "v0.1.2"
+      }
+    },
+    "debugger": {
+      "daily_clones": {
+        "2026-10-19": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 35,
+          "uniques": 14
+        }
+      },
+      "daily_views": {
+        "2026-10-19": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "latest_snapshot": {
+        "stars": 0,
+        "forks": 0,
+        "clones_14d": 35,
+        "clones_14d_uniques": 14,
+        "cumulative_clones": 35,
+        "cumulative_clone_uniques": 14,
+        "views_14d": 0,
+        "views_14d_uniques": 0,
+        "cumulative_views": 0,
+        "pkg_downloads": 3,
+        "all_asset_downloads": 11,
+        "latest_release": "v0.1.0"
+      }
+    },
+    "knowledge-xllm": {
+      "daily_clones": {
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-02": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "daily_views": {
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-02": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "latest_snapshot": {
+        "stars": 0,
+        "forks": 0,
+        "clones_14d": 0,
+        "clones_14d_uniques": 0,
+        "cumulative_clones": 0,
+        "cumulative_clone_uniques": 0,
+        "views_14d": 0,
+        "views_14d_uniques": 0,
+        "cumulative_views": 0,
+        "pkg_downloads": 0,
+        "all_asset_downloads": 0,
+        "latest_release": "commit@23b7b063"
+      }
+    },
+    "knowledge-mindie-sd": {
+      "daily_clones": {
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-02": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "daily_views": {
+        "2026-10-20": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-21": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-22": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-23": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-24": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-25": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-26": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-27": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-28": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-29": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-30": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-10-31": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-01": {
+          "count": 0,
+          "uniques": 0
+        },
+        "2026-11-02": {
+          "count": 0,
+          "uniques": 0
+        }
+      },
+      "latest_snapshot": {
+        "stars": 0,
+        "forks": 0,
+        "clones_14d": 0,
+        "clones_14d_uniques": 0,
+        "cumulative_clones": 0,
+        "cumulative_clone_uniques": 0,
+        "views_14d": 0,
+        "views_14d_uniques": 0,
+        "cumulative_views": 0,
+        "pkg_downloads": 0,
+        "all_asset_downloads": 0,
+        "latest_release": "commit@c23ba64a"
       }
     }
   },
-  "updated_at_cst": "2026-11-02 22:56"
+  "updated_at_cst": "2026-11-03 00:25"
 }
