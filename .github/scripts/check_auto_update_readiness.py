@@ -2,7 +2,7 @@
 """Pre-release and CI gate for both lockstep and flexible component updates.
 
 [Role]
-Verifies that `channels/0.1.json`, all 7 `knowledge-*` domain corpora, all 7 shared
+Verifies that `channels/0.1.json`, all 9 `knowledge-*` domain corpora, all 7 shared
 runtime components, and all 5 native host plugins satisfy zero-intervention update
 invariants for both flexible independent component/corpus releases (`max(installed,
 plugin_baseline, latest_component_release)`) and lockstep plugin releases.
@@ -40,6 +40,8 @@ EXPECTED_CORPORA = (
     "knowledge-infer-core",
     "knowledge-operators",
     "knowledge-vllm-ascend",
+    "knowledge-xllm",
+    "knowledge-mindie-sd",
     "knowledge-infer-distributed",
     "knowledge-infer-observability",
     "knowledge-infer-ops-compat",
@@ -482,8 +484,9 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
     from mindie_knowledge.runtime_inventory import COMPONENTS
 
     expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity"}
-    if set(REPOSITORIES) != expected_harnesses:
-        errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} != {expected_harnesses}")
+    allowed_harnesses = expected_harnesses | {"workbuddy"}
+    if not expected_harnesses.issubset(set(REPOSITORIES)) or not set(REPOSITORIES).issubset(allowed_harnesses):
+        errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} not in {allowed_harnesses}")
 
     required_pkgs = {
         "mindie-knowledge",

@@ -11,25 +11,35 @@
     "independent_update_allowed": true,
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
-      "verified_mechanism": "channels/0.1.json records the product-verified 13-repository + 7-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 8 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py).",
-      "known_boundaries": "The 0.1.6 channel pins verified releases across the 8 shared runtime/evaluation components (knowledge 0.13.8, remote-dev 0.11.2, profiler 0.5.5, sim 0.9.0, coordinator 0.7.1, npu-top 0.3.0, diagnostics 0.5.4, mindie-bench 0.4.5), 5 native host plugins (Codex 0.1.16, Claude Code 0.1.12, Kimi 0.1.12, DSH 0.1.11, Google Antigravity 0.1.2), and 7 public domain corpora. All five host plugins expose the remote NPU and deterministic component/diagnostic tools (diagnostics_status, diagnostics_bundle, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
+      "verified_mechanism": "channels/0.1.json records the product-verified 13-repository + 9-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 8 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py).",
+      "known_boundaries": "The 0.1.6 channel pins verified releases across the 8 shared runtime/evaluation components (knowledge 0.13.8, remote-dev 0.11.2, profiler 0.5.5, sim 0.9.1, coordinator 0.7.1, npu-top 0.3.0, diagnostics 0.5.4, mindie-bench 0.4.5), 5 native host plugins (Codex 0.1.16, Claude Code 0.1.12, Kimi 0.1.12, DSH 0.1.11, Google Antigravity 0.1.2), and 9 public domain corpora. All five host plugins expose the remote NPU and deterministic component/diagnostic tools (diagnostics_status, diagnostics_bundle, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
     }
   },
   "corpora": {
     "knowledge-infer-core": {
       "repository": "mindie-agent/knowledge-infer-core",
       "commit": "8f759165044aae5cf6eaa9762ebadfb732a672e4",
-      "units": 109
+      "units": 105
     },
     "knowledge-operators": {
       "repository": "mindie-agent/knowledge-operators",
       "commit": "0ac89226d6a06be24bc503bc38195599e8f831b6",
-      "units": 105
+      "units": 103
     },
     "knowledge-vllm-ascend": {
       "repository": "mindie-agent/knowledge-vllm-ascend",
-      "commit": "1c7bcad61f1156389dcf714468acd74c34754268",
+      "commit": "bfaf97b9c2b47a820cfd9ef4e40908da6df68bff",
       "units": 91
+    },
+    "knowledge-xllm": {
+      "repository": "mindie-agent/knowledge-xllm",
+      "commit": "23b7b0636cfb050ee88e339ecd69aea6f95cae30",
+      "units": 24
+    },
+    "knowledge-mindie-sd": {
+      "repository": "mindie-agent/knowledge-mindie-sd",
+      "commit": "ec86c59c8ceac40d82220b80f3d787704bc3caf4",
+      "units": 24
     },
     "knowledge-infer-distributed": {
       "repository": "mindie-agent/knowledge-infer-distributed",
@@ -49,7 +59,7 @@
     "knowledge-agent-engineering": {
       "repository": "mindie-agent/knowledge-agent-engineering",
       "commit": "06f418353d9028aecb3a11fb65ef1b284792c396",
-      "units": 33
+      "units": 32
     }
   },
   "components": {
@@ -82,10 +92,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/sim",
       "package": "mindie-sim",
-      "version": "0.9.0",
-      "tag": "v0.9.0",
-      "commit": "f5608b4943f515c401d2f9b12fffb579a1e2571b",
-      "revision": "f5608b4943f515c401d2f9b12fffb579a1e2571b",
+      "version": "0.9.1",
+      "tag": "v0.9.1",
+      "commit": "0add847c4a2132a7cbdaef9c3de81285568eb92e",
+      "revision": "0add847c4a2132a7cbdaef9c3de81285568eb92e",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -321,7 +331,7 @@
         "mindie-agent-agy"
       ],
       "plugin_republish_required": true,
-      "summary": "0.1.6 automatic-update readiness, Wave 5 multi-chip calibration & 5-host compatibility patch: mindie-knowledge 0.13.8 (9a4325858e6fadb10715275826a7795843cbbdf4) adds automatic unit revision advancement in build_routing_index(), base_revision semantic revision monotonicity enforcement in publication_check.py, monotonic revision repair tolerance in GradedRepository.install_feed(), and antigravity/dsh release-metadata support; mindie-coordinator 0.7.1 (d146c55c414bfb92136cf5fb7fa11ae14c673ef0) adds native Antigravity (agy/antigravity) and AGY_CONVERSATION_ID session discovery; mindie-sim 0.9.0 (f5608b4943f515c401d2f9b12fffb579a1e2571b) adds async_scheduling HBM delayed-release modeling, Case composer, Wave 5 catalog, topology/PD Pareto solvers, and skew barrier mechanics; mindie-profiler 0.5.5 (7cdd56b6cc9e0e7f603368393497487dd2dbfe39) adds AddRmsNormQuant/SparseFlashMla/DP-partner prefill segmentation and 1,653/1,653 <=10% Wave 5 A2/A3/A5 in-sample regime calibration; all 7 graded knowledge-* corpora advance validator.revision to 0.13.8 with monotonic unit revisions; and all 5 host plugins (Codex 0.1.16 with Desktop codex-cli 0.166.0-alpha.5.1 support, Claude Code 0.1.12, Kimi 0.1.12, DSH 0.1.11, Antigravity 0.1.2) synchronize component pins, MCP tool descriptions, enterprise-network/Windows/LF install hardening, and pre-release auto-update readiness gates."
+      "summary": "0.1.6 automatic-update readiness, Wave 5 multi-chip calibration & 5-host compatibility patch: mindie-knowledge 0.13.8 (9a4325858e6fadb10715275826a7795843cbbdf4) adds automatic unit revision advancement in build_routing_index(), base_revision semantic revision monotonicity enforcement in publication_check.py, monotonic revision repair tolerance in GradedRepository.install_feed(), and antigravity/dsh release-metadata support; mindie-coordinator 0.7.1 (d146c55c414bfb92136cf5fb7fa11ae14c673ef0) adds native Antigravity (agy/antigravity) and AGY_CONVERSATION_ID session discovery; mindie-sim 0.9.1 (0add847c4a2132a7cbdaef9c3de81285568eb92e) adds async_scheduling HBM delayed-release modeling, Case composer, Wave 5 catalog, topology/PD Pareto solvers, and skew barrier mechanics; mindie-profiler 0.5.5 (7cdd56b6cc9e0e7f603368393497487dd2dbfe39) adds AddRmsNormQuant/SparseFlashMla/DP-partner prefill segmentation and 1,653/1,653 <=10% Wave 5 A2/A3/A5 in-sample regime calibration; all 7 graded knowledge-* corpora advance validator.revision to 0.13.8 with monotonic unit revisions; and all 5 host plugins (Codex 0.1.16 with Desktop codex-cli 0.166.0-alpha.5.1 support, Claude Code 0.1.12, Kimi 0.1.12, DSH 0.1.11, Antigravity 0.1.2) synchronize component pins, MCP tool descriptions, enterprise-network/Windows/LF install hardening, and pre-release auto-update readiness gates."
     }
   ]
 }

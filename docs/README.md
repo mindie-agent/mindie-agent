@@ -14,7 +14,7 @@
 | [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | 本地实战经验如何脱敏沉淀、生成检索导航，并与社区公共知识库双向流转 |
 | [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | 后续设计：Token 预算、渐进加载、经验修订与探索回流；含 OO-Harness 条件化策略复用、组件分工与实施步骤 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 原地解析、纳秒区间计量、Host-Device 异步关联、跨 Run 对比与按需采集设计 |
-| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.0` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学与 Wave 5 跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内校准及 856 DSH 集群泛化验证 |
+| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.1` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学与 Wave 5 跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内校准及 856 DSH 集群泛化验证 |
 | [Profiler 与 Sim 的结构复用和实测映射](profiler-sim-structure.md) | — | `mindie-model-structure/1` 结构导出、同构算子集合（Cohort）对账、`auto_segment_decode_forwards` 拓扑引导切分与 Wave 5 多芯片回放结果 |
 | [`mindie-sim` 接口演进与消费者集成说明](simulation-consumer-migration.md) | — | `0.7.x -> 0.8.x/0.9.x` CLI/API 映射以及在五端宿主插件、`profiler` 与 `mindie-bench` 中的集成状态 |
 | [A3 预测性能与应达性能双模型方案](a3-performance-modeling-plan.md) | — | 历史双模型设计与机制追溯；不再规定新版执行入口或实测门槛 |

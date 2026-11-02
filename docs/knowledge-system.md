@@ -2,9 +2,9 @@
 
 [English](knowledge-system.en.md) · [返回文档中心](README.md)
 
-MindIE Agent 将可复用的昇腾研发经验组织为带适用条件、代码来源和版本号的结构化知识条目（Knowledge Units），同时支持在本地保留脱敏后的排障会话记录供溯源查阅。当前版本重点覆盖 **vLLM-Ascend 与昇腾算子**两个核心领域，并配套提供推理核心机制、分布式通信、可观测性与算子兼容性知识库，服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查**三类场景。
+MindIE Agent 将可复用的昇腾研发经验组织为带适用条件、代码来源和版本号的结构化知识条目（Knowledge Units），同时支持在本地保留脱敏后的排障会话记录供溯源查阅。当前版本重点覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 三大昇腾主力推理/生成框架与昇腾算子**核心领域，并配套提供推理核心机制、分布式通信、可观测性、算子兼容性与 Agent 工程知识库，服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查**三类场景。
 
-检索引擎与经验提炼运行时由 [`knowledge`](https://github.com/mindie-agent/knowledge) 维护；领域知识分别存放在 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) 等内容仓库中。整体组件分工见[系统架构](architecture.md)，会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，上下文预算与探索机制的扩展设计见[上下文分层、经验演化与开放探索设计](knowledge-context-and-exploration.md)。
+检索引擎与经验提炼运行时由 [`knowledge`](https://github.com/mindie-agent/knowledge) 维护；领域知识分别存放在 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) 等内容仓库中。整体组件分工见[系统架构](architecture.md)，会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，上下文预算与探索机制的扩展设计见[上下文分层、经验演化与开放探索设计](knowledge-context-and-exploration.md)。
 
 知识检索遵循**按需信息缺口决策（Information-Gap Retrieval）**：当本地代码、调用栈与验证命令已经足以直接推进修复时，无需强制发起知识查询；当任务存在跨模块排障、硬件规范或架构选型缺口时，再按需调用 `knowledge_query` 检索候选，并仅对选中的高价值条目调用 `knowledge_read_ref` 精确展开，避免无关上下文挤占推理窗口（详见 [2026-10-29 按需知识检索验收记录](audits/2026-10-29-knowledge-p0.md)）。
 
@@ -77,16 +77,18 @@ MindIE Agent 将可复用的昇腾研发经验组织为带适用条件、代码�
 `GradedRepository.query` 为每条命中生成精确引用（`ref`、`unit_ref`、`feedback_ref`），并通过 `feedback.observe` 记录本次实际返回的 `unit_id` 与 `revision`。调用 `explain`（或 MCP `knowledge_read_ref`）时支持单条或批量 `refs` 精确版本读取，共用完整的 `inherits_from` 依赖闭包与总响应预算（`token_budget`），并支持传入当前会话已完整加载的 `known_refs` 避免重复展开相同前置规则；执行任务后可通过 `feedback.record_vote` 提交 `helpful` / `not_helpful` 反馈，为后续修订提供依据。
 
 为兼顾精确 API 匹配与跨概念召回，检索引擎吸收了 [CANNBot Knowledge](https://gitcode.com/cann/cannbot-knowledge) 与 `vllm-ascend` 生态的**昇腾标识符子词切分（Subword Tokenization）与声明式检索评测**机制：
-- **复合符号与子词双轨索引**：针对 `DataCopyPad`、`PipeBarrier`、`SetFlag`/`WaitFlag`、`GatedDeltaNet`、`Ascend910B4`、`npu_fused_infer_attention_score` 以及 `npugraph_ex`、`torchair`、`msmodelslim`、`dspark`、`dflash`、`xlite`、`eplb`、`hixl`、`lmcache`、`mooncake`、`sfa_v1`、`dsa_v1`、`mla_v1`、`fa3_v1`、`quarot`、`teacache`、`mindiesd`、`vllm_omni`、`rainfusion`、`rf_v2`、`rf_v3`、`ada_bsa`、`eagleqbsa`、`ditcache`、`cache_dit`、`taylorseer`、`code2wav`、`token2wav`、`llm2tts`、`flashgen`、`taehv`、`yuanrong`、`msmemscope`、`msprof`、`msprobe`、`serving_cast`、`tensor_cast` 等复合标识符，在保留完整复合符号精确加权的同时自动拆分 constituent 子词，避免因大小写或复合词形态差异漏检；
+- **复合符号与子词双轨索引**：针对 `DataCopyPad`、`PipeBarrier`、`SetFlag`/`WaitFlag`、`GatedDeltaNet`、`Ascend910B4`、`npu_fused_infer_attention_score` 以及 `npugraph_ex`、`torchair`、`msmodelslim`、`dspark`、`dflash`、`xlite`、`eplb`、`hixl`、`lmcache`、`mooncake`、`sfa_v1`、`dsa_v1`、`mla_v1`、`fa3_v1`、`quarot`、`teacache`、`mindiesd`、`mindie_sd`、`laurel`、`add_rms_norm_bias`、`rope_mindie_sd`、`xllm`、`xllm_ops`、`xllm_service`、`xllm_workflow`、`xtensor`、`phy_page_pool`、`beam_searcher`、`grouped_matmul_finalize_routing`、`index_group_matmul`、`rejection_sampler`、`CopyBlocksVo`、`vllm_omni`、`rainfusion`、`rf_v2`、`rf_v3`、`ada_bsa`、`eagleqbsa`、`ditcache`、`cache_dit`、`taylorseer`、`code2wav`、`token2wav`、`llm2tts`、`flashgen`、`taehv`、`yuanrong`、`msmemscope`、`msprof`、`msprobe`、`serving_cast`、`tensor_cast` 等复合标识符，在保留完整复合符号精确加权的同时自动拆分 constituent 子词，避免因大小写或复合词形态差异漏检；
 - **声明式检索评测套件（`evaluate_retrieval_suite`）**：支持按声明式用例（查询词、环境 `conditions`、`mode="standard"|"explore"`、期望命中 `expected_unit_ids`、禁出条目 `forbidden_unit_ids`）确定性度量 **`Recall@K`**、**`MRR`（平均倒数排名）**、**`_common` 基础约束挂载率（`foundation_baseline_rate`）** 以及探索模式下 `L3` 常规工作流的剥离完备率。
-- **七大领域知识库覆盖规模（450 个结构化分级知识单元）**：
+- **九大领域知识库覆盖规模（491 个结构化分级知识单元）**：
   - `knowledge-vllm-ascend`（`91` 单元）：覆盖 `vllm-ascend` 15 篇架构设计、30 篇特性指南、45+ 官方模型教程、30+ 源码子系统、46 个 0-day 模型分支家族、PD 分离交接与精度验证（`L1–L3`），以及 `vllm-project/vllm-omni` 多阶段全模态流水线（`AsyncOmni` / `Thinker -> Talker -> Code2Wav`、`NPUARModelRunner`、TTS/Audio/Duplex 与 DiT 融合推理）；
-  - `knowledge-infer-core`（`109` 单元）：覆盖 `cann-recipes-infer` 26 个模型家族优化 Recipe、16 个 `model-infer-*` Skill、公共加速模块、`Ascend/msagent` 量化/精度诊断工作流，以及 `Ascend/MindIE-SD`（`mindiesd`）扩散模型稀疏注意力（`RainFusion` / `Ada-BSA` / `EagleQBSA`）、跨步缓存（`DiTCache` / `CustomCache`）、3D 因果 VAE/TAEHV 状态切片解码与动态时步量化契约；
-  - `knowledge-operators`（`105` 单元，含 `15` 个带消融回执的 `L4` Mutator）：覆盖 AscendC / Triton-Ascend / TileLang / PyPTO / Catlass 算子开发、`cann/ops-transformer` 融合算子契约、模型专属自定义算子，以及 `MindIE-SD` 自定义稀疏注意力/Catlass `matmul_add`/Triton 算子与子图融合流水收益分析；
-  - `knowledge-infer-distributed`（`39` 单元）：覆盖 `Mooncake`、`dynamo`、HCCL 多机集合通信、SHMEM 对称内存、PD/EPD 分离传输，以及多机 `DP/TP/EP/PP/DCP/DSA-CP/PCP`、`MindIE-SD` / `vllm-omni` 混合序列并行（Ulysses + Ring + CFG）、FlashAttention + AllToAll 功耗降频治理、动态剪枝 EPLB、$c/f$ 通信掩盖评估与 `YuanrongConnector`；
-  - `knowledge-infer-observability`（`39` 单元）：覆盖 `msmodeling`、`msprof-analyze`、`msmemscope`、`mskpp`、`ops-test-kit`（TTK）、服务级 Profiling，以及 `MindIE-SD` 窗口化交错 A/B/A 性能门禁（`perf-gate`）与三级图像/视频生成精度门禁（`accuracy-gate`）；
-  - `knowledge-infer-ops-compat`（`34` 单元）：覆盖 AutoFuse、GE/TorchAir 图编译、SuperKernel、多流/预取、容器驱动安装、Volcano/MindIE Motor 部署，以及 `MindIE-SD` `torch_npu._inductor` Pattern Pass 开发与“先 API 替换、后入图编译”两阶段集成规程；
-  - `knowledge-agent-engineering`（`33` 单元）：覆盖多智能体模型调优编排、SOTA 探索循环、`ais_bench` 核心集压缩、Git Bisect 自动修 Bug、安全审计，以及 `MindIE-SD` S0–S6 扩散模型端到端自动优化闭环与知识库自检（`kb-lint`）。
+  - `knowledge-xllm`（`24` 单元）：覆盖 `xLLM-AI/xllm`、`xLLM-AI/xllm-ops`、`xLLM-AI/xllm-service` 与 `xLLM-AI/xllm-workflow` 全栈昇腾工程知识库——包含 C++ 原生 `ModelRegistry`（LLM/VLM/DiT/Rec）注册契约、`xTensor` VMM 2 MB 物理页池（`PhyPagePool` + `aclrtReserveMemAddress`）与权重热切换、ACLGraph 分段图捕获与 SuperKernel 融合、MTP/Eagle-3/Suffix 投机解码、`xllm-ops` 45+ AscendC 自定义算子与 A5 (`Ascend950` / `soc_version=260`) TileLang AOT 算子编译、`xllm-service` Brpc/etcd/Mooncake PD 分离路由与 `OneRec` 生成式推荐流水线；
+  - `knowledge-mindie-sd`（`24` 单元）：覆盖 `Ascend/MindIE-SD`（`mindiesd`）多模态扩散生成加速框架——包含 `AttentionConfig`/`Register` 算子派发契约、块稀疏注意力（`RainFusion` V1–V3 / `Ada-BSA` / `EagleQBSA` / `Burnish`）、跨步激活缓存（`DiTCache` / `Cache-DiT` / `TaylorSeer` / `CustomCache`）、时步感知动态量化（W8A8 / W4A4 / FP8 / MXFP4 + `Laurel` 低秩补偿）、Ulysses/Ring/CFG/TP 混合分布式并行、3D 因果 VAE/TAEHV 状态切片解码、`torch_npu._inductor` 图模式及 S0–S6 自动调优与 `perf-gate` / `accuracy-gate` 评测门禁；
+  - `knowledge-infer-core`（`105` 单元）：覆盖 `cann-recipes-infer` 26 个模型家族优化 Recipe、16 个 `model-infer-*` Skill、公共加速模块与 `Ascend/msagent` 量化/精度诊断工作流；
+  - `knowledge-operators`（`103` 单元，含 `15` 个带消融回执的 `L4` Mutator）：覆盖 AscendC / Triton-Ascend / TileLang / PyPTO / Catlass 算子开发、`cann/ops-transformer` 融合算子契约与模型专属自定义算子；
+  - `knowledge-infer-distributed`（`39` 单元）：覆盖 `Mooncake`、`dynamo`、HCCL 多机集合通信、SHMEM 对称内存、PD/EPD 分离传输，以及多机 `DP/TP/EP/PP/DCP/DSA-CP/PCP`、`MindIE-SD` / `vllm-omni` 混合序列并行（Ulysses + Ring + CFG）、FlashAttention + AllToAll 功耗降频治理、动态剪枝 EPLB、$c/f$ 通信掩盖评估与 `YuanrongConnector`;
+  - `knowledge-infer-observability`（`39` 单元）：覆盖 `msmodeling`、`msprof-analyze`、`msmemscope`、`mskpp`、`ops-test-kit`（TTK）、服务级 Profiling，以及窗口化交错 A/B/A 性能门禁（`perf-gate`）与三级图像/视频生成精度门禁（`accuracy-gate`）；
+  - `knowledge-infer-ops-compat`（`34` 单元）：覆盖 AutoFuse、GE/TorchAir 图编译、SuperKernel、多流/预取、容器驱动安装、Volcano/MindIE Motor 部署与 CUDA 至昇腾算子迁移兼容规程；
+  - `knowledge-agent-engineering`（`32` 单元）：覆盖多智能体模型调优编排、SOTA 探索循环、`ais_bench` 核心集压缩、Git Bisect 自动修 Bug、安全审计与知识库自检（`kb-lint`）。
 
 ## 4. 经验提炼与跨任务复用闭环
 

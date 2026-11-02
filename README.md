@@ -167,7 +167,7 @@
 
 ## ✨ 为什么选择 MindIE Agent？
 
-MindIE Agent 在你已有的 Claude Code、Codex、Kimi Code、DSH 或 Google Antigravity 会话中提供领域知识和远端开发工具，覆盖 `vLLM-Ascend` / `vLLM-Omni`、`MindIE-SD`、昇腾算子与分布式推理等核心领域，支撑模型 0day 开发、固定 case 的模型或算子性能优化、问题定位三个核心场景。实现与验收进展见[系统架构](./docs/architecture.md)和下方发布记录。
+MindIE Agent 在你已有的 Claude Code、Codex、Kimi Code、DSH 或 Google Antigravity 会话中提供领域知识和远端开发工具，覆盖 `vLLM-Ascend` / `vLLM-Omni`、`xLLM`（`xllm` / `xllm-ops` / `xllm-service` / `xllm-workflow`）、`MindIE-SD`、昇腾算子与分布式推理等核心领域，支撑模型 0day 开发、固定 case 的模型或算子性能优化、问题定位三个核心场景。实现与验收进展见[系统架构](./docs/architecture.md)和下方发布记录。
 
 | 能力 | 帮你完成的工作 |
 | --- | --- |
@@ -216,7 +216,7 @@ flowchart TB
   end
 
   subgraph Remote["🖥️ 远端昇腾集群与知识源 (Ascend Fleet & Canonical Feeds)"]
-    Feed[("📚 7 大昇腾领域知识库<br/>(vLLM-Ascend · Operators · Infer · Agent Eng)")]
+    Feed[("📚 9 大昇腾领域知识库<br/>(vLLM-Ascend · xLLM · MindIE-SD · Operators · Infer · Agent Eng)")]
     Cluster[("🚀 远端昇腾 NPU 主机与 Docker 容器")]
   end
 
@@ -324,7 +324,7 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | [`v0.11.2`](https://github.com/mindie-agent/remote-dev/releases/tag/v0.11.2) | SSH 远端文件读写与命令执行、共享用户私有 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁、Docker 容器直连、后台长作业管理、连接复用与产物同步 |
 | **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | [`v0.7.1`](https://github.com/mindie-agent/coordinator/releases/tag/v0.7.1) | 远端昇腾环境与多 Agent 资源协调器：SSH 主机/多机互通配置、容器开通与绑定、NPU 拓扑探测（兼容 A2/A3 双 Die/A5）、HCCL/RoCE 预检、单 Die 显存租约预算与并发编译槽位控制及端口防冲突 |
 | **[`profiler`](https://github.com/mindie-agent/profiler)** | `mindie-profiler` / `mindie_profiler` | [`v0.5.5`](https://github.com/mindie-agent/profiler/releases/tag/v0.5.5) | 昇腾 Profiling 采集与解析组件：受控采集、`msprof` 产物就地只读分析（`inventory / analyze / correlate / compare / sql / camodel / kernels`）、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）与 Decode/Prefill 自动切分、显存拆解及跨版本对比 CLI |
-| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | [`v0.9.0`](https://github.com/mindie-agent/sim/releases/tag/v0.9.0) | 硬件无关的五层因果性能建模组件：统一组合硬件资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持确定性 Case 合成（`compose`）、`async_scheduling` 显存延迟释放、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、SLA/PD Pareto 求解（`sla / sweep`）、多 DP 偏斜屏障力学（`skew`）及 Wave 5 跨 A2/A3/A5 1,653 份实测 Profile 100% <=10% 样本内校准与独立 856 例 DSH 集群评测（整体 841/856=98.25%，其中 561 例 Held-out 盲测 546/561=97.33% <=15%） |
+| **[`sim`](https://github.com/mindie-agent/sim)** | `mindie-sim` / `mindie_sim` | [`v0.9.1`](https://github.com/mindie-agent/sim/releases/tag/v0.9.1) | 硬件无关的五层因果性能建模组件：统一组合硬件资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持确定性 Case 合成（`compose`）、`async_scheduling` 显存延迟释放、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、SLA/PD Pareto 求解（`sla / sweep`）、多 DP 偏斜屏障力学（`skew`）及 Wave 5 跨 A2/A3/A5 1,653 份实测 Profile 100% <=10% 样本内校准与独立 856 例 DSH 集群评测（整体 841/856=98.25%，其中 561 例 Held-out 盲测 546/561=97.33% <=15%） |
 | **[`npu-top`](https://github.com/mindie-agent/npu-top)** | `npu-top` | [`v0.3.0`](https://github.com/mindie-agent/npu-top/releases/tag/v0.3.0) | 昇腾 NPU 可视化监控看板：支持 A2 / A3 / A5 集群监控、共享读取 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环 Web 实时状态页（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天 SQLite 利用率热力图 |
 | **[`diagnostics`](https://github.com/mindie-agent/diagnostics)** | `mindie-diagnostics` / `mindie_diagnostics` | [`v0.5.4`](https://github.com/mindie-agent/diagnostics/releases/tag/v0.5.4) | 故障诊断与日志组件：支持 CANN 错误码与 `plog` 根因分析、4×1 MiB 本地轮转日志、离线脱敏诊断包与带 2 次有界外发对账重试的可选 GitHub Issue 白名单上报 |
 
@@ -334,13 +334,15 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 
 | 仓库 | 领域标识 (`domain`) | 知识规模与基线提交 | 定位与覆盖范围 |
 | --- | --- | --- | --- |
-| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | `vllm-ascend` | 91 单元 · [`1c7bcad6`](https://github.com/mindie-agent/knowledge-vllm-ascend/tree/1c7bcad61f1156389dcf714468acd74c34754268) | `vLLM-Ascend` 与 `vLLM-Omni` 领域工程知识库：覆盖新模型 0day 接入、PD 分离、MoE EP/MC2、量化与投机解码、ACLGraph/TorchAir，以及 `vllm-omni` 多阶段全模态（`Thinker -> Talker -> Code2Wav` / AR+DiT / TTS / Duplex）流水线调优 |
-| **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | `operators` | 105 单元 · [`0ac89226`](https://github.com/mindie-agent/knowledge-operators/tree/0ac89226d6a06be24bc503bc38195599e8f831b6) | 昇腾算子工程知识库：覆盖 910B / 910C (A3) / 950 (A5) 硬件约束、`AscendC`、`Triton-Ascend`、Catlass、FlashAttention/MLA、Matmul/MoE 融合，以及 `MindIE-SD` 稀疏注意力自定义算子与子图融合流水分析 |
-| **[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)** | `infer-core` | 109 单元 · [`8f759165`](https://github.com/mindie-agent/knowledge-infer-core/tree/8f759165044aae5cf6eaa9762ebadfb732a672e4) | 昇腾推理服务与引擎核心知识库：覆盖 `cann-recipes-infer` 模型优化 Recipe、`Ascend/MindIE-SD`（`mindiesd`）扩散模型稀疏注意力（`RainFusion`/`Ada-BSA`/`EagleQBSA`）、跨步缓存（`DiTCache`）、3D VAE 状态切片解码与动态时步量化契约 |
+| **[`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)** | `vllm-ascend` | 91 单元 · [`bfaf97b9`](https://github.com/mindie-agent/knowledge-vllm-ascend/tree/bfaf97b9c2b47a820cfd9ef4e40908da6df68bff) | `vLLM-Ascend` 与 `vLLM-Omni` 领域工程知识库：覆盖新模型 0day 接入、PD 分离、MoE EP/MC2、量化与投机解码、ACLGraph/TorchAir，以及 `vllm-omni` 多阶段全模态（`Thinker -> Talker -> Code2Wav` / AR+DiT / TTS / Duplex）流水线调优 |
+| **[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)** | `xllm` | 24 单元 · [`23b7b063`](https://github.com/mindie-agent/knowledge-xllm/tree/23b7b0636cfb050ee88e339ecd69aea6f95cae30) | `xLLM` 全栈（`xllm` / `xllm-ops` / `xllm-service` / `xllm-workflow`）昇腾工程知识库：覆盖 C++ 原生 `ModelRegistry`、`xTensor` VMM 2 MB 物理页池与权重热切换、Piecewise ACLGraph、MTP/Eagle-3/Suffix 投机解码、48 个 AscendC 算子与 A5 (`dav-c310`) TileLang AOT 编译、Brpc/etcd/Mooncake PD 分离路由与 `OneRec` 生成式推荐流水线 |
+| **[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)** | `mindie-sd` | 24 单元 · [`ec86c59c`](https://github.com/mindie-agent/knowledge-mindie-sd/tree/ec86c59c8ceac40d82220b80f3d787704bc3caf4) | `Ascend/MindIE-SD`（`mindiesd`）多模态扩散生成框架知识库：覆盖 `AttentionConfig`/`Register` 派发、块稀疏注意力（`RainFusion` V1–V3 / `Ada-BSA` / `EagleQBSA`）、跨步缓存（`DiTCache` / `Cache-DiT` / `TaylorSeer`）、时步感知动态量化 + `Laurel`、Ulysses/Ring/CFG 混合并行、3D 因果 VAE 状态切片解码、`torch_npu._inductor` 图编译及 S0–S6 自动调优门禁 |
+| **[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)** | `operators` | 103 单元 · [`0ac89226`](https://github.com/mindie-agent/knowledge-operators/tree/0ac89226d6a06be24bc503bc38195599e8f831b6) | 昇腾算子工程知识库：覆盖 910B / 910C (A3) / 950 (A5) 硬件约束、`AscendC`、`Triton-Ascend`、TileLang、PyPTO、Catlass、FlashAttention/MLA 与 Matmul/MoE 融合算子 |
+| **[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)** | `infer-core` | 105 单元 · [`8f759165`](https://github.com/mindie-agent/knowledge-infer-core/tree/8f759165044aae5cf6eaa9762ebadfb732a672e4) | 昇腾推理服务与引擎核心知识库：覆盖 `cann-recipes-infer` 26 个模型家族优化 Recipe、16 个 `model-infer-*` Skill、公共加速模块与 `Ascend/msagent` 量化/精度诊断工作流 |
 | **[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)** | `infer-distributed` | 39 单元 · [`817d48cb`](https://github.com/mindie-agent/knowledge-infer-distributed/tree/817d48cbf5dae80d607292d486cc07b30c405aa6) | 分布式推理与集合通信知识库：覆盖 HCCL 通信排障、RoCE/HCCS 拓扑、SHMEM、Mooncake/Yuanrong 传输，以及多机 `DP/TP/EP/PP/DCP/DSA-CP/PCP` 与 DiT Ulysses/Ring/CFG 混合并行及功耗降频治理 |
 | **[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)** | `infer-observability` | 39 单元 · [`4b3dd86b`](https://github.com/mindie-agent/knowledge-infer-observability/tree/4b3dd86b365c9e588a1eb47df7dcc6437fdf8a89) | 推理可观测性、诊断与评测知识库：覆盖 CANN/`plog`/Device 报错定位、`msprof` 性能拆解、容量/性能仿真，以及窗口化交错 A/B/A 性能门禁（`perf-gate`）与三级图像/视频生成精度门禁（`accuracy-gate`） |
 | **[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)** | `infer-ops-compat` | 34 单元 · [`c37c9c0f`](https://github.com/mindie-agent/knowledge-infer-ops-compat/tree/c37c9c0f559a27c63948aabc1f5b092de54b8c78) | 图编译、算子注册与迁移兼容知识库：覆盖 TorchAir/ACLGraph 图捕获、`torch_npu._inductor` Pattern Pass 开发、两阶段（API 优先→图编译）框架集成、CUDA 至昇腾迁移与容器/集群部署 |
-| **[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering)** | `agent-engineering` | 33 单元 · [`06f41835`](https://github.com/mindie-agent/knowledge-agent-engineering/tree/06f418353d9028aecb3a11fb65ef1b284792c396) | Agent 工程与治理知识库：覆盖多 Agent 协同编排、`MindIE-SD` S0–S6 自动调优闭环、知识库质量门禁（`kb-lint`）、双层隐私脱敏与真机基准评测方法 |
+| **[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering)** | `agent-engineering` | 32 单元 · [`06f41835`](https://github.com/mindie-agent/knowledge-agent-engineering/tree/06f418353d9028aecb3a11fb65ef1b284792c396) | Agent 工程与治理知识库：覆盖多 Agent 协同编排、SOTA 探索循环、`ais_bench` 核心集压缩、Git Bisect 自动修 Bug、知识库质量门禁（`kb-lint`）、双层隐私脱敏与真机基准评测方法 |
 <!-- mindie-org-versions:main-ecosystem-zh:end -->
 
 ---
