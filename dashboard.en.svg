@@ -86,7 +86,7 @@
   <circle cx="40" cy="369" r="3.5" fill="#7045F5"/>
   <text x="50" y="373" class="mono td-repo">mindie-agent</text>
   <text x="268" y="373" class="font td-cat">Main Entry</text>
-  <text x="368" y="373" class="mono td-sub">v0.1.6</text>
+  <text x="368" y="373" class="mono td-sub">v0.1.7</text>
   <text x="545" y="373" text-anchor="end" class="mono td-num">67 / 54</text>
   <text x="665" y="373" text-anchor="end" class="mono td-bold">2,203</text>
   <text x="815" y="373" text-anchor="end" class="mono td-num">1,431 (461)</text>

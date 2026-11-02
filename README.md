@@ -8,7 +8,7 @@
 
 | 类型 | 仓库 | 最新版本 | Stars | Forks | 累计 Clone | 近 14 天 Clone (独立) | 近 14 天浏览 (独立) | Release 下载 (含附件) |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 产品入口 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | `v0.1.6` | 67 | 54 | **2,203** | 1,431 (461) | 444 (147) | 35 (133) |
+| 产品入口 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | `v0.1.7` | 67 | 54 | **2,203** | 1,431 (461) | 444 (147) | 35 (133) |
 | 技能目录 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) | `commit@46bc588d` | 4 | 8 | **228** | 141 (70) | 254 (36) | 0 (0) |
 | 客户端插件 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) | `v0.1.17` | 0 | 2 | **4,407** | 3,219 (461) | 16 (13) | 856 (1,023) |
 | 客户端插件 | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) | `v0.1.13` | 0 | 0 | **2,627** | 1,974 (314) | 5 (3) | 189 (334) |
