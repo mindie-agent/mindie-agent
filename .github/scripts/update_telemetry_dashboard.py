@@ -48,7 +48,7 @@ CORE_REPOS: list[tuple[str, str, str, str]] = [
     ("mindie-agent-kimi", "客户端插件", "Client Plugin", "#2563EB"),
     ("mindie-agent-dsh", "客户端插件", "Client Plugin", "#0EA5E9"),
     ("mindie-agent-agy", "客户端插件", "Client Plugin", "#4285F4"),
-    ("mindie-agent-wb", "客户端插件", "Client Plugin", "#00A4FF"),
+    ("mindie-agent-wb", "客户端插件", "Client Plugin", "#0EC8A9"),
     ("knowledge", "运行时组件", "Core Runtime", "#475569"),
     ("remote-dev", "运行时组件", "Core Runtime", "#475569"),
     ("coordinator", "运行时组件", "Core Runtime", "#475569"),
@@ -75,7 +75,7 @@ PLUGIN_REPOS: list[tuple[str, str, str]] = [
     ("mindie-agent-kimi", "Kimi Code", "#2563EB"),
     ("mindie-agent-dsh", "DeepSeek Harness", "#0EA5E9"),
     ("mindie-agent-agy", "Google Antigravity", "#4285F4"),
-    ("mindie-agent-wb", "Tencent WorkBuddy", "#00A4FF"),
+    ("mindie-agent-wb", "Tencent WorkBuddy", "#0EC8A9"),
 ]
 
 
