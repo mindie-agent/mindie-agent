@@ -249,8 +249,8 @@
         "views_14d": 444,
         "views_14d_uniques": 147,
         "cumulative_views": 673,
-        "pkg_downloads": 35,
-        "all_asset_downloads": 133,
+        "pkg_downloads": 36,
+        "all_asset_downloads": 140,
         "latest_release": "v0.1.7"
       }
     },
@@ -5195,5 +5195,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-03 00:25"
+  "updated_at_cst": "2026-11-03 00:52"
 }

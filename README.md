@@ -1,6 +1,6 @@
 # 📊 MindIE Agent 开源仓库与下载统计
 
-> **最近更新**：`2026-11-03 00:25 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
+> **最近更新**：`2026-11-03 00:52 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
 
 ![MindIE Agent Repository & Download Statistics](./dashboard.zh.svg)
 
@@ -8,7 +8,7 @@
 
 | 类型 | 仓库 | 最新版本 | Stars | Forks | 累计 Clone | 近 14 天 Clone (独立) | 近 14 天浏览 (独立) | Release 下载 (含附件) |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 产品入口 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | `v0.1.7` | 67 | 54 | **2,203** | 1,431 (461) | 444 (147) | 35 (133) |
+| 产品入口 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | `v0.1.7` | 67 | 54 | **2,203** | 1,431 (461) | 444 (147) | 36 (140) |
 | 技能目录 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) | `commit@46bc588d` | 4 | 8 | **228** | 141 (70) | 254 (36) | 0 (0) |
 | 客户端插件 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) | `v0.1.17` | 0 | 2 | **4,407** | 3,219 (461) | 16 (13) | 856 (1,023) |
 | 客户端插件 | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) | `v0.1.13` | 0 | 0 | **2,627** | 1,974 (314) | 5 (3) | 189 (334) |
@@ -34,7 +34,7 @@
 | 领域知识库 | [`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability) | `commit@4b3dd86b` | 0 | 0 | **191** | 191 (95) | 2 (2) | 0 (0) |
 | 领域知识库 | [`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat) | `commit@c37c9c0f` | 0 | 0 | **155** | 155 (72) | 3 (3) | 0 (0) |
 | 领域知识库 | [`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | `commit@3cf3f10c` | 0 | 0 | **166** | 166 (81) | 1 (1) | 0 (0) |
-| **合计** | **26 个公开仓库** | — | **74** | **80** | **48,311** | **34,200** | — | **5,224** (8,149) |
+| **合计** | **26 个公开仓库** | — | **74** | **80** | **48,311** | **34,200** | — | **5,225** (8,156) |
 
 ## 数据文件
 
