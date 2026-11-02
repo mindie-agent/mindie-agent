@@ -18,12 +18,12 @@
   "corpora": {
     "knowledge-infer-core": {
       "repository": "mindie-agent/knowledge-infer-core",
-      "commit": "8f759165044aae5cf6eaa9762ebadfb732a672e4",
+      "commit": "f0d8e7cf3edf41399395f41fd5a42e7b37847264",
       "units": 105
     },
     "knowledge-operators": {
       "repository": "mindie-agent/knowledge-operators",
-      "commit": "0ac89226d6a06be24bc503bc38195599e8f831b6",
+      "commit": "bf8150d4d754fc360e00dfdb9f62f8967b2dcfff",
       "units": 103
     },
     "knowledge-vllm-ascend": {
@@ -38,7 +38,7 @@
     },
     "knowledge-mindie-sd": {
       "repository": "mindie-agent/knowledge-mindie-sd",
-      "commit": "ec86c59c8ceac40d82220b80f3d787704bc3caf4",
+      "commit": "c23ba64ab6c210da5ff34d1f5cdb27eb8e81154e",
       "units": 24
     },
     "knowledge-infer-distributed": {
@@ -58,7 +58,7 @@
     },
     "knowledge-agent-engineering": {
       "repository": "mindie-agent/knowledge-agent-engineering",
-      "commit": "06f418353d9028aecb3a11fb65ef1b284792c396",
+      "commit": "3cf3f10c2c35b801d06b7f410ce2d105e1f31ff1",
       "units": 32
     }
   },

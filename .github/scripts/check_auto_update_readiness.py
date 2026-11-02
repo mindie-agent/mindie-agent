@@ -474,13 +474,60 @@ def verify_components_and_plugins(
     return errors
 
 
+def _matches_dsh_peer(requirement: str, version: str) -> bool:
+    """Evaluate exact or comparator-range DSH peerDependencies with includePrerelease semantics."""
+    from semantic_version import Version
+
+    if not isinstance(requirement, str) or not requirement.strip():
+        return False
+    try:
+        actual = Version(version.strip())
+    except ValueError:
+        return False
+    for token in requirement.strip().split():
+        for op, fn in (
+            (">=", lambda a, b: a >= b),
+            ("<=", lambda a, b: a <= b),
+            (">", lambda a, b: a > b),
+            ("<", lambda a, b: a < b),
+            ("=", lambda a, b: a == b),
+        ):
+            if token.startswith(op):
+                target_str = token[len(op) :]
+                break
+        else:
+            op, fn, target_str = "=", (lambda a, b: a == b), token
+        try:
+            target = Version(target_str)
+        except ValueError:
+            return False
+        if (
+            op == "<"
+            and not target.prerelease
+            and (actual.major, actual.minor, actual.patch) == (target.major, target.minor, target.patch)
+        ):
+            return False
+        if not fn(actual, target):
+            return False
+    return True
+
+
+FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
+    "codex": ("0.166.0", "0.166.1", "0.167.0-alpha.1", "0.199.0"),
+    "claude-code": ("2.1.299", "2.1.300", "2.2.0-rc.1", "2.99.0"),
+    "kimi-code": ("2.3.1", "2.3.2", "2.4.0-rc.1", "2.99.0"),
+    "antigravity": ("2.0.0", "2.1.0", "2.99.0-rc.1"),
+}
+
+
 def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[str]:
     """Verify that the latest shared component code is API-compatible with all 5 host plugins."""
     errors: list[str] = []
     if not _ensure_knowledge_importable(siblings_roots):
         return errors
+    from semantic_version import Version
     from mindie_knowledge.component_bindings import COMPONENT_MODULES
-    from mindie_knowledge.releases import REPOSITORIES, validate_compatibility
+    from mindie_knowledge.releases import REPOSITORIES, supports_harness, validate_compatibility
     from mindie_knowledge.runtime_inventory import COMPONENTS
 
     expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity"}
@@ -518,12 +565,45 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
             errors.append(f"{plugin_name}: missing {compat_path.name}")
             continue
         compat_data = json.loads(compat_path.read_text(encoding="utf-8"))
-        # DSH uses a custom compatibility schema; the other 4 use mindie-harness-compatibility/1 intervals
+        if harness_key == "dsh":
+            pkg_json = json.loads((plugin_dir / "package.json").read_text(encoding="utf-8"))
+            peer_req = ((pkg_json.get("peerDependencies") or {}).get("@deepseek-ai/dsh") or "").strip()
+            if not peer_req or (" " not in peer_req and not peer_req.startswith((">=", "^", "~"))):
+                errors.append(
+                    f"mindie-agent-dsh: package.json peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
+                    "is point-locked; must declare a forward-compatible SemVer range"
+                )
+            for ver in ("0.2.0-rc.2", "0.2.1-rc.2", "0.2.2-alpha.2", "0.99.99"):
+                if not _matches_dsh_peer(peer_req, ver):
+                    errors.append(
+                        f"mindie-agent-dsh: peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
+                        f"rejects forward DSH version {ver}"
+                    )
+            supported_list = compat_data.get("supported") or []
+            if not supported_list or all(item.get("minimum") == item.get("maximum") for item in supported_list):
+                errors.append(
+                    "mindie-agent-dsh: harness-compatibility.json missing forward-compatible 'supported' range"
+                )
+            continue
+
         if "supported" in compat_data and "interface_registry" in compat_data:
             try:
                 validate_compatibility(compat_data, harness_name=harness_key)
             except Exception as exc:
                 errors.append(f"{plugin_name}: validate_compatibility failed under latest mindie-knowledge: {exc}")
+                continue
+            supported_list = compat_data.get("supported") or []
+            highest = max(supported_list, key=lambda item: Version(item["maximum"]))
+            if highest["minimum"] == highest["maximum"] or not highest.get("include_prerelease"):
+                errors.append(
+                    f"{plugin_name}: highest supported interval {highest} is point-locked or excludes prereleases; "
+                    "must declare a forward-compatible range with include_prerelease=true"
+                )
+            for probe_ver in FORWARD_HOST_PROBES.get(harness_key, ()):
+                if not supports_harness(compat_data, harness_name=harness_key, harness_version=probe_ver):
+                    errors.append(
+                        f"{plugin_name}: harness-compatibility.json rejects synthetic forward host version {probe_ver}"
+                    )
 
     return errors
 
@@ -585,6 +665,19 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
         ver = _extract_semver(res.stdout + "\n" + res.stderr)
         if ver and not supports_harness(compat, harness_name="kimi-code", harness_version=ver):
             errors.append(f"mindie-agent-kimi: harness-compatibility.json does not support installed kimi {ver}")
+
+    dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
+    which_dsh = shutil.which("dsh")
+    if dsh_dir is not None and which_dsh:
+        pkg_json = json.loads((dsh_dir / "package.json").read_text(encoding="utf-8"))
+        peer_req = ((pkg_json.get("peerDependencies") or {}).get("@deepseek-ai/dsh") or "").strip()
+        res = _run_cmd([which_dsh, "--version"])
+        ver = _extract_semver(res.stdout + "\n" + res.stderr)
+        if ver and not _matches_dsh_peer(peer_req, ver):
+            errors.append(
+                f"mindie-agent-dsh: package.json peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
+                f"does not support installed dsh {ver}"
+            )
 
     return errors
 
