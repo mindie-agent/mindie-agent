@@ -48,6 +48,7 @@ CORE_REPOS: list[tuple[str, str, str, str]] = [
     ("mindie-agent-kimi", "客户端插件", "Client Plugin", "#2563EB"),
     ("mindie-agent-dsh", "客户端插件", "Client Plugin", "#0EA5E9"),
     ("mindie-agent-agy", "客户端插件", "Client Plugin", "#4285F4"),
+    ("mindie-agent-wb", "客户端插件", "Client Plugin", "#00A4FF"),
     ("knowledge", "运行时组件", "Core Runtime", "#475569"),
     ("remote-dev", "运行时组件", "Core Runtime", "#475569"),
     ("coordinator", "运行时组件", "Core Runtime", "#475569"),
@@ -55,8 +56,11 @@ CORE_REPOS: list[tuple[str, str, str, str]] = [
     ("sim", "运行时组件", "Core Runtime", "#475569"),
     ("npu-top", "NPU 监控", "Observability", "#D97706"),
     ("diagnostics", "运行时组件", "Core Runtime", "#475569"),
+    ("debugger", "运行时组件", "Core Runtime", "#475569"),
     ("mindie-bench", "评测工具", "Benchmark", "#64748B"),
     ("knowledge-vllm-ascend", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-xllm", "领域知识库", "Knowledge Repo", "#0D9488"),
+    ("knowledge-mindie-sd", "领域知识库", "Knowledge Repo", "#0D9488"),
     ("knowledge-operators", "领域知识库", "Knowledge Repo", "#0D9488"),
     ("knowledge-infer-core", "领域知识库", "Knowledge Repo", "#0D9488"),
     ("knowledge-infer-distributed", "领域知识库", "Knowledge Repo", "#0D9488"),
@@ -71,6 +75,7 @@ PLUGIN_REPOS: list[tuple[str, str, str]] = [
     ("mindie-agent-kimi", "Kimi Code", "#2563EB"),
     ("mindie-agent-dsh", "DeepSeek Harness", "#0EA5E9"),
     ("mindie-agent-agy", "Google Antigravity", "#4285F4"),
+    ("mindie-agent-wb", "Tencent WorkBuddy", "#00A4FF"),
 ]
 
 

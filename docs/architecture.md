@@ -2,7 +2,7 @@
 
 [English](architecture.en.md) · [返回文档中心](README.md)
 
-MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity）提供昇腾领域知识检索、远端容器开发、多卡资源协调与性能剖析能力。当前版本围绕 **vLLM-Ascend 框架开发与昇腾算子开发**两个核心领域，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查**三类日常研发场景。
+MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy）提供昇腾领域知识检索、远端容器开发、多卡资源协调、目标负载调试与性能剖析能力。当前版本覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 框架开发与昇腾算子开发**，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查与精度调试**三类日常研发场景。
 
 本文介绍各组件的职责边界与协同方式。正式发布版本与实测数据见[版本发布记录](README.md)，知识组织与检索机制见[知识与经验系统](knowledge-system.md)，宿主会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，工程准则见[设计原则](design-principles.md)。
 
@@ -10,13 +10,14 @@ MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Co
 
 ```mermaid
 flowchart TB
-    H["Codex / Claude Code / Kimi Code / DSH / Antigravity"] --> P["各自的轻量原生插件"]
+    H["Codex / Claude Code / Kimi Code / DSH / Antigravity / WorkBuddy"] --> P["各自的轻量原生插件"]
     P --> K["knowledge：领域路由、条件检索与经验沉淀"]
     P --> R["remote-dev：远端文件编辑、命令与后台作业"]
-    P --> D["diagnostics：本地故障日志与可选 Issue 上报"]
+    P --> D["diagnostics：Agent 自身本地故障日志与可选 Issue 上报"]
+    P --> DB["debugger：目标 NPU 负载故障分诊、三原语精度定位与 ACLGraph 调试"]
     P --> PR["profiler：昇腾 Profiling 采集、解析与跨轮次对比"]
     P --> S["sim：通用资源、算子族、图与服务约束建模"]
-    K <--> F["vLLM-Ascend / operators 等领域知识库"]
+    K <--> F["vLLM-Ascend / xLLM / MindIE-SD / operators 等 9 大领域知识库"]
     T["按需安装的 TaskClient / coordinator"] --> Q["机器台账、容器绑定、NPU 与端口租约"]
     Q --> R
     R --> N["远端昇腾主机与 Docker 容器"]
@@ -25,21 +26,21 @@ flowchart TB
     B --> H
 ```
 
-五个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
+六个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
 - **领域知识按需激活**：输入 `/mindie-agent`（在 Codex 中也可使用 `$mindie-agent`）即可按当前任务加载昇腾领域知识与工作流引导。
-- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模与 `diagnostics` 本地诊断通过 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在五端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在 Antigravity 等宿主中支持只读观测调用）。
+- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试，以及 `diagnostics` 本地诊断通过 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在六端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
 - **经验沉淀按授权运行**：仅当当前会话显式调用 `/mindie-agent` 且满足用户保存的本地授权与项目范围时，宿主生命周期事件才会触发脱敏会话采集与经验提炼。
 
-默认插件依赖 `knowledge`、`remote-dev` 和 `diagnostics`；`coordinator`、`profiler`、`sim` 与 `npu-top` 可按团队环境独立安装或组合使用。
+默认插件依赖 `knowledge`、`remote-dev`、`diagnostics` 与 `debugger`；`coordinator`、`profiler`、`sim` 与 `npu-top` 可按团队环境独立安装或组合使用。
 
 ## 2. 仓库职责划分
 
 | 仓库 | 负责内容 |
 | --- | --- |
 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品架构、领域边界、入口文档、跨仓规范与发布记录；不包含运行时代码或 MCP 服务 |
-| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
+| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)、[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
 | [`knowledge`](https://github.com/mindie-agent/knowledge) | 知识检索引擎：适用条件匹配、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、脱敏任务切片、经验提炼校验与社区 PR 投递 |
-| [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 7 大结构化分级知识库（`L1–L4`） |
+| [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、`xLLM`、`MindIE-SD`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 9 大结构化分级知识库（`L1–L4`） |
 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
 | [`coordinator`](https://github.com/mindie-agent/coordinator) | 远端昇腾环境与多卡租约管家：机器与容器台账、NPU 拓扑探测（含 A2/A3 双 Die/A5 映射）、HCCL/RoCE 预检、单 Die 显存租约预算与并发编译槽位控制、NPU 卡与端口防冲突租约、受管任务清理 |
 | [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向开发者的 NPU 集群监控看板：支持 A2/A3/A5 集群监控、共享读取 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环实时 Web 界面（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天利用率历史 |

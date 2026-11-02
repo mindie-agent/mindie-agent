@@ -2,8 +2,8 @@
 """Pre-release and CI gate for both lockstep and flexible component updates.
 
 [Role]
-Verifies that `channels/0.1.json`, all 9 `knowledge-*` domain corpora, all 7 shared
-runtime components, and all 5 native host plugins satisfy zero-intervention update
+Verifies that `channels/0.1.json`, all 9 `knowledge-*` domain corpora, all 8 shared
+runtime components, and all 6 native host plugins satisfy zero-intervention update
 invariants for both flexible independent component/corpus releases (`max(installed,
 plugin_baseline, latest_component_release)`) and lockstep plugin releases.
 
@@ -14,7 +14,7 @@ plugin_baseline, latest_component_release)`) and lockstep plugin releases.
 - Flexible Component Floor: Each plugin's pinned component commits must resolve to
   formal release tags in each component repo with `plugin_baseline <= channel_component`.
 - Cross-Version Compatibility Probe: Shared component sources must pass model-free
-  compatibility checks against all 5 host plugin adapters.
+  compatibility checks against all 6 host plugin adapters.
 
 [Timeouts & Locks]
 - Subprocess probes (`git`, host `--version`, sync checks) enforce a strict `15s` timeout.
@@ -49,6 +49,7 @@ EXPECTED_CORPORA = (
 )
 EXPECTED_SHARED_COMPONENTS = (
     "diagnostics",
+    "debugger",
     "profiler",
     "sim",
     "npu-top",
@@ -62,12 +63,18 @@ EXPECTED_PLUGINS = (
     "mindie-agent-kimi",
     "mindie-agent-dsh",
     "mindie-agent-agy",
+    "mindie-agent-wb",
 )
 
 
 def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 15.0) -> subprocess.CompletedProcess[str]:
+    resolved_argv = list(argv)
+    if resolved_argv:
+        resolved_bin = shutil.which(resolved_argv[0])
+        if resolved_bin:
+            resolved_argv[0] = resolved_bin
     return subprocess.run(
-        argv,
+        resolved_argv,
         cwd=str(cwd) if cwd else None,
         capture_output=True,
         text=True,
@@ -95,8 +102,13 @@ def _ensure_knowledge_importable(siblings_roots: list[Path]) -> bool:
     if knowledge_repo is not None:
         if str(knowledge_repo) not in sys.path:
             sys.path.insert(0, str(knowledge_repo))
-        for sp in sorted((knowledge_repo / ".venv/lib").glob("python*/site-packages")):
-            if str(sp) not in sys.path:
+        site_package_candidates = [
+            *sorted((knowledge_repo / ".venv/lib").glob("python*/site-packages")),
+            *sorted((knowledge_repo / ".venv/Lib").glob("site-packages")),
+            knowledge_repo / ".venv/Lib/site-packages",
+        ]
+        for sp in site_package_candidates:
+            if sp.is_dir() and str(sp) not in sys.path:
                 sys.path.append(str(sp))
     try:
         import mindie_knowledge.graded.maintenance  # noqa: F401
@@ -187,6 +199,7 @@ def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
         f"Kimi {components.get('mindie-agent-kimi', {}).get('version', '')}",
         f"DSH {components.get('mindie-agent-dsh', {}).get('version', '')}",
         f"Google Antigravity {components.get('mindie-agent-agy', {}).get('version', '')}",
+        f"Tencent WorkBuddy {components.get('mindie-agent-wb', {}).get('version', '')}",
     ]
     for token in kb_tokens:
         if token and token not in kb:
@@ -351,7 +364,9 @@ def verify_components_and_plugins(
         tag = entry["tag"]
         tag_res = _run_cmd(["git", "rev-parse", f"{tag}^{{commit}}"], cwd=repo_dir)
         if tag_res.returncode != 0:
-            errors.append(f"{name}: tag {tag} not found in local checkout {repo_dir}")
+            commit_res = _run_cmd(["git", "rev-parse", f"{entry['commit']}^{{commit}}"], cwd=repo_dir)
+            if strict_lockstep or comp_tag_maps.get(name) or commit_res.returncode != 0:
+                errors.append(f"{name}: tag {tag} not found in local checkout {repo_dir}")
         elif tag_res.stdout.strip() != entry["commit"]:
             errors.append(
                 f"{name}: tag {tag} resolves to {tag_res.stdout.strip()}, "
@@ -444,12 +459,17 @@ def verify_components_and_plugins(
                 "mindie-agent-dsh", comp_name, _extract_pinned_sha(rr, comp_name), "runtime-requirements.txt"
             )
 
-    agy_dir = _resolve_repo("mindie-agent-agy", siblings_roots)
-    if agy_dir is not None:
-        pyp = (agy_dir / "pyproject.toml").read_text(encoding="utf-8")
+    for plugin_name in ("mindie-agent-agy", "mindie-agent-wb"):
+        p_dir = _resolve_repo(plugin_name, siblings_roots)
+        if p_dir is None:
+            continue
+        pyp = (p_dir / "pyproject.toml").read_text(encoding="utf-8")
         for comp_name in ("knowledge", "remote-dev", "diagnostics"):
-            _check_pin_floor("mindie-agent-agy", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
-        pc = json.loads((agy_dir / "product-contract.json").read_text(encoding="utf-8"))
+            _check_pin_floor(plugin_name, comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
+        pc = json.loads((p_dir / "product-contract.json").read_text(encoding="utf-8"))
+        pub_vc = ((pc.get("publication") or {}).get("verified_commit") or "")
+        if pub_vc:
+            _check_verified_commit(plugin_name, pub_vc)
         comps = pc.get("components") or {}
         expected_map = {
             "mindie-knowledge": comp_entries["knowledge"]["version"],
@@ -460,15 +480,17 @@ def verify_components_and_plugins(
             "mindie-sim": comp_entries["sim"]["version"],
             "npu-top": comp_entries["npu-top"]["version"],
         }
+        if plugin_name == "mindie-agent-wb" or "mindie-debugger" in comps:
+            expected_map["mindie-debugger"] = comp_entries["debugger"]["version"]
         for pkg, ch_ver in expected_map.items():
             pin_ver = str(comps.get(pkg) or "")
             if not pin_ver:
-                errors.append(f"mindie-agent-agy: product-contract.json missing {pkg}")
+                errors.append(f"{plugin_name}: product-contract.json missing {pkg}")
             elif strict_lockstep and pin_ver != ch_ver:
-                errors.append(f"mindie-agent-agy: product-contract.json {pkg}={pin_ver!r} != {ch_ver!r}")
+                errors.append(f"{plugin_name}: product-contract.json {pkg}={pin_ver!r} != {ch_ver!r}")
             elif _parse_semver(pin_ver) > _parse_semver(ch_ver):
                 errors.append(
-                    f"mindie-agent-agy: product-contract.json baseline {pkg}={pin_ver!r} > channel {ch_ver!r}"
+                    f"{plugin_name}: product-contract.json baseline {pkg}={pin_ver!r} > channel {ch_ver!r}"
                 )
 
     return errors
@@ -517,11 +539,12 @@ FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
     "claude-code": ("2.1.299", "2.1.300", "2.2.0-rc.1", "2.99.0"),
     "kimi-code": ("2.3.1", "2.3.2", "2.4.0-rc.1", "2.99.0"),
     "antigravity": ("2.0.0", "2.1.0", "2.99.0-rc.1"),
+    "workbuddy": ("1.0.0", "1.1.0", "2.0.0-rc.1"),
 }
 
 
 def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[str]:
-    """Verify that the latest shared component code is API-compatible with all 5 host plugins."""
+    """Verify that the latest shared component code is API-compatible with all 6 host plugins."""
     errors: list[str] = []
     if not _ensure_knowledge_importable(siblings_roots):
         return errors
@@ -530,15 +553,15 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
     from mindie_knowledge.releases import REPOSITORIES, supports_harness, validate_compatibility
     from mindie_knowledge.runtime_inventory import COMPONENTS
 
-    expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity"}
-    allowed_harnesses = expected_harnesses | {"workbuddy"}
-    if not expected_harnesses.issubset(set(REPOSITORIES)) or not set(REPOSITORIES).issubset(allowed_harnesses):
-        errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} not in {allowed_harnesses}")
+    expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity", "workbuddy"}
+    if set(REPOSITORIES) != expected_harnesses:
+        errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} != {expected_harnesses}")
 
     required_pkgs = {
         "mindie-knowledge",
         "remote-dev",
         "mindie-diagnostics",
+        "mindie-debugger",
         "mindie-profiler",
         "mindie-sim",
         "npu-top",
@@ -547,9 +570,13 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
     if not required_pkgs.issubset(set(COMPONENTS)):
         errors.append(f"mindie_knowledge.runtime_inventory.COMPONENTS missing {required_pkgs - set(COMPONENTS)}")
 
-    required_modules = {"profiler", "sim", "coordinator", "diagnostics"}
+    required_modules = {"profiler", "sim", "coordinator", "diagnostics", "debugger"}
     if not required_modules.issubset(set(COMPONENT_MODULES)):
         errors.append(f"mindie_knowledge.component_bindings.COMPONENT_MODULES missing {required_modules - set(COMPONENT_MODULES)}")
+    elif not str(COMPONENT_MODULES["debugger"][1]).startswith("mindie_debugger"):
+        errors.append(
+            f"mindie_knowledge.component_bindings.COMPONENT_MODULES['debugger'] unexpected module {COMPONENT_MODULES['debugger']!r}"
+        )
 
     for harness_key, repo_slug in REPOSITORIES.items():
         plugin_name = repo_slug.split("/", 1)[1]
@@ -640,38 +667,39 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
             except (OSError, ValueError):
                 pass
         for binary in codex_bins:
-            res = _run_cmd([binary, "--version"])
+            resolved_bin = shutil.which(binary) or binary
+            res = _run_cmd([resolved_bin, "--version"])
             ver = _extract_semver(res.stdout + "\n" + res.stderr)
             if ver and not supports_harness(compat, harness_name="codex", harness_version=ver):
                 errors.append(
                     f"mindie-agent-codex: harness-compatibility.json does not support installed Codex CLI "
-                    f"{ver} ({binary})"
+                    f"{ver} ({resolved_bin})"
                 )
 
     cc_dir = _resolve_repo("mindie-agent-cc", siblings_roots)
-    which_claude = shutil.which("claude")
-    if cc_dir is not None and which_claude:
+    resolved_claude = shutil.which("claude")
+    if cc_dir is not None and resolved_claude:
         compat = json.loads((cc_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
-        res = _run_cmd([which_claude, "--version"])
+        res = _run_cmd([resolved_claude, "--version"])
         ver = _extract_semver(res.stdout + "\n" + res.stderr)
         if ver and not supports_harness(compat, harness_name="claude-code", harness_version=ver):
             errors.append(f"mindie-agent-cc: harness-compatibility.json does not support installed claude {ver}")
 
     kimi_dir = _resolve_repo("mindie-agent-kimi", siblings_roots)
-    which_kimi = shutil.which("kimi")
-    if kimi_dir is not None and which_kimi:
+    resolved_kimi = shutil.which("kimi")
+    if kimi_dir is not None and resolved_kimi:
         compat = json.loads((kimi_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
-        res = _run_cmd([which_kimi, "--version"])
+        res = _run_cmd([resolved_kimi, "--version"])
         ver = _extract_semver(res.stdout + "\n" + res.stderr)
         if ver and not supports_harness(compat, harness_name="kimi-code", harness_version=ver):
             errors.append(f"mindie-agent-kimi: harness-compatibility.json does not support installed kimi {ver}")
 
     dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
-    which_dsh = shutil.which("dsh")
-    if dsh_dir is not None and which_dsh:
+    resolved_dsh = shutil.which("dsh")
+    if dsh_dir is not None and resolved_dsh:
         pkg_json = json.loads((dsh_dir / "package.json").read_text(encoding="utf-8"))
         peer_req = ((pkg_json.get("peerDependencies") or {}).get("@deepseek-ai/dsh") or "").strip()
-        res = _run_cmd([which_dsh, "--version"])
+        res = _run_cmd([resolved_dsh, "--version"])
         ver = _extract_semver(res.stdout + "\n" + res.stderr)
         if ver and not _matches_dsh_peer(peer_req, ver):
             errors.append(
@@ -796,7 +824,7 @@ def main() -> int:
         ("R1", f"Channel Schema & Release Track ({mode})", r1_errors),
         ("R2", "Knowledge Corpus Monotonic Revisions & Validator Floor", r2_errors),
         ("R3", "Component & Plugin Tag/Commit/Release Integrity", r3_errors),
-        ("R4", "Five-Host Cross-Version Component Compatibility", r4_errors),
+        ("R4", "Six-Host Cross-Version Component Compatibility", r4_errors),
         (
             "R5",
             "Local Active Host CLI Compatibility Coverage"
