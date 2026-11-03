@@ -14,7 +14,7 @@
 | [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | 本地实战经验如何脱敏沉淀、生成检索导航，并与社区公共知识库双向流转 |
 | [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | 后续设计：Token 预算、渐进加载、经验修订与探索回流；含 OO-Harness 条件化策略复用、组件分工与实施步骤 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 原地解析、纳秒区间计量、Host-Device 异步关联、跨 Run 对比与按需采集设计 |
-| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.2` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学与 Wave 5 跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内校准及 856 DSH 集群泛化验证 |
+| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.3` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学与 Wave 5 跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内校准及 856 DSH 集群泛化验证 |
 | [Profiler 与 Sim 的结构复用和实测映射](profiler-sim-structure.md) | — | `mindie-model-structure/1` 结构导出、同构算子集合（Cohort）对账、`auto_segment_decode_forwards` 拓扑引导切分与 Wave 5 多芯片回放结果 |
 | [`mindie-sim` 接口演进与消费者集成说明](simulation-consumer-migration.md) | — | `0.7.x -> 0.8.x/0.9.x` CLI/API 映射以及在五端宿主插件、`profiler` 与 `mindie-bench` 中的集成状态 |
 | [A3 预测性能与应达性能双模型方案](a3-performance-modeling-plan.md) | — | 历史双模型设计与机制追溯；不再规定新版执行入口或实测门槛 |
@@ -44,6 +44,7 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
+| [**`0.1.7` 补丁发布说明**](releases/0.1.7.md) · [V2 八组件 `G0–G5` 实测报告](releases/0.1.7/g0-g5-vllm-ascend-v2-report.md) | [**`0.1.7` Patch Notes**](releases/0.1.7.en.md) · [V2 Benchmark Report](releases/0.1.7/g0-g5-vllm-ascend-v2-report.en.md) | 新增第六款官方原生插件 Tencent WorkBuddy（`mindie-agent-wb v0.1.2`）、第八个共享组件 `mindie-debugger v0.1.0`、`mindie-sim v0.9.2` 可配置建模、9 大昇腾知识库（`493` 单元），以及 100% 真实 `vllm-ascend` 场景 34 题 144 场 `G0–G5` 全矩阵基准实测 |
 | [**`0.1.6` 补丁发布说明**](releases/0.1.6.md) | [**`0.1.6` Patch Notes**](releases/0.1.6.en.md) | 自动更新防漏改/漏检三道防线（`R1–R6` 必检门禁 + 灵活组件独立更新下界校验）、全量知识库 `revision` 对齐及 5 大宿主插件配套升级 |
 | [**`0.1.5` 补丁发布说明**](releases/0.1.5.md) | [**`0.1.5` Patch Notes**](releases/0.1.5.en.md) | 新增第五款官方原生插件 Google Antigravity（`mindie-agent-agy v0.1.0`）与 7 大组件双向契约适配，完成口语化报障语料 `G0–G5` 全矩阵基准验证（66 场 L2/L3 + G3/G4/G5 飞轮全过） |
 | [**`0.1.4` 补丁发布说明**](releases/0.1.4.md) · [自动升级验收](releases/0.1.4/automatic-update-acceptance.json) | [**`0.1.4` Patch Notes**](releases/0.1.4.en.md) | 按信息缺口检索、统一精读预算、精确依赖引用、受管组件自动绑定更新；保留复杂任务非退化尚未通过的结论 |

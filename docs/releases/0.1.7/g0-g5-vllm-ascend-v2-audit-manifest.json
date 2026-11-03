@@ -1,0 +1,347 @@
+{
+  "gate1_tasks": [
+    {
+      "task_id": "cpu-rope-rotary-dim-32-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "ab8025bb54a27887a13612744c8f8082d9efd682f8cefe3424f670739984ae69",
+      "instruction_preview": "换了一组模型头维度配置（`rotary_dim=32`）之后，在昇腾上跑 RoPE 缓存更新报错挂了，帮我解一下这个问题：\n\n```text\nRuntimeError: The expanded size of the tensor (128) must match the existing size (32) at "
+    },
+    {
+      "task_id": "cpu-rope-rotary-dim-64-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "a3c0ca1159c0b63cc0b4ae1029279c98f79cf4913af822a20529fd1d4c1b5675",
+      "instruction_preview": "我在昇腾上跑一个自定义头维度的模型（配了 `rotary_dim=64`），更新 RoPE 缓存的时候报错挂了，帮我解一下这个问题：\n\n```text\nRuntimeError: The expanded size of the tensor (128) must match the existing size (64"
+    },
+    {
+      "task_id": "dspark-mrv2-drafter-crash-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "54cb5fc6642413651fbecdf1cb1de7607050292d40361cc2b8352611abefbf69",
+      "instruction_preview": "我在昇腾上用 Model Runner V2 跑 DeepSeek-V4 的 DSpark 投机解码，在 dummy run 和 draft propose 阶段连着报下面两个错挂了，帮我解一下这个问题：\n\n```text\nTypeError: 'NoneType' object is not subscriptabl"
+    },
+    {
+      "task_id": "dsv4-sparse-mla-qli-fusion-rsi-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "41b644170bfe875141b2fcce1e6fc1f9b0791bd4fddb9eea00ff0eed7180ba2c",
+      "instruction_preview": "我在昇腾 910B 上调优 DeepSeek-V4（W8A8）的 SparseMLA 解码算子，前一阶段尝试记在 `logs/dsv4_stage1_l3_attempt.json` 里了，现在跑长序列还是报下面的错而且搬运和同步开销太大，帮我继续优化把这个问题解一下：\n\n```text\nRuntimeError: A"
+    },
+    {
+      "task_id": "k3-idle-dp-gdn-state-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "ade457610254eec15de7844399ab22a111f796c2ef507f3bf9a6e1d7f13506b3",
+      "instruction_preview": "我在昇腾上用外部负载均衡多 DP（`data_parallel_external_lb`）跑 Kimi-K3 模型，只要某个 DP rank 遇到没有请求的空闲轮次跑了 dummy 步，后续请求的 GDN 状态就乱了导致输出异常，帮我解一下这个问题。"
+    },
+    {
+      "task_id": "l3-dspark-mrv2-drafter-crash-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "2ecb0c0c4db6d879963191b21fbacb0cfc18179692dd5ec3e2f259361f456882",
+      "instruction_preview": "我在昇腾上用 Model Runner V2 跑 DeepSeek-V4 的 DSpark 投机解码，在 dummy run 和 draft propose 阶段连着报下面两个错挂了，帮我解一下这个问题：\n\n```text\nTypeError: 'NoneType' object is not subscriptabl"
+    },
+    {
+      "task_id": "l3-dsv4-sparse-mla-qli-fusion-rsi-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "b514096641e83cc7b4f467c79b1c400d2fe178957951dda7962e5f35f21a21f1",
+      "instruction_preview": "我在昇腾 910B 上调优 DeepSeek-V4（W8A8）的 SparseMLA 解码算子，前一阶段尝试记在 `logs/dsv4_stage1_l3_attempt.json` 里了，现在跑长序列还是报下面的错而且搬运和同步开销太大，帮我继续优化把这个问题解一下：\n\n```text\nRuntimeError: A"
+    },
+    {
+      "task_id": "l3-mrv2-dsa-prefill-metadata-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "9337c2ced9b357fefa777ffd5deb4614d9effb6b70c80c5099493478c848ac3d",
+      "instruction_preview": "我在昇腾上切到 Model Runner V2 跑 DeepSeek 稀疏注意力（DSA）模型并开启多步投机解码时，初始化 KV cache、构造注意力元数据和跑多步草稿更新的时候连着报错挂了，日志如下，帮我解一下这个问题：\n\n```text\nTypeError: AscendDSABackend.get_kv_cac"
+    },
+    {
+      "task_id": "l3-triton-spatial-norm-dim-merge-rsi-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "64c45bf85a0cbc7a7024d1ecb87089c9d78e70e0dc9b4ee037c269e8adf44527",
+      "instruction_preview": "我在昇腾 910B 上调优 4D 空间分组归一化规约算子，前一阶段尝试记在 `logs/operator_stage1_l3_attempt.json` 里了，现在精度还是超阈值而且性能卡住下不去，报错如下，帮我继续优化把这个问题解一下：\n\n```text\nAssertionError: Numerical check"
+    },
+    {
+      "task_id": "l3-vllm-ascend-aclgraph-capture-and-replay-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "696036a914a3f047ba68019271ee640495b4795223c107df061b8ecb2c523051",
+      "instruction_preview": "我们在 `vllm-ascend` 中开启 `FULL` 模式的 `ACLGraph`（`CUDAGraphMode.FULL`）跑 Decode 推理时遇到两个问题：\n\n1. 首次进入图捕获阶段（`torch.npu.graph`）就报流同步错误（`ACL stream capture error: forbidde"
+    },
+    {
+      "task_id": "mrv2-dsa-prefill-metadata-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "f230b10c0585dab2486d85c4f95fa2f3a03852e8a2ba42b8f8acd4a7b178dc32",
+      "instruction_preview": "我在昇腾上切到 Model Runner V2 跑 DeepSeek 稀疏注意力（DSA）模型并开启多步投机解码时，初始化 KV cache、构造注意力元数据和跑多步草稿更新的时候连着报错挂了，日志如下，帮我解一下这个问题：\n\n```text\nTypeError: AscendDSABackend.get_kv_cac"
+    },
+    {
+      "task_id": "mtp-draft-slot-mapping-capacity-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "fe2dfe9ad275a0e313d7eae23806dee3c7d2ff8eaf097d2debeab93d87a73cf3",
+      "instruction_preview": "我在昇腾上开 DCP=4 和 MTP=5 跑投机解码，满并发跑起来或者全图预热的时候直接报长度对不上崩了，报错如下，帮我解一下这个问题：\n\n```text\nValueError: could not broadcast input array from shape (110,) into shape (104,)\nRu"
+    },
+    {
+      "task_id": "rope-rotary-dim-32-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "e7b37fd4bf946e2f7f841229bb3c7938a54077d210a3f745e56518389dc13555",
+      "instruction_preview": "换了一组模型头维度配置（`rotary_dim=32`）之后，在昇腾上跑 RoPE 缓存更新报错挂了，帮我解一下这个问题：\n\n```text\nRuntimeError: The expanded size of the tensor (128) must match the existing size (32) at "
+    },
+    {
+      "task_id": "rope-rotary-dim-64-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "fe882e13599b27982650df6da0590cd570a7e5b36e69c253e7d1d8d44190874f",
+      "instruction_preview": "我在昇腾上跑一个自定义头维度的模型（配了 `rotary_dim=64`），更新 RoPE 缓存的时候报错挂了，帮我解一下这个问题：\n\n```text\nRuntimeError: The expanded size of the tensor (128) must match the existing size (64"
+    },
+    {
+      "task_id": "sfa-mtp-seq-lens-eval-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "7a287e8907793da9fab0318ddee1956f4c311cd07ce6f2e3f6a4a61f6f1c983f",
+      "instruction_preview": "这边在昇腾上开 SFA 后端跑多步 MTP（`num_speculative_tokens > 1`）投机解码的时候，多步草稿的接受率还是异常偏低，帮我排查下代码并修干净。"
+    },
+    {
+      "task_id": "sfa-mtp-seq-lens-seed-zh-vague",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "dd64e17e7dc5e51d4e0fcd9d8a4564c7052b89a1285ad8e5b900db1d7eae2918",
+      "instruction_preview": "我在昇腾上跑 GLM-5.2 开 SFA 注意力后端配合多步 MTP（`num_speculative_tokens > 1`）的时候，投机接受率低得反常（只开 1 步的时候是正常的），帮我看下代码哪里有问题并修好。"
+    },
+    {
+      "task_id": "triton-spatial-norm-dim-merge-rsi-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "6e406d9d89d0ba526801ec4487a44a1f71b407d4ac08813d5ae6ace65f524e4c",
+      "instruction_preview": "我在昇腾 910B 上调优 4D 空间分组归一化规约算子，前一阶段尝试记在 `logs/operator_stage1_l3_attempt.json` 里了，现在精度还是超阈值而且性能卡住下不去，报错如下，帮我继续优化把这个问题解一下：\n\n```text\nAssertionError: Numerical check"
+    },
+    {
+      "task_id": "vllm-ascend-aclgraph-capture-and-replay-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "58ec2a2e5df5d9307b268d989cafc29b53e1b1dcf55019ada137c9e73bfd8c17",
+      "instruction_preview": "我们在 `vllm-ascend` 中开启 `FULL` 模式的 `ACLGraph`（`CUDAGraphMode.FULL`）跑 Decode 推理时遇到两个问题：\n\n1. 首次进入图捕获阶段（`torch.npu.graph`）就报流同步错误（`ACL stream capture error: forbidde"
+    },
+    {
+      "task_id": "vllm-ascend-async-scheduling-kv-vram-budget-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "1f961ce2ef0bc208a257d830f21101bd938998212355d0cbf9873e07422fa630",
+      "instruction_preview": "开启 `--async-scheduling` 后在 Ascend 950PR 上跑长上下文高并发时频繁 OOM（日志在 `logs/a5_async_sched_oom.log`），排查发现 KV Cache 预算和并发上限计算没扣减异步双缓冲 Workspace 与延迟释放的 KV 块，请修复相关预算与并发求解逻辑"
+    },
+    {
+      "task_id": "vllm-ascend-eplb-and-chunked-prefill-skew-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "addfa4e2fa5dcd6fb9db13bf560534de0363a92baea1b97d3ac0e4ce685b306a",
+      "instruction_preview": "DeepSeek-V3 多 DP 混跑时 TPOT 经常突破 50ms SLA 且动态 EPLB 频繁抖动迁移（见 `logs/dsv3_dp_skew_sla.log`），请修复跨 DP 慢卡等待、EPLB 迁移净收益门限及 Chunked Prefill 预算计算逻辑。"
+    },
+    {
+      "task_id": "vllm-ascend-fia-mtp-plog-cascade-triage-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "e1eb716c64958ab0ab69cfbdecee6ff4c74e92c0414865868733458275407d72",
+      "instruction_preview": "我们在 8 卡昇腾上用 vllm-ascend 开 TP=8 和 MTP 投机解码跑推理时突然挂死，采集的 8 卡日志目录在 logs/plog_tp8_crash/，终端刷屏全是 Rank 0/1/2 的 HCCL EI0006 等待超时，帮我查下到底是哪块 vllm_ascend 代码引起的并把问题修好。"
+    },
+    {
+      "task_id": "vllm-ascend-fused-moe-w8a8-heal-diff-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "a44419b80a19b253a1cf34a273455c4a096ada1e325acfa117c49ae68dfc3055",
+      "instruction_preview": "我们在 vllm-ascend 里跑多层 MoE 动态量化前向时，输出跟 FP32 基准比余弦相似度掉到了 0.79（复现入口 tests/repro_moe_quant_accuracy.py）；逐层打印看第 0 层路由完输出就有差异，但改路由根本没用，帮我定位真正算错的算子代码并修复。"
+    },
+    {
+      "task_id": "vllm-ascend-gdn-dspark-inplace-stomp-watch-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "46942e0500ae00039515b7e3e610f881c5e34928462b869b13e23302aa3ffc2a",
+      "instruction_preview": "在 vllm-ascend 里跑混合线性注意力（GDN）加 DSpark 多步投机草稿生成时，全程不抛任何异常，但只要跑完第一步草稿，原本正常的请求序列状态和后续步的输出就全乱了（复现脚本在 tests/repro_gdn_dspark_step.py），帮我查出哪里把状态改坏了并修掉。"
+    },
+    {
+      "task_id": "vllm-ascend-graph-fusion-pass-ub-roofline-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "9eb5ad7483110ea85d6fbed07eb65bbb9349f91dfc9eefaf8408cdf778e8c915",
+      "instruction_preview": "`GraphFusionPassManager` 在选择算子融合方案时触发了 192KiB UB 溢出且实际端到端耗时反而变慢（见 `logs/fusion_pass_ub_overflow.log`），请修复其双缓冲 UB 容量校验和因果 Roofline 关键路径优选逻辑。"
+    },
+    {
+      "task_id": "vllm-ascend-kda-varlen-chunk-eval-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "e7d254d3549eafe898c932db4db4a0c6ea4ca32ff50b6c625bf1e713e669e95a",
+      "instruction_preview": "在 vllm-ascend 的 KDA 算子（vllm_ascend/ops/triton/kda/kda.py）里跑变长 Prefill 与单步 Decode 混合批次续写（chunk_kda_varlen_mixed_continuation）时，前序变长序列尾块的跨边界渗漏同样污染了后续 Decode 请求的注意"
+    },
+    {
+      "task_id": "vllm-ascend-kda-varlen-chunk-seed-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "e8c2d2ff189569cce3a62acf9e210f8a3fa818e18c63b94f4e224a02f4ffc1b0",
+      "instruction_preview": "在 vllm-ascend 里跑 KDA 线性注意力算子（vllm_ascend/ops/triton/kda/kda.py）处理变长序列（cu_seqlens）预填充时，只要序列长度不是分块大小 BT 的整数倍，尾块就会越界读入下一条序列的 token 并算错循环状态 h，帮我把变长分块边界与尾块状态递推掩码修好。"
+    },
+    {
+      "task_id": "vllm-ascend-mla-decode-profiler-sim-structure-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "0cf8e055469c0b976f5dcee675ca072162324891bb135e0707ea7872411221a2",
+      "instruction_preview": "在 Ascend 950PR 上跑 MLA Decode 时实测单步耗时远超理论算子耗时（采集库在 `traces/vllm_mla_decode_a5.db`），大量时间消耗在非模型结构的 `aclnnCast` 与 `aclnnInplaceCopy` 上，请定位并消除 MLA 前向及 Decode 元数据准备中的"
+    },
+    {
+      "task_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "4dd905b150b282717876bdaaa04eda7bad8fbc9dac7ae48a156b9b6a5c0172c2",
+      "instruction_preview": "我们在优化 vllm-ascend 的 MLA 前置投影、RoPE 旋转位置编码与 KV 缓存写入链路（vllm_ascend/ops/mla.py）时，当前参考实现存在多次冗余张量分配与分散写开销；请在保证 BF16/FP32 数值精度的前提下完成多因子融合优化，并输出留一法（Leave-One-Out）消融评估报告"
+    },
+    {
+      "task_id": "vllm-ascend-modelslim-quant-header-preflight-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "c9f739be2a807b15cd6c10b4af957ed899057f8c9b8381c50e6b7504026899f6",
+      "instruction_preview": "我们在昇腾上用 vllm-ascend 加载 ModelSlim 导出的混合量化权重（目录在 checkpoints/dsv4_w8a8_mixed/）时，部分层实际存的是 BF16 权重或缺少量化 scale 张量，结果预检不报错、跑到前向或显存估算时直接崩溃（报错日志见 logs/modelslim_load_cr"
+    },
+    {
+      "task_id": "vllm-ascend-mooncake-kv-p2p-asymmetric-tp-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "9f8bab1f2b348be5caea7846c7e6e0b589e4cfe8af4c1486ebcbf7f6a0c4e051",
+      "instruction_preview": "在 vllm-ascend 里用 Mooncake P2P 连接器跑 PD 分离推理时，只要 Prefill 节点和 Decode 节点的 TP 并行度不一致（比如 Prefill TP=4、Decode TP=8）就会算错 KV 分片映射，而且请求中途取消或超时后待发送列表里的 KV 块一直不释放导致内存泄漏，帮我修"
+    },
+    {
+      "task_id": "vllm-ascend-multi-die-topology-and-cpu-binding-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "288575ba2fd4863a3eb046d51e7360119e47d1a29fe19fa5dd299c7aae89690c",
+      "instruction_preview": "在昇腾双 Die 服务器上用 vllm-ascend 启动多实例推理时，vllm_ascend/cpu_binding.py 和 platform.py 在解析 ASCEND_RT_VISIBLE_DEVICES 拓扑、双 Die 同卡亲和选卡以及 NUMA 绑核时经常把实例错绑到隔离核或跨卡低带宽链路上（现场采集的拓"
+    },
+    {
+      "task_id": "vllm-ascend-observability-crash-redaction-and-outbox-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "14a895e7ad3bd2d60cd21ee50e04d1430f2f4a92d1712b6fbfb072cd7801451d",
+      "instruction_preview": "vllm-ascend 的日志与崩溃诊断导出模块（vllm_ascend/logger.py）在处理运行期异常日志（样例见 logs/worker_crash_raw.log）时，不仅漏脱敏了内网节点 IP、密钥 Token 和用户主目录路径，而且在上报超时的时候把 TimeoutError 当普通 IO 错误重置回 "
+    },
+    {
+      "task_id": "vllm-ascend-profiler-straggler-and-hbm-reconcile-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "70e389821b29a0059cf24c8f6d59c6074ea1aa6a0fa78626f8c887ef5fb51045",
+      "instruction_preview": "TP=2 Decode 性能剖析（数据在 `traces/tp2_decode_msprof/`）把等待集合通信的快卡误判成了慢卡，且显存对账算出了负数残差，请修复多卡慢卡归因与显存池非加性对账逻辑。"
+    },
+    {
+      "task_id": "vllm-ascend-sampler-triton-topk-unfiltered-zh",
+      "evidence": "verified",
+      "zero_vllm_ascend_diag": true,
+      "zero_tool_spoilers": true,
+      "soundness_before_reward": 0.0,
+      "soundness_after_reward": 1.0,
+      "task_sha256": "2ad53961867d89aa9e1f338b9e547d43c95b501278aa8e01e6e3d7c75f1ed3e7",
+      "instruction_preview": "在 vllm-ascend 的采样模块（vllm_ascend/sample/）里同时开启 top_k 和 top_p 采样时，遇到部分请求不启用 top_k（k<=0 或 k>=vocab_size）或者首个 token 概率直接超过 top_p 阈值时，会报越界或算出一整行 -inf 导致 softmax 变成 N"
+    }
+  ],
+  "gate2_violations": [],
+  "total_trials_audited": 144,
+  "product_version": "0.1.7"
+}
