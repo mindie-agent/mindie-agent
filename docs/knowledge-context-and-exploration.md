@@ -655,7 +655,7 @@ knowledge_feedback(ref, rating=None, reason="", event_type=None,
 - `explain` 既支持单个 `ref`（兼容现有调用及原始任务材料读取），也支持批量 `refs` 统一计算依赖闭包 `needed = closure(S) - visible_complete_refs`：共享父前提在 `requires` 中按拓扑顺序只展开一次，主单元在 `units` 中返回完整正文（绝不截断步骤）。`known_refs` 仅指当前上下文中完整可见的精确版本（`id@revision` 或完整 URI）；`unresolved` 明确区分 `condition_unknown`、`condition_mismatch`、`budget_excluded`、`removed_or_superseded`（附带 `superseded_by`）和 `not_found`。
 - `distill` 在 `task_state="in_flight"` 但 `inputs` 含已验证里程碑（`outcome="verified"`）时允许提炼；调用整理模型前自动从当前 `RoutingIndex` 检索同主题相关旧单元（`related_units`）作为差量对照；当前台 Agent 已形成符合 `mindie-distill-decision/1` 的 `proposal` 时，直接走确定性校验与 `apply_decision`（`model_calls=0`）。
 - `feedback` 在保持既有 `rating="up"|"down"` 投票兼容的同时，支持显式记录 `applied` 与 `evaluated`（绑定 `run_id` 与 `outcome="supported"|"refuted"|"inconclusive"`），并在服务端区分 `query` 返回的 `discovered`（`delivered`）与 `explain` 完整读取的 `loaded`，按 `(root_opaque, unit_id, revision, event_type, run_id)` 幂等去重。
-- 可复用的探索判断与三轴评估（`assess_stagnation`、`build_exploration_context`、`evaluate_exploration_candidate`）收敛于 `knowledge.graded.explore`，由 `mindie-bench` 的 `rsi_explorer.py` 与各插件共同调用。
+- 可复用的探索判断、三轴评估、实验账本与多轮优化状态协同（`assess_stagnation`、`build_exploration_context`、`evaluate_exploration_candidate`、`experiment_ledger` 的 `fingerprint` / `check_trials` / `judge` / `gate` / `append` / `fold` / `render_progress_file`，以及基于账本推导、支持非线性原语与单步 `record` 的 `rsi_loop`）统一收敛于 `mindie_knowledge.graded`（`explore.py`、`experiment_ledger.py`、`rsi_loop.py`），各端插件直接复用，插件运行时零 `mindie-bench` 依赖。
 
 `query` 和 `explain` 本身不调用模型；语义判断由当前 Agent 或已有提炼调用完成。首版继续复用本地检索和条件索引，是否增加 embedding 用实际召回缺口决定。
 
