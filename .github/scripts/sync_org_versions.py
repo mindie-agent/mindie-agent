@@ -35,6 +35,9 @@ import sys
 import urllib.error
 import urllib.request
 
+from sibling_readme_sync import process_markdown_file as process_file
+from sibling_readme_sync import sync_docs_versions, sync_sibling_readmes
+
 ORG = "mindie-agent"
 HTTP_TIMEOUT_SECONDS = 15
 
@@ -563,118 +566,6 @@ def sync_channel_internal_fields(channel_path: Path, m: dict, write: bool) -> li
     return []
 
 
-def sync_docs_versions(repo_root: Path, m: dict, write: bool) -> list[str]:
-    c = m["components"]
-    cpv = m["current_patch_version"]
-    sim_v = c["sim"]["version"]
-    prof_v = c["profiler"]["version"]
-    know_v = c["knowledge"]["version"]
-    rdev_v = c["remote-dev"]["version"]
-    diag_v = c["diagnostics"]["version"]
-    dbg_v = c["debugger"]["version"]
-    ntop_v = c["npu-top"]["version"]
-    coord_v = c["coordinator"]["version"]
-    bench_v = c["mindie-bench"]["version"]
-    codex_v = c["mindie-agent-codex"]["version"]
-    cc_v = c["mindie-agent-cc"]["version"]
-    kimi_v = c["mindie-agent-kimi"]["version"]
-    dsh_v = c["mindie-agent-dsh"]["version"]
-    agy_v = c["mindie-agent-agy"]["version"]
-    wb_v = c["mindie-agent-wb"]["version"]
-
-    errors: list[str] = []
-
-    def _transform_docs_readme(txt: str) -> str:
-        return re.sub(
-            r"\| \[(?:面向 Agent 的通用性能建模系统|General Performance Modeling System)\]\(simulation-system\.md\)([^\n]*?)`mindie-sim v[0-9.]+`",
-            lambda match: match.group(0).rsplit("`mindie-sim v", 1)[0] + f"`mindie-sim v{sim_v}`",
-            txt,
-        )
-
-    def _transform_sim_doc(txt: str) -> str:
-        txt = re.sub(r"当前正式版本 `v[0-9.]+`", f"当前正式版本 `v{sim_v}`", txt)
-        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
-        return txt
-
-    def _transform_prof_sim_doc(txt: str) -> str:
-        txt = re.sub(
-            r"\[`mindie-profiler`\]\(https://github\.com/mindie-agent/profiler\)（`v[0-9.]+`）与 \[`mindie-sim`\]\(https://github\.com/mindie-agent/sim\)（`v[0-9.]+`）",
-            f"[`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v{prof_v}`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v{sim_v}`）",
-            txt,
-        )
-        txt = re.sub(r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`", txt)
-        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
-        return txt
-
-    def _transform_consumer_migration(txt: str) -> str:
-        txt = re.sub(r"当前正式版 `v[0-9.]+`", f"当前正式版 `v{sim_v}`", txt)
-        txt = re.sub(r"`mindie-profiler`（`v[0-9.]+`）", f"`mindie-profiler`（`v{prof_v}`）", txt)
-        txt = re.sub(r"`mindie-bench`（`v[0-9.]+`）", f"`mindie-bench`（`v{bench_v}`）", txt)
-        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
-        txt = re.sub(r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`", txt)
-        row_versions = {
-            "mindie-agent-codex": codex_v,
-            "mindie-agent-cc": cc_v,
-            "mindie-agent-kimi": kimi_v,
-            "mindie-agent-dsh": dsh_v,
-            "mindie-agent-agy": agy_v,
-            "mindie-agent-wb": wb_v,
-            "mindie-profiler": prof_v,
-            "mindie-debugger": dbg_v,
-            "mindie-bench": bench_v,
-        }
-        for name, ver in row_versions.items():
-            txt = re.sub(
-                rf"(\| \*\*`{re.escape(name)}`\*\* \| )`v[0-9.]+`",
-                rf"\1`v{ver}`",
-                txt,
-            )
-        return txt
-
-    def _transform_next_steps(txt: str, is_en: bool) -> str:
-        suffix = ".en.md" if is_en else ".md"
-        txt = re.sub(
-            rf"`v0\.1\.1`–\[`v[0-9.]+`\]\(releases/[0-9.]+{re.escape(suffix)}\)",
-            f"`v0.1.1`–[`v{cpv}`](releases/{cpv}{suffix})",
-            txt,
-        )
-        pairs = [
-            (r"`knowledge v[0-9.]+`", f"`knowledge v{know_v}`"),
-            (r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`"),
-            (r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`"),
-            (r"`remote-dev v[0-9.]+`", f"`remote-dev v{rdev_v}`"),
-            (r"`diagnostics v[0-9.]+`", f"`diagnostics v{diag_v}`"),
-            (r"`debugger v[0-9.]+`", f"`debugger v{dbg_v}`"),
-            (r"`mindie-debugger v[0-9.]+`", f"`mindie-debugger v{dbg_v}`"),
-            (r"`npu-top v[0-9.]+`", f"`npu-top v{ntop_v}`"),
-            (r"`coordinator v[0-9.]+`", f"`coordinator v{coord_v}`"),
-            (r"`mindie-bench v[0-9.]+`", f"`mindie-bench v{bench_v}`"),
-            (r"`Codex v[0-9.]+`", f"`Codex v{codex_v}`"),
-            (r"`Claude Code v[0-9.]+`", f"`Claude Code v{cc_v}`"),
-            (r"`Kimi v[0-9.]+`", f"`Kimi v{kimi_v}`"),
-            (r"`DSH v[0-9.]+`", f"`DSH v{dsh_v}`"),
-            (r"`Google Antigravity v[0-9.]+`", f"`Google Antigravity v{agy_v}`"),
-            (r"`Tencent WorkBuddy v[0-9.]+`", f"`Tencent WorkBuddy v{wb_v}`"),
-        ]
-        for pat, repl in pairs:
-            txt = re.sub(pat, repl, txt)
-        return txt
-
-    targets = [
-        (repo_root / "docs" / "README.md", _transform_docs_readme),
-        (repo_root / "docs" / "README.en.md", _transform_docs_readme),
-        (repo_root / "docs" / "simulation-system.md", _transform_sim_doc),
-        (repo_root / "docs" / "profiler-sim-structure.md", _transform_prof_sim_doc),
-        (repo_root / "docs" / "simulation-consumer-migration.md", _transform_consumer_migration),
-        (repo_root / "docs" / "mechanism-first-performance-modeling-design.md", _transform_sim_doc),
-        (repo_root / "docs" / "next-steps.md", lambda t: _transform_next_steps(t, False)),
-        (repo_root / "docs" / "next-steps.en.md", lambda t: _transform_next_steps(t, True)),
-    ]
-    for path, fn in targets:
-        errors.extend(process_file(path, fn, write))
-    return errors
-
-
 def replace_marker_block(text: str, block_id: str, new_body: str) -> str:
     start_tag = f"<!-- mindie-org-versions:{block_id}:start -->"
     end_tag = f"<!-- mindie-org-versions:{block_id}:end -->"
@@ -734,20 +625,6 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
     return text
 
 
-def process_file(path: Path, transform, write: bool) -> list[str]:
-    if not path.is_file():
-        return [f"Missing target file: {path}"]
-    original = path.read_text(encoding="utf-8")
-    updated = transform(original).replace("\r\n", "\n")
-    if updated != original:
-        if write:
-            path.write_text(updated, encoding="utf-8", newline="\n")
-            print(f"Updated {path}")
-            return []
-        return [f"Out-of-sync version block or pin in {path} (run sync_org_versions.py --write)"]
-    return []
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Synchronize and verify MindIE Agent and org README versions.")
     parser.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[2]), help="Path to mindie-agent root.")
@@ -793,6 +670,7 @@ def main() -> int:
         )
     )
     errors.extend(sync_docs_versions(repo_root, manifest, args.write))
+    errors.extend(sync_sibling_readmes(repo_root, manifest, args.write))
     errors.extend(
         process_file(
             repo_root / "README.md",

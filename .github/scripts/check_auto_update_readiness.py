@@ -35,35 +35,14 @@ import shutil
 import subprocess
 import sys
 
-SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-EXPECTED_CORPORA = (
-    "knowledge-infer-core",
-    "knowledge-operators",
-    "knowledge-vllm-ascend",
-    "knowledge-xllm",
-    "knowledge-mindie-sd",
-    "knowledge-infer-distributed",
-    "knowledge-infer-observability",
-    "knowledge-infer-ops-compat",
-    "knowledge-agent-engineering",
-)
-EXPECTED_SHARED_COMPONENTS = (
-    "diagnostics",
-    "debugger",
-    "profiler",
-    "sim",
-    "npu-top",
-    "remote-dev",
-    "knowledge",
-    "coordinator",
-)
-EXPECTED_PLUGINS = (
-    "mindie-agent-codex",
-    "mindie-agent-cc",
-    "mindie-agent-kimi",
-    "mindie-agent-dsh",
-    "mindie-agent-agy",
-    "mindie-agent-wb",
+from sibling_readme_sync import (
+    EXPECTED_CORPORA,
+    EXPECTED_PLUGINS,
+    EXPECTED_SHARED_COMPONENTS,
+    SHA_RE,
+    sync_sibling_readmes,
+    verify_channel_schema,
+    verify_github_releases,
 )
 
 
@@ -132,92 +111,6 @@ def _component_tag_commits(comp_repo: Path) -> dict[str, str]:
         if rev.returncode == 0:
             mapping[rev.stdout.strip()] = tag.lstrip("v")
     return mapping
-
-
-def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
-    errors: list[str] = []
-    if manifest.get("schema") != "mindie-release-channel/1":
-        errors.append(f"channels/0.1.json: unexpected schema {manifest.get('schema')!r}")
-    if not manifest.get("independent_update_allowed"):
-        errors.append("channels/0.1.json: independent_update_allowed must be true")
-    cpv = str(manifest.get("current_patch_version") or "")
-    if not cpv:
-        errors.append("channels/0.1.json: missing current_patch_version")
-    expected_rn = f"docs/releases/{cpv}.md"
-    expected_rn_en = f"docs/releases/{cpv}.en.md"
-    if manifest.get("release_notes") != expected_rn:
-        errors.append(f"channels/0.1.json: release_notes {manifest.get('release_notes')!r} != {expected_rn!r}")
-    if manifest.get("release_notes_en") != expected_rn_en:
-        errors.append(f"channels/0.1.json: release_notes_en {manifest.get('release_notes_en')!r} != {expected_rn_en!r}")
-
-    patch_releases = manifest.get("patch_releases") or []
-    if not isinstance(patch_releases, list) or not patch_releases:
-        errors.append("channels/0.1.json: patch_releases must be a non-empty list")
-    else:
-        latest_patch = patch_releases[-1]
-        if str(latest_patch.get("patch_version") or "") != cpv:
-            errors.append(
-                f"channels/0.1.json: patch_releases[-1].patch_version "
-                f"{latest_patch.get('patch_version')!r} != current_patch_version {cpv!r}"
-            )
-
-    corpora = manifest.get("corpora") or {}
-    for name in EXPECTED_CORPORA:
-        entry = corpora.get(name)
-        if not isinstance(entry, dict):
-            errors.append(f"channels/0.1.json: missing corpus {name}")
-            continue
-        commit = str(entry.get("commit") or "")
-        if not SHA_RE.fullmatch(commit):
-            errors.append(f"channels/0.1.json: corpus {name} invalid commit {commit!r}")
-        if not isinstance(entry.get("units"), int) or entry["units"] <= 0:
-            errors.append(f"channels/0.1.json: corpus {name} invalid units {entry.get('units')!r}")
-
-    components = manifest.get("components") or {}
-    for name in (*EXPECTED_SHARED_COMPONENTS, "mindie-bench", *EXPECTED_PLUGINS):
-        entry = components.get(name)
-        if not isinstance(entry, dict):
-            errors.append(f"channels/0.1.json: missing component/plugin {name}")
-            continue
-        version = str(entry.get("version") or "")
-        tag = str(entry.get("tag") or "")
-        commit = str(entry.get("commit") or "")
-        revision = str(entry.get("revision") or "")
-        if not version or tag != f"v{version}":
-            errors.append(f"channels/0.1.json: {name} tag {tag!r} != v{version}")
-        if not SHA_RE.fullmatch(commit) or commit != revision:
-            errors.append(f"channels/0.1.json: {name} commit/revision mismatch ({commit!r} vs {revision!r})")
-        if not entry.get("independent_update_allowed"):
-            errors.append(f"channels/0.1.json: {name} must set independent_update_allowed=true")
-
-    kb = str(((manifest.get("update_policy") or {}).get("implementation_status") or {}).get("known_boundaries") or "")
-    kb_tokens = [
-        f"The {cpv} channel pins",
-        *(f"{k} {components[k]['version']}" for k in (*EXPECTED_SHARED_COMPONENTS, "mindie-bench") if k in components),
-        f"Codex {components.get('mindie-agent-codex', {}).get('version', '')}",
-        f"Claude Code {components.get('mindie-agent-cc', {}).get('version', '')}",
-        f"Kimi {components.get('mindie-agent-kimi', {}).get('version', '')}",
-        f"DSH {components.get('mindie-agent-dsh', {}).get('version', '')}",
-        f"Google Antigravity {components.get('mindie-agent-agy', {}).get('version', '')}",
-        f"Tencent WorkBuddy {components.get('mindie-agent-wb', {}).get('version', '')}",
-    ]
-    for token in kb_tokens:
-        if token and token not in kb:
-            errors.append(f"channels/0.1.json: known_boundaries missing or out of sync for {token!r}")
-
-    for rel_file in (expected_rn, expected_rn_en):
-        rel_path = main_repo / rel_file
-        if not rel_path.is_file():
-            errors.append(f"{rel_file}: release notes file not found")
-            continue
-        rel_txt = rel_path.read_text(encoding="utf-8")
-        for name, entry in components.items():
-            ver = entry.get("version", "")
-            sha = entry.get("commit", "")
-            row_pat = rf"\|\s*`{re.escape(name)}`\s*\|[^|\n]+\|\s*`{re.escape(str(ver))}`\s*\|\s*`{re.escape(str(sha))}`\s*\|"
-            if not re.search(row_pat, rel_txt):
-                errors.append(f"{rel_file}: table row for {name} does not match channel ({ver} / {sha[:8]})")
-    return errors
 
 
 def _historical_corpus_commits(main_repo: Path, corpus_name: str) -> list[str]:
@@ -710,38 +603,13 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
     return errors
 
 
-def verify_github_releases(manifest: dict) -> list[str]:
-    """Verify via `gh release view` that every component/plugin in channels/0.1.json has a formal Release."""
-    errors: list[str] = []
-    if not shutil.which("gh"):
-        return ["gh CLI not found in PATH for --verify-github-releases"]
-    comp_entries = manifest.get("components") or {}
-    for key in sorted(comp_entries):
-        entry = comp_entries[key]
-        repo = entry.get("repository", "")
-        version = entry.get("version", "")
-        tag = f"v{version}"
-        res = _run_cmd(
-            ["gh", "release", "view", tag, "-R", repo, "--json", "tagName,isDraft,isPrerelease,assets"],
-            timeout=15.0,
-        )
-        if res.returncode != 0:
-            errors.append(f"{repo}: formal GitHub Release {tag} not found ({res.stderr.strip()})")
-            continue
-        data = json.loads(res.stdout)
-        if data.get("isDraft") or data.get("isPrerelease"):
-            errors.append(
-                f"{repo}: GitHub Release {tag} is draft={data.get('isDraft')} prerelease={data.get('isPrerelease')}"
-            )
-        assets = {a.get("name") for a in (data.get("assets") or []) if isinstance(a, dict)}
-        if not assets:
-            errors.append(f"{repo}: GitHub Release {tag} has 0 uploaded assets")
-        elif "SHA256SUMS" not in assets:
-            errors.append(f"{repo}: GitHub Release {tag} missing SHA256SUMS asset")
-    return errors
-
-
-def verify_doc_and_lf_hygiene(main_repo: Path) -> list[str]:
+def verify_doc_and_lf_hygiene(
+    main_repo: Path,
+    manifest: dict,
+    siblings_roots: list[Path],
+    *,
+    require_siblings: bool,
+) -> list[str]:
     errors: list[str] = []
     scripts_dir = main_repo / ".github" / "scripts"
     lf_res = _run_cmd([sys.executable, str(scripts_dir / "check_lf_eol.py")], cwd=main_repo, timeout=15.0)
@@ -754,6 +622,16 @@ def verify_doc_and_lf_hygiene(main_repo: Path) -> list[str]:
     )
     if sync_res.returncode != 0:
         errors.append(f"sync_org_versions.py --check --offline failed: {(sync_res.stderr or sync_res.stdout).strip()}")
+    sibling_errors = sync_sibling_readmes(
+        main_repo,
+        manifest,
+        False,
+        siblings_roots=siblings_roots,
+        require_siblings=require_siblings,
+    )
+    for err in sibling_errors:
+        if err not in errors:
+            errors.append(err)
     return errors
 
 
@@ -818,7 +696,12 @@ def main() -> int:
         r3_errors.extend(verify_github_releases(manifest))
     r4_errors = verify_flexible_component_compatibility(siblings_roots)
     r5_errors = verify_local_host_compatibility(siblings_roots) if args.verify_local_hosts else []
-    r6_errors = verify_doc_and_lf_hygiene(main_repo)
+    r6_errors = verify_doc_and_lf_hygiene(
+        main_repo,
+        manifest,
+        siblings_roots,
+        require_siblings=args.require_siblings,
+    )
 
     checklist_rows = [
         ("R1", f"Channel Schema & Release Track ({mode})", r1_errors),
