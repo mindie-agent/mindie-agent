@@ -19,7 +19,7 @@
 
 依据[设计原则](design-principles.md)第 1、8、9、10、14、15 条：
 
-1. **安装与更新复用系统信任库。** 原生启动命令在下载 Python 前启用 uv 系统证书；内部安装器使用兼容旧版 uv 的环境变量设置默认值，保留用户的 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS` 选择和显式 CA。`SSL_CERT_FILE`、`SSL_CERT_DIR` 和包源配置继续生效。Kimi 的首次安装与更新统一使用 uv，移除依赖 ensurepip 版本的另一套安装路径。Google Antigravity 与 Tencent WorkBuddy 沿用各自仓库里已有的 `plugins/mindie-agent/scripts/setup.py`：引导运行时前调用同目录 `paths.apply_enterprise_transport_env`，以 `setdefault` 写入 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS`、`GCM_INTERACTIVE=never` 以及 Windows Git `core.longpaths` / `core.autocrlf`。这两端不增加第二条安装或传输路径。
+1. **安装与更新复用系统信任库。** 原生启动命令在下载 Python 前启用 uv 系统证书；内部安装器使用兼容旧版 uv 的环境变量设置默认值，保留用户的 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS` 选择和显式 CA。`SSL_CERT_FILE`、`SSL_CERT_DIR` 和包源配置继续生效。Kimi 的首次安装与更新统一使用 uv，移除依赖 ensurepip 版本的另一套安装路径。Google Antigravity 与 Tencent WorkBuddy 沿用各自仓库里已有的 `plugins/mindie-agent/scripts/setup.py`：引导运行时前调用同目录 `paths.apply_enterprise_transport_env`，以 `setdefault` 写入 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS`、`GCM_INTERACTIVE=never`，并在保留调用方已有 `GIT_CONFIG_COUNT` 条目的前提下增量追加缺失的 Windows Git `core.longpaths` / `core.autocrlf` 及 GitHub 凭据设置。这两端不增加第二条安装或传输路径。
 2. **后台知识服务继承网络环境。** 在共享 `knowledge` 服务上下文中声明代理、CA、包源及 gh 配置路径变量，沿用现有一次性启动上下文。六个插件不各自维护网络状态机。安装配置只保存变量名，值由实际唤醒服务的进程提供。
 3. **故障上报服务使用已有环境文件入口。** 启用服务时，自动将必要的代理、CA 和 gh 配置路径写入该服务目录下的私有环境文件；不复制 API Token。显式指定的环境文件优先。网络设置变化时更新现有服务，上传授权和已有回执保持原样。Kimi 的定时更新复用共享组件的同一环境文件实现，当前调用显式提供的变量优先。
 4. **回环请求不经过企业代理。** knowledge 本机 RPC、Kimi 插件注册、DSH 摘要和 Bench 的 SSH、知识与重放 RPC 使用标准库 `ProxyHandler({})`，不依赖用户维护 `NO_PROXY`。
@@ -38,7 +38,7 @@ Windows 企业网络下已验证 Codex `0.164.0-alpha.11.1` 的正式 `0.1.2` MC
 
 ## 正常安装与工作区引导
 
-主仓安装入口、六个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装，介绍已有用户须知，提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择，并在安装汇报末尾询问用户是否愿意为主仓 `mindie-agent/mindie-agent` 点亮 Star ⭐（仅在用户明确同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行）。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
+主仓安装入口、六个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装与校验，随后在第五步通过 `setup.py sharing --status` 检查授权状态，并立即调用当前宿主的**原生交互式提问工具**（Antigravity `ask_question`、Claude Code / WorkBuddy / Kimi `AskUserQuestion`、Codex `request_user_input`、DSH 原生提问工具或标准选择卡片）向用户弹出三个选项：是否开启社区共享与自动故障上报（通过 `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"` 或 `setup.py sharing --disable` 统一写入 `mindie-community.json`、`mindie-consent.json` 与 `diagnostics.json`）、是否愿意为主仓 `mindie-agent/mindie-agent` 点亮 Star ⭐（仅在用户明确选择同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行），以及提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
 
 - 工作区安装使用 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace) 当前检出的 `AGENTS.md` 与 `repo_init.py`，复用已有 `workspace.json` 的 Fork 选择。工作区独立安装也先完成认证；从插件引导进入时复用同一次验证。
 - 用户同意创建或复用工作区，即在同一流程中将所选绝对路径添加到当前宿主的原生项目/工作区入口，不再另问一次是否登记。初始化选择独立保留，用户暂缓源码下载也可以先登记目录。
@@ -54,7 +54,7 @@ Windows 企业网络下已验证 Codex `0.164.0-alpha.11.1` 的正式 `0.1.2` MC
 2. **需要登录时选择方式。** 用户已说明处于企业网络，或检测到代理/自定义 CA 配置、浏览器授权受阻时，优先推荐 Token；普通网络默认使用浏览器登录，也允许用户选择 Token。代理和 CA 仅是选择建议的依据，不代表浏览器一定不可用。连接超时、代理 407 和证书错误先按网络问题处理，不能冒充 Token 失效。
 3. **选 Token 后只补齐缺失的一步。** 已有 Token 就直接使用；没有则打开 [GitHub Token 创建页](https://github.com/settings/tokens/new?scopes=repo%2Cread%3Aorg%2Cgist&description=MindIE%20Agent)，引导完成创建后回到终端。普通持久登录使用 `gh` 支持的 classic PAT（`repo`、`read:org`、`gist`）；有效期由用户或组织策略决定。组织要求 SSO 时完成对应授权。受组织策略约束的 fine-grained Token 按实际目标仓库配置权限，不要求用户换成不被允许的类型。
 4. **用原生提示接收并保存。** 在用户可操作的终端运行 `gh auth login --hostname github.com --git-protocol https`，选择 `Paste an authentication token`，由用户在隐藏输入提示中粘贴。若用户已提供私有 Token 文件路径，Agent 直接通过标准输入执行 `gh auth login --hostname github.com --git-protocol https --with-token`，无需再次输入。Token 不进入对话、命令行参数、仓库、MindIE 配置或日志；保存由 `gh` 管理，不添加 `--insecure-storage`。环境中的旧 Token 会覆盖已保存登录，修复时需同时处理实际调用进程的旧变量。
-5. **验证后继续原任务。** 再次读取账号，确保 `git` 所在目录已在 `PATH` 中（或通过 `MINDIE_GIT_BIN` 显式指定），在 Windows 下先清除系统级 `etc/gitconfig` 可能预置的无作用域 `helper-selector`（如 `git config --system --unset-all credential.helper` 及设置 `GCM_INTERACTIVE=never`，避免 `GIT_TERMINAL_PROMPT=0` 下仍弹出 GUI 凭据选择窗阻塞进程；若企业代理下 `schannel` 报 `CRYPT_E_NO_REVOCATION_CHECK`，配置 `http.sslBackend=schannel` 与 `http.schannelCheckRevoke=false` 并保持 `http.sslVerify=true`），再执行 `gh auth setup-git --hostname github.com`，并只读检查本次操作涉及的仓库。后续源码/知识同步、Git push、PR 和 Issue 操作复用同一 `gh` 身份；登录不改变已有贡献选择与项目范围。401 处理凭据失效，403/404 结合目标仓库、权限和 SSO 定位，不循环要求用户重登，也不创建测试 PR/Issue 来验证登录。
+5. **验证后继续原任务。** 再次读取账号，确保 `git` 所在目录已在 `PATH` 中（或通过 `MINDIE_GIT_BIN` 显式指定）。为避免修改用户全局 `~/.gitconfig` 或系统级 `etc/gitconfig`，所有 Git 网络操作统一通过进程级环境变量 `GIT_CONFIG_COUNT`（或 `git -c`）注入 `credential.helper=`（先清空 Windows `etc/gitconfig` 可能预置的多值 `manager` / `helper-selector`，避免触发 GCM 2 秒自动探测与 GUI 弹窗）、`credential.https://github.com.helper=!gh auth git-credential`、`credential.interactive=never`、`core.autocrlf=false` 与 `core.longpaths=true`，同时设置 `GCM_INTERACTIVE=never` 与 `GIT_TERMINAL_PROMPT=0`（若企业代理下 Windows `schannel` 报 `CRYPT_E_NO_REVOCATION_CHECK`，同样通过进程级 `GIT_CONFIG_COUNT` 追加 `http.sslBackend=schannel` 与 `http.schannelCheckRevoke=false` 并保持 `http.sslVerify=true`），再只读检查本次操作涉及的仓库。后续源码/知识同步、Git push、PR 和 Issue 操作复用同一 `gh` 身份；登录不改变已有贡献选择与项目范围。401 处理凭据失效，403/404 结合目标仓库、权限和 SSO 定位，不循环要求用户重登，也不创建测试 PR/Issue 来验证登录。
 
 用户提供文件时，以下命令中的路径变量由 Agent 使用实际路径填入；文件内容不打印：
 

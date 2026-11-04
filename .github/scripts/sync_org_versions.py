@@ -632,6 +632,8 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
         (r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-agy\.git", f"--branch v{agy_v} https://github.com/mindie-agent/mindie-agent-agy.git"),
         (r"--branch v[0-9.]+ https://github\.com/mindie-agent/mindie-agent-wb\.git", f"--branch v{wb_v} https://github.com/mindie-agent/mindie-agent-wb.git"),
         (r"`mindie-agent-agy v[0-9.]+`", f"`mindie-agent-agy v{agy_v}`"),
+        (r"检出钉住的 `v[0-9.]+` tag", f"检出钉住的 `v{agy_v}` tag"),
+        (r"Clone the pinned `v[0-9.]+` tag", f"Clone the pinned `v{agy_v}` tag"),
         (r"`mindie-agent-wb v[0-9.]+`", f"`mindie-agent-wb v{wb_v}`"),
         (r"remote-dev@v[0-9.]+", f"remote-dev@v{rdev_v}"),
         (r"`mindie-agent-cc v[0-9.]+`", f"`mindie-agent-cc v{cc_v}`"),

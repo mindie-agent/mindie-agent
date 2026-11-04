@@ -43,6 +43,7 @@ from sibling_readme_sync import (
     sync_sibling_readmes,
     verify_channel_schema,
     verify_github_releases,
+    verify_unreleased_plugin_main,
 )
 
 
@@ -740,6 +741,7 @@ def main() -> int:
         require_siblings=args.require_siblings,
         strict_lockstep=args.strict_lockstep,
     )
+    r3_errors.extend(verify_unreleased_plugin_main(manifest, siblings_roots))
     if args.verify_github_releases:
         r3_errors.extend(verify_github_releases(manifest))
     r4_errors = verify_flexible_component_compatibility(siblings_roots)

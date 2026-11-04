@@ -27,11 +27,14 @@ and `docs/README.en.md`.
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
+import urllib.parse
 from typing import Callable
 
 PACKAGE_INFO: dict[str, tuple[str, str]] = {
@@ -330,9 +333,21 @@ def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
     )
     txt = re.sub(rf"({re.escape(repo_name)}\.git#v)(?!0\.0\.)\d+\.\d+\.\d+", rf"\g<1>{self_ver}", txt)
     txt = re.sub(rf"({re.escape(repo_name)}\.git --ref v)(?!0\.0\.)\d+\.\d+\.\d+", rf"\g<1>{self_ver}", txt)
+    txt = re.sub(
+        rf"(https://github\.com/mindie-agent/{re.escape(repo_name)}/releases/tag/v)(?!0\.0\.)\d+\.\d+\.\d+",
+        rf"\g<1>{self_ver}",
+        txt,
+    )
+    txt = re.sub(
+        rf"(\b{re.escape(repo_name)} v?)(?!0\.0\.)\d+\.\d+\.\d+\b",
+        rf"\g<1>{self_ver}",
+        txt,
+    )
     for pat in (
         r"(当前正式版本为 `v?)(?!0\.0\.)\d+\.\d+\.\d+(`)",
         r"(当前正式版 `v?)(?!0\.0\.)\d+\.\d+\.\d+(`)",
+        r"(当前稳定版本：\[`v)(?!0\.0\.)\d+\.\d+\.\d+(`\])",
+        r"([Cc]urrent [Rr]elease:\s*\[`v)(?!0\.0\.)\d+\.\d+\.\d+(`\])",
         r"(当前 `v?)(?!0\.0\.)\d+\.\d+\.\d+(`)",
         r"([Rr]elease `v?)(?!0\.0\.)\d+\.\d+\.\d+(`)",
         r"(正式版 `v)(?!0\.0\.)\d+\.\d+\.\d+(`)",
@@ -340,30 +355,127 @@ def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
     ):
         txt = re.sub(pat, rf"\g<1>{self_ver}\g<2>", txt)
 
-    for comp_key, (pkg_dash, pkg_under) in PACKAGE_INFO.items():
-        c_ver = str(comps[comp_key]["version"])
-        c_sha = str(comps[comp_key]["commit"])
-        txt = re.sub(
-            rf"(https://github\.com/mindie-agent/{re.escape(comp_key)}/releases/download/v)\d+\.\d+\.\d+(/{re.escape(pkg_under)}-)\d+\.\d+\.\d+(-py3-none-any\.whl)",
-            rf"\g<1>{c_ver}\g<2>{c_ver}\g<3>",
-            txt,
-        )
-        txt = re.sub(
-            rf"(`{re.escape(pkg_dash)}`(?:\]\([^)]+\))?\s*[（(]`v)\d+\.\d+\.\d+(`[)）])",
-            rf"\g<1>{c_ver}\g<2>",
-            txt,
-        )
-        txt = re.sub(
-            rf"(\b{re.escape(pkg_dash)} )(v?)(?!0\.0\.)\d+\.\d+\.\d+\b",
-            rf"\g<1>\g<2>{c_ver}",
-            txt,
-        )
-        txt = re.sub(
-            rf"(`{re.escape(pkg_dash)} {re.escape(c_ver)}`[（(]`)[0-9a-f]{{40}}(`[)）])",
-            rf"\g<1>{c_sha}\g<2>",
-            txt,
-        )
+    if repo_name not in EXPECTED_PLUGINS:
+        for comp_key, (pkg_dash, pkg_under) in PACKAGE_INFO.items():
+            c_ver = str(comps[comp_key]["version"])
+            c_sha = str(comps[comp_key]["commit"])
+            txt = re.sub(
+                rf"(https://github\.com/mindie-agent/{re.escape(comp_key)}/releases/download/v)\d+\.\d+\.\d+(/{re.escape(pkg_under)}-)\d+\.\d+\.\d+(-py3-none-any\.whl)",
+                rf"\g<1>{c_ver}\g<2>{c_ver}\g<3>",
+                txt,
+            )
+            txt = re.sub(
+                rf"(`{re.escape(pkg_dash)}`(?:\]\([^)]+\))?\s*[（(]`v)\d+\.\d+\.\d+(`[)）])",
+                rf"\g<1>{c_ver}\g<2>",
+                txt,
+            )
+            txt = re.sub(
+                rf"(\b{re.escape(pkg_dash)} )(v?)(?!0\.0\.)\d+\.\d+\.\d+\b",
+                rf"\g<1>\g<2>{c_ver}",
+                txt,
+            )
+            txt = re.sub(
+                rf"(`{re.escape(pkg_dash)} {re.escape(c_ver)}`\s*[（(]`)[0-9a-f]{{40}}(`[)）])",
+                rf"\g<1>{c_sha}\g<2>",
+                txt,
+            )
     return txt
+
+
+def _strip_fenced_code(text: str) -> str:
+    return re.sub(r"^```.*?^```", "", text, flags=re.MULTILINE | re.DOTALL)
+
+
+def _heading_slugs(raw_heading: str) -> set[str]:
+    clean = re.sub(r"<[^>]+>", "", raw_heading).strip()
+    clean = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", clean)
+    clean = clean.replace("`", "").replace("**", "").replace("*", "")
+    lowered = clean.lower()
+    slug_no_vs = re.sub(r"[^\w\s-]", "", lowered).replace(" ", "-")
+    slug_with_vs = re.sub(r"[^\w\s\ufe0f-]", "", lowered).replace(" ", "-")
+    return {slug_no_vs, slug_with_vs, slug_no_vs.strip("-"), slug_with_vs.strip("-")}
+
+
+def verify_markdown_anchors(label: str, text: str) -> list[str]:
+    errors: list[str] = []
+    stripped = _strip_fenced_code(text)
+    valid_anchors: set[str] = set()
+    seen_counts: dict[str, int] = {}
+    for match in re.finditer(r"^#{1,6}\s+(.+?)\s*$", stripped, flags=re.MULTILINE):
+        for slug in _heading_slugs(match.group(1)):
+            if not slug:
+                continue
+            count = seen_counts.get(slug, 0)
+            seen_counts[slug] = count + 1
+            valid_anchors.add(slug if count == 0 else f"{slug}-{count}")
+    for html_id in re.findall(r'\b(?:id|name)=["\']([^"\']+)["\']', stripped):
+        valid_anchors.add(html_id.strip().lower())
+
+    anchors = [
+        *re.findall(r"\[[^\]]+\]\(#([^)\s]+)\)", stripped),
+        *re.findall(r'href=["\']#([^"\'\s>]+)["\']', stripped),
+    ]
+    for raw_anchor in anchors:
+        candidate = urllib.parse.unquote(raw_anchor).strip().lower()
+        if candidate and candidate not in valid_anchors and candidate.replace("\ufe0f", "") not in valid_anchors:
+            errors.append(f"{label}: broken internal anchor #{raw_anchor}")
+    return errors
+
+
+def verify_no_stale_self_versions(label: str, text: str, repo_name: str, self_ver: str) -> list[str]:
+    errors: list[str] = []
+    stripped = _strip_fenced_code(text)
+    if repo_name in EXPECTED_PLUGINS:
+        for h_match in re.finditer(r"^#{1,6}\s+([^\n]+)$", stripped, flags=re.MULTILINE):
+            h_txt = h_match.group(1)
+            ver_in_heading = re.search(r"\b(0\.\d+\.\d+)\b", h_txt)
+            if ver_in_heading:
+                errors.append(
+                    f"{label}: section heading hardcodes patch version {ver_in_heading.group(1)!r} "
+                    f"({h_txt.strip()!r}); keep headings version-neutral"
+                )
+    patterns = (
+        rf"\b{re.escape(repo_name)}\.git#v(\d+\.\d+\.\d+)\b",
+        rf"\b{re.escape(repo_name)}\.git\s+--ref\s+v(\d+\.\d+\.\d+)\b",
+        rf"--branch\s+v(\d+\.\d+\.\d+)\s+https://github\.com/mindie-agent/{re.escape(repo_name)}\.git",
+        rf"\b{re.escape(repo_name)}\s+v?(\d+\.\d+\.\d+)\b",
+        r"(?:当前稳定版本|Current Release|当前正式版本)[：:\s]*\[?`v?(\d+\.\d+\.\d+)`\]?",
+    )
+    for pat in patterns:
+        for found in re.findall(pat, text):
+            if found != self_ver and not found.startswith("0.0."):
+                errors.append(f"{label}: stale self version {found!r} != channel version {self_ver!r}")
+    return errors
+
+
+def verify_unreleased_plugin_main(manifest: dict, siblings_roots: list[Path]) -> list[str]:
+    errors: list[str] = []
+    comps = manifest.get("components") or {}
+    for plugin_name in EXPECTED_PLUGINS:
+        entry = comps.get(plugin_name)
+        if not isinstance(entry, dict):
+            continue
+        repo_dir = resolve_sibling_repo(plugin_name, siblings_roots)
+        if repo_dir is None:
+            continue
+        res = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(repo_dir),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=15.0,
+            check=False,
+        )
+        if res.returncode == 0:
+            head_sha = res.stdout.strip()
+            expected_sha = str(entry.get("commit") or "")
+            if head_sha and expected_sha and head_sha != expected_sha:
+                errors.append(
+                    f"{plugin_name}: local checkout HEAD {head_sha[:8]} != channels/0.1.json "
+                    f"commit {expected_sha[:8]} ({entry.get('tag')})"
+                )
+    return errors
 
 
 def sync_sibling_readmes(
@@ -377,6 +489,11 @@ def sync_sibling_readmes(
     roots = siblings_roots if siblings_roots is not None else default_siblings_roots(repo_root)
     comps = m.get("components") or {}
     errors: list[str] = []
+
+    for main_rel in ("README.md", "README.en.md"):
+        main_readme = repo_root / main_rel
+        if main_readme.is_file():
+            errors.extend(verify_markdown_anchors(f"mindie-agent/{main_rel}", main_readme.read_text(encoding="utf-8")))
 
     for repo_name, entry in comps.items():
         repo_dir = resolve_sibling_repo(repo_name, roots)
@@ -403,6 +520,9 @@ def sync_sibling_readmes(
                 errors.append(f"{repo_name}/{rel}: missing shields.io Release badge for v{self_ver}")
             elif any(v != self_ver for v in badge_matches):
                 errors.append(f"{repo_name}/{rel}: Release badge versions {badge_matches} != expected {self_ver}")
+            if repo_name in EXPECTED_PLUGINS:
+                errors.extend(verify_markdown_anchors(f"{repo_name}/{rel}", current_txt))
+            errors.extend(verify_no_stale_self_versions(f"{repo_name}/{rel}", current_txt, repo_name, self_ver))
 
         for opt_rel in ("docs/README.md", "docs/README.en.md"):
             opt_target = repo_dir / opt_rel
@@ -451,3 +571,53 @@ def verify_github_releases(manifest: dict) -> list[str]:
         elif "SHA256SUMS" not in assets:
             errors.append(f"{repo}: GitHub Release {tag} missing SHA256SUMS asset")
     return errors
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--check", action="store_true", help="Verify docs and sibling READMEs without writing")
+    mode.add_argument("--write", action="store_true", help="Rewrite out-of-sync docs and sibling READMEs in place")
+    parser.add_argument(
+        "--channel",
+        type=Path,
+        default=Path(__file__).resolve().parents[2] / "channels" / "0.1.json",
+        help="Path to channels/0.1.json",
+    )
+    parser.add_argument(
+        "--siblings-root",
+        type=Path,
+        action="append",
+        default=[],
+        help="Directory containing sibling MindIE Agent repository checkouts",
+    )
+    parser.add_argument(
+        "--require-siblings",
+        action="store_true",
+        help="Fail if any expected sibling repository checkout is missing",
+    )
+    args = parser.parse_args(argv)
+    repo_root = args.channel.resolve().parents[1]
+    manifest = json.loads(args.channel.read_text(encoding="utf-8"))
+    roots = default_siblings_roots(repo_root, args.siblings_root)
+    errors = [
+        *verify_channel_schema(manifest, repo_root),
+        *sync_docs_versions(repo_root, manifest, args.write),
+        *sync_sibling_readmes(
+            repo_root,
+            manifest,
+            args.write,
+            siblings_roots=roots,
+            require_siblings=args.require_siblings,
+        ),
+    ]
+    if errors:
+        for err in errors:
+            print(f"[sibling-readme-sync:FAIL] {err}", file=sys.stderr)
+        return 1
+    print(f"[sibling-readme-sync:OK] Verified docs and sibling READMEs for channel v{manifest.get('current_patch_version')}.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
