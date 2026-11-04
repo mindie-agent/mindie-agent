@@ -61,90 +61,31 @@
 > 社区贡献默认关闭。用户明确开启目标知识库 `<owner/repo>` 的贡献后，才创建或复用该知识库的个人 Fork，并绑定 `<GH_USER>/<repo>` 作为推送目标。不要因安装而 Fork 主仓、插件仓或所有领域仓库。
 >
 > #### 第三步：识别你所在的宿主客户端并安装对应插件
-> 根据你自身的运行环境选择**唯一匹配**的分支执行（若不确定，请检查 `claude --version`、`codex --version`、`kimi --version`、`dsh --version`、`agy --version` 或 `cbc --version`；当前插件版本为 Codex `v0.1.19`、Claude Code `v0.1.15`、Kimi Code `v0.1.15`、DSH `v0.1.14`、Google Antigravity `v0.1.5` 与 Tencent WorkBuddy `v0.1.4`，共享组件直接从各官方 GitHub 仓库拉取最新正式 Release，完整版本清单见 [`channels/0.1.json`](./channels/0.1.json)）：
+> 只安装当前宿主对应的一个插件。打开该适配器仓库的安装页，执行其中的 Agent 自动安装协议。本页保留宿主识别、版本钉和安装页链接。当前插件版本为 Codex `v0.1.19`、Claude Code `v0.1.15`、Kimi Code `v0.1.15`、DSH `v0.1.14`、Google Antigravity `v0.1.5` 与 Tencent WorkBuddy `v0.1.4`，与 [`channels/0.1.json`](./channels/0.1.json) 以及 Codex、DSH harness `main` 安装页上的正式 tag 一致。共享组件由各插件从官方 GitHub Release 发现。
 >
-> - **分支 A — 如果你是 Claude Code（或检测到 `CLAUDECODE` 环境变量 / 用户使用 `claude`）**：
+> 按下面的顺序选定唯一分支，命中即停止。当前进程的会话标记优先于本机 CLI：有 `CODEX_THREAD_ID` 或 `CODEX_CI` 就选分支 B，即使 `claude --version` 也能成功。不要按列表顺序取第一个 `--version` 成功项。
+>
+> 1. 当前进程有 `CODEX_THREAD_ID` 或 `CODEX_CI` → 分支 B。
+> 2. 当前进程有 `CLAUDECODE` → 分支 A。
+> 3. 当前对话就在 Google Antigravity 或 Tencent WorkBuddy 中 → 分支 E 或 F。用应用包和数据目录确认；PATH 上没有 `agy` 或 `cbc`。
+> 4. 当前进程有 `DSH_PROFILE` 或 `DSH_HOME` → 分支 D。
+> 5. 当前进程有 `KIMI_CODE_HOME` → 分支 C。只认进程环境里的变量，不把磁盘上的 `~/.kimi-code` 当成会话。
+> 6. 以上都没有时，再用各分支写出的 `codex --version`、`claude --version`、`kimi --version`、`dsh --version` 和应用包探测。多个入口同时存在时询问用户。
+>
+> - **分支 A — Claude Code**：安装页：[mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.15/README.md#快速开始)。Claude Code 成功标准：`v0.1.15`（`claude plugin list --json` 里 `mindie-agent@mindie-agent-cc` 已启用）。该安装页的核对句可能仍比安装 ref 旧一个补丁，以这个成功标准为准。
+> - **分支 B — OpenAI Codex CLI**：安装页：[mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.19/README.md#快速开始)。Codex 安装 ref 与成功标准：`v0.1.19`（`codex plugin list --json` 里 `mindie-agent@mindie-agent` 已启用）。安装页核对句若更旧，以这个成功标准为准。
+> - **分支 C — Kimi Code CLI**：安装页：[mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.15/README.md#快速开始)。
+> - **分支 D — DeepSeek Harness（DSH）**：安装页：[mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.14/README.md#快速开始)。
+> - **分支 E — Google Antigravity**：macOS 应用包 `/Applications/Antigravity.app`（也查找 `~/Applications/Antigravity.app`），以及用户数据目录 `~/.gemini/antigravity`。适配器 `agy_app_data_dirs()` 还会只读 `~/.gemini/antigravity-cli`、`~/.gemini/antigravity-ide` 和绝对路径 `AGY_APP_DATA_DIR`。需要宿主版本时读取 `Antigravity.app/Contents/Info.plist` 的 `CFBundleShortVersionString`。安装页：[mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.5/README.md#快速开始交给-agent-一句话自动安装)。该页把插件复制到 `~/.gemini/config/plugins/mindie-agent` 后再从那里运行 `setup.py`。此时 `plugin_root()` 是复制后的插件目录，`_discover_checkout_source()` 的第一候选 `plugin_root().parent.parent` 变成 `~/.gemini/config`，里面没有 `pyproject.toml`。函数接着才看 `repo_root()`（绝对路径环境变量 `MINDIE_AGY_SOURCE_ROOT`，且该目录含 `pyproject.toml`）、`${TMPDIR:-/tmp}/mindie-agent-agy-install` 和 `data_home()/agy-source`。相对路径 `./mindie-agent-agy` 不在候选里。发现失败时 `stage_source_baseline()` 退回 `repo_root()` 的 `~/.gemini/config`，`uv sync --project` 会失败。在执行该页 `setup.py init` 的同一个 shell 里先把钉住的 tag 检出，并导出绝对路径 `MINDIE_AGY_SOURCE_ROOT`（目录内必须有 `pyproject.toml` 与 `product-contract.json`）：
 >   ```bash
->   claude plugin marketplace add "https://github.com/mindie-agent/mindie-agent-cc.git#v0.1.15"
->   claude plugin install mindie-agent@mindie-agent-cc --scope user
->   claude --init-only
->   claude plugin list --json
->   claude mcp list
+>   export MINDIE_AGY_SOURCE_ROOT="$(pwd)/mindie-agent-agy"
+>   git -c core.autocrlf=false -c core.longpaths=true clone --depth 1 --branch v0.1.5 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_AGY_SOURCE_ROOT"
 >   ```
->   *验证标准*：`claude plugin list --json` 显示 `mindie-agent@mindie-agent-cc`（`0.1.15`）已启用，且 `claude mcp list` 中 `knowledge`、`remote` 与 `components` 均显示 `Connected`。
+>   安装页第 2 步的 `git clone` 没有 `--branch`，跳过它。用这次检出作为复制来源，只执行该页的 `mkdir` / `cp`，再在仍导出 `MINDIE_AGY_SOURCE_ROOT` 的同一进程里运行该页的 `setup.py init`。另一条路径是把同一个检出放到 `${TMPDIR:-/tmp}/mindie-agent-agy-install`：`_discover_checkout_source()` 会搜索该目录，这时不必导出变量，但 `cp` 的来源必须是这个目录。两条路径只选一条。
+> - **分支 F — Tencent WorkBuddy / CodeBuddy**：应用包内的 `codebuddy`，路径为 `/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy` 或 `~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`，或已存在的绝对路径 `MINDIE_WB_BIN`；配置目录为 `~/.workbuddy`（绝对路径的 `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` 优先）。在钉住的 tag 检出上执行安装页中的 `setup.py init --install-wb`，并用该页给出的 `codebuddy plugin validate` 核验。安装页：[mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.4/README.md#3-快速安装与验证)。
+> - **分支 G — Cursor 或其他通用 MCP 客户端**（只要 SSH 远端底座 `remote-dev`）：按 [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.5/README.md) 注册 stdio 服务，来源钉为 `remote-dev@v0.11.5`。
 >
-> - **分支 B — 如果你是 OpenAI Codex CLI（或检测到 `CODEX_CI` / `CODEX_THREAD_ID` / 用户使用 `codex`）**：
->   ```bash
->   codex plugin marketplace add https://github.com/mindie-agent/mindie-agent-codex.git --ref v0.1.19
->   codex plugin add mindie-agent@mindie-agent --json
->   codex plugin list --json
->   ```
->   *验证标准*：`codex plugin list --json` 显示 `mindie-agent@mindie-agent`（`0.1.19`）已启用。提醒用户开启新会话即可自动触发 `SessionStart` 构建锁定运行时。
->
-> - **分支 C — 如果你是 Kimi Code CLI（或检测到 `KIMI_CODE_HOME` / 用户使用 `kimi`）**：
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-kimi-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.15 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
->   SETUP_OUT=$(UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/setup.py")
->   echo "$SETUP_OUT"
->   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | uv run --no-project --python 3.13 python -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
->   uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
->   ```
->   *验证标准*：安装脚本成功返回，告知用户可在会话中输入 `/mindie-agent` 使用。
->
-> - **分支 D — 如果你是 DeepSeek Harness（DSH，或检测到 `DSH_PROFILE` / `DSH_HOME` / 用户使用 `dsh`）**：
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-dsh-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.14 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
->   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
->   ```
->   随后在 DSH Web 的 **Plugins** 页面安装并启用：
->   ```text
->   git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.14
->   ```
->   如果当前就在 DSH 会话内且具备 `plugin_manager` 工具，可用它完成同一步骤：
->   ```text
->   plugin_manager(action="install_bundle", target="git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.14")
->   ```
->   *验证标准*：`setup.py` 最终 JSON 中 `status` 为 `ready`、`activation.status` 为 `active`，且 `knowledge.status` 为 `inactive`（安装期不启动知识服务，待会话内调用 `/mindie-agent` 时按需启用）；Plugins 页面显示 `mindie-agent-dsh` 已启用。提醒用户打开**新会话**后即可使用 `/mindie-agent`。
->
-> - **分支 E — 如果你是 Google Antigravity（AGY，或检测到 `~/.gemini/antigravity` / 用户使用 `agy`）**：
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-agy-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.5 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
->   mkdir -p ~/.gemini/config/plugins ~/.gemini/plugins
->   rm -rf ~/.gemini/config/plugins/mindie-agent ~/.gemini/plugins/mindie-agent
->   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/config/plugins/mindie-agent
->   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/plugins/mindie-agent
->   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$PWD"
->   ```
->   *验证标准*：`setup.py init` 返回 `status: initialized` 且生成 `~/.config/mindie-agent/agy.json`，插件挂载在 `~/.gemini/plugins/mindie-agent`（也可挂载到工作区 `.agents/plugins/mindie-agent`）。提醒用户在会话中输入 `/mindie-agent` 即可按需启用领域知识与 Skill。
->
-> - **分支 F — 如果你是 Tencent WorkBuddy / CodeBuddy Agent CLI（或检测到 `~/.workbuddy` / `~/.codebuddy` / 用户使用 `workbuddy` 或 `cbc`）**：
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-wb-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.4 https://github.com/mindie-agent/mindie-agent-wb.git "$MINDIE_TMP"
->   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python "$MINDIE_TMP/plugins/mindie-agent/scripts/setup.py" init --workspace-root "$PWD"
->   ```
->   *验证标准*：`setup.py init` 返回 `status: initialized` 且生成 `~/.config/mindie-agent/wb.json`，自动将 `plugins/mindie-agent` 同步挂载为 WorkBuddy Connector 与 CodeBuddy 原生插件。提醒用户在会话中输入 `/mindie-agent` 即可按需启用领域知识与 Skill。
->
-> - **分支 G — 如果你是 Cursor / 其他通用 MCP 客户端（仅需 SSH 远端 NPU 开发底座 `remote-dev`）**：
->   在项目的 `.mcp.json`（或 `.cursor/mcp.json`）中写入 `remote-dev` 服务：
->   ```json
->   {
->     "mcpServers": {
->       "remote-dev": {
->         "type": "stdio",
->         "command": "uvx",
->         "args": ["--from", "git+https://github.com/mindie-agent/remote-dev@v0.11.5", "remote-dev", "server"]
->       }
->     }
->   }
->   ```
+> 选定唯一分支后，按该安装页的协议安装上面钉住的 tag。Codex 与 Claude Code 以本页写出的成功标准为准。首次工作区引导仍走第四步的 Skill 参考。
 >
 > #### 第四步：完成首次配置与开发工作区引导
 > 六种完整插件安装后均引导完成首次工作区配置：复用已验证的 GitHub 认证，介绍用户须知，并提供创建/初始化 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace)、复用已有目录或继续当前工作区的选项：

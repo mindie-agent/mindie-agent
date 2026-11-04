@@ -60,91 +60,32 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >
 > Community contribution is off by default. Only after the user enables contribution to a target corpus `<owner/repo>` should you create or reuse that corpus's personal Fork and bind `<GH_USER>/<repo>` as the push target. Do not Fork the main repository, plugin repositories or all domain repositories as an installation step.
 >
-> #### Step 3: Identify your host environment & install the matching plugin
-> Run the **single matching branch** for your host CLI (check `claude --version`, `codex --version`, `kimi --version`, `dsh --version`, `agy --version`, or `cbc --version` if unsure; current plugin versions are Codex `v0.1.19`, Claude Code `v0.1.15`, Kimi Code `v0.1.15`, DSH `v0.1.14`, Google Antigravity `v0.1.5`, and Tencent WorkBuddy `v0.1.4`, while shared runtime components discover the latest formal GitHub Releases directly from their official repositories; see [`channels/0.1.json`](./channels/0.1.json) for the full release manifest):
+> #### Step 3: Identify your host environment and install the matching plugin
+> Install only the plugin for the current host. Open that adapter repository's install page and run the Agent protocol written there. This page keeps host detection, version pins, and install-page links; current plugin versions are Codex `v0.1.19`, Claude Code `v0.1.15`, Kimi Code `v0.1.15`, DSH `v0.1.14`, Google Antigravity `v0.1.5`, and Tencent WorkBuddy `v0.1.4`. These pins match [`channels/0.1.json`](./channels/0.1.json) and the formal tags on the Codex and DSH install pages at harness `main`. Each plugin discovers shared components from official GitHub Releases.
 >
-> - **Branch A — If you are running inside Claude Code (`CLAUDECODE` env or `claude` CLI)**:
+> Select exactly one branch in this order and stop at the first hit. Session markers in the current process outrank a local CLI. `CODEX_THREAD_ID` or `CODEX_CI` selects Branch B even when `claude --version` succeeds. Do not take the first `--version` that exits 0.
+>
+> 1. `CODEX_THREAD_ID` or `CODEX_CI` in the current process → Branch B.
+> 2. `CLAUDECODE` in the current process → Branch A.
+> 3. This conversation is already inside Google Antigravity or Tencent WorkBuddy → Branch E or F. Confirm with the app bundle and data directory. There is no `agy` or `cbc` executable on `PATH`.
+> 4. `DSH_PROFILE` or `DSH_HOME` in the current process → Branch D.
+> 5. `KIMI_CODE_HOME` in the current process → Branch C. A `~/.kimi-code` directory on disk is not a session.
+> 6. Otherwise probe `codex --version`, `claude --version`, `kimi --version`, `dsh --version`, and the app bundles named below. If more than one entry exists, ask the user.
+>
+> - **Branch A — Claude Code**: Install page: [mindie-agent-cc Quick Start](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.15/README.en.md#quick-start). Claude Code success version: `v0.1.15` (`mindie-agent@mindie-agent-cc` enabled in `claude plugin list --json`). That install page's check sentence may still name the previous patch; use this success version.
+> - **Branch B — OpenAI Codex CLI**: Install page: [mindie-agent-codex Quick Start](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.19/README.en.md#quick-start). Codex install ref and success version: `v0.1.19` (`mindie-agent@mindie-agent` enabled in `codex plugin list --json`). If that page's check sentence is older, use this success version.
+> - **Branch C — Kimi Code CLI**: Install page: [mindie-agent-kimi Quick Start](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.15/README.en.md#quick-start).
+> - **Branch D — DeepSeek Harness (DSH)**: Install page: [mindie-agent-dsh Quick Start](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.14/README.en.md#quick-start).
+> - **Branch E — Google Antigravity**: the macOS app bundle `/Applications/Antigravity.app` (also look for `~/Applications/Antigravity.app`) and the user data directory `~/.gemini/antigravity`. The adapter `agy_app_data_dirs()` also reads `~/.gemini/antigravity-cli`, `~/.gemini/antigravity-ide`, and an absolute `AGY_APP_DATA_DIR`. When a host version is required, read `CFBundleShortVersionString` from `Antigravity.app/Contents/Info.plist`. Install page: [mindie-agent-agy Quick Start](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.5/README.en.md#quick-start-one-sentence-agent-install). That page copies the plugin to `~/.gemini/config/plugins/mindie-agent` and then runs `setup.py` from the copy. `plugin_root()` is that copied directory, so the first `_discover_checkout_source()` candidate, `plugin_root().parent.parent`, is `~/.gemini/config`, which has no `pyproject.toml`. The function then checks `repo_root()` (absolute `MINDIE_AGY_SOURCE_ROOT` whose directory contains `pyproject.toml`), `${TMPDIR:-/tmp}/mindie-agent-agy-install`, and `data_home()/agy-source`. A relative `./mindie-agent-agy` clone is not a candidate. When discovery misses, `stage_source_baseline()` returns `repo_root()`'s `~/.gemini/config` and `uv sync --project` fails. In the same shell that will run that page's `setup.py init`, clone the pinned tag and export an absolute `MINDIE_AGY_SOURCE_ROOT` (the directory must contain `pyproject.toml` and `product-contract.json`):
 >   ```bash
->   claude plugin marketplace add "https://github.com/mindie-agent/mindie-agent-cc.git#v0.1.15"
->   claude plugin install mindie-agent@mindie-agent-cc --scope user
->   claude --init-only
->   claude plugin list --json
->   claude mcp list
+>   export MINDIE_AGY_SOURCE_ROOT="$(pwd)/mindie-agent-agy"
+>   git -c core.autocrlf=false -c core.longpaths=true clone --depth 1 --branch v0.1.5 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_AGY_SOURCE_ROOT"
 >   ```
->   *Verification*: Confirm `claude plugin list --json` shows `mindie-agent@mindie-agent-cc` (`0.1.15`) enabled and `claude mcp list` shows `knowledge`, `remote`, and `components` as `Connected`.
+>   Skip that page's step-2 `git clone`; it has no `--branch`. Copy `plugins/mindie-agent` from this checkout with the page's `mkdir` / `cp`, then run its `setup.py init` in the same process that still exports `MINDIE_AGY_SOURCE_ROOT`. The other path is this same checkout at `${TMPDIR:-/tmp}/mindie-agent-agy-install`: `_discover_checkout_source()` already searches that directory, so the variable is unnecessary, but `cp` must read that directory. Pick one path.
+> - **Branch F — Tencent WorkBuddy / CodeBuddy**: the bundled `codebuddy` binary at `/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy` or `~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`, or an existing absolute `MINDIE_WB_BIN`; the config directory is `~/.workbuddy` (absolute `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` take precedence). On the pinned tag checkout, run the install page's `setup.py init --install-wb` and its `codebuddy plugin validate` check. Install page: [mindie-agent-wb Installation](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.4/README.en.md#installation).
+> - **Branch G — Cursor or another generic MCP client** (`remote-dev` SSH base only): register the stdio server from the [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.5/README.md). Source pin: `remote-dev@v0.11.5`.
 >
-> - **Branch B — If you are running inside OpenAI Codex CLI (`CODEX_CI` / `CODEX_THREAD_ID` env or `codex` CLI)**:
->   ```bash
->   codex plugin marketplace add https://github.com/mindie-agent/mindie-agent-codex.git --ref v0.1.19
->   codex plugin add mindie-agent@mindie-agent --json
->   codex plugin list --json
->   ```
->   *Verification*: Confirm `codex plugin list --json` shows `mindie-agent@mindie-agent` (`0.1.19`) enabled. Let the user know that starting a new session will trigger `SessionStart` to build the locked runtime.
->
-> - **Branch C — If you are running inside Kimi Code CLI (`KIMI_CODE_HOME` env or `kimi` CLI)**:
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-kimi-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.15 https://github.com/mindie-agent/mindie-agent-kimi.git "$MINDIE_TMP"
->   SETUP_OUT=$(UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/setup.py")
->   echo "$SETUP_OUT"
->   NATIVE_PKG=$(printf '%s\n' "$SETUP_OUT" | uv run --no-project --python 3.13 python -c 'import sys, json; text=sys.stdin.read(); data=json.loads(text[text.find("{"):]); print(data["native_package"])')
->   uv run --no-project --python 3.13 python "$MINDIE_TMP/scripts/install_kimi_plugin.py" --kimi-home "${KIMI_CODE_HOME:-$HOME/.kimi-code}" --plugin-root "$NATIVE_PKG"
->   ```
->   *Verification*: Confirm `install_kimi_plugin.py` succeeds and let the user know they can use `/mindie-agent` inside Kimi Code.
->
-> - **Branch D — If you are running inside DeepSeek Harness (DSH; `DSH_PROFILE` / `DSH_HOME`, or the `dsh` CLI)**:
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-dsh-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.14 https://github.com/mindie-agent/mindie-agent-dsh.git "$MINDIE_TMP"
->   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --quiet --no-project --python 3.11 "$MINDIE_TMP/scripts/setup.py"
->   ```
->   Then install and enable in the DSH Web **Plugins** page:
->   ```text
->   git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.14
->   ```
->   Inside a DSH session that has the `plugin_manager` tool, the same step is:
->   ```text
->   plugin_manager(action="install_bundle", target="git+https://github.com/mindie-agent/mindie-agent-dsh.git#v0.1.14")
->   ```
->   *Verification*: `setup.py` reports `status: ready`, `activation.status: active`, and `knowledge.status: inactive` (knowledge stays inactive during setup until a session manually invokes `/mindie-agent`); the Plugins page shows `mindie-agent-dsh` enabled. Let the user know to open a **new session** and invoke `/mindie-agent`.
->
-> - **Branch E — If you are running inside Google Antigravity (`~/.gemini/antigravity` or the `agy` CLI)**:
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-agy-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.5 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_TMP"
->   mkdir -p ~/.gemini/config/plugins ~/.gemini/plugins
->   rm -rf ~/.gemini/config/plugins/mindie-agent ~/.gemini/plugins/mindie-agent
->   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/config/plugins/mindie-agent
->   cp -R "$MINDIE_TMP/plugins/mindie-agent" ~/.gemini/plugins/mindie-agent
->   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$PWD"
->   ```
->   *Verification*: `setup.py init` returns `status: initialized` and writes `~/.config/mindie-agent/agy.json` with the plugin mounted at `~/.gemini/plugins/mindie-agent` (or `.agents/plugins/mindie-agent` for workspace scope). Let the user know they can type `/mindie-agent` inside Antigravity to activate domain knowledge and Skill guidance on demand.
->
-> - **Branch F — If you are running inside Tencent WorkBuddy / CodeBuddy Agent CLI (`~/.workbuddy` / `~/.codebuddy`, or the `workbuddy` / `cbc` CLI)**:
->   ```bash
->   MINDIE_TMP="${TMPDIR:-/tmp}/mindie-agent-wb-install"
->   rm -rf "$MINDIE_TMP"
->   git -c core.longpaths=true -c core.autocrlf=false clone --depth 1 --branch v0.1.4 https://github.com/mindie-agent/mindie-agent-wb.git "$MINDIE_TMP"
->   UV_SYSTEM_CERTS=true UV_NATIVE_TLS=true uv run --no-project --python 3.13 python "$MINDIE_TMP/plugins/mindie-agent/scripts/setup.py" init --workspace-root "$PWD"
->   ```
->   *Verification*: `setup.py init` returns `status: initialized` and writes `~/.config/mindie-agent/wb.json`, mounting `plugins/mindie-agent` as both a WorkBuddy Connector and a CodeBuddy native plugin. Let the user know they can type `/mindie-agent` inside WorkBuddy to activate domain knowledge and Skill guidance on demand.
->
-> - **Branch G — If you are running inside Cursor or another generic MCP client (standalone `remote-dev` SSH toolset)**:
->   Add `remote-dev` to `.mcp.json` (or `.cursor/mcp.json`):
->   ```json
->   {
->     "mcpServers": {
->       "remote-dev": {
->         "type": "stdio",
->         "command": "uvx",
->         "args": ["--from", "git+https://github.com/mindie-agent/remote-dev@v0.11.5", "remote-dev", "server"]
->       }
->     }
->   }
->   ```
+> After selecting the single matching branch, install the tag pinned above by following that page. For Codex and Claude Code, use the success version written on this page. First-time workspace onboarding stays with the Skill references in Step 4.
 >
 > #### Step 4: Finish first-time setup and development workspace onboarding
 > All six full plugin installations include first-time workspace onboarding: reuse verified GitHub authentication, present the user notice, and offer creating/initializing [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace), reusing an existing directory, or keeping the current directory:
