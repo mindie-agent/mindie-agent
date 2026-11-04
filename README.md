@@ -1,6 +1,6 @@
 # 📊 MindIE Agent 开源仓库与下载统计
 
-> **最近更新**：`2026-11-04 12:59 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
+> **最近更新**：`2026-11-04 13:02 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
 
 ![MindIE Agent Repository & Download Statistics](./dashboard.zh.svg)
 
@@ -12,7 +12,7 @@
 | 技能目录 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) | `commit@46bc588d` | 4 | 8 | **252** | 148 (71) | 263 (39) | 0 (0) |
 | 客户端插件 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) | `v0.1.19` | 0 | 3 | **4,684** | 3,227 (445) | 15 (12) | 1,027 (1,198) |
 | 客户端插件 | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) | `v0.1.15` | 0 | 0 | **2,687** | 1,839 (294) | 4 (3) | 201 (350) |
-| 客户端插件 | [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) | `v0.1.14` | 0 | 0 | **3,081** | 2,166 (357) | 2 (2) | 2,243 (2,386) |
+| 客户端插件 | [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) | `v0.1.15` | 0 | 0 | **3,081** | 2,166 (357) | 2 (2) | 2,243 (2,386) |
 | 客户端插件 | [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | `v0.1.13` | 0 | 0 | **1,831** | 1,472 (367) | 16 (14) | 77 (221) |
 | 客户端插件 | [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) | `v0.1.5` | 0 | 0 | **142** | 142 (48) | 5 (4) | 10 (20) |
 | 客户端插件 | [`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb) | `v0.1.4` | 0 | 0 | **47** | 47 (18) | 0 (0) | 4 (12) |

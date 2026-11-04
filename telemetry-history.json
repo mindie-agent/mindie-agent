@@ -1299,7 +1299,7 @@
         "cumulative_views": 3,
         "pkg_downloads": 2243,
         "all_asset_downloads": 2386,
-        "latest_release": "v0.1.14"
+        "latest_release": "v0.1.15"
       }
     },
     "mindie-agent-dsh": {
@@ -5403,5 +5403,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-04 12:59"
+  "updated_at_cst": "2026-11-04 13:02"
 }
