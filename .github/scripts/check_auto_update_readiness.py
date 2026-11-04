@@ -435,6 +435,53 @@ FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
     "workbuddy": ("1.0.0", "1.1.0", "2.0.0-rc.1"),
 }
 
+WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str], ...] = (
+    ("mindie-agent-dsh", "scripts/setup_process.py"),
+    ("mindie-agent-agy", "plugins/mindie-agent/scripts/bounded.py"),
+    ("mindie-agent-agy", "plugins/mindie-agent/scripts/component_update.py"),
+    ("mindie-agent-wb", "plugins/mindie-agent/scripts/bounded.py"),
+    ("mindie-agent-wb", "plugins/mindie-agent/scripts/component_update.py"),
+    ("mindie-agent-cc", "scripts/bounded_win32.py"),
+    ("mindie-agent-codex", "plugins/mindie-agent/scripts/windows_process.py"),
+    ("mindie-agent-kimi", "scripts/bounded.py"),
+    ("knowledge", "mindie_knowledge/windows_process.py"),
+    ("knowledge", "mindie_knowledge/loop/process.py"),
+    ("knowledge", "mindie_knowledge/gitread.py"),
+    ("knowledge", "mindie_knowledge/release_http.py"),
+    ("diagnostics", "mindie_diagnostics/platform_service.py"),
+    ("diagnostics", "mindie_diagnostics/reporter.py"),
+    ("remote-dev", "remote_dev/core/local_process.py"),
+    ("coordinator", "mindie_coordinator/service_client.py"),
+)
+
+
+def verify_windows_windowless_spawns(siblings_roots: list[Path]) -> list[str]:
+    """Ensure Node.js spawn calls set windowsHide:true and Windows Python subprocess wrappers set CREATE_NO_WINDOW."""
+    errors: list[str] = []
+    dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
+    if dsh_dir is not None:
+        host_mjs = dsh_dir / "host3.mjs"
+        if host_mjs.is_file():
+            text = host_mjs.read_text(encoding="utf-8")
+            spawn_count = len(re.findall(r"\bspawn\s*\(", text))
+            hide_count = len(re.findall(r"\bwindowsHide\s*:\s*true\b", text))
+            if spawn_count == 0 or hide_count < spawn_count:
+                errors.append(
+                    f"mindie-agent-dsh: host3.mjs has {spawn_count} spawn() call(s) but only "
+                    f"{hide_count} windowsHide: true setting(s) (Windows console popup risk)"
+                )
+    for repo_name, rel_path in WINDOWS_NO_WINDOW_REQUIRED_FILES:
+        repo_dir = _resolve_repo(repo_name, siblings_roots)
+        if repo_dir is None:
+            continue
+        target = repo_dir / rel_path
+        if not target.is_file():
+            errors.append(f"{repo_name}: missing expected subprocess wrapper {rel_path}")
+            continue
+        if "CREATE_NO_WINDOW" not in target.read_text(encoding="utf-8"):
+            errors.append(f"{repo_name}: {rel_path} missing subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
+    return errors
+
 
 def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[str]:
     """Verify that the latest shared component code is API-compatible with all 6 host plugins."""
@@ -525,6 +572,7 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
                         f"{plugin_name}: harness-compatibility.json rejects synthetic forward host version {probe_ver}"
                     )
 
+    errors.extend(verify_windows_windowless_spawns(siblings_roots))
     return errors
 
 

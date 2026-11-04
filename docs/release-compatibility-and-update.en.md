@@ -72,7 +72,7 @@ Milestone or coordinated patch releases follow a **bottom-up dependency order** 
    - Host plugin runtime baselines include `knowledge`, `remote-dev`, and `diagnostics`; a packaged dependency does not imply public knowledge discovery. Codex `0.1.8` registers only remote-dev and deterministic component entries in default MCP discovery, with a private knowledge catalog loaded by the manual Skill. Independently installed `coordinator`, `profiler`, and `sim` can use these entries; `npu-top` remains a standalone human dashboard. Verify other hosts against their own release evidence.
    - `mindie-bench` maintains its own version sequence and is referenced by immutable commit SHA in release workflows.
 
-Before publishing any plugin Release or updating [`channels/0.1.json`](../channels/0.1.json), maintainers verify the following checklist:
+Before publishing any component, corpus, or plugin Release or updating [`channels/0.1.json`](../channels/0.1.json), maintainers must run and pass the automated Release Checklist (`R1–R6` via `python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts --verify-github-releases`), which also enforces the Windows Zero Console Popup gate (`windowsHide: true` in Node.js `spawn` calls and `CREATE_NO_WINDOW` in Python subprocess wrappers across updaters, hooks, MCP servers, and shared components), and verify the following checklist:
 
 | Pre-Release Check | Verification Standard |
 | --- | --- |
