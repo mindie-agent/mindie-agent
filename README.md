@@ -63,17 +63,29 @@
 > #### 第三步：识别你所在的宿主客户端并安装对应插件
 > 只安装当前宿主对应的一个插件。打开该适配器仓库的安装页，执行其中的 Agent 自动安装协议。本页保留宿主识别、版本钉和安装页链接。当前插件版本为 Codex `v0.1.19`、Claude Code `v0.1.15`、Kimi Code `v0.1.15`、DSH `v0.1.14`、Google Antigravity `v0.1.5` 与 Tencent WorkBuddy `v0.1.4`，与 [`channels/0.1.json`](./channels/0.1.json) 以及 Codex、DSH harness `main` 安装页上的正式 tag 一致。共享组件由各插件从官方 GitHub Release 发现。
 >
-> 宿主识别只探测真实入口，命中一条即选用该分支：
+> 按下面的顺序选定唯一分支，命中即停止。当前进程的会话标记优先于本机 CLI：有 `CODEX_THREAD_ID` 或 `CODEX_CI` 就选分支 B，即使 `claude --version` 也能成功。不要按列表顺序取第一个 `--version` 成功项。
 >
-> - **分支 A — Claude Code**：`CLAUDECODE`，或 `claude --version`。安装页：[mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.15/README.md#快速开始)。
-> - **分支 B — OpenAI Codex CLI**：`CODEX_CI` / `CODEX_THREAD_ID`，或 `codex --version`。安装页：[mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.19/README.md#快速开始)。安装 ref 使用该页与本页钉住的 `v0.1.19`；该页核对句若仍写 `0.1.18`，已启用的 `0.1.19` 即为安装成功。
-> - **分支 C — Kimi Code CLI**：`KIMI_CODE_HOME`，或 `kimi --version`。安装页：[mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.15/README.md#快速开始)。
-> - **分支 D — DeepSeek Harness（DSH）**：`DSH_PROFILE` / `DSH_HOME`，或 `dsh --version`。安装页：[mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.14/README.md#快速开始)。
-> - **分支 E — Google Antigravity**：macOS 应用包 `/Applications/Antigravity.app`（也查找 `~/Applications/Antigravity.app`），以及用户数据目录 `~/.gemini/antigravity`。适配器 `agy_app_data_dirs()` 还会只读 `~/.gemini/antigravity-cli`、`~/.gemini/antigravity-ide` 和绝对路径 `AGY_APP_DATA_DIR`。PATH 上没有 `agy` 可执行文件。需要宿主版本时读取 `Antigravity.app/Contents/Info.plist` 的 `CFBundleShortVersionString`。安装页：[mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.5/README.md#快速开始交给-agent-一句话自动安装)。
-> - **分支 F — Tencent WorkBuddy / CodeBuddy**：应用包内的 `codebuddy`，路径为 `/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy` 或 `~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`，或已存在的绝对路径 `MINDIE_WB_BIN`；配置目录为 `~/.workbuddy`（绝对路径的 `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` 优先）。PATH 上没有 `cbc` 可执行文件。在钉住的 tag 检出上执行安装页中的 `setup.py init --install-wb`，并用该页给出的 `codebuddy plugin validate` 核验。安装页：[mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.4/README.md#3-快速安装与验证)。
+> 1. 当前进程有 `CODEX_THREAD_ID` 或 `CODEX_CI` → 分支 B。
+> 2. 当前进程有 `CLAUDECODE` → 分支 A。
+> 3. 当前对话就在 Google Antigravity 或 Tencent WorkBuddy 中 → 分支 E 或 F。用应用包和数据目录确认；PATH 上没有 `agy` 或 `cbc`。
+> 4. 当前进程有 `DSH_PROFILE` 或 `DSH_HOME` → 分支 D。
+> 5. 当前进程有 `KIMI_CODE_HOME` → 分支 C。只认进程环境里的变量，不把磁盘上的 `~/.kimi-code` 当成会话。
+> 6. 以上都没有时，再用各分支写出的 `codex --version`、`claude --version`、`kimi --version`、`dsh --version` 和应用包探测。多个入口同时存在时询问用户。
+>
+> - **分支 A — Claude Code**：安装页：[mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.15/README.md#快速开始)。Claude Code 成功标准：`v0.1.15`（`claude plugin list --json` 里 `mindie-agent@mindie-agent-cc` 已启用）。该安装页的核对句可能仍比安装 ref 旧一个补丁，以这个成功标准为准。
+> - **分支 B — OpenAI Codex CLI**：安装页：[mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.19/README.md#快速开始)。Codex 安装 ref 与成功标准：`v0.1.19`（`codex plugin list --json` 里 `mindie-agent@mindie-agent` 已启用）。安装页核对句若更旧，以这个成功标准为准。
+> - **分支 C — Kimi Code CLI**：安装页：[mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.15/README.md#快速开始)。
+> - **分支 D — DeepSeek Harness（DSH）**：安装页：[mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.14/README.md#快速开始)。
+> - **分支 E — Google Antigravity**：macOS 应用包 `/Applications/Antigravity.app`（也查找 `~/Applications/Antigravity.app`），以及用户数据目录 `~/.gemini/antigravity`。适配器 `agy_app_data_dirs()` 还会只读 `~/.gemini/antigravity-cli`、`~/.gemini/antigravity-ide` 和绝对路径 `AGY_APP_DATA_DIR`。需要宿主版本时读取 `Antigravity.app/Contents/Info.plist` 的 `CFBundleShortVersionString`。安装页：[mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.5/README.md#快速开始交给-agent-一句话自动安装)。该页把插件复制到 `~/.gemini/config/plugins/mindie-agent` 后再从那里运行 `setup.py`。此时 `plugin_root()` 是复制后的插件目录，`_discover_checkout_source()` 的第一候选 `plugin_root().parent.parent` 变成 `~/.gemini/config`，里面没有 `pyproject.toml`。函数接着才看 `repo_root()`（绝对路径环境变量 `MINDIE_AGY_SOURCE_ROOT`，且该目录含 `pyproject.toml`）、`${TMPDIR:-/tmp}/mindie-agent-agy-install` 和 `data_home()/agy-source`。相对路径 `./mindie-agent-agy` 不在候选里。发现失败时 `stage_source_baseline()` 退回 `repo_root()` 的 `~/.gemini/config`，`uv sync --project` 会失败。在执行该页 `setup.py init` 的同一个 shell 里先把钉住的 tag 检出，并导出绝对路径 `MINDIE_AGY_SOURCE_ROOT`（目录内必须有 `pyproject.toml` 与 `product-contract.json`）：
+>   ```bash
+>   export MINDIE_AGY_SOURCE_ROOT="$(pwd)/mindie-agent-agy"
+>   git -c core.autocrlf=false -c core.longpaths=true clone --depth 1 --branch v0.1.5 https://github.com/mindie-agent/mindie-agent-agy.git "$MINDIE_AGY_SOURCE_ROOT"
+>   ```
+>   安装页第 2 步的 `git clone` 没有 `--branch`，跳过它。用这次检出作为复制来源，只执行该页的 `mkdir` / `cp`，再在仍导出 `MINDIE_AGY_SOURCE_ROOT` 的同一进程里运行该页的 `setup.py init`。另一条路径是把同一个检出放到 `${TMPDIR:-/tmp}/mindie-agent-agy-install`：`_discover_checkout_source()` 会搜索该目录，这时不必导出变量，但 `cp` 的来源必须是这个目录。两条路径只选一条。
+> - **分支 F — Tencent WorkBuddy / CodeBuddy**：应用包内的 `codebuddy`，路径为 `/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy` 或 `~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`，或已存在的绝对路径 `MINDIE_WB_BIN`；配置目录为 `~/.workbuddy`（绝对路径的 `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` 优先）。在钉住的 tag 检出上执行安装页中的 `setup.py init --install-wb`，并用该页给出的 `codebuddy plugin validate` 核验。安装页：[mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.4/README.md#3-快速安装与验证)。
 > - **分支 G — Cursor 或其他通用 MCP 客户端**（只要 SSH 远端底座 `remote-dev`）：按 [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.5/README.md) 注册 stdio 服务，来源钉为 `remote-dev@v0.11.5`。
 >
-> 选定唯一分支后，按该安装页的协议安装上面钉住的 tag，并用该页写出的核验标准确认插件已启用。首次工作区引导仍走第四步的 Skill 参考。
+> 选定唯一分支后，按该安装页的协议安装上面钉住的 tag。Codex 与 Claude Code 以本页写出的成功标准为准。首次工作区引导仍走第四步的 Skill 参考。
 >
 > #### 第四步：完成首次配置与开发工作区引导
 > 六种完整插件安装后均引导完成首次工作区配置：复用已验证的 GitHub 认证，介绍用户须知，并提供创建/初始化 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace)、复用已有目录或继续当前工作区的选项：
