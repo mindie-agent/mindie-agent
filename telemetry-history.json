@@ -248,7 +248,7 @@
         }
       },
       "latest_snapshot": {
-        "stars": 70,
+        "stars": 71,
         "forks": 56,
         "clones_14d": 1419,
         "clones_14d_uniques": 479,
@@ -777,8 +777,8 @@
         "views_14d": 15,
         "views_14d_uniques": 12,
         "cumulative_views": 52,
-        "pkg_downloads": 1027,
-        "all_asset_downloads": 1198,
+        "pkg_downloads": 1149,
+        "all_asset_downloads": 1324,
         "latest_release": "v0.1.19"
       }
     },
@@ -1037,8 +1037,8 @@
         "views_14d": 4,
         "views_14d_uniques": 3,
         "cumulative_views": 7,
-        "pkg_downloads": 201,
-        "all_asset_downloads": 350,
+        "pkg_downloads": 205,
+        "all_asset_downloads": 358,
         "latest_release": "v0.1.15"
       }
     },
@@ -1297,8 +1297,8 @@
         "views_14d": 2,
         "views_14d_uniques": 2,
         "cumulative_views": 3,
-        "pkg_downloads": 2243,
-        "all_asset_downloads": 2386,
+        "pkg_downloads": 2247,
+        "all_asset_downloads": 2394,
         "latest_release": "v0.1.15"
       }
     },
@@ -1557,9 +1557,9 @@
         "views_14d": 16,
         "views_14d_uniques": 14,
         "cumulative_views": 17,
-        "pkg_downloads": 77,
-        "all_asset_downloads": 221,
-        "latest_release": "v0.1.13"
+        "pkg_downloads": 79,
+        "all_asset_downloads": 227,
+        "latest_release": "v0.1.14"
       }
     },
     "knowledge": {
@@ -1818,7 +1818,7 @@
         "views_14d_uniques": 9,
         "cumulative_views": 41,
         "pkg_downloads": 109,
-        "all_asset_downloads": 832,
+        "all_asset_downloads": 840,
         "latest_release": "v0.13.12"
       }
     },
@@ -2338,7 +2338,7 @@
         "views_14d_uniques": 9,
         "cumulative_views": 25,
         "pkg_downloads": 104,
-        "all_asset_downloads": 791,
+        "all_asset_downloads": 795,
         "latest_release": "v0.11.5"
       }
     },
@@ -2598,7 +2598,7 @@
         "views_14d_uniques": 10,
         "cumulative_views": 39,
         "pkg_downloads": 69,
-        "all_asset_downloads": 256,
+        "all_asset_downloads": 258,
         "latest_release": "v0.7.4"
       }
     },
@@ -2858,7 +2858,7 @@
         "views_14d_uniques": 4,
         "cumulative_views": 32,
         "pkg_downloads": 665,
-        "all_asset_downloads": 779,
+        "all_asset_downloads": 781,
         "latest_release": "v0.3.1"
       }
     },
@@ -3118,7 +3118,7 @@
         "views_14d_uniques": 0,
         "cumulative_views": 0,
         "pkg_downloads": 111,
-        "all_asset_downloads": 709,
+        "all_asset_downloads": 715,
         "latest_release": "v0.5.6"
       }
     },
@@ -3542,7 +3542,7 @@
         "views_14d_uniques": 8,
         "cumulative_views": 23,
         "pkg_downloads": 51,
-        "all_asset_downloads": 216,
+        "all_asset_downloads": 218,
         "latest_release": "v0.5.6"
       }
     },
@@ -3706,7 +3706,7 @@
         "views_14d_uniques": 11,
         "cumulative_views": 38,
         "pkg_downloads": 51,
-        "all_asset_downloads": 212,
+        "all_asset_downloads": 214,
         "latest_release": "v0.9.3"
       }
     },
@@ -4837,8 +4837,8 @@
         "views_14d": 5,
         "views_14d_uniques": 4,
         "cumulative_views": 5,
-        "pkg_downloads": 10,
-        "all_asset_downloads": 20,
+        "pkg_downloads": 12,
+        "all_asset_downloads": 26,
         "latest_release": "v0.1.5"
       }
     },
@@ -4977,8 +4977,8 @@
         "views_14d": 0,
         "views_14d_uniques": 0,
         "cumulative_views": 0,
-        "pkg_downloads": 4,
-        "all_asset_downloads": 12,
+        "pkg_downloads": 6,
+        "all_asset_downloads": 18,
         "latest_release": "v0.1.4"
       }
     },
@@ -5118,7 +5118,7 @@
         "views_14d_uniques": 0,
         "cumulative_views": 0,
         "pkg_downloads": 3,
-        "all_asset_downloads": 25,
+        "all_asset_downloads": 27,
         "latest_release": "v0.1.0"
       }
     },
@@ -5403,5 +5403,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-04 13:02"
+  "updated_at_cst": "2026-11-04 14:46"
 }
