@@ -27,11 +27,11 @@
 
 | 消费者组件 / 插件 | 当前正式版本 | 集成方式与验证闭环 |
 | --- | --- | --- |
-| **`mindie-agent-codex`** | `v0.1.17` | 通过 `components` MCP 服务暴露 `sim` 与 `profiler` 工具，支持 `compose`、`predict`、`efficiency`、`sla`、`sweep`、`skew`、`operators`、`graph`、`study`、`accuracy` 及结构导出 |
-| **`mindie-agent-cc`** | `v0.1.13` | 通过 `components` MCP 服务统一注册 `sim`、`profiler`、`coordinator`、`diagnostics_status` 与 `diagnostics_bundle`，工具超时与返回契约五端一致 |
-| **`mindie-agent-kimi`** | `v0.1.13` | 在 Kimi Code `mindie-tools` / `components` MCP 桥中同步暴露新版 `sim` 与 `profiler` 接口及参数说明，支持受管 Python 模块命令自动迁移 |
-| **`mindie-agent-dsh`** | `v0.1.12` | 通过 DSH `component_tools.py` 透传统一组件工具目录，支持在 DSH 会话中直接调用新版 `sim` 与 `profiler` |
-| **`mindie-agent-agy`** | `v0.1.3` | 通过 Google Antigravity `mindie-tools` MCP 服务暴露 `sim`、`profiler`、`coordinator`、`npu_top`、`diagnostics_*` 与 `mindie_status` |
+| **`mindie-agent-codex`** | `v0.1.18` | 通过 `components` MCP 服务暴露 `sim` 与 `profiler` 工具，支持 `compose`、`predict`、`efficiency`、`sla`、`sweep`、`skew`、`operators`、`graph`、`study`、`accuracy` 及结构导出 |
+| **`mindie-agent-cc`** | `v0.1.14` | 通过 `components` MCP 服务统一注册 `sim`、`profiler`、`coordinator`、`diagnostics_status` 与 `diagnostics_bundle`，工具超时与返回契约五端一致 |
+| **`mindie-agent-kimi`** | `v0.1.14` | 在 Kimi Code `mindie-tools` / `components` MCP 桥中同步暴露新版 `sim` 与 `profiler` 接口及参数说明，支持受管 Python 模块命令自动迁移 |
+| **`mindie-agent-dsh`** | `v0.1.13` | 通过 DSH `component_tools.py` 透传统一组件工具目录，支持在 DSH 会话中直接调用新版 `sim` 与 `profiler` |
+| **`mindie-agent-agy`** | `v0.1.4` | 通过 Google Antigravity `mindie-tools` MCP 服务暴露 `sim`、`profiler`、`coordinator`、`npu_top`、`diagnostics_*` 与 `mindie_status` |
 | **`mindie-profiler`** | `v0.5.6` | 原生消费 `mindie-model-structure/1` 完成事件关联、同构 Cohort 统计与 Decode/Prefill 拓扑引导切分（含 `AddRmsNormQuant`、`SparseFlashMla` 与 DP-partner EP 对齐），并提供 Wave 5 三芯片 `1,653 / 1,653 <= 10%` 样本内校准流水线 |
 | **`mindie-bench`** | `v0.4.6` | `value_sim.py` 与 `value_scenarios.py` 全面采用公开的 `target_operators`、`operator_costs`、`target_graphs`、`graph_costs` 与 `predict` 接口，在 `sim-causal-modeling-boundaries` 场景中验证因果依赖、图/服务边界与资源释放 |
 
