@@ -600,6 +600,21 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
             text,
         )
 
+    for repo, ver in (
+        ("mindie-agent-cc", cc_v),
+        ("mindie-agent-codex", codex_v),
+        ("mindie-agent-kimi", kimi_v),
+        ("mindie-agent-dsh", dsh_v),
+        ("mindie-agent-agy", agy_v),
+        ("mindie-agent-wb", wb_v),
+        ("remote-dev", rdev_v),
+    ):
+        text = re.sub(
+            rf"(https://github\.com/mindie-agent/{re.escape(repo)}/blob/v)[0-9]+(?:\.[0-9]+)+/",
+            rf"\g<1>{ver}/",
+            text,
+        )
+
     pairs = [
         (r"mindie-agent-cc\.git#v[0-9.]+", f"mindie-agent-cc.git#v{cc_v}"),
         (r"`mindie-agent@mindie-agent-cc`（`[0-9.]+`）", f"`mindie-agent@mindie-agent-cc`（`{cc_v}`）"),

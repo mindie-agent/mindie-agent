@@ -7,7 +7,7 @@
 | 链路 | 执行方 | 网络配置来源 |
 | --- | --- | --- |
 | 插件注册、源码与知识 Feed 拉取 | 宿主插件管理器、Git | 当前进程的代理、Git 配置与系统证书 |
-| Python、组件 wheel 与 PyPI 依赖下载 | 四宿主安装器及更新器调用的 uv | 当前进程代理、系统证书、显式 CA 和包源设置 |
+| Python、组件 wheel 与 PyPI 依赖下载 | 六宿主安装器及更新器调用的 uv | 当前进程代理、系统证书、显式 CA 和包源设置 |
 | Gitleaks、DSH Release 下载 | Python 标准库 HTTPS | 系统证书、显式 CA 与当前进程代理 |
 | 知识贡献 PR、故障 Issue 上传 | Git 与 gh | 当前授权、gh 登录及服务启动时的网络环境 |
 | knowledge 本机 RPC、Kimi 插件 API、DSH 摘要 API | 共享知识客户端与插件 Python 适配器 | 回环地址直接连接 |
@@ -19,8 +19,8 @@
 
 依据[设计原则](design-principles.md)第 1、8、9、10、14、15 条：
 
-1. **安装与更新复用系统信任库。** 原生启动命令在下载 Python 前启用 uv 系统证书；内部安装器使用兼容旧版 uv 的环境变量设置默认值，保留用户的 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS` 选择和显式 CA。`SSL_CERT_FILE`、`SSL_CERT_DIR` 和包源配置继续生效。Kimi 的首次安装与更新统一使用 uv，移除依赖 ensurepip 版本的另一套安装路径。
-2. **后台知识服务继承网络环境。** 在共享 `knowledge` 服务上下文中声明代理、CA、包源及 gh 配置路径变量，沿用现有一次性启动上下文。四个插件不各自维护网络状态机。安装配置只保存变量名，值由实际唤醒服务的进程提供。
+1. **安装与更新复用系统信任库。** 原生启动命令在下载 Python 前启用 uv 系统证书；内部安装器使用兼容旧版 uv 的环境变量设置默认值，保留用户的 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS` 选择和显式 CA。`SSL_CERT_FILE`、`SSL_CERT_DIR` 和包源配置继续生效。Kimi 的首次安装与更新统一使用 uv，移除依赖 ensurepip 版本的另一套安装路径。Google Antigravity 与 Tencent WorkBuddy 沿用各自仓库里已有的 `plugins/mindie-agent/scripts/setup.py`：引导运行时前调用同目录 `paths.apply_enterprise_transport_env`，以 `setdefault` 写入 `UV_SYSTEM_CERTS`、`UV_NATIVE_TLS`、`GCM_INTERACTIVE=never` 以及 Windows Git `core.longpaths` / `core.autocrlf`。这两端不增加第二条安装或传输路径。
+2. **后台知识服务继承网络环境。** 在共享 `knowledge` 服务上下文中声明代理、CA、包源及 gh 配置路径变量，沿用现有一次性启动上下文。六个插件不各自维护网络状态机。安装配置只保存变量名，值由实际唤醒服务的进程提供。
 3. **故障上报服务使用已有环境文件入口。** 启用服务时，自动将必要的代理、CA 和 gh 配置路径写入该服务目录下的私有环境文件；不复制 API Token。显式指定的环境文件优先。网络设置变化时更新现有服务，上传授权和已有回执保持原样。Kimi 的定时更新复用共享组件的同一环境文件实现，当前调用显式提供的变量优先。
 4. **回环请求不经过企业代理。** knowledge 本机 RPC、Kimi 插件注册、DSH 摘要和 Bench 的 SSH、知识与重放 RPC 使用标准库 `ProxyHandler({})`，不依赖用户维护 `NO_PROXY`。
 5. **外部写入保持现有结果语义。** 不重试结果不确定的 Git push、PR、Issue 或模型请求。证书错误保留原始失败；证书库来自操作系统或用户指定的 CA，不自动信任网络返回的证书。
@@ -38,7 +38,7 @@ Windows 企业网络下已验证 Codex `0.164.0-alpha.11.1` 的正式 `0.1.2` MC
 
 ## 正常安装与工作区引导
 
-主仓安装入口、四个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装，介绍已有用户须知，提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择，并在安装汇报末尾询问用户是否愿意为主仓 `mindie-agent/mindie-agent` 点亮 Star ⭐（仅在用户明确同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行）。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
+主仓安装入口、六个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装，介绍已有用户须知，提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择，并在安装汇报末尾询问用户是否愿意为主仓 `mindie-agent/mindie-agent` 点亮 Star ⭐（仅在用户明确同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行）。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
 
 - 工作区安装使用 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace) 当前检出的 `AGENTS.md` 与 `repo_init.py`，复用已有 `workspace.json` 的 Fork 选择。工作区独立安装也先完成认证；从插件引导进入时复用同一次验证。
 - 用户同意创建或复用工作区，即在同一流程中将所选绝对路径添加到当前宿主的原生项目/工作区入口，不再另问一次是否登记。初始化选择独立保留，用户暂缓源码下载也可以先登记目录。
