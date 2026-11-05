@@ -55,7 +55,7 @@
 >   - 账号读取成功时直接复用已有认证。需要登录时按 [GitHub 登录引导](docs/enterprise-network.md#github-登录引导) 处理：普通网络使用浏览器，企业网络或浏览器授权受阻时优先 Token；已有 Token 就通过 `gh` 隐藏提示输入，没有则引导创建。由 `gh` 保存凭据，验证账号、Git 及后续进程复用后继续安装。网络、代理或证书失败先修复传输，不把它们当作 Token 失效。严禁执行 `git config --global` 或 `git config --system` 修改用户全局 Git 配置。
 >
 > #### 第二步：保留用户授权，按需准备贡献目标
-> 安装过程只注册当前宿主所需的插件，不未经询问静默执行 Star 或 Fork；插件安装验证完成后，在第五步立即调用当前宿主的**原生交互式提问工具**弹出选项，询问用户是否开启社区共享与故障上报、是否为主仓点亮 Star ⭐ 以及本地开发工作区选择。
+> 安装过程只注册当前宿主所需的插件，不未经询问静默执行 Star 或 Fork；插件安装验证完成后，在第五步立即调用当前宿主的**原生交互式提问工具**弹出选项，询问本地开发工作区选择、是否开启社区共享与故障上报，以及是否顺手给项目点个 Star ⭐。
 >
 > 社区贡献默认关闭。用户明确开启目标知识库 `<owner/repo>` 的贡献后，才通过 `setup.py sharing --enable` 自动创建或复用该知识库的个人 Fork，并绑定 `<GH_USER>/<repo>` 作为推送目标。不要因安装而 Fork 主仓、插件仓或所有领域仓库。
 >
@@ -91,7 +91,7 @@
 > - [Google Antigravity 工作区引导](https://github.com/mindie-agent/mindie-agent-agy/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 > - [Tencent WorkBuddy 工作区引导](https://github.com/mindie-agent/mindie-agent-wb/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 >
-> #### 第五步：弹出宿主原生交互式提问（社区共享、点亮 Star ⭐ 与开发工作区）并完成绑定
+> #### 第五步：弹出宿主原生交互式提问（开发工作区、社区共享与顺手点个 Star ⭐）并完成绑定
 > 插件安装与校验完成后，先通过 `setup.py sharing --status` 检查当前配置状态；若尚未记录用户授权选择（`needs_onboarding_prompt: true`），**必须立即调用当前宿主的原生提问工具弹出交互卡片**（不要只输出纯文本让用户自己敲命令）：
 > - **Google Antigravity**：调用原生 **`ask_question`** 工具；
 > - **Claude Code / Tencent WorkBuddy / Kimi Code**：调用原生 **`AskUserQuestion`** 工具；
@@ -99,27 +99,27 @@
 > - **DeepSeek Harness (DSH)**：优先调用会话中可用的原生提问工具，若无则输出标准三项编号选择卡片（`[1]` / `[2]`）等待用户回复。
 >
 > 一次性向用户询问以下 3 个问题（推荐项置顶）：
-> 1. **社区知识共享与自动故障上报（Community Sharing & Fault Reporting）**：
->    - `(Recommended) 开启社区共享与故障上报`（自动按需 Fork `mindie-agent/knowledge-vllm-ascend` 并在授权项目范围内同步脱敏经验与诊断上报）
->    - `仅保持本地模式（关闭外发共享与故障上报）`
-> 2. **GitHub Star ⭐ 支持（GitHub Star）**：
->    - `(Recommended) 为 mindie-agent/mindie-agent 点亮 GitHub Star ⭐`
->    - `暂不点亮`
-> 3. **本地开发工作区（Local Development Workspace）**：
+> 1. **本地开发工作区（Local Development Workspace）**：
 >    - `(Recommended) 在当前目录初始化 vllm-ascend-workspace`
 >    - `继续使用当前目录作为工作区`
 >    - `指定已有工作区目录`
+> 2. **社区知识共享与自动故障上报（Community Sharing & Fault Reporting）**：
+>    - `(Recommended) 开启社区共享与故障上报`（自动按需 Fork `mindie-agent/knowledge-vllm-ascend` 并在授权项目范围内同步脱敏经验与诊断上报）
+>    - `仅保持本地模式（关闭外发共享与故障上报）`
+> 3. **顺手给 MindIE Agent 点个 GitHub Star 吗？ ⭐（GitHub Star）**：
+>    - `(Recommended) 好，点个 Star ⭐`（在 GitHub 上 star `mindie-agent/mindie-agent` 支持一下项目）
+>    - `先不用`（直接开始使用）
 >
 > **收到用户在原生弹窗中的选择后，按严格顺序执行落盘并汇报**：
 > 1. **先确定并初始化工作区路径 `WORKSPACE_ROOT`**（并将绝对路径登记到宿主原生工作区列表）；
 > 2. **执行统一共享配置命令 `setup.py sharing`**：
 >    - 若用户选择开启共享：运行 `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"`（自动解析 GitHub 账号、按需 Fork 目标知识库并同时更新 `mindie-community.json`、`mindie-consent.json` 与 `diagnostics.json`）；
 >    - 若用户选择关闭共享：运行 `setup.py sharing --disable`；
-> 3. **按用户授权点亮 Star ⭐（严禁未经同意静默执行）**：仅当用户在问题 2 中明确选择点亮 Star 时，执行：
+> 3. **按用户意愿点上 Star ⭐（严禁未经同意静默执行）**：仅当用户在第 3 题中明确选择点个 Star 时，执行：
 >    ```bash
 >    gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent && gh api --hostname github.com --silent /user/starred/mindie-agent/mindie-agent
 >    ```
-> 4. **向用户汇报最终结果**：简要汇总已验证的 `gh` 账号、已安装的插件及版本、`setup.py sharing --status` 的共享/上报状态、Star 状态、工作区路径，以及日常只需通过 `/mindie-agent` 唤醒领域知识与 Skill（`remote-dev` 默认自动触发）。
+> 4. **向用户汇报最终结果**：简要汇总已验证的 `gh` 账号、已安装的插件及版本、工作区路径、`setup.py sharing --status` 的共享/上报状态及 Star 状态，并提醒日常只需通过 `/mindie-agent` 唤醒领域知识与 Skill（`remote-dev` 默认自动触发）。
 
 </details>
 

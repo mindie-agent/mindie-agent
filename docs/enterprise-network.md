@@ -38,7 +38,7 @@ Windows 企业网络下已验证 Codex `0.164.0-alpha.11.1` 的正式 `0.1.2` MC
 
 ## 正常安装与工作区引导
 
-主仓安装入口、六个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装与校验，随后在第五步通过 `setup.py sharing --status` 检查授权状态，并立即调用当前宿主的**原生交互式提问工具**（Antigravity `ask_question`、Claude Code / WorkBuddy / Kimi `AskUserQuestion`、Codex `request_user_input`、DSH 原生提问工具或标准选择卡片）向用户弹出三个选项：是否开启社区共享与自动故障上报（通过 `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"` 或 `setup.py sharing --disable` 统一写入 `mindie-community.json`、`mindie-consent.json` 与 `diagnostics.json`）、是否愿意为主仓 `mindie-agent/mindie-agent` 点亮 Star ⭐（仅在用户明确选择同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行），以及提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
+主仓安装入口、六个插件的自动安装协议和首次配置入口都执行同一顺序：检查并复用 GitHub 认证，完成插件安装与校验，随后在第五步通过 `setup.py sharing --status` 检查授权状态，并立即调用当前宿主的**原生交互式提问工具**（Antigravity `ask_question`、Claude Code / WorkBuddy / Kimi `AskUserQuestion`、Codex `request_user_input`、DSH 原生提问工具或标准选择卡片）向用户弹出三个选项：提供 `vllm-ascend-workspace` 的创建、复用或继续当前目录选择，是否开启社区共享与自动故障上报（通过 `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"` 或 `setup.py sharing --disable` 统一写入 `mindie-community.json`、`mindie-consent.json` 与 `diagnostics.json`），以及是否顺手给 `mindie-agent/mindie-agent` 点个 Star ⭐（仅在用户明确选择同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行）。手动安装文档明确以 `/mindie-agent 帮我完成首次配置` 收尾；后台启动和普通开发任务不重复询问。
 
 - 工作区安装使用 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace) 当前检出的 `AGENTS.md` 与 `repo_init.py`，复用已有 `workspace.json` 的 Fork 选择。工作区独立安装也先完成认证；从插件引导进入时复用同一次验证。
 - 用户同意创建或复用工作区，即在同一流程中将所选绝对路径添加到当前宿主的原生项目/工作区入口，不再另问一次是否登记。初始化选择独立保留，用户暂缓源码下载也可以先登记目录。
