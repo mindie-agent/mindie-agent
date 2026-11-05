@@ -1,0 +1,868 @@
+{
+  "track": "track-RSI-E2E-v4",
+  "vllm_ascend_commit": "1223fea314cb6172900bd615c9940fcd2c658925",
+  "ascend_corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+  "operators_corpus_commit": "7ed7de63775b44c0f03cded26ad944fb58bcc0e5",
+  "total_trials": 16,
+  "g2_pass_count": 0,
+  "g2_total": 8,
+  "g4_pass_count": 8,
+  "g4_total": 8,
+  "g4_auto_switched_count": 8,
+  "g4_c6_applied_count": 8,
+  "trials": [
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G2",
+      "instance_id": "dsv4-sparse-mla-qli-fusion-rsi-zh",
+      "trial_id": "dsv4-sparse-mla-qli-fusion-rsi-zh_G2_1_4d2b9d297d40",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 516.04,
+      "delivery_wall_clock_sec": 525.47,
+      "total_turns": 27,
+      "model_calls": 27,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "8eca37d5264f1cd7ab2fe78d2ccd7334f98acc784e8734bc06ee9f03f6918edf",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G2/dsv4-sparse-mla-qli-fusion-rsi-zh_G2_1_4d2b9d297d40/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 5,
+      "ledger_distinct_refuted_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "8bd2a801550ecfc5f101c68a6e0785492762758303627a5799bb9c65a2e9ffd0",
+        "b6def87cdd8707e0bdc3e945812b7769309945f666287de0cd2325b62895714b",
+        "d173b2527edbacc9f9de2266ca6e1082b6f177dbb8eaadf4caf4681fb80f3d73"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G2",
+      "instance_id": "triton-spatial-norm-dim-merge-rsi-zh",
+      "trial_id": "triton-spatial-norm-dim-merge-rsi-zh_G2_1_3d83b57d7549",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 562.0,
+      "delivery_wall_clock_sec": 571.68,
+      "total_turns": 29,
+      "model_calls": 29,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "1dc1937eefb59f5b55a397f360ee982569c2b17d35e2cc3fbc8534f77591ae09",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G2/triton-spatial-norm-dim-merge-rsi-zh_G2_1_3d83b57d7549/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 4,
+      "ledger_distinct_refuted_hashes": [
+        "963efcf2874248be2457d70934181ecca5ab5d203cf11b206e066cb2b0b94e47",
+        "20c7caf71ff7b9eac99ce78832a5f6b8a2be1fc363153740b3d76c665bfba536",
+        "9d979e876fb767dd5433bfd456e51fabb5471750bf9a8e1695c5d18fe6c99a42",
+        "a830dcef383c045fc0fc9cdeb91bb37a5bdf7a11c1941c3c3e250a92b2c9b9e2"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G2",
+      "instance_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh",
+      "trial_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G2_1_4f93320631a1",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 600.01,
+      "delivery_wall_clock_sec": 651.59,
+      "total_turns": 24,
+      "model_calls": 24,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "diagnose"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "39c6c5415e0d9d8d0eb2e24ef17498541181afffd7bf7132f6bbab71ae87471a",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G2/vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G2_1_4f93320631a1/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 8,
+      "ledger_distinct_refuted_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "9097cfd1c543bb630fc9b53f6dd45285e50c8b34e795b2da2c8cf62b747ec478",
+        "dd5c20ba201b2b95726fb2113064ffe136afc6bed833f74b129d7f488c6642f4",
+        "e628e51150b5b12d1c1bb9241288b923a63c0bd21dde9960d20e7d7811e07080",
+        "6011a6612d14f4ddf16592d996e00214d5bc8b8a6880b33cd69f822cbae797b0",
+        "bb7e9e16166ad88576cc809f30bcd7efcf6df644983b4efb9d634381711e2d22",
+        "72dd093dc9c3ad7ca3f894948deed9743b56c62327ce95694de74ad5fe0722d5",
+        "927845c30060d736cf346f9ecc8a1c7a5a2d6607b9e8eaae43563e07e73cbc32"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G2",
+      "instance_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh",
+      "trial_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G2_1_2cb63db1129c",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 332.93,
+      "delivery_wall_clock_sec": 342.94,
+      "total_turns": 17,
+      "model_calls": 17,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "c076821abf9607e821daa333293fb5a6da6f372eedac295b14923d6aece171a9",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G2/vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G2_1_2cb63db1129c/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 4,
+      "ledger_distinct_refuted_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "2fd0da60b484d475fe6a5c03847a68c0f8663b67801f93b3c86ccd9542105985",
+        "c8dce1bc1a158f917a7599204587b9a4ec9ca402bbffb51c17c6279014561fb3",
+        "a72877ef523992e22e83241867dfba7d13435e0e7d6d974c892b7b3b4b061daf"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G4",
+      "instance_id": "dsv4-sparse-mla-qli-fusion-rsi-zh",
+      "trial_id": "dsv4-sparse-mla-qli-fusion-rsi-zh_G4_1_c5da46918a45",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 568.93,
+      "delivery_wall_clock_sec": 634.22,
+      "total_turns": 59,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "8bd2a801550ecfc5f101c68a6e0785492762758303627a5799bb9c65a2e9ffd0"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "explore",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-sparse-mla-qli-valid-count-handoff-validation"
+      ],
+      "distilled_git_commit": "b3f2c58c61",
+      "task_digest": "8eca37d5264f1cd7ab2fe78d2ccd7334f98acc784e8734bc06ee9f03f6918edf",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G4/dsv4-sparse-mla-qli-fusion-rsi-zh_G4_1_c5da46918a45/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "8bd2a801550ecfc5f101c68a6e0785492762758303627a5799bb9c65a2e9ffd0"
+      ],
+      "ledger_distinct_refuted_candidates": 5,
+      "ledger_distinct_refuted_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "8bd2a801550ecfc5f101c68a6e0785492762758303627a5799bb9c65a2e9ffd0",
+        "1f04784d56e982243f2f4a517a3fa516d190d41af5340b4687bc99a75c736015",
+        "437bfbe9e306bb2b57793d998bf6ba727d73416f8b187d46dc1d4745492f079e"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G4",
+      "instance_id": "triton-spatial-norm-dim-merge-rsi-zh",
+      "trial_id": "triton-spatial-norm-dim-merge-rsi-zh_G4_1_5c12792bbc08",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 564.12,
+      "delivery_wall_clock_sec": 630.98,
+      "total_turns": 50,
+      "model_calls": 51,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "7b5cf1be6436cb76d0330f99fc1268a45e015786a05c408f8d8a087240238f50",
+        "f1e23532c6e56302ef2e9d17187fa913f03f315cb7b13c4956a58dfaaf14aafd",
+        "4e70cb33b95335e412caf40226aea9e7d4ee2fe3edcef930e54d0fe060ed04ae"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-spatial-group-norm-cpu-path-ablation"
+      ],
+      "distilled_git_commit": "7844a875c1",
+      "task_digest": "1dc1937eefb59f5b55a397f360ee982569c2b17d35e2cc3fbc8534f77591ae09",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G4/triton-spatial-norm-dim-merge-rsi-zh_G4_1_5c12792bbc08/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "7b5cf1be6436cb76d0330f99fc1268a45e015786a05c408f8d8a087240238f50",
+        "f1e23532c6e56302ef2e9d17187fa913f03f315cb7b13c4956a58dfaaf14aafd",
+        "4e70cb33b95335e412caf40226aea9e7d4ee2fe3edcef930e54d0fe060ed04ae"
+      ],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "7b5cf1be6436cb76d0330f99fc1268a45e015786a05c408f8d8a087240238f50",
+        "f1e23532c6e56302ef2e9d17187fa913f03f315cb7b13c4956a58dfaaf14aafd",
+        "4e70cb33b95335e412caf40226aea9e7d4ee2fe3edcef930e54d0fe060ed04ae"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G4",
+      "instance_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh",
+      "trial_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G4_1_fe375afb1030",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 554.24,
+      "delivery_wall_clock_sec": 620.76,
+      "total_turns": 43,
+      "model_calls": 44,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "9097cfd1c543bb630fc9b53f6dd45285e50c8b34e795b2da2c8cf62b747ec478",
+        "8e9ea57121d6b42072e577069abbd3ce272beb72f89962d41445445d159abbee"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-dspark-independent-token-buckets-validation"
+      ],
+      "distilled_git_commit": "f69e2fe644",
+      "task_digest": "39c6c5415e0d9d8d0eb2e24ef17498541181afffd7bf7132f6bbab71ae87471a",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G4/vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G4_1_fe375afb1030/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "9097cfd1c543bb630fc9b53f6dd45285e50c8b34e795b2da2c8cf62b747ec478",
+        "8e9ea57121d6b42072e577069abbd3ce272beb72f89962d41445445d159abbee"
+      ],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "9097cfd1c543bb630fc9b53f6dd45285e50c8b34e795b2da2c8cf62b747ec478",
+        "8e9ea57121d6b42072e577069abbd3ce272beb72f89962d41445445d159abbee"
+      ]
+    },
+    {
+      "host": "codex",
+      "model": null,
+      "reasoning_effort": "xhigh",
+      "group": "G4",
+      "instance_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh",
+      "trial_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G4_1_57b2486b299c",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 460.66,
+      "delivery_wall_clock_sec": 529.73,
+      "total_turns": 41,
+      "model_calls": 42,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "955ff306f377cecab02b0aaf1462d7159ad4275c71c4f6790b6d10aa723e0172",
+        "89452c8004fa9b1ca73d3ecb13f4c83a20d3769950cef87c40276b33eb4fcee9"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-mla-prolog-cpu-ablation-and-rounding-triage"
+      ],
+      "distilled_git_commit": "f5e621c873",
+      "task_digest": "c076821abf9607e821daa333293fb5a6da6f372eedac295b14923d6aece171a9",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/codex/G4/vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G4_1_57b2486b299c/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "955ff306f377cecab02b0aaf1462d7159ad4275c71c4f6790b6d10aa723e0172",
+        "89452c8004fa9b1ca73d3ecb13f4c83a20d3769950cef87c40276b33eb4fcee9"
+      ],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "955ff306f377cecab02b0aaf1462d7159ad4275c71c4f6790b6d10aa723e0172",
+        "89452c8004fa9b1ca73d3ecb13f4c83a20d3769950cef87c40276b33eb4fcee9"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G2",
+      "instance_id": "dsv4-sparse-mla-qli-fusion-rsi-zh",
+      "trial_id": "dsv4-sparse-mla-qli-fusion-rsi-zh_G2_1_bcd4d7fdc5c0",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 330.67,
+      "delivery_wall_clock_sec": 355.16,
+      "total_turns": 60,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "8eca37d5264f1cd7ab2fe78d2ccd7334f98acc784e8734bc06ee9f03f6918edf",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G2/dsv4-sparse-mla-qli-fusion-rsi-zh_G2_1_bcd4d7fdc5c0/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "8bd2a801550ecfc5f101c68a6e0785492762758303627a5799bb9c65a2e9ffd0"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G2",
+      "instance_id": "triton-spatial-norm-dim-merge-rsi-zh",
+      "trial_id": "triton-spatial-norm-dim-merge-rsi-zh_G2_1_f3446148c7bc",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 396.74,
+      "delivery_wall_clock_sec": 421.31,
+      "total_turns": 60,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "diagnose",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "1dc1937eefb59f5b55a397f360ee982569c2b17d35e2cc3fbc8534f77591ae09",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G2/triton-spatial-norm-dim-merge-rsi-zh_G2_1_f3446148c7bc/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "3d32314b8602cd2170cc168a61b250f7d1ea020539406baf63cb7610c029708d",
+        "f1a369d7cc06786fcf4af2b646ebf1d9e2a45edc23974420aaa7cbd65950869e",
+        "b1bbfbd91d47371658e1ff2ab3f2ac8703ddd3df850a152b338a1f714e791ee6"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G2",
+      "instance_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh",
+      "trial_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G2_1_e9704d233e44",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 453.73,
+      "delivery_wall_clock_sec": 477.05,
+      "total_turns": 60,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "explore",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": true,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "39c6c5415e0d9d8d0eb2e24ef17498541181afffd7bf7132f6bbab71ae87471a",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G2/vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G2_1_e9704d233e44/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 4,
+      "ledger_distinct_refuted_hashes": [
+        "01f5aa705fcb6bba9d51d2d584e69f285ef01804f9b58a5c5f555e5d2bbb4808",
+        "2015b3795761ff94ce9b7a034cee58208797b0147b04a9115109b2f396e3aef2",
+        "d0a6f33df3913d56c95941a65dd5af141f027d353843c68e289e8ef14a2a1ce4",
+        "c7fec0863cf7446614f9aad082c99045649606d9a6e64e73f1ba622bb7df8bda"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G2",
+      "instance_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh",
+      "trial_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G2_1_4ff6b276b7e7",
+      "terminal_status": "completed_fail",
+      "reward": 0.0,
+      "total_wall_clock_sec": 304.76,
+      "delivery_wall_clock_sec": 329.13,
+      "total_turns": 60,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 0,
+      "distinct_candidate_hashes": [],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": false,
+      "caller_initiated_explore": false,
+      "c6_distill_status": null,
+      "distilled_unit_ids": [],
+      "distilled_git_commit": null,
+      "task_digest": "c076821abf9607e821daa333293fb5a6da6f372eedac295b14923d6aece171a9",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G2/vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G2_1_4ff6b276b7e7/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 0,
+      "promotion_gate_candidate_hashes": [],
+      "ledger_distinct_refuted_candidates": 4,
+      "ledger_distinct_refuted_hashes": [
+        "654881f4db7dcd996fc629ab61d56eb4c6815dabc5570c6dae952192c172fb74",
+        "58b3fc4cc69939c835f4c04bedd5032daf1953944d1ce4650c6b7d8ee4829d9a",
+        "b56c4859cb11b763266b5ea02988d651193a3f7cfbcfe4ce5cfc333eaf1861a1",
+        "5dd72e7e65b273edb19b68c8abb775496699aa68d5d33c15a81ba6639dd3dfd1"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G4",
+      "instance_id": "dsv4-sparse-mla-qli-fusion-rsi-zh",
+      "trial_id": "dsv4-sparse-mla-qli-fusion-rsi-zh_G4_1_b373dd4909cf",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 334.95,
+      "delivery_wall_clock_sec": 360.36,
+      "total_turns": 60,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 4,
+      "distinct_candidate_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "45bbde06d26e2cd8d081acb9a5a7cdd2ea1b17c17e32736ad074715f05428296",
+        "72d028d1d631ae746a374eba45c666e2fd7239b8fc7b833ea430a652c4d9d545"
+      ],
+      "requested_mode_sequence": [
+        "diagnose",
+        "reuse",
+        "diagnose",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "explore",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-dsv4-sparse-mla-device-topk-guard"
+      ],
+      "distilled_git_commit": "cf55844668",
+      "task_digest": "8eca37d5264f1cd7ab2fe78d2ccd7334f98acc784e8734bc06ee9f03f6918edf",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G4/dsv4-sparse-mla-qli-fusion-rsi-zh_G4_1_b373dd4909cf/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 4,
+      "promotion_gate_candidate_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "45bbde06d26e2cd8d081acb9a5a7cdd2ea1b17c17e32736ad074715f05428296",
+        "72d028d1d631ae746a374eba45c666e2fd7239b8fc7b833ea430a652c4d9d545"
+      ],
+      "ledger_distinct_refuted_candidates": 4,
+      "ledger_distinct_refuted_hashes": [
+        "8e22faec78421597a0abf8301255093fd5eadc244cc03b17692c5dc82091636a",
+        "db9e252ed1ff814f6fba1f736dcea77b51fd15560228f2d95b34100abc75615f",
+        "45bbde06d26e2cd8d081acb9a5a7cdd2ea1b17c17e32736ad074715f05428296",
+        "72d028d1d631ae746a374eba45c666e2fd7239b8fc7b833ea430a652c4d9d545"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G4",
+      "instance_id": "triton-spatial-norm-dim-merge-rsi-zh",
+      "trial_id": "triton-spatial-norm-dim-merge-rsi-zh_G4_1_3fbd380c0fdb",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 374.0,
+      "delivery_wall_clock_sec": 473.92,
+      "total_turns": 55,
+      "model_calls": 56,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "5e455836f45777ddceae14dc58e19e49c431b95d2480c3dec3e9419e8c72dbef",
+        "932e0394dd8a3dbf28ac45adfbf57e7d41444a09d6ae02afaae9049d3df349cd",
+        "fe02f6ba76e05ec81f6afdba134b82ca7ec71ff4247f69c09d113ae0e332167e"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-spatial-group-norm-reduce-fp32-dim-merge-distilled-sop"
+      ],
+      "distilled_git_commit": "6d71d85a72",
+      "task_digest": "1dc1937eefb59f5b55a397f360ee982569c2b17d35e2cc3fbc8534f77591ae09",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G4/triton-spatial-norm-dim-merge-rsi-zh_G4_1_3fbd380c0fdb/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "5e455836f45777ddceae14dc58e19e49c431b95d2480c3dec3e9419e8c72dbef",
+        "932e0394dd8a3dbf28ac45adfbf57e7d41444a09d6ae02afaae9049d3df349cd",
+        "fe02f6ba76e05ec81f6afdba134b82ca7ec71ff4247f69c09d113ae0e332167e"
+      ],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "5e455836f45777ddceae14dc58e19e49c431b95d2480c3dec3e9419e8c72dbef",
+        "932e0394dd8a3dbf28ac45adfbf57e7d41444a09d6ae02afaae9049d3df349cd",
+        "fe02f6ba76e05ec81f6afdba134b82ca7ec71ff4247f69c09d113ae0e332167e"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G4",
+      "instance_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh",
+      "trial_id": "vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G4_1_6e713b23792d",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 304.72,
+      "delivery_wall_clock_sec": 329.36,
+      "total_turns": 60,
+      "model_calls": 60,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "04f959bd06af78a88e53ae3d142d52227127a7b24017e3e8885acc2ad8d2529a",
+        "b546267c7d8a390c4745b5a065c7674a7929f57ad9843058a008d18584fa65c3"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-dspark-mtp-aclgraph-d2h-sync-candidate"
+      ],
+      "distilled_git_commit": "840c160f12",
+      "task_digest": "39c6c5415e0d9d8d0eb2e24ef17498541181afffd7bf7132f6bbab71ae87471a",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G4/vllm-ascend-dspark-mtp-aclgraph-d2h-rsi-zh_G4_1_6e713b23792d/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "04f959bd06af78a88e53ae3d142d52227127a7b24017e3e8885acc2ad8d2529a",
+        "b546267c7d8a390c4745b5a065c7674a7929f57ad9843058a008d18584fa65c3"
+      ],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "95fe6a9173b7d2841a16ee31cf212cd4d0e79fddd726c8311fc9b731d7c77412",
+        "04f959bd06af78a88e53ae3d142d52227127a7b24017e3e8885acc2ad8d2529a",
+        "b546267c7d8a390c4745b5a065c7674a7929f57ad9843058a008d18584fa65c3"
+      ]
+    },
+    {
+      "host": "dsh",
+      "model": null,
+      "reasoning_effort": "max",
+      "group": "G4",
+      "instance_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh",
+      "trial_id": "vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G4_1_34c9db43a842",
+      "terminal_status": "completed_pass",
+      "reward": 1.0,
+      "total_wall_clock_sec": 196.91,
+      "delivery_wall_clock_sec": 280.47,
+      "total_turns": 35,
+      "model_calls": 36,
+      "distinct_refuted_candidates": 3,
+      "distinct_candidate_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "261d04a10eb9adec83501dd319509cb16268a4cb16c4cf42eb4e23361aafa291",
+        "fe8d2118f0ac40fd65eadac71218e4ab0b83664c7d13412ffd7211f7892b0e1f"
+      ],
+      "requested_mode_sequence": [
+        "reuse",
+        "reuse",
+        "reuse",
+        "reuse"
+      ],
+      "effective_mode_sequence": [
+        "reuse",
+        "explore",
+        "reuse",
+        "reuse"
+      ],
+      "auto_switched_from_reuse": true,
+      "caller_initiated_explore": false,
+      "c6_distill_status": "completed:applied",
+      "distilled_unit_ids": [
+        "unit-vllm-ascend-mla-prolog-qkv-rope-kvcache-coalesce-distilled-sop"
+      ],
+      "distilled_git_commit": "4d7f88b43b",
+      "task_digest": "c076821abf9607e821daa333293fb5a6da6f372eedac295b14923d6aece171a9",
+      "corpus_commit": "a64a959322b17944ac06e0dba30afbc9fe5d1480",
+      "corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+      "receipt_path": "/Users/maoxx241/code/mindie-bench/reports/g0-g5-vllm-ascend-v2-20261103/runs/track-RSI-E2E-v4/dsh/G4/vllm-ascend-mla-prolog-rope-kvcache-fusion-rsi-zh_G4_1_34c9db43a842/trial_receipt.json",
+      "promotion_gate_refuted_candidates": 3,
+      "promotion_gate_candidate_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "261d04a10eb9adec83501dd319509cb16268a4cb16c4cf42eb4e23361aafa291",
+        "fe8d2118f0ac40fd65eadac71218e4ab0b83664c7d13412ffd7211f7892b0e1f"
+      ],
+      "ledger_distinct_refuted_candidates": 3,
+      "ledger_distinct_refuted_hashes": [
+        "7e7e7a69863e3e3cb3b5ba7bfe8090ed950a0ae59bb86ffed760b86150d48a5d",
+        "261d04a10eb9adec83501dd319509cb16268a4cb16c4cf42eb4e23361aafa291",
+        "fe8d2118f0ac40fd65eadac71218e4ab0b83664c7d13412ffd7211f7892b0e1f"
+      ]
+    }
+  ],
+  "ascend_corpus_view_sha256": "7a85facfe15ac80a91a48dad68f773599e09ae7966d8a156e04efc18dd5a79f7",
+  "operators_corpus_view_sha256": "a1d061a0e706cb431d85baa8c41adddf865ab2668c58862449f48f2e8125fe7a",
+  "validation_scope": "controlled_cpu_tensor_and_ablation_contract"
+}
