@@ -282,14 +282,109 @@ def verify_components_and_plugins(
         tag_map = comp_tag_maps.get(comp_name)
         if tag_map:
             if pinned_sha not in tag_map:
-                errors.append(
-                    f"{plugin_name}: {source_file} pins {comp_name} to {pinned_sha[:8]}, "
-                    f"which is not a formal release tag in {comp_name}"
-                )
+                comp_repo = _resolve_repo(comp_name, siblings_roots)
+                is_mainline_advance = False
+                if comp_repo is not None:
+                    anc_floor = _run_cmd(
+                        ["git", "merge-base", "--is-ancestor", channel_sha, pinned_sha], cwd=comp_repo
+                    )
+                    anc_head = _run_cmd(
+                        ["git", "merge-base", "--is-ancestor", pinned_sha, "HEAD"], cwd=comp_repo
+                    )
+                    is_mainline_advance = anc_floor.returncode == 0 and anc_head.returncode == 0
+                if not is_mainline_advance:
+                    errors.append(
+                        f"{plugin_name}: {source_file} pins {comp_name} to {pinned_sha[:8]}, "
+                        f"which is not a formal release tag in {comp_name}"
+                    )
             elif _parse_semver(tag_map[pinned_sha]) > _parse_semver(channel_ver):
                 errors.append(
                     f"{plugin_name}: {source_file} baseline {comp_name} {tag_map[pinned_sha]} "
                     f"is ahead of channel version {channel_ver}"
+                )
+
+    dist_by_component = {
+        "knowledge": "mindie-knowledge",
+        "remote-dev": "remote-dev",
+        "diagnostics": "mindie-diagnostics",
+        "debugger": "mindie-debugger",
+        "profiler": "mindie-profiler",
+        "sim": "mindie-sim",
+        "coordinator": "mindie-coordinator",
+        "npu-top": "npu-top",
+    }
+
+    def _extract_default_dep_pin(
+        pyp_text: str, comp_name: str, *, uses_uv_sources: bool = False
+    ) -> str | None:
+        import tomllib
+
+        try:
+            parsed = tomllib.loads(pyp_text)
+        except Exception:
+            return None
+        raw_deps = (parsed.get("project") or {}).get("dependencies")
+        if not isinstance(raw_deps, list):
+            return None
+        dist_name = dist_by_component[comp_name]
+        if uses_uv_sources:
+            if not any(
+                isinstance(d, str) and re.match(rf"^\s*{re.escape(dist_name)}(?:\s|[><=!~@]|$)", d)
+                for d in raw_deps
+            ):
+                return None
+            src = ((parsed.get("tool") or {}).get("uv") or {}).get("sources") or {}
+            entry = src.get(dist_name) if isinstance(src, dict) else None
+            if not isinstance(entry, dict):
+                return None
+            if entry.get("git") != f"https://github.com/mindie-agent/{comp_name}":
+                return None
+            rev = entry.get("rev")
+            return rev if isinstance(rev, str) and re.fullmatch(r"[0-9a-f]{40}", rev) else None
+        deps_text = "\n".join(
+            d for d in raw_deps if isinstance(d, str) and re.match(rf"^\s*{re.escape(dist_name)}\s*@", d)
+        )
+        return _extract_pinned_sha(deps_text, comp_name)
+
+    def _check_uv_lock_default_deps(
+        plugin_name: str,
+        lock_path: Path,
+        root_pkg_name: str,
+        required_components: tuple[str, ...],
+        expected_pins: dict[str, str | None],
+    ) -> None:
+        import tomllib
+
+        if not lock_path.is_file():
+            errors.append(f"{plugin_name}: missing {lock_path.name}")
+            return
+        try:
+            locked = tomllib.loads(lock_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            errors.append(f"{plugin_name}: invalid {lock_path.name}: {exc}")
+            return
+        packages = locked.get("package") or []
+        root_pkgs = [p for p in packages if isinstance(p, dict) and p.get("name") == root_pkg_name]
+        if len(root_pkgs) != 1:
+            errors.append(f"{plugin_name}: {lock_path.name} missing root package {root_pkg_name}")
+            return
+        root_dep_names = {
+            d.get("name") for d in (root_pkgs[0].get("dependencies") or []) if isinstance(d, dict)
+        }
+        for comp_name in required_components:
+            dist_name = dist_by_component[comp_name]
+            if dist_name not in root_dep_names:
+                errors.append(
+                    f"{plugin_name}: {lock_path.name} root package {root_pkg_name} missing default dependency {dist_name}"
+                )
+            expected_sha = expected_pins.get(comp_name)
+            if not expected_sha:
+                continue
+            comp_pkgs = [p for p in packages if isinstance(p, dict) and p.get("name") == dist_name]
+            expected_git = f"https://github.com/mindie-agent/{comp_name}?rev={expected_sha}#{expected_sha}"
+            if len(comp_pkgs) != 1 or (comp_pkgs[0].get("source") or {}).get("git") != expected_git:
+                errors.append(
+                    f"{plugin_name}: {lock_path.name} package {dist_name} does not match expected commit {expected_sha[:8]}"
                 )
 
     vllm_repo = _resolve_repo("knowledge-vllm-ascend", siblings_roots)
@@ -313,19 +408,35 @@ def verify_components_and_plugins(
                     f"is not an ancestor of knowledge-vllm-ascend {expected_vllm_corpus_sha[:8]}"
                 )
 
+    core_seven = ("knowledge", "remote-dev", "diagnostics", "debugger", "profiler", "sim", "coordinator")
     codex_dir = _resolve_repo("mindie-agent-codex", siblings_roots)
     if codex_dir is not None:
         pyp = (codex_dir / "plugins/mindie-agent/pyproject.toml").read_text(encoding="utf-8")
-        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
-            _check_pin_floor("mindie-agent-codex", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
+        codex_pins = {
+            comp_name: _extract_default_dep_pin(pyp, comp_name, uses_uv_sources=True)
+            for comp_name in core_seven
+        }
+        for comp_name in core_seven:
+            _check_pin_floor("mindie-agent-codex", comp_name, codex_pins[comp_name], "pyproject.toml")
+        _check_uv_lock_default_deps(
+            "mindie-agent-codex",
+            codex_dir / "plugins/mindie-agent/uv.lock",
+            "mindie-agent-codex",
+            core_seven,
+            codex_pins,
+        )
         pc = json.loads((codex_dir / "plugins/mindie-agent/product-contract.json").read_text(encoding="utf-8"))
         _check_verified_commit("mindie-agent-codex", pc["publication"]["verified_commit"])
 
     cc_dir = _resolve_repo("mindie-agent-cc", siblings_roots)
     if cc_dir is not None:
         pyp = (cc_dir / "pyproject.toml").read_text(encoding="utf-8")
-        for comp_name in ("knowledge", "remote-dev", "diagnostics", "profiler", "sim", "coordinator"):
-            _check_pin_floor("mindie-agent-cc", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
+        cc_pins = {comp_name: _extract_default_dep_pin(pyp, comp_name) for comp_name in core_seven}
+        for comp_name in core_seven:
+            _check_pin_floor("mindie-agent-cc", comp_name, cc_pins[comp_name], "pyproject.toml")
+        _check_uv_lock_default_deps(
+            "mindie-agent-cc", cc_dir / "uv.lock", "mindie-agent-cc", core_seven, cc_pins
+        )
         pc = json.loads((cc_dir / "product-contract.json").read_text(encoding="utf-8"))
         _check_verified_commit("mindie-agent-cc", pc["publication"]["verified_commit"])
 
@@ -333,11 +444,11 @@ def verify_components_and_plugins(
     if kimi_dir is not None:
         ao = (kimi_dir / "runtime/active-overrides.txt").read_text(encoding="utf-8")
         tr = (kimi_dir / "test-requirements.txt").read_text(encoding="utf-8")
-        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
+        for comp_name in core_seven:
             _check_pin_floor(
                 "mindie-agent-kimi", comp_name, _extract_pinned_sha(ao, comp_name), "runtime/active-overrides.txt"
             )
-        for comp_name in ("profiler", "sim", "coordinator"):
+        for comp_name in ("debugger", "profiler", "sim", "coordinator"):
             _check_pin_floor(
                 "mindie-agent-kimi", comp_name, _extract_pinned_sha(tr, comp_name), "test-requirements.txt"
             )
@@ -346,20 +457,28 @@ def verify_components_and_plugins(
     if dsh_dir is not None:
         pyp = (dsh_dir / "pyproject.toml").read_text(encoding="utf-8")
         rr = (dsh_dir / "runtime-requirements.txt").read_text(encoding="utf-8")
-        for comp_name in ("knowledge", "remote-dev", "diagnostics", "profiler", "sim", "coordinator"):
-            _check_pin_floor("mindie-agent-dsh", comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
-        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
+        dsh_pins = {comp_name: _extract_default_dep_pin(pyp, comp_name) for comp_name in core_seven}
+        for comp_name in core_seven:
+            _check_pin_floor("mindie-agent-dsh", comp_name, dsh_pins[comp_name], "pyproject.toml")
             _check_pin_floor(
                 "mindie-agent-dsh", comp_name, _extract_pinned_sha(rr, comp_name), "runtime-requirements.txt"
             )
+        _check_uv_lock_default_deps(
+            "mindie-agent-dsh", dsh_dir / "uv.lock", "mindie-agent-dsh-runtime", core_seven, dsh_pins
+        )
 
     for plugin_name in ("mindie-agent-agy", "mindie-agent-wb"):
         p_dir = _resolve_repo(plugin_name, siblings_roots)
         if p_dir is None:
             continue
         pyp = (p_dir / "pyproject.toml").read_text(encoding="utf-8")
-        for comp_name in ("knowledge", "remote-dev", "diagnostics"):
-            _check_pin_floor(plugin_name, comp_name, _extract_pinned_sha(pyp, comp_name), "pyproject.toml")
+        for comp_name in (*core_seven, "npu-top"):
+            _check_pin_floor(
+                plugin_name,
+                comp_name,
+                _extract_default_dep_pin(pyp, comp_name, uses_uv_sources=True),
+                "pyproject.toml",
+            )
         pc = json.loads((p_dir / "product-contract.json").read_text(encoding="utf-8"))
         pub_vc = ((pc.get("publication") or {}).get("verified_commit") or "")
         if pub_vc:
