@@ -55,7 +55,7 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 >   - Reuse a working account. When login is needed, follow the [GitHub sign-in flow](docs/enterprise-network.en.md#github-sign-in-flow): browser login on ordinary networks, or token login on enterprise networks / blocked browser authorization. Guide creation if needed, receive an existing token through the hidden `gh` prompt, and let `gh` save it. Verify the account, Git and subsequent-process reuse before continuing. Resolve network/proxy/certificate failures as transport problems. Never run `git config --global` or `git config --system` to mutate global Git configuration.
 >
 > #### Step 2: Preserve consent and prepare contribution targets only when needed
-> Installation registers the plugin needed by the current host without silently running Star or Fork commands; right after plugin installation and verification complete, Step 5 invokes the current host's **native interactive question tool** to ask the user about Community Sharing & Fault Reporting, starring the main repository ⭐, and choosing a local development workspace.
+> Installation registers the plugin needed by the current host without silently running Star or Fork commands; right after plugin installation and verification complete, Step 5 invokes the current host's **native interactive question tool** to ask the user about choosing a local development workspace, Community Sharing & Fault Reporting, and optionally giving the project a Star ⭐.
 >
 > Community contribution is off by default. Only after the user enables contribution to a target corpus `<owner/repo>` does `setup.py sharing --enable` automatically create or reuse that corpus's personal Fork and bind `<GH_USER>/<repo>` as the push target. Do not Fork the main repository, plugin repositories or all domain repositories as an installation step.
 >
@@ -91,7 +91,7 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 > - [Google Antigravity Workspace Setup](https://github.com/mindie-agent/mindie-agent-agy/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 > - [Tencent WorkBuddy Workspace Setup](https://github.com/mindie-agent/mindie-agent-wb/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 >
-> #### Step 5: Pop up native interactive questions (Community Sharing, GitHub Star ⭐ & Workspace) and persist choices
+> #### Step 5: Pop up native interactive questions (Workspace, Community Sharing & GitHub Star ⭐) and persist choices
 > Right after plugin installation and verification complete, check `setup.py sharing --status`; when `needs_onboarding_prompt: true`, **immediately invoke the current host's native interactive question tool** (do not just print plain text asking the user to run CLI commands):
 > - **Google Antigravity**: call the native **`ask_question`** tool;
 > - **Claude Code / Tencent WorkBuddy / Kimi Code**: call the native **`AskUserQuestion`** tool;
@@ -99,27 +99,27 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 > - **DeepSeek Harness (DSH)**: call the native question tool if available in the session, or present a structured 3-item numbered choice card (`[1]` / `[2]`) and wait for the user's reply.
 >
 > Present the following 3 questions (with recommended options first):
-> 1. **Community Knowledge Sharing & Automated Fault Reporting**:
->    - `(Recommended) Enable Community Sharing & Fault Reporting` (auto-fork `mindie-agent/knowledge-vllm-ascend` on demand and share redacted experience & fault diagnostics within the authorized project scope)
->    - `Keep Local-Only Mode (disable outbound sharing & fault reporting)`
-> 2. **GitHub Star ⭐ Support**:
->    - `(Recommended) Star mindie-agent/mindie-agent on GitHub ⭐`
->    - `Skip for now`
-> 3. **Local Development Workspace**:
+> 1. **Local Development Workspace**:
 >    - `(Recommended) Initialize vllm-ascend-workspace in current directory`
 >    - `Keep current directory as workspace`
 >    - `Use an existing workspace directory`
+> 2. **Community Knowledge Sharing & Automated Fault Reporting**:
+>    - `(Recommended) Enable Community Sharing & Fault Reporting` (auto-fork `mindie-agent/knowledge-vllm-ascend` on demand and share redacted experience & fault diagnostics within the authorized project scope)
+>    - `Keep Local-Only Mode (disable outbound sharing & fault reporting)`
+> 3. **Would you like to give mindie-agent a Star on GitHub ⭐?**:
+>    - `(Recommended) Sure, star it ⭐` (Star `mindie-agent/mindie-agent` on GitHub to support the project)
+>    - `Maybe later` (Continue without starring)
 >
 > **After receiving the user's answers from the native popup, execute in strict order**:
 > 1. **Resolve and initialize `WORKSPACE_ROOT` first** (and register the absolute path in the host's native workspace list);
 > 2. **Persist the sharing & reporting choice via `setup.py sharing`**:
 >    - If enabled: run `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"` (automatically resolves the GitHub account, ensures the personal fork, and updates `mindie-community.json`, `mindie-consent.json`, and `diagnostics.json`);
 >    - If disabled: run `setup.py sharing --disable`;
-> 3. **Star the repository ⭐ only if explicitly approved**: Only when the user selected the Star option in Question 2, run:
+> 3. **Star the repository ⭐ only if explicitly approved**: Only when the user selected the Star option in Question 3, run:
 >    ```bash
 >    gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent && gh api --hostname github.com --silent /user/starred/mindie-agent/mindie-agent
 >    ```
-> 4. **Report final installation summary**: Summarize the verified `gh` account, installed plugin and version, `setup.py sharing --status` state, Star status, workspace path, and remind the user that `/mindie-agent` activates domain knowledge & Skills while `remote-dev` triggers automatically by default.
+> 4. **Report final installation summary**: Summarize the verified `gh` account, installed plugin and version, workspace path, `setup.py sharing --status` state, and Star status, and remind the user that `/mindie-agent` activates domain knowledge & Skills while `remote-dev` triggers automatically by default.
 
 </details>
 
