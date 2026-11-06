@@ -85,13 +85,13 @@ python3 .github/scripts/check_auto_update_readiness.py --release-scope product -
 python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
 ```
 
-Independent R6 requires selected targets and reads their candidate versions from `pyproject.toml` or native plugin manifests. It checks only their own release badges, wheel links and LF; paired product versions and peer references do not force synchronization. Corpora retain README/LF and R2 unit-revision checks without inventing package versions. Omitting a target is an explicit error, never a fallback to global synchronization. Candidate tags, packages and assets remain verified by the owning release workflow; R1–R5 retain existing combination, corpus, dependency and host checks, including Windows zero-popup protection.
+Independent R6 requires selected targets and reads their candidate versions from `pyproject.toml` or native plugin manifests. It checks only their own release badges, current-version declarations, release/install links and LF; paired product versions and peer references do not force synchronization. Corpora retain README/LF and R2 unit-revision checks without inventing package versions. Omitting a target is an explicit error, never a fallback to global synchronization. Candidate tags, packages and assets remain verified by the owning release workflow; R1–R5 retain existing combination, corpus, dependency and host checks, including Windows zero-popup protection.
 
 `--strict-lockstep` controls dependency pin equality independently of documentation scope. Both full synchronization tools (`sync_org_versions.py`, `sibling_readme_sync.py`) require explicit `--release-scope product` for checking or writing. Periodic telemetry updates telemetry artifacts only; it no longer rewrites product or organization version tables.
 
 R6 therefore validates selected repositories against their own source versions in independent mode, and validates the full channel/document/README combination only in product mode. Review these remaining release requirements as well:
 
-Main-repository PR CI selects product checks when the channel, product version tables or publication inputs change. Other changes run LF, release-scope regressions and PR review checks. Independent component publication does not require a main-repository PR.
+Main-repository PR CI selects product checks when the channel, product version tables, publication inputs or gate/synchronizer implementations change. Its path selection shares the synchronizer's managed document list. Other changes run LF, release-scope regressions and PR review checks. Independent component publication does not require a main-repository PR.
 
 | Pre-Release Check | Verification Standard |
 | --- | --- |

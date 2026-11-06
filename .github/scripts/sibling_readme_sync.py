@@ -80,6 +80,14 @@ EXPECTED_PLUGINS = (
     "mindie-agent-wb",
 )
 
+# The synchronizer and CI change routing share the same owned document set.
+PRODUCT_DOC_PATHS = (
+    "docs/README.md", "docs/README.en.md", "docs/simulation-system.md",
+    "docs/profiler-sim-structure.md", "docs/simulation-consumer-migration.md",
+    "docs/mechanism-first-performance-modeling-design.md",
+    "docs/next-steps.md", "docs/next-steps.en.md",
+)
+
 
 def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
     errors: list[str] = []
@@ -323,34 +331,24 @@ def sync_docs_versions(repo_root: Path, m: dict, write: bool) -> list[str]:
             txt = re.sub(pat, repl, txt)
         return txt
 
-    targets = [
-        (repo_root / "docs" / "README.md", _transform_docs_readme),
-        (repo_root / "docs" / "README.en.md", _transform_docs_readme),
-        (repo_root / "docs" / "simulation-system.md", _transform_sim_doc),
-        (repo_root / "docs" / "profiler-sim-structure.md", _transform_prof_sim_doc),
-        (repo_root / "docs" / "simulation-consumer-migration.md", _transform_consumer_migration),
-        (repo_root / "docs" / "mechanism-first-performance-modeling-design.md", _transform_sim_doc),
-        (repo_root / "docs" / "next-steps.md", lambda t: _transform_next_steps(t, False)),
-        (repo_root / "docs" / "next-steps.en.md", lambda t: _transform_next_steps(t, True)),
-    ]
-    for path, fn in targets:
-        errors.extend(process_markdown_file(path, fn, write))
+    transforms = (
+        _transform_docs_readme, _transform_docs_readme, _transform_sim_doc,
+        _transform_prof_sim_doc, _transform_consumer_migration, _transform_sim_doc,
+        lambda t: _transform_next_steps(t, False), lambda t: _transform_next_steps(t, True),
+    )
+    for relative_path, fn in zip(PRODUCT_DOC_PATHS, transforms, strict=True):
+        errors.extend(process_markdown_file(repo_root / relative_path, fn, write))
     return errors
 
 
-def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
-    comps = m["components"]
-    cpv = str(m["current_patch_version"])
-    self_ver = str(comps[repo_name]["version"])
-
+def transform_own_readme_versions(txt: str, repo_name: str, self_ver: str) -> str:
+    """Shared self-version rules; no product version or peer dependency input."""
     txt = re.sub(
         r"(https://img\.shields\.io/badge/[Rr]elease-v)\d+\.\d+\.\d+(-[^\s\"')>]+)",
         rf"\g<1>{self_ver}\g<2>",
         txt,
     )
     txt = re.sub(r'(alt="Release v)\d+\.\d+\.\d+(")', rf"\g<1>{self_ver}\g<2>", txt)
-    txt = re.sub(r"(配套主产品 `)\d+\.\d+\.\d+(`)", rf"\g<1>{cpv}\g<2>", txt)
-    txt = re.sub(r"(paired with `mindie-agent )\d+\.\d+\.\d+(`)", rf"\g<1>{cpv}\g<2>", txt)
     txt = re.sub(
         rf"(--branch v)(?!0\.0\.)\d+\.\d+\.\d+( https://github\.com/mindie-agent/{re.escape(repo_name)}\.git)",
         rf"\g<1>{self_ver}\g<2>",
@@ -380,6 +378,15 @@ def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
         r"(latest `v)(?!0\.0\.)\d+\.\d+\.\d+(` release)",
     ):
         txt = re.sub(pat, rf"\g<1>{self_ver}\g<2>", txt)
+    return txt
+
+
+def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
+    comps = m["components"]
+    cpv = str(m["current_patch_version"])
+    txt = transform_own_readme_versions(txt, repo_name, str(comps[repo_name]["version"]))
+    txt = re.sub(r"(配套主产品 `)\d+\.\d+\.\d+(`)", rf"\g<1>{cpv}\g<2>", txt)
+    txt = re.sub(r"(paired with `mindie-agent )\d+\.\d+\.\d+(`)", rf"\g<1>{cpv}\g<2>", txt)
 
     if repo_name not in EXPECTED_PLUGINS:
         for comp_key, (pkg_dash, pkg_under) in PACKAGE_INFO.items():

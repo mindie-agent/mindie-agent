@@ -7,15 +7,18 @@ Only an explicit product scope compares READMEs across the channel combination.
 """
 from __future__ import annotations
 
+import argparse
 import json
+import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 import tomllib
 
 from sibling_readme_sync import (
-    EXPECTED_PLUGINS, resolve_sibling_repo, sync_sibling_readmes, verify_markdown_anchors,
-    verify_no_stale_self_versions,
+    EXPECTED_PLUGINS, PRODUCT_DOC_PATHS, resolve_sibling_repo, sync_sibling_readmes,
+    transform_own_readme_versions, verify_markdown_anchors, verify_no_stale_self_versions,
 )
 
 VERSION_FILES = (
@@ -68,6 +71,8 @@ def verify_own_readmes(repo: Path, name: str, version: str | None) -> list[str]:
             errors.append(f"{name}/{filename}: missing Release badge for source version {version}")
         if any(found != version for found in badges):
             errors.append(f"{name}/{filename}: Release badge versions {badges} != source version {version}")
+        if transform_own_readme_versions(text, name, version) != text:
+            errors.append(f"{name}/{filename}: self release links or version declarations differ from source version {version}")
         wheel_links = re.findall(
             rf"github\.com/mindie-agent/{re.escape(name)}/releases/download/v([^/\s]+)/"
             r"[A-Za-z0-9_]+-([0-9]+\.[0-9]+\.[0-9]+)-py3-none-any\.whl", text)
@@ -105,6 +110,7 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
         if repo is None:
             errors.append(f"{name}: selected release checkout not found in {roots}")
             continue
+        repo = repo.resolve()
         result = run([sys.executable, str(scripts / "check_lf_eol.py"), "--repo-root", str(repo)],
                      cwd=repo, timeout=15.0)
         if result.returncode:
@@ -117,3 +123,29 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
         except (OSError, ValueError) as exc:
             errors.append(f"{name}: release documentation check failed: {exc}")
     return errors
+
+
+def product_inputs_changed(base: str, *, repository: Path, head: str = "HEAD") -> bool:
+    """Route actual Git changes, including every document the product sync owns."""
+    paths = (
+        "channels/", "docs/releases/", "README.md", "README.en.md", *PRODUCT_DOC_PATHS,
+        ".github/workflows/release.yml", ".github/workflows/pr-checklist.yml",
+        ".github/scripts/check_auto_update_readiness.py", ".github/scripts/release_doc_hygiene.py",
+        ".github/scripts/sibling_readme_sync.py", ".github/scripts/sync_org_versions.py",
+    )
+    result = subprocess.run(
+        ["git", "diff", "--quiet", base, head, "--", *paths], cwd=repository,
+        capture_output=True, text=True, encoding="utf-8", timeout=15, check=False,
+        creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+    )
+    if result.returncode not in (0, 1):
+        result.check_returncode()
+    return result.returncode == 1
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Identify product inputs changed for CI routing.")
+    parser.add_argument("--product-inputs-changed", required=True, metavar="BASE_SHA")
+    args = parser.parse_args()
+    changed = product_inputs_changed(args.product_inputs_changed, repository=Path.cwd())
+    print("changed=" + str(changed).lower())

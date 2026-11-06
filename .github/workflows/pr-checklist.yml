@@ -27,15 +27,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          if git diff --quiet "$BASE_SHA" HEAD -- channels/ docs/releases/ docs/next-steps.md docs/next-steps.en.md README.md README.en.md .github/workflows/release.yml; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            status=$?
-            if [ "$status" -ne 1 ]; then
-              exit "$status"
-            fi
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
+          python3 .github/scripts/release_doc_hygiene.py --product-inputs-changed "$BASE_SHA" >> "$GITHUB_OUTPUT"
       - name: Verify Channel Version Sync in READMEs
         if: steps.product.outputs.changed == 'true'
         run: python3 .github/scripts/sync_org_versions.py --release-scope product --check --offline

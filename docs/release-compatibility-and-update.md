@@ -89,7 +89,7 @@ python3 .github/scripts/check_auto_update_readiness.py --release-scope product -
 python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
 ```
 
-`--release-repo` 只选择 R6 的独立发布文档范围；省略目标会明确报错，不会退回全量同步。R6 从所选仓的 `pyproject.toml` 或原生插件清单读取候选版本，检查自身版本徽章、wheel 链接和 LF。语料使用自身 LF/README 与既有 R2 单元修订门禁，不伪造软件包版本。其他仓的版本漂移、配套产品版本和交叉组件引用不会成为独立发布的文档同步要求。候选 Tag、包和发行资产仍由对应仓的正式发布工作流验证；R1–R5 保留既有组合、语料、依赖和宿主兼容性检查。
+`--release-repo` 只选择 R6 的独立发布文档范围；省略目标会明确报错，不会退回全量同步。R6 从所选仓的 `pyproject.toml` 或原生插件清单读取候选版本，检查自身版本徽章、当前版本声明、Release/安装链接和 LF。语料使用自身 LF/README 与既有 R2 单元修订门禁，不伪造软件包版本。其他仓的版本漂移、配套产品版本和交叉组件引用不会成为独立发布的文档同步要求。候选 Tag、包和发行资产仍由对应仓的正式发布工作流验证；R1–R5 保留既有组合、语料、依赖和宿主兼容性检查。
 
 `--strict-lockstep` 只控制依赖 pin 是否必须等于通道组合，与文档范围正交；它不会隐式启用全量文档同步。两个全量同步工具 `sync_org_versions.py`、`sibling_readme_sync.py` 的检查和写入都要求显式 `--release-scope product`。周期遥测只更新遥测产物，不再自动改写主仓或组织版本表。
 
@@ -146,7 +146,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
    - 插件选择器根据本机当前安装的宿主版本，选出**当前宿主能用的最高兼容正式版插件 Release**（排除 `draft` 与 `prerelease`）。
    - 当没有更高版本的插件 Release 可用时，宿主更新器直接调用组件更新流程（`component_update.py`），将共享运行时组件独立推进至各组件仓库最新的正式 Release；当升级到新插件 Release 时，也会继承当前已安装组件的版本下界（`max(已安装版本, 新插件基线, 组件正式 Release)`），防止新插件把已独立升级过的组件回退到旧基线。
 3. **发版前自动更新就绪必检项（`check_auto_update_readiness.py`，原生支持灵活组件独立发版与全量同步发版双模式）**：
-   - 发布前按上面的 independent/product 命令选择文档范围，再执行 `--require-siblings --verify-local-hosts`（正式发布加 `--verify-github-releases`）。主仓 PR CI 对通道、产品版本表或产品发行输入的变更显式检查 product 范围，其他改动执行 LF、发布范围回归和 PR 自查；这不要求独立组件另提主仓 PR。其余门禁继续覆盖以下维度：
+   - 发布前按上面的 independent/product 命令选择文档范围，再执行 `--require-siblings --verify-local-hosts`（正式发布加 `--verify-github-releases`）。主仓 PR CI 对通道、产品版本表、产品发行输入及门禁/同步实现的变更显式检查 product 范围；检查路径与同步器共用同一份受管文档清单。其他改动执行 LF、发布范围回归和 PR 自查；这不要求独立组件另提主仓 PR。其余门禁继续覆盖以下维度：
      - **知识库语义版本单调性**：`mindie-knowledge` 的 `build_routing_index()` 在重建 `index/routing-manifest.json` 时自动将内容变更单元的 `revision` 递增 1，`publication_check.py` 在 `validate(..., base_revision=...)` 中强制拦截任何修改 `content_sha256` 却未推进 `revision` 的提交，且发版前脚本扫描全部 7 个 `knowledge-*` 仓库历史通道提交至 `HEAD` 的单调性及 `publication-contract.json` 的 `validator.revision` 对齐情况（允许 `validator.revision <= channel knowledge version`）；
      - **灵活组件独立升级下界校验（默认 `flexible-component-update` 模式）与锁步发版校验（`--strict-lockstep` 模式）**：
        - **日常独立组件/语料发版（无需重发 5 款宿主插件）**：默认模式下，`check_auto_update_readiness.py` 校验 5 款宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的每个组件 SHA 均对应官方组件仓库的正式 Release Tag 且满足 `plugin_baseline_version <= channel_component_version`，同时校验 `product-contract.json` 的 `verified_commit` 是通道语料提交的合法祖先，并执行跨版本 API 兼容性检查（`verify_flexible_component_compatibility`）。这样单独发布任意共享组件（如 `knowledge`、`remote-dev`、`diagnostics`、`coordinator`、`profiler`、`sim`、`npu-top`）或推送 `knowledge-*` 语料时，无需重发任何宿主插件，已安装的五端宿主即可通过各自的 `component_update.py`（`mindie_knowledge.component_runtime.discover` + `build`）独立发现并原地原子切换至最新组件正式版；
