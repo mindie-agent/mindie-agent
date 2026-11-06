@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-06 12:22 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-06 12:35 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">9,969</text>
-  <text x="734" y="144" class="font kpi-sub">14,131 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">10,016</text>
+  <text x="734" y="144" class="font kpi-sub">14,373 total asset downloads</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -110,7 +110,7 @@
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">5,666</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">3,863 (457)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">5,487</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">5,522</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
@@ -120,7 +120,7 @@
   <text x="545" y="472" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="472" text-anchor="end" class="mono td-bold">2,853</text>
   <text x="815" y="472" text-anchor="end" class="mono td-num">1,588 (276)</text>
-  <text x="920" y="472" text-anchor="end" class="mono td-num">215</text>
+  <text x="920" y="472" text-anchor="end" class="mono td-num">220</text>
   <line x1="24" y1="484" x2="936" y2="484" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="501" r="3.5" fill="#2563EB"/>
   <text x="50" y="505" class="mono td-repo">mindie-agent-kimi</text>
@@ -129,7 +129,7 @@
   <text x="545" y="505" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="505" text-anchor="end" class="mono td-bold">3,243</text>
   <text x="815" y="505" text-anchor="end" class="mono td-num">1,884 (341)</text>
-  <text x="920" y="505" text-anchor="end" class="mono td-num">2,252</text>
+  <text x="920" y="505" text-anchor="end" class="mono td-num">2,255</text>
   <rect x="25" y="517" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="517" x2="936" y2="517" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="534" r="3.5" fill="#0EA5E9"/>
@@ -139,7 +139,7 @@
   <text x="545" y="538" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="538" text-anchor="end" class="mono td-bold">2,032</text>
   <text x="815" y="538" text-anchor="end" class="mono td-num">1,403 (344)</text>
-  <text x="920" y="538" text-anchor="end" class="mono td-num">81</text>
+  <text x="920" y="538" text-anchor="end" class="mono td-num">83</text>
   <line x1="24" y1="550" x2="936" y2="550" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="567" r="3.5" fill="#4285F4"/>
   <text x="50" y="571" class="mono td-repo">mindie-agent-agy</text>
@@ -158,7 +158,7 @@
   <text x="545" y="604" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="604" text-anchor="end" class="mono td-bold">176</text>
   <text x="815" y="604" text-anchor="end" class="mono td-num">176 (72)</text>
-  <text x="920" y="604" text-anchor="end" class="mono td-num">8</text>
+  <text x="920" y="604" text-anchor="end" class="mono td-num">10</text>
   <line x1="24" y1="616" x2="936" y2="616" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="633" r="3.5" fill="#475569"/>
   <text x="50" y="637" class="mono td-repo">knowledge</text>
