@@ -15,6 +15,7 @@ These nine principles define what should be a tool, what should be a Skill or kn
 1. **Measure efficiency by the total cost of achieving the user's real goal (Top Priority)**
    - Total cost includes **understanding, configuration, waiting, debugging, and rework**—not just raw execution time.
    - Reliability mechanisms are worthwhile only when they reduce these real costs. Never burden every everyday task with heavy ceremony just to guard against rare edge cases. When other considerations conflict with this rule, Principle 1 wins.
+   - **Task continuity is a P0 product requirement**: Failures in MindIE knowledge, setup, diagnostics or local recording affect that capability, not the whole user task. Report the failure, retain completed results and job references, and continue independent steps or use equivalent authorized host tools. Defer optional onboarding. Preserve identity, permissions, actual device/port ownership and reconciliation of uncertain writes; pause only the affected action when those facts cannot be established.
 2. **Turn only well-bounded, closed problems into tools**
    - A tool must have clear preconditions, inputs, outputs, and failure modes (e.g., reading a remote file, querying live NPU telemetry, or redacting secrets).
    - Leave open-ended, context-dependent judgment to the Agent; extract only repeatable, deterministic operations into stable tools, and never expand scope just for the sake of building a tool.
@@ -139,7 +140,7 @@ Every development PR across all MindIE Agent repositories (covering code, config
 | Dimension | Review Question |
 |---|---|
 | **1. Total Cost** | What real friction or cost does this change remove? Does it add unnecessary background work, repetitive full-tree hashing/IO checks, or extra user steps? |
-| **2. Tool Boundary** | Is any toolified logic solving a closed, well-bounded problem rather than freezing open-ended judgment into a rigid flow? |
+| **2. Tool Boundary** | Is any toolified logic solving a closed, well-bounded problem rather than freezing open-ended judgment into a rigid flow? Do public discovery, input validation, runtime forwarding, recovery guidance and pinned dependencies work together for the same user scenario, beyond passing low-level SDK tests? |
 | **3. Cognitive Load** | Does the change keep internal state and parameters simple for both users and Agents? |
 | **4. Single Responsibility** | Are module boundaries clean without cross-repo leakage, duplicate state stores, or copy-pasted `*_fallback.py`/`*_bootstrap.py` shadow state machines? |
 | **5. Informational Skills** | Do Skills remain clear, helpful guides rather than mandatory procedural checklists? |
