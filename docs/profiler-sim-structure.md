@@ -2,7 +2,7 @@
 
 [Profiler 系统设计](profiler-system.md) · [Sim 建模系统](simulation-system.md) · [系统架构](architecture.md) · [设计原则](design-principles.md) · [文档中心](README.md)
 
-本文说明 [`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v0.5.6`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v0.9.3`）如何共享模型结构声明、关联昇腾真机 Profiling 事件，并完成算子同构集合（Cohort）与 Decode / Prefill 主体的端到端精度对账。
+本文说明 [`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v0.5.6`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v0.9.4`）如何共享模型结构声明、关联昇腾真机 Profiling 事件，并完成算子同构集合（Cohort）与 Decode / Prefill 主体的端到端精度对账。
 
 模型与算子拓扑结构由 `mindie-sim` 统一维护并导出为 `mindie-model-structure/1`；原始 `msprof` CSV/SQLite 解析、张量契约提取与实测事件归因由 `mindie-profiler` 统一维护。两者通过结构化文件解耦协作，既不在 `profiler` 中维护第二套模型目录，也不在 `sim` 中维护第二套 CSV/SQLite 解析器。
 
@@ -103,7 +103,7 @@ python profiler/examples/structure/pipeline.py --stage all
 
 ### 5.2 多架构与大规模集群验证结果
 
-通过 `mindie-profiler v0.5.6` 与 `mindie-sim v0.9.3` 的统一流水线（详见 `profiler` 仓库 `examples/structure/pipeline.py`、`examples/structure/wave5_generalization_eval.py` 与 `docs/profiler-system.md`），系统已完成从单模块、单算子 Cohort 到跨集群整网前向的分层闭环验证：
+通过 `mindie-profiler v0.5.6` 与 `mindie-sim v0.9.4` 的统一流水线（详见 `profiler` 仓库 `examples/structure/pipeline.py`、`examples/structure/wave5_generalization_eval.py` 与 `docs/profiler-system.md`），系统已完成从单模块、单算子 Cohort 到跨集群整网前向的分层闭环验证：
 
 | 验证维度 | 覆盖范围与数据规模 | 验证结果 |
 | --- | --- | --- |

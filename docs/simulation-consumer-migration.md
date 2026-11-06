@@ -2,7 +2,7 @@
 
 [仿真系统设计](simulation-system.md) · [结构复用与实测映射](profiler-sim-structure.md) · [系统架构](architecture.md) · [版本兼容与更新](release-compatibility-and-update.md) · [文档中心](README.md)
 
-本文记录 `mindie-sim` 从早期 `0.7.x` 专用四层 CLI 升级至 `0.8.x / 0.9.x`（当前正式版 `v0.9.3`）五层统一因果建模引擎后的接口映射关系，以及在五大原生宿主插件（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity）、`mindie-profiler`（`v0.5.6`）与 `mindie-bench`（`v0.4.6`）中的集成状态。
+本文记录 `mindie-sim` 从早期 `0.7.x` 专用四层 CLI 升级至 `0.8.x / 0.9.x`（当前正式版 `v0.9.4`）五层统一因果建模引擎后的接口映射关系，以及在五大原生宿主插件（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity）、`mindie-profiler`（`v0.5.6`）与 `mindie-bench`（`v0.4.6`）中的集成状态。
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## 2. 跨仓库消费者集成状态
 
-截至当前正式版本组合（见 [`channels/0.1.json`](../channels/0.1.json)），所有下游组件与宿主插件均已完成向 `mindie-sim v0.9.3` 及 `mindie-profiler v0.5.6` 接口的对齐与正式发布：
+截至当前正式版本组合（见 [`channels/0.1.json`](../channels/0.1.json)），所有下游组件与宿主插件均已完成向 `mindie-sim v0.9.4` 及 `mindie-profiler v0.5.6` 接口的对齐与正式发布：
 
 | 消费者组件 / 插件 | 当前正式版本 | 集成方式与验证闭环 |
 | --- | --- | --- |

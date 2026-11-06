@@ -12,7 +12,7 @@
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
       "verified_mechanism": "channels/0.1.json records the product-verified 15-repository + 9-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 9 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py; Tencent WorkBuddy mounts plugins/mindie-agent as both a WorkBuddy Connector and a CodeBuddy native plugin).",
-      "known_boundaries": "The 0.1.8 channel pins verified releases across the 9 shared runtime/evaluation components (knowledge 0.13.12, remote-dev 0.11.5, profiler 0.5.6, sim 0.9.3, coordinator 0.7.4, npu-top 0.3.1, diagnostics 0.5.7, debugger 0.1.0, mindie-bench 0.4.6), 6 native host plugins (Codex 0.1.20, Claude Code 0.1.16, Kimi 0.1.16, DSH 0.1.15, Google Antigravity 0.1.6, Tencent WorkBuddy 0.1.5), and 9 public domain corpora. All six host plugins expose the remote NPU and deterministic component/debugging tools (diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and unified single-state RSI loop/ledger (rsi_loop / experiment_ledger) and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
+      "known_boundaries": "The 0.1.8 channel pins verified releases across the 9 shared runtime/evaluation components (knowledge 0.13.13, remote-dev 0.11.5, profiler 0.5.6, sim 0.9.4, coordinator 0.7.4, npu-top 0.3.1, diagnostics 0.5.7, debugger 0.1.0, mindie-bench 0.4.6), 6 native host plugins (Codex 0.1.20, Claude Code 0.1.16, Kimi 0.1.16, DSH 0.1.15, Google Antigravity 0.1.6, Tencent WorkBuddy 0.1.5), and 9 public domain corpora. All six host plugins expose the remote NPU and deterministic component/debugging tools (diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and unified single-state RSI loop/ledger (rsi_loop / experiment_ledger) and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
     }
   },
   "corpora": {
@@ -23,13 +23,13 @@
     },
     "knowledge-operators": {
       "repository": "mindie-agent/knowledge-operators",
-      "commit": "bf8150d4d754fc360e00dfdb9f62f8967b2dcfff",
+      "commit": "0d2aa4b5387cf3f8d5c46a0703b43dd0adda9c4c",
       "units": 103
     },
     "knowledge-vllm-ascend": {
       "repository": "mindie-agent/knowledge-vllm-ascend",
-      "commit": "a0f890b70e73919ffe5d917febcb2595793422ef",
-      "units": 93
+      "commit": "911ed567a1011e6ee6578f008c522bde4ac55b4e",
+      "units": 97
     },
     "knowledge-xllm": {
       "repository": "mindie-agent/knowledge-xllm",
@@ -104,10 +104,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/sim",
       "package": "mindie-sim",
-      "version": "0.9.3",
-      "tag": "v0.9.3",
-      "commit": "dbadff04b60937a0722b0a227cdad01beed083cd",
-      "revision": "dbadff04b60937a0722b0a227cdad01beed083cd",
+      "version": "0.9.4",
+      "tag": "v0.9.4",
+      "commit": "6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66",
+      "revision": "6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -140,10 +140,10 @@
       "role": "shared_component",
       "repository": "mindie-agent/knowledge",
       "package": "mindie-knowledge",
-      "version": "0.13.12",
-      "tag": "v0.13.12",
-      "commit": "1840bd4e238e718676768489058917818d18cd3c",
-      "revision": "1840bd4e238e718676768489058917818d18cd3c",
+      "version": "0.13.13",
+      "tag": "v0.13.13",
+      "commit": "3c478a19b5542b38520c7f98b87a07f37e305021",
+      "revision": "3c478a19b5542b38520c7f98b87a07f37e305021",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -385,6 +385,7 @@
       "type": "hotfix",
       "updated_components": [
         "knowledge",
+        "sim",
         "mindie-agent-codex",
         "mindie-agent-cc",
         "mindie-agent-kimi",
@@ -392,8 +393,8 @@
         "mindie-agent-agy",
         "mindie-agent-wb"
       ],
-      "plugin_republish_required": true,
-      "summary": "0.1.8 unified single-state RSI loop/ledger, higher graded retrieval budgets & 6-host verification patch: mindie-knowledge 0.13.12 (1840bd4e238e718676768489058917818d18cd3c) consolidates ExperimentLedger as the single authoritative RSI state store, simplifies RSILoopEngine to the three orient/propose/verdict primitives with superseded-baseline reconciliation and round-order preservation, surfaces active_rsi_session directly in explore responses, raises default graded retrieval token budgets (explore 24000, query 8000, explain 16000, ceiling 64000), and retires stale state=replaced service owners and launch records during service replace (mindie-agent-codex#85); all six native host plugins (Codex 0.1.20, Claude Code 0.1.16, Kimi 0.1.16, DSH 0.1.15, Antigravity 0.1.6, WorkBuddy 0.1.5) unify their RSI loop/ledger MCP/CLI tools onto mindie-knowledge 0.13.11, align mindie-sim to 0.9.3 (dbadff04b60937a0722b0a227cdad01beed083cd), and pass end-to-end real-task G4 benchmark verification (6/6 hosts reward = 1.0)."
+      "plugin_republish_required": false,
+      "summary": "0.1.8 unified single-state RSI loop/ledger, higher graded retrieval budgets & 6-host verification patch: mindie-knowledge 0.13.13 (3c478a19b5542b38520c7f98b87a07f37e305021) consolidates ExperimentLedger as the single authoritative RSI state store, simplifies RSILoopEngine to the three orient/propose/verdict primitives with superseded-baseline reconciliation and round-order preservation, surfaces active_rsi_session directly in explore responses, raises default graded retrieval token budgets (explore 24000, query 8000, explain 16000, ceiling 64000), and retires stale state=replaced service owners and launch records during service replace (mindie-agent-codex#85); mindie-sim 0.9.4 (6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66) completes full-fleet HF native config field coverage (layer_types heterogeneous KV cache sizing, routed_scaling_factor, LongCat/MiniMax-M3/Bailing-V3) and index_pool tail-row calibration; all six native host plugins (Codex 0.1.20, Claude Code 0.1.16, Kimi 0.1.16, DSH 0.1.15, Antigravity 0.1.6, WorkBuddy 0.1.5) unify their RSI loop/ledger MCP/CLI tools onto mindie-knowledge 0.13.11 and pass end-to-end real-task G4 benchmark verification (6/6 hosts reward = 1.0)."
     }
   ]
 }

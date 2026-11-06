@@ -1,8 +1,8 @@
 # 机制优先（Mechanism-First）的性能建模设计规范
 
-[仿真系统设计（`mindie-sim v0.9.3`）](simulation-system.md) · [双模型原始方案](a3-performance-modeling-plan.md) · [工程原则](design-principles.md) · [分级测试](testing-architecture.md)
+[仿真系统设计（`mindie-sim v0.9.4`）](simulation-system.md) · [双模型原始方案](a3-performance-modeling-plan.md) · [工程原则](design-principles.md) · [分级测试](testing-architecture.md)
 
-本文档阐述 `mindie-sim` 机制优先（Mechanism-First）性能建模的核心数学推导与架构规范；对应的 `mindie-sim v0.9.3` 5 层因果建模引擎、4 维效率拆解与 30ms SLA 硬件反推求解器能力见[面向 Agent 的通用性能建模系统](simulation-system.md)。
+本文档阐述 `mindie-sim` 机制优先（Mechanism-First）性能建模的核心数学推导与架构规范；对应的 `mindie-sim v0.9.4` 5 层因果建模引擎、4 维效率拆解与 30ms SLA 硬件反推求解器能力见[面向 Agent 的通用性能建模系统](simulation-system.md)。
 
 **核心原则：把能由工作量、执行计划和资源约束推导的效率现象还原为物理与微架构机制；校准只识别有明确物理含义、可区分、可复用的底层参数。`predict` 和 `should` 共用同一套底层执行机制，区别仅在于执行计划的选择。**
 

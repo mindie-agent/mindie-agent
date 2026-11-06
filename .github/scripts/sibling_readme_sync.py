@@ -345,6 +345,7 @@ def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
     )
     for pat in (
         r"(当前正式版本为 `v?)(?!0\.0\.)\d+\.\d+\.\d+(`)",
+        r"(当前正式版本\s*\[?`v?)(?!0\.0\.)\d+\.\d+\.\d+(`\]?)",
         r"(当前正式版 `v?)(?!0\.0\.)\d+\.\d+\.\d+(`)",
         r"(当前稳定版本：\[`v)(?!0\.0\.)\d+\.\d+\.\d+(`\])",
         r"([Cc]urrent [Rr]elease:\s*\[`v)(?!0\.0\.)\d+\.\d+\.\d+(`\])",

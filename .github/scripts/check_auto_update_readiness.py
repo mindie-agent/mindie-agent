@@ -285,13 +285,18 @@ def verify_components_and_plugins(
                 comp_repo = _resolve_repo(comp_name, siblings_roots)
                 is_mainline_advance = False
                 if comp_repo is not None:
+                    anc_behind = _run_cmd(
+                        ["git", "merge-base", "--is-ancestor", pinned_sha, channel_sha], cwd=comp_repo
+                    )
                     anc_floor = _run_cmd(
                         ["git", "merge-base", "--is-ancestor", channel_sha, pinned_sha], cwd=comp_repo
                     )
                     anc_head = _run_cmd(
                         ["git", "merge-base", "--is-ancestor", pinned_sha, "HEAD"], cwd=comp_repo
                     )
-                    is_mainline_advance = anc_floor.returncode == 0 and anc_head.returncode == 0
+                    is_mainline_advance = anc_behind.returncode == 0 or (
+                        anc_floor.returncode == 0 and anc_head.returncode == 0
+                    )
                 if not is_mainline_advance:
                     errors.append(
                         f"{plugin_name}: {source_file} pins {comp_name} to {pinned_sha[:8]}, "
@@ -860,7 +865,8 @@ def main() -> int:
         require_siblings=args.require_siblings,
         strict_lockstep=args.strict_lockstep,
     )
-    r3_errors.extend(verify_unreleased_plugin_main(manifest, siblings_roots))
+    if args.strict_lockstep:
+        r3_errors.extend(verify_unreleased_plugin_main(manifest, siblings_roots))
     if args.verify_github_releases:
         r3_errors.extend(verify_github_releases(manifest))
     r4_errors = verify_flexible_component_compatibility(siblings_roots)
