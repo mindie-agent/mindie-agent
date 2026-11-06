@@ -20,12 +20,12 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-06 11:05 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-06 12:00 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
-  <text x="38" y="124" class="font kpi-val">74 ★  ·  57 ⑂</text>
-  <text x="38" y="144" class="font kpi-sub">Org total: 82 Stars · 89 Forks</text>
+  <text x="38" y="124" class="font kpi-val">75 ★  ·  57 ⑂</text>
+  <text x="38" y="144" class="font kpi-sub">Org total: 83 Stars · 89 Forks</text>
   <rect x="256" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="256" y="72" width="4" height="86" rx="2" fill="#10A37F"/>
   <text x="270" y="95" class="font kpi-label">Client Plugin Clones</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">9,860</text>
-  <text x="734" y="144" class="font kpi-sub">13,899 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">9,937</text>
+  <text x="734" y="144" class="font kpi-sub">14,062 total asset downloads</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -88,7 +88,7 @@
   <text x="50" y="373" class="mono td-repo">mindie-agent</text>
   <text x="268" y="373" class="font td-cat">Main Entry</text>
   <text x="368" y="373" class="mono td-sub">v0.1.8</text>
-  <text x="545" y="373" text-anchor="end" class="mono td-num">74 / 57</text>
+  <text x="545" y="373" text-anchor="end" class="mono td-num">75 / 57</text>
   <text x="665" y="373" text-anchor="end" class="mono td-bold">2,560</text>
   <text x="815" y="373" text-anchor="end" class="mono td-num">1,295 (466)</text>
   <text x="920" y="373" text-anchor="end" class="mono td-num">37</text>
@@ -110,7 +110,7 @@
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">5,666</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">3,863 (457)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">5,389</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">5,463</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
@@ -173,7 +173,7 @@
   <circle cx="40" cy="666" r="3.5" fill="#475569"/>
   <text x="50" y="670" class="mono td-repo">remote-dev</text>
   <text x="268" y="670" class="font td-cat">Core Runtime</text>
-  <text x="368" y="670" class="mono td-sub">v0.11.5</text>
+  <text x="368" y="670" class="mono td-sub">v0.11.6</text>
   <text x="545" y="670" text-anchor="end" class="mono td-num">1 / 2</text>
   <text x="665" y="670" text-anchor="end" class="mono td-bold">5,867</text>
   <text x="815" y="670" text-anchor="end" class="mono td-num">3,380 (1,770)</text>
@@ -205,7 +205,7 @@
   <text x="545" y="769" text-anchor="end" class="mono td-num">1 / 0</text>
   <text x="665" y="769" text-anchor="end" class="mono td-bold">1,781</text>
   <text x="815" y="769" text-anchor="end" class="mono td-num">1,472 (664)</text>
-  <text x="920" y="769" text-anchor="end" class="mono td-num">54</text>
+  <text x="920" y="769" text-anchor="end" class="mono td-num">57</text>
   <rect x="25" y="781" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="781" x2="936" y2="781" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="798" r="3.5" fill="#D97706"/>
