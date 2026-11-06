@@ -93,11 +93,13 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
 
 `--strict-lockstep` 只控制依赖 pin 是否必须等于通道组合，与文档范围正交；它不会隐式启用全量文档同步。两个全量同步工具 `sync_org_versions.py`、`sibling_readme_sync.py` 的检查和写入都要求显式 `--release-scope product`。周期遥测只更新遥测产物，不再自动改写主仓或组织版本表。
 
+独立发布的宿主插件可以锁定比历史 channel 更新的正式组件。R3 继续校验历史组合，并要求当前插件的依赖 pin 对应正式 Tag；开启 `--verify-github-releases` 时，还检查这些实际依赖的正式 Release 与校验资产。产品组合范围仍检查组件版本上限，显式 `--strict-lockstep` 仍要求精确相等。发布新插件无需为了提高这个历史上限而重新发布产品组合。
+
 脚本会逐项输出并强制拦截以下 `R1–R6` 六项必检门禁（任一项未通过直接返回非零退出码）：
 - [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性、内部描述字段（`known_boundaries`、`patch_releases[-1]`）与当前版本说明（`docs/releases/<patch>.md` 及 `.en.md` 十三仓版本与 SHA 表）的一致性，并区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
 - [ ] **`R2. Knowledge Corpus Monotonic Revisions & Validator Floor`**：校验 7 个 `knowledge-*` 语料仓自上一通道版本以来所有内容变更单元的 `revision` 严格递增、`publication-contract.json` 的 `validator.revision <= channel knowledge version`，且插件 `verified_commit` 为通道语料 Commit 的合法祖先；
 - [ ] **`R3. Component & Plugin Tag/Commit/Release Integrity`**：校验 `channels/0.1.json` 中全部 13 个组件与插件的本地 Tag 解引用 Commit SHA、远端正式 GitHub Release（`isDraft=false`、`isPrerelease=false`）及 `SHA256SUMS` 资产完整性；
-- [ ] **`R4. Five-Host Cross-Version Component Compatibility`**：校验五端宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的组件基线满足单调下界（`plugin_baseline <= channel_component`）、通过最新 `mindie-knowledge` 跨版本接口校验，且全量宿主插件与共享组件的后台更新器、Hook、MCP 与子进程封装满足 Windows 零控制台弹窗契约（Node.js `windowsHide: true` + Python `CREATE_NO_WINDOW`）；
+- [ ] **`R4. Five-Host Cross-Version Component Compatibility`**：通过最新 `mindie-knowledge` 跨版本接口校验；组件 pin 的正式发布与产品组合范围由 R3 检查。全量宿主插件与共享组件的后台更新器、Hook、MCP 与子进程封装满足 Windows 零控制台弹窗契约（Node.js `windowsHide: true` + Python `CREATE_NO_WINDOW`）；
 - [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
 - [ ] **`R6. Scoped Release Documentation & Unix LF Hygiene`**：默认 independent，只校验 `--release-repo` 所选仓自身源码版本、README 徽章、wheel 链接和 LF，不读取其他仓 README 来要求同步。显式 product 才检查主仓通道内部字段、发行说明、版本表和全部组合仓 README 的一致性，并按产品发布流程同步组织首页。组件仓发布流水线继续要求自身徽章、wheel 链接和 Tag 版本一致；独立发布不因此触发产品全量同步。
 
