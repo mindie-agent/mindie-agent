@@ -59,6 +59,10 @@ By default, plugins use `knowledge`, `remote-dev`, `diagnostics`, and `debugger`
 
 ## 3. Remote Task Execution and Resource Cleanup
 
+Honor the user's selected source directory and business interpreter, retaining the existing checkout and compatible environment when no choice is specified. New sources do not imply a new Python environment. Remote-dev exposes interpreter dependency discovery, reused by coordinator while preserving virtualenv identity. Managed run materializes separate execution roots; development in a selected remote directory uses direct remote operations and resource leases. Preserve baseline artifacts before native overwrites, then verify loading and correctness. See [Source Development, Native Rebuilds and Artifact Recovery](source-rebuild-contract.en.md).
+
+When a helper is unsuitable, the agent may continue within existing authorization through CLIs, native SSH or task-specific scripts. Failure responses retain confirmed facts and job references with continuation routes; discovery and preparation are not whole-task gates. Changing tools preserves actual resource ownership and reconciliation of uncertain external writes.
+
 When running builds, tests, or benchmarks on remote Ascend servers:
 1. **Topology probing and lease acquisition**: `coordinator` checks host and container readiness and acquires conflict-free NPU and port leases based on actual hardware topology (for example, mapping Ascend A3 910C dual-Die `Phy-ID` pairs accurately so two tasks never collide on sibling dies of the same physical card).
 2. **Remote execution and background jobs**: `remote-dev` edits files and runs commands inside the target container, turning long compilation or benchmark runs into managed background jobs with live log streaming.
