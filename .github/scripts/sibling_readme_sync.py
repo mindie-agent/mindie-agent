@@ -18,7 +18,8 @@ and `docs/README.en.md`.
   and all inspected markdown files must use Unix LF (`\n`) line endings.
 
 [Timeouts & Locks]
-- Pure local filesystem inspection/rewriting; completes in < 0.2s with zero locks or network I/O.
+- Documentation transforms are local and lock-free. Release metadata reads have
+  15s subprocess budgets; optional remote Tag dereferencing shares another 15s.
 
 [Side-Effect Policy]
 - In `write=False` (`--check`) mode, strictly read-only. In `write=True` (`--write`) mode,
@@ -570,8 +571,8 @@ def sync_sibling_readmes(
     return errors
 
 
-def verify_github_releases(manifest: dict) -> list[str]:
-    """Verify via `gh release view` that every component/plugin in channels/0.1.json has a formal Release."""
+def verify_github_releases(manifest: dict, *, verify_commits: bool = False) -> list[str]:
+    """Verify formal Releases and optionally compare remote tags with source pins."""
     errors: list[str] = []
     gh_bin = shutil.which("gh")
     if not gh_bin:
@@ -603,6 +604,9 @@ def verify_github_releases(manifest: dict) -> list[str]:
             errors.append(f"{repo}: GitHub Release {tag} has 0 uploaded assets")
         elif "SHA256SUMS" not in assets:
             errors.append(f"{repo}: GitHub Release {tag} missing SHA256SUMS asset")
+        if verify_commits:
+            from release_tag_integrity import verify_tag_commit
+            errors.extend(verify_tag_commit(gh_bin, repo, tag, entry['commit']))
     return errors
 
 

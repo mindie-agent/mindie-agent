@@ -11,8 +11,8 @@ plugin_baseline, latest_component_release)`) and lockstep plugin releases.
 - Corpus Monotonicity: Every `knowledge-*` unit modification across channel history,
   plugin `verified_commit` baselines, and `HEAD` must monotonically advance its integer
   `revision` whenever `content_sha256` changes.
-- Flexible Component Floor: Each plugin's pinned component commits must resolve to
-  formal release tags in each component repo with `plugin_baseline <= channel_component`.
+- Independent releases use formal component tags without a historical channel ceiling.
+  Product combinations retain their component ceiling and explicit lockstep policy.
 - Cross-Version Compatibility Probe: Shared component sources must pass model-free
   compatibility checks against all 6 host plugin adapters.
 - Documentation Scope: Independent R6 reads only selected repositories' own
@@ -243,11 +243,14 @@ def verify_components_and_plugins(
     *,
     require_siblings: bool,
     strict_lockstep: bool = False,
+    independent: bool = False,
+    verify_formal_releases: bool = False,
 ) -> list[str]:
     """Verify component tags and plugin baseline floors (supporting flexible component updates)."""
     errors: list[str] = []
     comp_entries = manifest.get("components") or {}
     comp_tag_maps: dict[str, dict[str, str]] = {}
+    independent_dependencies: dict[str, dict[str, str]] = {}
 
     for name, entry in comp_entries.items():
         repo_dir = _resolve_repo(name, siblings_roots)
@@ -282,6 +285,16 @@ def verify_components_and_plugins(
             )
             return
         tag_map = comp_tag_maps.get(comp_name)
+        if independent and tag_map is not None:
+            if pinned_sha not in tag_map:
+                errors.append(f"{plugin_name}: {source_file} pins {comp_name} to {pinned_sha[:8]}, "
+                              "which is not a formal release tag")
+            else:
+                independent_dependencies[f"{comp_name}@{pinned_sha}"] = {
+                    "repository": comp_entries[comp_name]["repository"],
+                    "version": tag_map[pinned_sha], "commit": pinned_sha,
+                }
+            return
         if tag_map:
             if pinned_sha not in tag_map:
                 comp_repo = _resolve_repo(comp_name, siblings_roots)
@@ -508,11 +521,13 @@ def verify_components_and_plugins(
                 errors.append(f"{plugin_name}: product-contract.json missing {pkg}")
             elif strict_lockstep and pin_ver != ch_ver:
                 errors.append(f"{plugin_name}: product-contract.json {pkg}={pin_ver!r} != {ch_ver!r}")
-            elif _parse_semver(pin_ver) > _parse_semver(ch_ver):
+            elif not independent and _parse_semver(pin_ver) > _parse_semver(ch_ver):
                 errors.append(
                     f"{plugin_name}: product-contract.json baseline {pkg}={pin_ver!r} > channel {ch_ver!r}"
                 )
 
+    if independent and verify_formal_releases and independent_dependencies:
+        errors.extend(verify_github_releases({"components": independent_dependencies}, verify_commits=True))
     return errors
 
 
@@ -782,7 +797,7 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--release-scope", choices=("independent", "product"), default="independent",
-                        help="R6 scope: selected repositories by default; product enables full channel/README sync checks")
+        help="Independent releases allow formal dependency advances and scoped docs; product checks the recorded combination")
     parser.add_argument("--release-repo", action="append", default=[],
                         help="Repository to check against its own source version; repeat for independent releases")
     parser.add_argument(
@@ -843,6 +858,8 @@ def main(argv: list[str] | None = None) -> int:
         siblings_roots,
         require_siblings=args.require_siblings,
         strict_lockstep=args.strict_lockstep,
+        independent=args.release_scope == "independent",
+        verify_formal_releases=args.verify_github_releases,
     )
     if args.strict_lockstep:
         r3_errors.extend(verify_unreleased_plugin_main(manifest, siblings_roots))

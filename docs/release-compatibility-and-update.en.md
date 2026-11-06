@@ -89,6 +89,8 @@ Independent R6 requires selected targets and reads their candidate versions from
 
 `--strict-lockstep` controls dependency pin equality independently of documentation scope. Both full synchronization tools (`sync_org_versions.py`, `sibling_readme_sync.py`) require explicit `--release-scope product` for checking or writing. Periodic telemetry updates telemetry artifacts only; it no longer rewrites product or organization version tables.
 
+An independently released host plugin may pin formal components newer than the historical channel. R3 continues to validate that recorded combination and requires the current plugin pins to resolve to formal tags. With `--verify-github-releases`, it also checks those actual dependencies for formal Releases and checksum assets. Product scope retains its component ceiling, and explicit `--strict-lockstep` still requires exact equality. A new plugin does not require republishing a product combination to raise a historical ceiling.
+
 R6 therefore validates selected repositories against their own source versions in independent mode, and validates the full channel/document/README combination only in product mode. Review these remaining release requirements as well:
 
 Main-repository PR CI selects product checks when the channel, product version tables, publication inputs or gate/synchronizer implementations change. Its path selection shares the synchronizer's managed document list. Other changes run LF, release-scope regressions and PR review checks. Independent component publication does not require a main-repository PR.
