@@ -7,6 +7,7 @@ Shared runtime components: `knowledge`, `remote-dev`, `diagnostics`, `debugger`,
 ## 1. Core Operating Rules (Always Active)
 
 - **Repository & Inner-Loop Boundary (Principle 1)**: This repo holds documentation, channel manifests (`channels/0.1.json`), and CI gates only—no runtime code or legacy VAWS aliases. Edit files directly in the active checkout and verify only the affected scope (no snapshot directories or `readback.json`/`shadow.json` audit ceremonies).
+- **Task Continuity & Native Escape Routes (Principles 1–2)**: Helpers remain optional. When discovery, standard preparation, or a tool is unsuitable, continue within existing user authorization through existing CLIs, native shell/SSH, or task-local scripts. Preserve the original failure, confirmed facts, endpoint/job references, and actual resource ownership; reconcile uncertain external writes before replacement. Pause only dependent actions, not the whole task. See [`docs/source-rebuild-contract.md`](docs/source-rebuild-contract.md).
 - **State Honesty & No Silent Fallbacks (Principle 9 & 14)**:
   - Distinguish `completed`, `failed`, and `unknown` external effects. Never mask failures as `{}` / `"active"` / `exit 0`, never let `except OSError:` swallow `TimeoutError` (always precede with `except TimeoutError: raise`), and never blindly replay an `unknown` external write.
   - **Receipt Honesty**: Once a primary remote/component operation succeeds, local receipt/bind accounting errors must keep `isError=False` and attach `receipt_warning` + `receipt_unconfirmed=True`.
@@ -28,6 +29,7 @@ Do not preload all docs into context. Read only the reference matching your curr
 - **Architecture & Domain Boundaries** → [`docs/architecture.md`](docs/architecture.md)
 - **Engineering Principles, Testing & Resource Placement** → [`docs/design-principles.md`](docs/design-principles.md), [`docs/testing-architecture.md`](docs/testing-architecture.md) & [`docs/execution-resource-budget-design.md`](docs/execution-resource-budget-design.md)
 - **Harness Plugin Lifecycle, Knowledge & Component Specs** → [`docs/harness-boundary-and-lifecycle.md`](docs/harness-boundary-and-lifecycle.md), [`docs/knowledge-system.md`](docs/knowledge-system.md), [`docs/diagnostics-and-reporting.md`](docs/diagnostics-and-reporting.md), [`docs/profiler-system.md`](docs/profiler-system.md) & [`docs/simulation-system.md`](docs/simulation-system.md)
+- **Existing Source Development, Native Rebuilds & Artifact Recovery** → [`docs/source-rebuild-contract.md`](docs/source-rebuild-contract.md) *(Read when changing source locations, editable bindings, native build behavior, or baseline backup/restore guidance)*
 - **Gate — Submitting or Updating a Development PR**:
   - Complete [`docs/design-principles.md#三开发-pr-提交前自查清单pre-pr-review`](docs/design-principles.md#三开发-pr-提交前自查清单pre-pr-review) and [`.github/pull_request_template.md`](.github/pull_request_template.md), and verify Unix `LF` (`\n`) line endings via `python3 .github/scripts/check_lf_eol.py`.
 - **Gate — Publishing a Component, Corpus, or Plugin Release (Mandatory `R1–R6` Checklist)**:
