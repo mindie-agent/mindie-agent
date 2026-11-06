@@ -15,6 +15,8 @@ plugin_baseline, latest_component_release)`) and lockstep plugin releases.
   formal release tags in each component repo with `plugin_baseline <= channel_component`.
 - Cross-Version Compatibility Probe: Shared component sources must pass model-free
   compatibility checks against all 6 host plugin adapters.
+- Documentation Scope: Independent R6 reads only selected repositories' own
+  versions/READMEs; full channel-wide alignment requires explicit product scope.
 
 [Timeouts & Locks]
 - Subprocess probes (`git`, host `--version`, sync checks) enforce a strict `15s` timeout.
@@ -40,11 +42,11 @@ from sibling_readme_sync import (
     EXPECTED_PLUGINS,
     EXPECTED_SHARED_COMPONENTS,
     SHA_RE,
-    sync_sibling_readmes,
     verify_channel_schema,
     verify_github_releases,
     verify_unreleased_plugin_main,
 )
+from release_doc_hygiene import verify_release_doc_hygiene
 
 
 def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 15.0) -> subprocess.CompletedProcess[str]:
@@ -777,40 +779,12 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
     return errors
 
 
-def verify_doc_and_lf_hygiene(
-    main_repo: Path,
-    manifest: dict,
-    siblings_roots: list[Path],
-    *,
-    require_siblings: bool,
-) -> list[str]:
-    errors: list[str] = []
-    scripts_dir = main_repo / ".github" / "scripts"
-    lf_res = _run_cmd([sys.executable, str(scripts_dir / "check_lf_eol.py")], cwd=main_repo, timeout=15.0)
-    if lf_res.returncode != 0:
-        errors.append(f"check_lf_eol.py failed: {(lf_res.stderr or lf_res.stdout).strip()}")
-    sync_res = _run_cmd(
-        [sys.executable, str(scripts_dir / "sync_org_versions.py"), "--check", "--offline"],
-        cwd=main_repo,
-        timeout=15.0,
-    )
-    if sync_res.returncode != 0:
-        errors.append(f"sync_org_versions.py --check --offline failed: {(sync_res.stderr or sync_res.stdout).strip()}")
-    sibling_errors = sync_sibling_readmes(
-        main_repo,
-        manifest,
-        False,
-        siblings_roots=siblings_roots,
-        require_siblings=require_siblings,
-    )
-    for err in sibling_errors:
-        if err not in errors:
-            errors.append(err)
-    return errors
-
-
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--release-scope", choices=("independent", "product"), default="independent",
+                        help="R6 scope: selected repositories by default; product enables full channel/README sync checks")
+    parser.add_argument("--release-repo", action="append", default=[],
+                        help="Repository to check against its own source version; repeat for independent releases")
     parser.add_argument(
         "--channel",
         type=Path,
@@ -844,7 +818,11 @@ def main() -> int:
         action="store_true",
         help="Verify via gh CLI that every component and plugin in channels/0.1.json has a published formal GitHub Release with SHA256SUMS",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.release_scope == "independent" and not args.release_repo:
+        parser.error("independent releases require --release-repo; use --release-scope product for a product combination")
+    if args.release_scope == "product" and args.release_repo:
+        parser.error("--release-repo applies only to independent releases")
 
     main_repo = args.channel.resolve().parents[1]
     siblings_roots = list(args.siblings_root)
@@ -872,11 +850,14 @@ def main() -> int:
         r3_errors.extend(verify_github_releases(manifest))
     r4_errors = verify_flexible_component_compatibility(siblings_roots)
     r5_errors = verify_local_host_compatibility(siblings_roots) if args.verify_local_hosts else []
-    r6_errors = verify_doc_and_lf_hygiene(
+    r6_errors = verify_release_doc_hygiene(
         main_repo,
         manifest,
         siblings_roots,
+        scope=args.release_scope,
+        release_repos=args.release_repo,
         require_siblings=args.require_siblings,
+        run=_run_cmd,
     )
 
     checklist_rows = [
@@ -890,7 +871,8 @@ def main() -> int:
             + ("" if args.verify_local_hosts else " (skipped; pass --verify-local-hosts)"),
             r5_errors,
         ),
-        ("R6", "README / Org Version Sync & Unix LF Line-Ending Hygiene", r6_errors),
+        ("R6", f"Release Documentation & LF Hygiene ({args.release_scope}"
+         + (": " + ", ".join(args.release_repo) if args.release_repo else "") + ")", r6_errors),
     ]
 
     for code, label, item_errors in checklist_rows:
@@ -904,7 +886,7 @@ def main() -> int:
         return 1
 
     print(
-        f"[auto-update-readiness:OK] ({mode}) channels/0.1.json (v{manifest.get('current_patch_version')}), "
+        f"[auto-update-readiness:OK] ({mode}, R6={args.release_scope}) channels/0.1.json (v{manifest.get('current_patch_version')}), "
         f"{len(manifest.get('corpora', {}))} corpora, and {len(manifest.get('components', {}))} components/plugins verified."
     )
     return 0

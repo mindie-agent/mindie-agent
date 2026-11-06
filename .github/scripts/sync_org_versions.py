@@ -2,14 +2,14 @@
 """Synchronize and verify release versions across MindIE Agent docs, releases, and READMEs.
 
 [Role]
-Reads the canonical product channel manifest (channels/0.1.json), optionally cross-checks
+For an explicitly selected product combination, reads channels/0.1.json and cross-checks
 latest formal GitHub Releases via REST API, and synchronizes or verifies channel internal
 summaries, release notes (docs/releases/<patch>.md & .en.md), docs/*.md version pins, and
 README marker blocks across mindie-agent and mindie-agent/.github.
 
 [Invariants]
-- channels/0.1.json is the single source of truth for channel track, current patch
-  version, 15 component/plugin release tags, and 9 domain corpus revisions/unit counts.
+- channels/0.1.json owns the selected product combination's track, patch version,
+  component/plugin tags and corpus revisions; independent releases do not rewrite it.
 - Bounded HTML comment markers (<!-- mindie-org-versions:<id>:start/end -->) must wrap
   every generated section; missing or unbalanced markers raise an immediate RuntimeError.
 - All file writes preserve Unix LF (\n) line endings and UTF-8 encoding without silent
@@ -562,7 +562,7 @@ def sync_channel_internal_fields(channel_path: Path, m: dict, write: bool) -> li
             channel_path.write_text(rendered, encoding="utf-8", newline="\n")
             print(f"Updated {channel_path}")
             return []
-        return [f"Out-of-sync internal fields in {channel_path} (run sync_org_versions.py --write)"]
+        return [f"Out-of-sync internal fields in {channel_path} (run sync_org_versions.py --release-scope product --write)"]
     return []
 
 
@@ -648,6 +648,8 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Synchronize and verify MindIE Agent and org README versions.")
+    parser.add_argument("--release-scope", choices=("product",), required=True,
+                        help="Full synchronization is reserved for an explicitly selected product combination")
     parser.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[2]), help="Path to mindie-agent root.")
     parser.add_argument("--channel-file", default="", help="Override path to channels/0.1.json.")
     parser.add_argument("--org-profile-dir", default="", help="Optional path to mindie-agent/.github checkout.")

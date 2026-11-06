@@ -76,15 +76,22 @@ MindIE Agent 对外发布的是**经过验证的组件与插件组合**。OpenAI
    - 宿主插件运行时基线包含 `knowledge`、`remote-dev` 与 `diagnostics`，打包依赖不代表默认暴露知识接口。Codex `0.1.8` 的默认 MCP 仅注册 remote-dev 和确定性组件入口，知识目录由手动 Skill 私有加载；`coordinator`、`profiler`、`sim` 可独立安装并接入这些入口，`npu-top` 保持为面向人的独立看板。其他宿主按各自发布记录核验发现边界。
    - `mindie-bench` 版本独立演进，各仓发布流水线通过固定 Commit SHA 引用其运行器。
 
-在发布任何一个共享组件、知识库语料、宿主插件 Release 或更新 [`channels/0.1.json`](../channels/0.1.json) 时，**必须强制执行自动化发版必检清单（Release Checklist `R1–R6`）**：
+在发布共享组件、知识库语料、宿主插件或产品组合前后，**必须按实际发布范围通过 R1–R6**。组件仓正式 Release 是独立更新的发现源；`channels/0.1.json` 是已验证产品组合的历史记录，允许它落后于组件最新正式版。独立发布不要求主仓升版、通道更新或修改其他仓 README：
 
 ```bash
-# 日常独立组件/语料灵活发版（无需重发宿主插件）：
-python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts --verify-github-releases
+# 独立组件/语料/插件发布：默认 independent，显式选择待发布仓库；可重复 --release-repo。
+python3 .github/scripts/check_auto_update_readiness.py --release-repo knowledge --require-siblings --verify-local-hosts --verify-github-releases
 
-# 宿主插件同步重发（当插件自身代码、MCP 目录或 harness-compatibility.json 变更时）：
-python3 .github/scripts/check_auto_update_readiness.py --require-siblings --strict-lockstep --verify-local-hosts --verify-github-releases
+# 产品组合发布 / channels/0.1.json 更新：显式启用全量文档一致性检查。
+python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
+
+# 仅在主动发布产品组合时，执行全量写入同步。
+python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
 ```
+
+`--release-repo` 只选择 R6 的独立发布文档范围；省略目标会明确报错，不会退回全量同步。R6 从所选仓的 `pyproject.toml` 或原生插件清单读取候选版本，检查自身版本徽章、当前版本声明、Release/安装链接和 LF。语料使用自身 LF/README 与既有 R2 单元修订门禁，不伪造软件包版本。其他仓的版本漂移、配套产品版本和交叉组件引用不会成为独立发布的文档同步要求。候选 Tag、包和发行资产仍由对应仓的正式发布工作流验证；R1–R5 保留既有组合、语料、依赖和宿主兼容性检查。
+
+`--strict-lockstep` 只控制依赖 pin 是否必须等于通道组合，与文档范围正交；它不会隐式启用全量文档同步。两个全量同步工具 `sync_org_versions.py`、`sibling_readme_sync.py` 的检查和写入都要求显式 `--release-scope product`。周期遥测只更新遥测产物，不再自动改写主仓或组织版本表。
 
 脚本会逐项输出并强制拦截以下 `R1–R6` 六项必检门禁（任一项未通过直接返回非零退出码）：
 - [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性、内部描述字段（`known_boundaries`、`patch_releases[-1]`）与当前版本说明（`docs/releases/<patch>.md` 及 `.en.md` 十三仓版本与 SHA 表）的一致性，并区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
@@ -92,7 +99,7 @@ python3 .github/scripts/check_auto_update_readiness.py --require-siblings --stri
 - [ ] **`R3. Component & Plugin Tag/Commit/Release Integrity`**：校验 `channels/0.1.json` 中全部 13 个组件与插件的本地 Tag 解引用 Commit SHA、远端正式 GitHub Release（`isDraft=false`、`isPrerelease=false`）及 `SHA256SUMS` 资产完整性；
 - [ ] **`R4. Five-Host Cross-Version Component Compatibility`**：校验五端宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的组件基线满足单调下界（`plugin_baseline <= channel_component`）、通过最新 `mindie-knowledge` 跨版本接口校验，且全量宿主插件与共享组件的后台更新器、Hook、MCP 与子进程封装满足 Windows 零控制台弹窗契约（Node.js `windowsHide: true` + Python `CREATE_NO_WINDOW`）；
 - [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
-- [ ] **`R6. README / Release Notes / Docs / Org Version Sync & Unix LF Line-Ending Hygiene`**：自动调用 `sync_org_versions.py --check --offline`、`sibling_readme_sync.py` 与 `check_lf_eol.py`，确保 `channels/0.1.json` 内部字段、`docs/releases/<patch>.md`（及 `.en.md`）、`docs/*.md` 版本引用、主仓中英文 `README` 版本表、组织首页、**全部 15 个组件与插件兄弟仓自身的 `README.md` / `README.en.md` / `docs/README*.md`（Release 徽章、Wheel 下载链接、配套主产品版本、交叉组件版本）**与全仓 Unix `LF` 换行零偏差（同时由 `mindie-bench/.github/workflows/publish-release.yml` 在各仓打 Tag 发版时强制校验自身 `README.md` / `README.en.md` 的 Release 徽章与 Wheel 链接必须精确匹配当前 Tag）。
+- [ ] **`R6. Scoped Release Documentation & Unix LF Hygiene`**：默认 independent，只校验 `--release-repo` 所选仓自身源码版本、README 徽章、wheel 链接和 LF，不读取其他仓 README 来要求同步。显式 product 才检查主仓通道内部字段、发行说明、版本表和全部组合仓 README 的一致性，并按产品发布流程同步组织首页。组件仓发布流水线继续要求自身徽章、wheel 链接和 Tag 版本一致；独立发布不因此触发产品全量同步。
 
 此外，人工与流水线复核遵循以下细则：
 
@@ -106,7 +113,7 @@ python3 .github/scripts/check_auto_update_readiness.py --require-siblings --stri
 | **6. 组合闭环复核** | 确认所有底层依赖组件 Release 均已就绪后再发布插件 Release 或更新 `channels/0.1.json` |
 | **7. 发布 benchmark 随包交付** | 每个代码仓的新 Release 均附带基于该 Tag 精确源码、在干净工作区上运行通过的基准测试报告 |
 | **8. 既有安装升级验收** | 从仍受支持的已发布插件及其旧更新器出发验证候选准备、失败保留旧代与空闲切换；检查最终宿主包保留 MCP 超时、环境变量和用户授权，并核对实际加载的工具目录与参数。隔离候选源验证须明确标注；正式发布后，再验证正常后台发现与激活路径 |
-| **9. 全仓文档、发布说明、兄弟仓 README 与组织主页版本表同步** | 更新 `channels/0.1.json` 时运行 `python3 .github/scripts/sync_org_versions.py --write --org-profile-dir <path-to-.github>`（并通过 `pr-checklist.yml`、`check_auto_update_readiness.py` 与 `mindie-bench/.github/workflows/publish-release.yml` 三道门禁），确保 `channels/0.1.json` 内部摘要、`docs/releases/<patch>.md`（及 `.en.md`）、`docs/*.md`、主仓 `README.md` / `README.en.md`、全部 15 个组件/插件仓自身 `README.md` / `README.en.md`（Release 徽章、Wheel 链接与配套版本号）、[`mindie-agent/.github`](https://github.com/mindie-agent/.github) 组织首页与统计看板版本完全一致 |
+| **9. 按范围检查发布文档** | 独立发布只维护所选仓自身版本与 README/LF。只有主动更新 `channels/0.1.json`、发布产品组合时，才运行 `sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>`，全量同步主仓说明、组合版本表、兄弟仓配套引用和组织首页；不因组件领先历史组合而创建主仓维护版。 |
 
 组件独立更新适用于宿主插件接口不变的组件修复。若变更涉及原生工具目录、宿主 MCP 超时、插件环境变量或常驻启动器自身代码，必须发布包含这些变更的插件版本。更新回执应区分“候选已准备”“安装绑定已切换”与“宿主已加载新定义”：磁盘上的版本或组件指针更新，不能单独证明常驻宿主中的新接口已经生效。沿用宿主支持的刷新边界；需要自然重载或新进程时，保留活动会话，并明确记录该边界。
 
@@ -139,7 +146,7 @@ python3 .github/scripts/check_auto_update_readiness.py --require-siblings --stri
    - 插件选择器根据本机当前安装的宿主版本，选出**当前宿主能用的最高兼容正式版插件 Release**（排除 `draft` 与 `prerelease`）。
    - 当没有更高版本的插件 Release 可用时，宿主更新器直接调用组件更新流程（`component_update.py`），将共享运行时组件独立推进至各组件仓库最新的正式 Release；当升级到新插件 Release 时，也会继承当前已安装组件的版本下界（`max(已安装版本, 新插件基线, 组件正式 Release)`），防止新插件把已独立升级过的组件回退到旧基线。
 3. **发版前自动更新就绪必检项（`check_auto_update_readiness.py`，原生支持灵活组件独立发版与全量同步发版双模式）**：
-   - 任何共享组件、知识库语料、宿主插件或主版本发布前，必须执行 `python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts`（并在 PR 门禁 `.github/workflows/pr-checklist.yml` 中自动校验通道清单一致性），从三个维度杜绝因漏改或漏检阻塞自动升级：
+   - 发布前按上面的 independent/product 命令选择文档范围，再执行 `--require-siblings --verify-local-hosts`（正式发布加 `--verify-github-releases`）。主仓 PR CI 对通道、产品版本表、产品发行输入及门禁/同步实现的变更显式检查 product 范围；检查路径与同步器共用同一份受管文档清单。其他改动执行 LF、发布范围回归和 PR 自查；这不要求独立组件另提主仓 PR。其余门禁继续覆盖以下维度：
      - **知识库语义版本单调性**：`mindie-knowledge` 的 `build_routing_index()` 在重建 `index/routing-manifest.json` 时自动将内容变更单元的 `revision` 递增 1，`publication_check.py` 在 `validate(..., base_revision=...)` 中强制拦截任何修改 `content_sha256` 却未推进 `revision` 的提交，且发版前脚本扫描全部 7 个 `knowledge-*` 仓库历史通道提交至 `HEAD` 的单调性及 `publication-contract.json` 的 `validator.revision` 对齐情况（允许 `validator.revision <= channel knowledge version`）；
      - **灵活组件独立升级下界校验（默认 `flexible-component-update` 模式）与锁步发版校验（`--strict-lockstep` 模式）**：
        - **日常独立组件/语料发版（无需重发 5 款宿主插件）**：默认模式下，`check_auto_update_readiness.py` 校验 5 款宿主插件（Codex、Claude Code、Kimi Code、DSH、Antigravity）锁定的每个组件 SHA 均对应官方组件仓库的正式 Release Tag 且满足 `plugin_baseline_version <= channel_component_version`，同时校验 `product-contract.json` 的 `verified_commit` 是通道语料提交的合法祖先，并执行跨版本 API 兼容性检查（`verify_flexible_component_compatibility`）。这样单独发布任意共享组件（如 `knowledge`、`remote-dev`、`diagnostics`、`coordinator`、`profiler`、`sim`、`npu-top`）或推送 `knowledge-*` 语料时，无需重发任何宿主插件，已安装的五端宿主即可通过各自的 `component_update.py`（`mindie_knowledge.component_runtime.discover` + `build`）独立发现并原地原子切换至最新组件正式版；

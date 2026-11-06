@@ -72,7 +72,26 @@ Milestone or coordinated patch releases follow a **bottom-up dependency order** 
    - Host plugin runtime baselines include `knowledge`, `remote-dev`, and `diagnostics`; a packaged dependency does not imply public knowledge discovery. Codex `0.1.8` registers only remote-dev and deterministic component entries in default MCP discovery, with a private knowledge catalog loaded by the manual Skill. Independently installed `coordinator`, `profiler`, and `sim` can use these entries; `npu-top` remains a standalone human dashboard. Verify other hosts against their own release evidence.
    - `mindie-bench` maintains its own version sequence and is referenced by immutable commit SHA in release workflows.
 
-Before publishing any component, corpus, or plugin Release or updating [`channels/0.1.json`](../channels/0.1.json), maintainers must run and pass the automated Release Checklist (`R1–R6` via `python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts --verify-github-releases`), which also enforces the Windows Zero Console Popup gate (`windowsHide: true` in Node.js `spawn` calls and `CREATE_NO_WINDOW` in Python subprocess wrappers across updaters, hooks, MCP servers, and shared components), and verify the following checklist:
+Before and after a component, corpus, plugin or product release, pass R1–R6 for the actual publication scope. Official component Releases drive independent discovery; `channels/0.1.json` records a historical verified product combination and may lag newer formal components. An independent release requires no main product bump, channel update or peer README edits:
+
+```bash
+# Independent release (the default); repeat --release-repo for multiple targets.
+python3 .github/scripts/check_auto_update_readiness.py --release-repo knowledge --require-siblings --verify-local-hosts --verify-github-releases
+
+# Product combination release or channel update: full documentation alignment.
+python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
+
+# Full writes are reserved for an intentional product combination release.
+python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
+```
+
+Independent R6 requires selected targets and reads their candidate versions from `pyproject.toml` or native plugin manifests. It checks only their own release badges, current-version declarations, release/install links and LF; paired product versions and peer references do not force synchronization. Corpora retain README/LF and R2 unit-revision checks without inventing package versions. Omitting a target is an explicit error, never a fallback to global synchronization. Candidate tags, packages and assets remain verified by the owning release workflow; R1–R5 retain existing combination, corpus, dependency and host checks, including Windows zero-popup protection.
+
+`--strict-lockstep` controls dependency pin equality independently of documentation scope. Both full synchronization tools (`sync_org_versions.py`, `sibling_readme_sync.py`) require explicit `--release-scope product` for checking or writing. Periodic telemetry updates telemetry artifacts only; it no longer rewrites product or organization version tables.
+
+R6 therefore validates selected repositories against their own source versions in independent mode, and validates the full channel/document/README combination only in product mode. Review these remaining release requirements as well:
+
+Main-repository PR CI selects product checks when the channel, product version tables, publication inputs or gate/synchronizer implementations change. Its path selection shares the synchronizer's managed document list. Other changes run LF, release-scope regressions and PR review checks. Independent component publication does not require a main-repository PR.
 
 | Pre-Release Check | Verification Standard |
 | --- | --- |
@@ -84,7 +103,7 @@ Before publishing any component, corpus, or plugin Release or updating [`channel
 | **6. Closed-Loop Combination** | Publish plugins or update `channels/0.1.json` only after all underlying component Releases are verified. |
 | **7. Release Benchmark Delivery** | Every new code repository Release includes benchmark JSON and Markdown reports generated from the exact tagged commit on a clean checkout. |
 | **8. Upgrade from Existing Installations** | Start with supported published plugins and their old updaters to verify candidate preparation, retention of the old generation on failure, and idle activation. Check that the final host package preserves MCP timeouts, environment variables, and user grants, and inspect the tool catalog and parameters actually loaded by the host. Label isolated candidate-feed evidence explicitly; after publication, verify normal background discovery and activation against the formal release source. |
-| **9. Full Repo Docs, Release Notes, Sibling READMEs & Org Profile Version Sync** | Whenever `channels/0.1.json` is updated, run `python3 .github/scripts/sync_org_versions.py --write --org-profile-dir <path-to-.github>` (enforced across three gates: `pr-checklist.yml`, `check_auto_update_readiness.py` item `R6`, and `mindie-bench/.github/workflows/publish-release.yml` on tag builds) so `channels/0.1.json` internal summaries, `docs/releases/<patch>.md` (`.en.md`), `docs/*.md`, `README.md`, `README.en.md`, all 15 component/plugin repositories' own `README.md` / `README.en.md` (Release badges, wheel URLs, and paired `mindie-agent` versions), [`mindie-agent/.github`](https://github.com/mindie-agent/.github), and the telemetry dashboard stay in sync. |
+| **9. Scoped Release Documentation** | Independent releases maintain only their own source-version and README/LF agreement. Only an intentional product combination/channel update runs `sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>` to synchronize main documentation, combination tables, peer README references and the organization profile. A component ahead of a historical combination must not trigger a new main product version. |
 
 Independent component updates cover component fixes that preserve the host plugin interface. Changes to native tool catalogs, host MCP timeouts, plugin environment variables, or resident launcher code require a plugin release carrying those changes. Update receipts must distinguish a prepared candidate, a switched installation binding, and host definitions actually loaded: an updated on-disk version or component pointer alone does not prove that a resident host exposes the new interface. Use the host's supported refresh boundary; when natural reload or a new process is required, preserve active sessions and record that boundary explicitly.
 
