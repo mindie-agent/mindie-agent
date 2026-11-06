@@ -15,6 +15,7 @@ These nine principles define what should be a tool, what should be a Skill or kn
 1. **Measure efficiency by the total cost of achieving the user's real goal (Top Priority)**
    - Total cost includes **understanding, configuration, waiting, debugging, and rework**—not just raw execution time.
    - Reliability mechanisms are worthwhile only when they reduce these real costs. Never burden every everyday task with heavy ceremony just to guard against rare edge cases. When other considerations conflict with this rule, Principle 1 wins.
+   - **Task continuity is a P0 product requirement**: Failures in MindIE knowledge, setup, diagnostics or local recording affect that capability, not the whole user task. Report the failure, retain completed results and job references, and continue independent steps or use equivalent authorized host tools. Defer optional onboarding. Preserve identity, permissions, actual device/port ownership and reconciliation of uncertain writes; pause only the affected action when those facts cannot be established.
 2. **Turn only well-bounded, closed problems into tools**
    - A tool must have clear preconditions, inputs, outputs, and failure modes (e.g., reading a remote file, querying live NPU telemetry, or redacting secrets).
    - Leave open-ended, context-dependent judgment to the Agent; extract only repeatable, deterministic operations into stable tools, and never expand scope just for the sake of building a tool.
