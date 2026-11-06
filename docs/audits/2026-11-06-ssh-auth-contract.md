@@ -43,3 +43,5 @@
 | WorkBuddy | [#5](https://github.com/mindie-agent/mindie-agent-wb/pull/5) | 新认证边界 4 passed，0.53s；连同现有 MCP / knowledge 范围 11 passed，17.28s |
 
 本地环境为原生 Windows / Python 3.13；Coordinator 既有共享认证范围另有 6 passed / 1.02s。五个受影响仓库的 LF 检查与 `git diff --check` 均通过。Codex PR 保留为配套草稿，明确依赖共享组件先合入及正式发布；其余 CI 结果以各 PR 的当前检查记录为准。
+
+remote-dev 候选 `aee4e71aa4e3298b35c2229bc57e5a822caff115` 的 [真实 SSH CI](https://github.com/mindie-agent/remote-dev/actions/runs/42150103199/job/127671164811) 已通过：PowerShell 两组各 4 passed（13.98s / 13.17s），实际 WSL2 为 4 passed（13.20s）。这些用例现在从公开 `remote_auth` 登记，再验证公钥/密码模式、新进程复用、恢复与消费者边界；不代表用户业务机器或原聊天已经重新验证。该 PR 同轮 Linux 3.11/3.12、macOS/Windows 客户端、wheel 与 OpenSSH loopback 检查也通过。
