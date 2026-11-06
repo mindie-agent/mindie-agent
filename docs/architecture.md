@@ -54,6 +54,7 @@ flowchart TB
 ### 跨组件核心协作边界
 
 - **共享 SSH 认证底座（`remote_dev.auth`）**：SSH 认证与密钥维护由 `remote-dev` 统一实现，`coordinator` 与 `npu-top` 仅保存端点配置与 `auth_ref` 引用。同一操作系统用户下的不同进程、会话与宿主插件共享 `~/.mindie/ssh/credentials.json`（由用户目录权限保护，不依赖系统钥匙串或系统登录密码；Windows 与 WSL 各自使用所在环境的用户目录）。普通开发调用在业务命令提交前自动完成密码回退与公钥修复，已提交的业务命令绝不盲目重放；只读诊断与监控探针可在握手阶段回退密码认证而不修改远端公钥。
+  - **首次接入由 Agent 完成**：用户已为远端任务提供 SSH 密码时，Agent 通过 `remote_auth(action="setup", password=...)` 将其导入共享认证底座，自动验证密码、安装并独立验证公钥，随后继续原任务。缺少本地 `auth_ref` 不等于缺少用户凭据。`password_env` 仅适用于服务进程已经继承的变量；旧工具目录可通过本地进程 stdin 调用 `remote-dev auth setup --password-stdin`。各宿主保留共享层的安全恢复提示、业务提交状态与装钥状态，不能将其压缩成“请用户配置凭据”。实现与交付范围见[SSH 认证契约审计](audits/2026-11-06-ssh-auth-contract.md)。
 - **`sim` 与 `profiler` 的结构与实测协同**：`mindie-sim` 负责声明模型与算子拓扑结构（Case 前端与 `OpSpec` DAG 统一导出 `mindie-model-structure/1`），并由单一五层因果执行引擎完成资源、算子族、子图、纯模型与服务约束的机理预测、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）及 SLA 硬件配比求解；`mindie-profiler` 负责原始 `msprof` CSV/SQLite 解析、张量形状提取以及基于 `mindie-model-structure/1` 的拓扑引导 Decode 步切分（`auto_segment_decode_forwards`）与事件归因。两者通过结构导出与实测 Cohort / Decode Body 统计解耦协同，详见[性能建模系统](simulation-system.md)、[Profiler 系统设计](profiler-system.md)与[结构复用与实测映射](profiler-sim-structure.md)。
 
 ## 3. 远端 NPU 任务的执行与资源回收

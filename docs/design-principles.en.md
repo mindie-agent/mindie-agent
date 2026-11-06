@@ -139,7 +139,7 @@ Every development PR across all MindIE Agent repositories (covering code, config
 | Dimension | Review Question |
 |---|---|
 | **1. Total Cost** | What real friction or cost does this change remove? Does it add unnecessary background work, repetitive full-tree hashing/IO checks, or extra user steps? |
-| **2. Tool Boundary** | Is any toolified logic solving a closed, well-bounded problem rather than freezing open-ended judgment into a rigid flow? |
+| **2. Tool Boundary** | Is any toolified logic solving a closed, well-bounded problem rather than freezing open-ended judgment into a rigid flow? Do public discovery, input validation, runtime forwarding, recovery guidance and pinned dependencies work together for the same user scenario, beyond passing low-level SDK tests? |
 | **3. Cognitive Load** | Does the change keep internal state and parameters simple for both users and Agents? |
 | **4. Single Responsibility** | Are module boundaries clean without cross-repo leakage, duplicate state stores, or copy-pasted `*_fallback.py`/`*_bootstrap.py` shadow state machines? |
 | **5. Informational Skills** | Do Skills remain clear, helpful guides rather than mandatory procedural checklists? |
