@@ -35,3 +35,5 @@ MindIE 是通用 Agent 的附加能力。用户目标不应被插件的知识准
 最新共享候选的全部 CI 已通过。[真实 SSH 验收](https://github.com/mindie-agent/remote-dev/actions/runs/42154502701/job/127685670805)在 PowerShell 两组各 5 passed（14.82s / 13.60s）、实际 WSL2 为 5 passed（14.28s），共 15 项；新增项验证本地档案保存失败后，新进程通过已验证密钥继续执行。此证据仍不代表用户业务机器或已安装客户端已更新。
 
 原生适配器的新增干净安装 CI 已通过：[AGY](https://github.com/mindie-agent/mindie-agent-agy/actions/runs/42155906668) 为 Linux 10 passed / Windows 10 passed，[WB](https://github.com/mindie-agent/mindie-agent-wb/actions/runs/42155926527) 为 Linux 9 passed / Windows 9 passed。两者均从提交的锁文件安装非 editable 共享依赖，测试当前 checkout 的原生适配器，覆盖原先仅格式检查无法验证的行为。
+
+Coordinator 的 macOS 全量 CI 仍有既有失败：[本次作业](https://github.com/mindie-agent/coordinator/actions/runs/42156054681/job/127690355916)为 1493 passed / 3 failed，三项均为 `test_native_kernel_recipe.py` 的 `insufficient memory for one compiler worker`；[11 月 4 日主干](https://github.com/mindie-agent/coordinator/actions/runs/41774201118)已有完全相同三项失败（1491 passed / 3 failed）。新增两项认证登记测试在本次通过。此处保留失败证据，不重试到绿、不将其误报为全部 CI 通过。
