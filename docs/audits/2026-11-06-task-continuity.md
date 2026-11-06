@@ -24,7 +24,7 @@ MindIE 是通用 Agent 的附加能力。用户目标不应被插件的知识准
 
 ## 验证与发布状态
 
-共享候选为 `96b7c1d300c299e2adc46fcdf98be17e834750e1`，由 Codex、AGY、WB 的 manifest 和 lock 同时引用。相关 PR 沿用 [remote-dev #55](https://github.com/mindie-agent/remote-dev/pull/55)、[Codex #93](https://github.com/mindie-agent/mindie-agent-codex/pull/93)、[AGY #6](https://github.com/mindie-agent/mindie-agent-agy/pull/6)、[WB #5](https://github.com/mindie-agent/mindie-agent-wb/pull/5) 与[系统文档 #322](https://github.com/mindie-agent/mindie-agent/pull/322)。新增 Coordinator 和另外三端的配套 PR 在提交时补入。
+共享候选为 `96b7c1d300c299e2adc46fcdf98be17e834750e1`，由 Codex、AGY、WB 的 manifest 和 lock 同时引用。相关 PR 沿用 [remote-dev #55](https://github.com/mindie-agent/remote-dev/pull/55)、[Codex #93](https://github.com/mindie-agent/mindie-agent-codex/pull/93)、[AGY #6](https://github.com/mindie-agent/mindie-agent-agy/pull/6)、[WB #5](https://github.com/mindie-agent/mindie-agent-wb/pull/5) 与[系统文档 #322](https://github.com/mindie-agent/mindie-agent/pull/322)。
 
 配套变更为 [Coordinator #71](https://github.com/mindie-agent/coordinator/pull/71)、[Claude Code #65](https://github.com/mindie-agent/mindie-agent-cc/pull/65)、[Kimi #65](https://github.com/mindie-agent/mindie-agent-kimi/pull/65)、[DSH #37](https://github.com/mindie-agent/mindie-agent-dsh/pull/37)。三个依赖新共享接口的宿主 PR 保留草稿，正式交付仍需先发布共享组件。
 
@@ -33,3 +33,5 @@ MindIE 是通用 Agent 的附加能力。用户目标不应被插件的知识准
 第二轮 Astra max 复核独立运行 87 项隔离回归全部通过，并额外复现了 WB knowledge surface 的准入异常遗漏；该遗漏修复后用相同真实 stdio 探针确认返回完整 `[1,2,3,4]`、失败调用 `not_started`、ping 和 6 项知识目录正常。当前独立审查范围内没有未关闭或新增 P0/P1。
 
 最新共享候选的全部 CI 已通过。[真实 SSH 验收](https://github.com/mindie-agent/remote-dev/actions/runs/42154502701/job/127685670805)在 PowerShell 两组各 5 passed（14.82s / 13.60s）、实际 WSL2 为 5 passed（14.28s），共 15 项；新增项验证本地档案保存失败后，新进程通过已验证密钥继续执行。此证据仍不代表用户业务机器或已安装客户端已更新。
+
+原生适配器的新增干净安装 CI 已通过：[AGY](https://github.com/mindie-agent/mindie-agent-agy/actions/runs/42155906668) 为 Linux 10 passed / Windows 10 passed，[WB](https://github.com/mindie-agent/mindie-agent-wb/actions/runs/42155926527) 为 Linux 9 passed / Windows 9 passed。两者均从提交的锁文件安装非 editable 共享依赖，测试当前 checkout 的原生适配器，覆盖原先仅格式检查无法验证的行为。
