@@ -10,6 +10,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import check_auto_update_readiness as gate
+import release_tag_integrity
+import sibling_readme_sync
 
 
 class IndependentPluginPinsTests(unittest.TestCase):
@@ -95,6 +97,31 @@ class IndependentPluginPinsTests(unittest.TestCase):
         dependencies = verify.call_args.args[0]['components']
         self.assertEqual(list(dependencies.values()), [dict(repository='mindie-agent/remote-dev',
                                                           version='0.11.7', commit=self.new)])
+        self.assertTrue(verify.call_args.kwargs['verify_commits'])
+
+    def test_remote_tag_commit_must_match_the_actual_pin(self):
+        annotated = self.git('rev-parse', 'v0.11.7')
+        release = dict(tagName='v0.11.7', isDraft=False, isPrerelease=False,
+                       assets=[{'name': 'SHA256SUMS'}])
+        manifest = {'components': {'remote-dev': dict(repository='mindie-agent/remote-dev',
+                     version='0.11.7', commit=self.new)}}
+        for kind, remote in (('commit', self.new), ('tag', self.new), ('tag', self.old)):
+            with self.subTest(kind=kind, remote=remote):
+                def response(argv, **kwargs):
+                    if argv[1] == 'release':
+                        value = release
+                    elif '/git/ref/tags/' in argv[-1]:
+                        value = {'object': {'type': kind, 'sha': annotated if kind == 'tag' else remote}}
+                    else:
+                        self.assertTrue(argv[-1].endswith('/git/tags/' + annotated))
+                        value = {'object': {'type': 'commit', 'sha': remote}}
+                    return subprocess.CompletedProcess(argv, 0, json.dumps(value), '')
+                with patch.object(sibling_readme_sync.shutil, 'which', return_value='gh'), \
+                     patch.object(release_tag_integrity.subprocess, 'run', side_effect=response):
+                    errors = sibling_readme_sync.verify_github_releases(manifest, verify_commits=True)
+                self.assertEqual(bool(errors), remote != self.new)
+                if errors:
+                    self.assertIn('expected pinned source ' + self.new, errors[0])
 
 
 if __name__ == '__main__':

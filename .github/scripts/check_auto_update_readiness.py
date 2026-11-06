@@ -527,7 +527,7 @@ def verify_components_and_plugins(
                 )
 
     if independent and verify_formal_releases and independent_dependencies:
-        errors.extend(verify_github_releases({"components": independent_dependencies}))
+        errors.extend(verify_github_releases({"components": independent_dependencies}, verify_commits=True))
     return errors
 
 
