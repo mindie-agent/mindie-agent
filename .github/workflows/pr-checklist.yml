@@ -19,14 +19,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - name: Enforce Unix LF Line Endings (Reject Windows CRLF)
         run: python3 .github/scripts/check_lf_eol.py
+      - name: Identify product combination input changes
+        id: product
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if git diff --quiet "$BASE_SHA" HEAD -- channels/ docs/releases/ docs/next-steps.md docs/next-steps.en.md README.md README.en.md .github/workflows/release.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            status=$?
+            if [ "$status" -ne 1 ]; then
+              exit "$status"
+            fi
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Verify Channel Version Sync in READMEs
-        run: python3 .github/scripts/sync_org_versions.py --check --offline
+        if: steps.product.outputs.changed == 'true'
+        run: python3 .github/scripts/sync_org_versions.py --release-scope product --check --offline
       - name: Verify Automatic-Update Readiness Manifest & Schema
-        run: python3 .github/scripts/check_auto_update_readiness.py
-      - name: Verify product publication input contracts
-        run: python3 -m unittest discover -s .github/scripts/tests -p test_release_manifest.py
+        if: steps.product.outputs.changed == 'true'
+        run: python3 .github/scripts/check_auto_update_readiness.py --release-scope product
+      - name: Verify release scope and publication input contracts
+        run: python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py'
       - name: Validate PR Checklist and Review Evidence
         if: github.event_name == 'pull_request'
         env:

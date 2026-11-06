@@ -33,6 +33,11 @@ Do not preload all docs into context. Read only the reference matching your curr
 - **Gate — Publishing a Component, Corpus, or Plugin Release (Mandatory `R1–R6` Checklist)**:
   - Read [`docs/release-compatibility-and-update.md#组件与插件配套发布`](docs/release-compatibility-and-update.md#组件与插件配套发布) and **mandatorily pass all 6 checklist items (`R1–R6`)** before and after any release or [`channels/0.1.json`](channels/0.1.json) update:
     ```bash
-    # Default flexible component/corpus release (no plugin republish needed; add --strict-lockstep when republishing plugins):
-    python3 .github/scripts/check_auto_update_readiness.py --require-siblings --verify-local-hosts --verify-github-releases
+    # Independent release: select only the publishing repositories (repeat --release-repo as needed).
+    # R6 checks their own source versions, READMEs and LF; the product channel remains a historical combination.
+    python3 .github/scripts/check_auto_update_readiness.py --release-repo knowledge --require-siblings --verify-local-hosts --verify-github-releases
+
+    # Product combination release / channels update: explicitly enable full documentation alignment.
+    python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
     ```
+  - Independent component/corpus/plugin releases do not require a main product version bump, a channel update, or changes to other repositories' READMEs. Only product combination releases run `sync_org_versions.py --release-scope product --write` (optionally with `--org-profile-dir`). `--strict-lockstep` controls dependency pin equality independently of the R6 documentation scope.

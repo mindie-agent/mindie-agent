@@ -8,8 +8,8 @@ sibling component/plugin repositories' `README.md`, `README.en.md`, `docs/README
 and `docs/README.en.md`.
 
 [Invariants]
-- `channels/0.1.json` is the single source of truth for `current_patch_version` and all 15
-  component/plugin release versions and commits.
+- This is a product-combination synchronizer. `channels/0.1.json` owns that
+  combination's versions; it does not own independently released current versions.
 - Every present sibling component/plugin repository must include both `README.md` and
   `README.en.md`, each carrying a `shields.io/badge/[Rr]elease-v<version>` badge that
   matches its `channels/0.1.json` version.
@@ -222,7 +222,7 @@ def process_markdown_file(path: Path, transform: Callable[[str], str], write: bo
             print(f"Updated {path}")
             return []
         reason = "CRLF line endings" if has_crlf and updated == original.replace("\r\n", "\n") else "Out-of-sync version block or pin"
-        return [f"{reason} in {path} (run sync_org_versions.py --write)"]
+        return [f"{reason} in {path} (product combination: run sync_org_versions.py --release-scope product --write)"]
     return []
 
 
@@ -470,7 +470,7 @@ def verify_no_stale_self_versions(label: str, text: str, repo_name: str, self_ve
     for pat in patterns:
         for found in re.findall(pat, text):
             if found != self_ver and not found.startswith("0.0."):
-                errors.append(f"{label}: stale self version {found!r} != channel version {self_ver!r}")
+                errors.append(f"{label}: stale self version {found!r} != release version {self_ver!r}")
     return errors
 
 
@@ -601,6 +601,8 @@ def verify_github_releases(manifest: dict) -> list[str]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--release-scope", choices=("product",), required=True,
+                        help="Full synchronization is reserved for an explicitly selected product combination")
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true", help="Verify docs and sibling READMEs without writing")
     mode.add_argument("--write", action="store_true", help="Rewrite out-of-sync docs and sibling READMEs in place")

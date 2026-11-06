@@ -60,22 +60,5 @@ jobs:
             git -C "$DATA_DIR" push origin HEAD:refs/heads/telemetry-data
           fi
 
-      - name: Sync organization profile repository (mindie-agent/.github)
-        if: env.HAS_TELEMETRY_PAT == 'true'
-        env:
-          HAS_TELEMETRY_PAT: ${{ secrets.TELEMETRY_TOKEN != '' }}
-          TELEMETRY_TOKEN: ${{ secrets.TELEMETRY_TOKEN }}
-        run: |
-          ORG_DIR="$RUNNER_TEMP/mindie-org-dot-github"
-          rm -rf "$ORG_DIR"
-          git clone --depth 1 --branch main "https://x-access-token:${TELEMETRY_TOKEN}@github.com/mindie-agent/.github.git" "$ORG_DIR"
-          python3 .github/scripts/sync_org_versions.py --write --offline --org-profile-dir "$ORG_DIR"
-          git -C "$ORG_DIR" config user.name "github-actions[bot]"
-          git -C "$ORG_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C "$ORG_DIR" add profile/README.md README.md README.en.md
-          if git -C "$ORG_DIR" diff --cached --quiet; then
-            echo "Organization profile versions already up to date."
-            exit 0
-          fi
-          git -C "$ORG_DIR" commit -m "docs(profile): auto-sync channel versions from mindie-agent"
-          git -C "$ORG_DIR" push origin HEAD:refs/heads/main
+      # Product README/profile synchronization is an explicit release operation.
+      # Periodic telemetry must not rewrite version documentation across repos.
