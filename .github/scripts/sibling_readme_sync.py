@@ -174,6 +174,8 @@ def verify_product_benchmark_manifest(manifest: dict, main_repo: Path) -> list[s
     path = main_repo / "docs" / "releases" / version / "benchmark-manifest.json"
     try:
         benchmark = json.loads(path.read_text(encoding="utf-8"))
+    except TimeoutError:
+        raise
     except (OSError, ValueError) as exc:
         return [f"{path.relative_to(main_repo)}: publication input unavailable ({type(exc).__name__})"]
     if (not isinstance(benchmark, dict) or benchmark.get("schema_version") != "mindie-release-manifest/1"
