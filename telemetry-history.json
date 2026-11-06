@@ -825,8 +825,8 @@
         "views_14d": 53,
         "views_14d_uniques": 24,
         "cumulative_views": 90,
-        "pkg_downloads": 4682,
-        "all_asset_downloads": 4861,
+        "pkg_downloads": 5389,
+        "all_asset_downloads": 5568,
         "latest_release": "v0.1.20"
       }
     },
@@ -1102,7 +1102,7 @@
         "views_14d_uniques": 3,
         "cumulative_views": 8,
         "pkg_downloads": 215,
-        "all_asset_downloads": 372,
+        "all_asset_downloads": 373,
         "latest_release": "v0.1.16"
       }
     },
@@ -1930,7 +1930,7 @@
         "views_14d_uniques": 16,
         "cumulative_views": 54,
         "pkg_downloads": 113,
-        "all_asset_downloads": 971,
+        "all_asset_downloads": 975,
         "latest_release": "v0.13.13"
       }
     },
@@ -2197,7 +2197,7 @@
       },
       "latest_snapshot": {
         "stars": 0,
-        "forks": 9,
+        "forks": 10,
         "clones_14d": 2229,
         "clones_14d_uniques": 734,
         "cumulative_clones": 5498,
@@ -2207,7 +2207,7 @@
         "cumulative_views": 118,
         "pkg_downloads": 629,
         "all_asset_downloads": 629,
-        "latest_release": "commit@a0f890b7"
+        "latest_release": "commit@911ed567"
       }
     },
     "remote-dev": {
@@ -2482,7 +2482,7 @@
         "views_14d_uniques": 14,
         "cumulative_views": 32,
         "pkg_downloads": 105,
-        "all_asset_downloads": 877,
+        "all_asset_downloads": 881,
         "latest_release": "v0.11.5"
       }
     },
@@ -3310,7 +3310,7 @@
         "views_14d_uniques": 1,
         "cumulative_views": 1,
         "pkg_downloads": 115,
-        "all_asset_downloads": 854,
+        "all_asset_downloads": 858,
         "latest_release": "v0.5.7"
       }
     },
@@ -3766,7 +3766,7 @@
         "views_14d_uniques": 16,
         "cumulative_views": 34,
         "pkg_downloads": 53,
-        "all_asset_downloads": 250,
+        "all_asset_downloads": 252,
         "latest_release": "v0.5.6"
       }
     },
@@ -3947,7 +3947,7 @@
         "cumulative_views": 76,
         "pkg_downloads": 54,
         "all_asset_downloads": 246,
-        "latest_release": "v0.9.3"
+        "latest_release": "v0.9.4"
       }
     },
     "knowledge-operators": {
@@ -4127,7 +4127,7 @@
         "cumulative_views": 12,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
-        "latest_release": "commit@bf8150d4"
+        "latest_release": "commit@0d2aa4b5"
       }
     },
     "knowledge-infer-core": {
@@ -5795,5 +5795,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-06 03:12"
+  "updated_at_cst": "2026-11-06 11:05"
 }
