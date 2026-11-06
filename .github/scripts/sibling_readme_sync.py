@@ -164,7 +164,30 @@ def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
             row_pat = rf"\|\s*`{re.escape(name)}`\s*\|[^|\n]+\|\s*`{re.escape(str(ver))}`\s*\|\s*`{re.escape(str(sha))}`\s*\|"
             if not re.search(row_pat, rel_txt):
                 errors.append(f"{rel_file}: table row for {name} does not match channel ({ver} / {sha[:8]})")
+    errors.extend(verify_product_benchmark_manifest(manifest, main_repo))
     return errors
+
+
+def verify_product_benchmark_manifest(manifest: dict, main_repo: Path) -> list[str]:
+    """Catch missing or stale product publication inputs before a tag is created."""
+    version = str(manifest.get("current_patch_version") or "")
+    path = main_repo / "docs" / "releases" / version / "benchmark-manifest.json"
+    try:
+        benchmark = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return [f"{path.relative_to(main_repo)}: publication input unavailable ({type(exc).__name__})"]
+    if (not isinstance(benchmark, dict) or benchmark.get("schema_version") != "mindie-release-manifest/1"
+            or benchmark.get("product_version") != version):
+        return [f"{path.relative_to(main_repo)}: schema or product version differs from channel"]
+    rows = benchmark.get("repositories")
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        return [f"{path.relative_to(main_repo)}: repositories must be a list of release targets"]
+    expected = {item["repository"]: (item["version"], item["commit"])
+                for item in (manifest.get("components") or {}).values()}
+    actual = {row.get("repository"): (row.get("version"), row.get("revision")) for row in rows}
+    if len(actual) != len(rows) or actual != expected:
+        return [f"{path.relative_to(main_repo)}: repository versions and revisions differ from channel"]
+    return []
 
 
 def default_siblings_roots(repo_root: Path, extra_roots: list[Path] | None = None) -> list[Path]:

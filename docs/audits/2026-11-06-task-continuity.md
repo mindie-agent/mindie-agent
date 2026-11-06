@@ -24,7 +24,7 @@ MindIE 是通用 Agent 的附加能力。用户目标不应被插件的知识准
 
 ## 验证与正式交付
 
-开发审查的共享候选为 `96b7c1d300c299e2adc46fcdf98be17e834750e1`。发布准备完成后，六端插件改为锁定正式 `remote-dev 0.11.6 / 991ef7863b2b208f94f54a29db4ac5be50884ea3`、`Coordinator 0.7.5 / 819b0deb7bea994d4dff9c009200a48dd9300cc4`、`knowledge 0.13.13 / 3c478a19b5542b38520c7f98b87a07f37e305021` 与 `sim 0.9.4 / 6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66`。精确版本、标签、全部资产校验和及干净源码基准见 [0.1.9 发布验收](../releases/0.1.9/task-continuity-release-acceptance.json)，组合表见[发布说明](../releases/0.1.9.md)。
+开发审查的共享候选为 `96b7c1d300c299e2adc46fcdf98be17e834750e1`。发布准备完成后，六端插件改为锁定正式 `remote-dev 0.11.6 / 991ef7863b2b208f94f54a29db4ac5be50884ea3`、`Coordinator 0.7.5 / 819b0deb7bea994d4dff9c009200a48dd9300cc4`、`knowledge 0.13.13 / 3c478a19b5542b38520c7f98b87a07f37e305021` 与 `sim 0.9.4 / 6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66`。精确版本、标签、全部资产校验和及干净源码基准见 [0.1.10 发布验收](../releases/0.1.10/task-continuity-release-acceptance.json)，组合表见[发布说明](../releases/0.1.10.md)。
 
 修复 PR：[remote-dev #55](https://github.com/mindie-agent/remote-dev/pull/55)、[Coordinator #71](https://github.com/mindie-agent/coordinator/pull/71)、[Codex #93](https://github.com/mindie-agent/mindie-agent-codex/pull/93)、[Claude Code #65](https://github.com/mindie-agent/mindie-agent-cc/pull/65)、[Kimi #65](https://github.com/mindie-agent/mindie-agent-kimi/pull/65)、[DSH #37](https://github.com/mindie-agent/mindie-agent-dsh/pull/37)、[AGY #6](https://github.com/mindie-agent/mindie-agent-agy/pull/6)、[WB #5](https://github.com/mindie-agent/mindie-agent-wb/pull/5) / [WB 发布合同补强 #6](https://github.com/mindie-agent/mindie-agent-wb/pull/6)，以及[产品 #322](https://github.com/mindie-agent/mindie-agent/pull/322)。
 
@@ -39,3 +39,9 @@ Coordinator 首轮 macOS 有三项与既有主干一致的编译 fixture 资源�
 WB `0.1.6` 的[发布候选失败](https://github.com/mindie-agent/mindie-agent-wb/actions/runs/42160239492)，没有正式 Release，标签未移动。`0.1.7` 同步 marketplace 与原生版本，将实际安装合同纳入双平台 PR CI。默认测试不再自动扫描其他用户宿主的运行时或凭据，Tier 3 网络验收通过 `--live-host` 显式运行，保留真实错误断言。最终本地和 Astra max 独立全量均为 37 passed / 3 skipped / 1 NPU deselected；使用最终指定解释器的两项显式 Tier 3 均通过（52.46s）。此前旧解释器的 HTTP 502 和旧 `.venv` 的父子版本指纹不一致保留为失败，未计作通过。
 
 发布前现有通道的 flexible R1–R6 已通过；新正式组合的 strict-lockstep R1–R6（含本机宿主与全部正式 Release）也已全部通过。正式 Release 可被现有更新器发现，但候选准备、安装绑定切换和运行中宿主加载工具定义分别核验；本次没有强停用户会话，也不声称当前聊天已经重载新目录。
+
+## 产品汇总发布输入补强
+
+产品 `0.1.9` 的[汇总流水线](https://github.com/mindie-agent/mindie-agent/actions/runs/42162126642)在创建正式 Release 前发现缺少 `benchmark-manifest.json`。原 R1–R6 未覆盖此文件，检查通过不能代表汇总输入完整；失败标签保留，未重指向其他源码。
+
+后续 `0.1.10` 补齐 15 个正式仓库的版本、SHA、固定运行器、必需基准场景与平台清单，用实际固定版本发布收集器验证已有正式报告。R1 增加必需文件及其与 channel 的源码同一性检查，PR CI 的三项语义回归覆盖缺失、正确、过期与重复目标。配套 README 只更新主产品引用，插件运行时及正式 SHA 不变；此产品维护补丁按 flexible R1–R6 复核。
