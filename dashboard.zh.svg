@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent 开源仓库与下载统计</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-06 12:00 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-06 12:22 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release 下载量</text>
-  <text x="734" y="124" class="font kpi-val">9,937</text>
-  <text x="734" y="144" class="font kpi-sub">含全部附件共 14,062 次</text>
+  <text x="734" y="124" class="font kpi-val">9,969</text>
+  <text x="734" y="144" class="font kpi-sub">含全部附件共 14,131 次</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">客户端插件拉取分布</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -106,17 +106,17 @@
   <circle cx="40" cy="435" r="3.5" fill="#10A37F"/>
   <text x="50" y="439" class="mono td-repo">mindie-agent-codex</text>
   <text x="268" y="439" class="font td-cat">客户端插件</text>
-  <text x="368" y="439" class="mono td-sub">v0.1.20</text>
+  <text x="368" y="439" class="mono td-sub">v0.1.21</text>
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">5,666</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">3,863 (457)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">5,463</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">5,487</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
   <text x="50" y="472" class="mono td-repo">mindie-agent-cc</text>
   <text x="268" y="472" class="font td-cat">客户端插件</text>
-  <text x="368" y="472" class="mono td-sub">v0.1.16</text>
+  <text x="368" y="472" class="mono td-sub">v0.1.17</text>
   <text x="545" y="472" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="472" text-anchor="end" class="mono td-bold">2,853</text>
   <text x="815" y="472" text-anchor="end" class="mono td-num">1,588 (276)</text>
@@ -125,7 +125,7 @@
   <circle cx="40" cy="501" r="3.5" fill="#2563EB"/>
   <text x="50" y="505" class="mono td-repo">mindie-agent-kimi</text>
   <text x="268" y="505" class="font td-cat">客户端插件</text>
-  <text x="368" y="505" class="mono td-sub">v0.1.16</text>
+  <text x="368" y="505" class="mono td-sub">v0.1.17</text>
   <text x="545" y="505" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="505" text-anchor="end" class="mono td-bold">3,243</text>
   <text x="815" y="505" text-anchor="end" class="mono td-num">1,884 (341)</text>
@@ -135,7 +135,7 @@
   <circle cx="40" cy="534" r="3.5" fill="#0EA5E9"/>
   <text x="50" y="538" class="mono td-repo">mindie-agent-dsh</text>
   <text x="268" y="538" class="font td-cat">客户端插件</text>
-  <text x="368" y="538" class="mono td-sub">v0.1.15</text>
+  <text x="368" y="538" class="mono td-sub">v0.1.16</text>
   <text x="545" y="538" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="538" text-anchor="end" class="mono td-bold">2,032</text>
   <text x="815" y="538" text-anchor="end" class="mono td-num">1,403 (344)</text>
@@ -144,17 +144,17 @@
   <circle cx="40" cy="567" r="3.5" fill="#4285F4"/>
   <text x="50" y="571" class="mono td-repo">mindie-agent-agy</text>
   <text x="268" y="571" class="font td-cat">客户端插件</text>
-  <text x="368" y="571" class="mono td-sub">v0.1.6</text>
+  <text x="368" y="571" class="mono td-sub">v0.1.7</text>
   <text x="545" y="571" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="571" text-anchor="end" class="mono td-bold">274</text>
   <text x="815" y="571" text-anchor="end" class="mono td-num">274 (104)</text>
-  <text x="920" y="571" text-anchor="end" class="mono td-num">14</text>
+  <text x="920" y="571" text-anchor="end" class="mono td-num">16</text>
   <rect x="25" y="583" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="583" x2="936" y2="583" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="600" r="3.5" fill="#0EC8A9"/>
   <text x="50" y="604" class="mono td-repo">mindie-agent-wb</text>
   <text x="268" y="604" class="font td-cat">客户端插件</text>
-  <text x="368" y="604" class="mono td-sub">v0.1.5</text>
+  <text x="368" y="604" class="mono td-sub">v0.1.7</text>
   <text x="545" y="604" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="604" text-anchor="end" class="mono td-bold">176</text>
   <text x="815" y="604" text-anchor="end" class="mono td-num">176 (72)</text>
@@ -177,16 +177,16 @@
   <text x="545" y="670" text-anchor="end" class="mono td-num">1 / 2</text>
   <text x="665" y="670" text-anchor="end" class="mono td-bold">5,867</text>
   <text x="815" y="670" text-anchor="end" class="mono td-num">3,380 (1,770)</text>
-  <text x="920" y="670" text-anchor="end" class="mono td-num">105</text>
+  <text x="920" y="670" text-anchor="end" class="mono td-num">108</text>
   <line x1="24" y1="682" x2="936" y2="682" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="699" r="3.5" fill="#475569"/>
   <text x="50" y="703" class="mono td-repo">coordinator</text>
   <text x="268" y="703" class="font td-cat">运行时组件</text>
-  <text x="368" y="703" class="mono td-sub">v0.7.4</text>
+  <text x="368" y="703" class="mono td-sub">v0.7.5</text>
   <text x="545" y="703" text-anchor="end" class="mono td-num">0 / 2</text>
   <text x="665" y="703" text-anchor="end" class="mono td-bold">1,875</text>
   <text x="815" y="703" text-anchor="end" class="mono td-num">1,074 (561)</text>
-  <text x="920" y="703" text-anchor="end" class="mono td-num">72</text>
+  <text x="920" y="703" text-anchor="end" class="mono td-num">75</text>
   <rect x="25" y="715" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="715" x2="936" y2="715" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="732" r="3.5" fill="#475569"/>
