@@ -3,16 +3,16 @@
   "schema_version": "mindie-release-channel/1",
   "track": "0.1",
   "milestone_version": "0.1.0",
-  "current_patch_version": "0.1.10",
-  "release_notes": "docs/releases/0.1.10.md",
-  "release_notes_en": "docs/releases/0.1.10.en.md",
+  "current_patch_version": "0.1.11",
+  "release_notes": "docs/releases/0.1.11.md",
+  "release_notes_en": "docs/releases/0.1.11.en.md",
   "independent_update_allowed": true,
   "update_policy": {
     "independent_update_allowed": true,
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
       "verified_mechanism": "channels/0.1.json records the product-verified 15-repository + 9-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 9 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py; Tencent WorkBuddy mounts plugins/mindie-agent as both a WorkBuddy Connector and a CodeBuddy native plugin).",
-      "known_boundaries": "The 0.1.10 channel pins verified releases across the 9 shared runtime/evaluation components (knowledge 0.13.13, remote-dev 0.11.6, profiler 0.5.6, sim 0.9.4, coordinator 0.7.5, npu-top 0.3.1, diagnostics 0.5.7, debugger 0.1.0, mindie-bench 0.4.6), 6 native host plugins (Codex 0.1.21, Claude Code 0.1.17, Kimi 0.1.17, DSH 0.1.16, Google Antigravity 0.1.7, Tencent WorkBuddy 0.1.7), and 9 public domain corpora. All six host plugins expose the remote NPU and deterministic component/debugging tools (diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and unified single-state RSI loop/ledger (rsi_loop / experiment_ledger) and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
+      "known_boundaries": "The 0.1.11 channel pins verified releases across the 9 shared runtime/evaluation components (knowledge 0.13.13, remote-dev 0.11.6, profiler 0.5.6, sim 0.9.4, coordinator 0.7.5, npu-top 0.3.1, diagnostics 0.5.7, debugger 0.1.0, mindie-bench 0.4.6), 6 native host plugins (Codex 0.1.21, Claude Code 0.1.17, Kimi 0.1.17, DSH 0.1.16, Google Antigravity 0.1.8, Tencent WorkBuddy 0.1.8), and 9 public domain corpora. All six host plugins expose the remote NPU and deterministic component/debugging tools (diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and unified single-state RSI loop/ledger (rsi_loop / experiment_ledger) and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
     }
   },
   "corpora": {
@@ -212,10 +212,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-agy",
       "package": "mindie-agent-agy",
-      "version": "0.1.7",
-      "tag": "v0.1.7",
-      "commit": "25513fdccc36a098738b5c5e4091b5eb57a6f9a2",
-      "revision": "25513fdccc36a098738b5c5e4091b5eb57a6f9a2",
+      "version": "0.1.8",
+      "tag": "v0.1.8",
+      "commit": "ed3d756e5460b0b57e4d1679c171b3f5f1256230",
+      "revision": "ed3d756e5460b0b57e4d1679c171b3f5f1256230",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -224,10 +224,10 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-wb",
       "package": "mindie-agent-wb",
-      "version": "0.1.7",
-      "tag": "v0.1.7",
-      "commit": "356d0cbba475f14e7deb37f45dd66800a71a8ed6",
-      "revision": "356d0cbba475f14e7deb37f45dd66800a71a8ed6",
+      "version": "0.1.8",
+      "tag": "v0.1.8",
+      "commit": "4bde6b66c9e490ddcb6add0220b2b8ab9a07ad8e",
+      "revision": "4bde6b66c9e490ddcb6add0220b2b8ab9a07ad8e",
       "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
       "independent_update_allowed": true
     },
@@ -419,6 +419,16 @@
       "updated_components": [],
       "plugin_republish_required": false,
       "summary": "0.1.10 publishes the already verified SSH authentication and task continuity combination after the unpublished 0.1.9 product candidate. Adds the exact 15-repository benchmark manifest and checks publication inputs before tagging. Runtime releases and their original benchmark identities are reused unchanged."
+    },
+    {
+      "patch_version": "0.1.11",
+      "type": "hotfix",
+      "updated_components": [
+        "mindie-agent-agy",
+        "mindie-agent-wb"
+      ],
+      "plugin_republish_required": true,
+      "summary": "Preserve active interpreter and retained payload pairing during AGY/WB native updates. Prepare compatible components and publish immutable payload generations before activation; failures retain the existing task entry and configuration."
     }
   ]
 }

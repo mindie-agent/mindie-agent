@@ -45,3 +45,20 @@ WB `0.1.6` 的[发布候选失败](https://github.com/mindie-agent/mindie-agent-
 产品 `0.1.9` 的[汇总流水线](https://github.com/mindie-agent/mindie-agent/actions/runs/42162126642)在创建正式 Release 前发现缺少 `benchmark-manifest.json`。原 R1–R6 未覆盖此文件，检查通过不能代表汇总输入完整；失败标签保留，未重指向其他源码。
 
 后续 `0.1.10` 补齐 15 个正式仓库的版本、SHA、固定运行器、必需基准场景与平台清单，用实际固定版本发布收集器验证已有正式报告。R1 增加必需文件及其与 channel 的源码同一性检查，PR CI 的三项语义回归覆盖缺失、正确、过期与重复目标。配套 README 只更新主产品引用，插件运行时及正式 SHA 不变；此产品维护补丁按 flexible R1–R6 复核。
+
+## 旧安装升级连续性复查与 0.1.11
+
+`0.1.10` 正式发布后的旧安装复查又确认一项 P1：AGY/WB `0.1.7` 的新处理器调用共享结果分类 API，但旧 `remote-dev 0.11.5` 不包含该模块。安装器只检查模块存在性，启动器只切换解释器而执行新下载的脚本，因而会让已安装宿主的远端工具在分派前失败。后台更新不能作为当前进程的兼容性屏障；此前干净新装测试没有覆盖这一实际升级边界。
+
+后续 [AGY #8](https://github.com/mindie-agent/mindie-agent-agy/pull/8) 与 [WB #7](https://github.com/mindie-agent/mindie-agent-wb/pull/7) 发布两端 `0.1.8`：
+
+- 启动器从同一份激活配置读取解释器与保留脚本，按已记录的原生版本优先选择 `source_root` 中的原组合，避免原生目录被覆盖后的新旧混用。
+- 安装先探测实际组件 API，必要时通过既有共享构建器准备独立运行时，通过后再切换配置；没有复制结果分类器。
+- 脚本先复制到独立临时目录，再以版本与内容摘要通过 `os.replace()` 发布，保留旧目录、任务状态和用户字段。
+- 同轮 Astra max 发现 WB runtime discovery 仍调用已删除的辅助函数；已删除残留并通过真实旧解释器回归验证。
+
+Astra max 独立复核使用正式旧 setup 实际生成配置，再覆盖原生目录。两端均通过覆盖前后 status/ping、复制中断保持旧配置、摘要目录复用、新组合激活，以及**同一个旧 MCP 进程持续存活并跨越覆盖和配置切换**的调用。确认的两个 P1 已关闭，本轮审查范围无未关闭 P0/P1。
+
+真实旧组件现场安装、构建升级和清理验收：AGY 1 passed / 55.30s，WB 1 passed / 44.92s。常规隔离回归：AGY 32 passed / 1 explicit upgrade skipped；WB 38 passed / 4 skipped / 1 live NPU deselected。专用升级 CI 在 Linux/Windows 均通过：[AGY](https://github.com/mindie-agent/mindie-agent-agy/actions/runs/42169441633)、[WB](https://github.com/mindie-agent/mindie-agent-wb/actions/runs/42169515249)；WB 测试体分别 17.86s / 36.80s。本地中间失败包括 Windows 长路径清理、测试安装误继承候选 uv 配置及一次发布目录读取超时，均保留失败记录；只有上述最终通过计入验收。
+
+`0.1.11` 使用两端新正式标签的精确源码与基准，其余组件沿用原正式身份。两端所有发布资产经过 SHA256 验证，归档中的 launcher、setup、component_update、MCP 处理器及锁文件逐字节匹配审查源码，见[机读验收](../releases/0.1.11/task-continuity-release-acceptance.json)。完整组合再次执行 strict R1–R6；四端无代码变化的插件以正式标签源码验证，README 使用当前组合引用，检查结束恢复原工作分支。没有修改用户宿主绑定、调用业务主机或运行 NPU 工作负载。
