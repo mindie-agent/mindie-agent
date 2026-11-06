@@ -20,12 +20,12 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent 开源仓库与下载统计</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-06 15:39 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-06 16:36 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
   <text x="38" y="124" class="font kpi-val">75 ★  ·  57 ⑂</text>
-  <text x="38" y="144" class="font kpi-sub">全组织合计 83 Stars · 89 Forks</text>
+  <text x="38" y="144" class="font kpi-sub">全组织合计 84 Stars · 89 Forks</text>
   <rect x="256" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="256" y="72" width="4" height="86" rx="2" fill="#10A37F"/>
   <text x="270" y="95" class="font kpi-label">客户端插件 Clone</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release 下载量</text>
-  <text x="734" y="124" class="font kpi-val">10,296</text>
-  <text x="734" y="144" class="font kpi-sub">含全部附件共 14,989 次</text>
+  <text x="734" y="124" class="font kpi-val">10,321</text>
+  <text x="734" y="144" class="font kpi-sub">含全部附件共 15,107 次</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">客户端插件拉取分布</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -87,11 +87,11 @@
   <circle cx="40" cy="369" r="3.5" fill="#7045F5"/>
   <text x="50" y="373" class="mono td-repo">mindie-agent</text>
   <text x="268" y="373" class="font td-cat">产品入口</text>
-  <text x="368" y="373" class="mono td-sub">v0.1.11</text>
+  <text x="368" y="373" class="mono td-sub">v0.1.12</text>
   <text x="545" y="373" text-anchor="end" class="mono td-num">75 / 57</text>
   <text x="665" y="373" text-anchor="end" class="mono td-bold">2,560</text>
   <text x="815" y="373" text-anchor="end" class="mono td-num">1,295 (466)</text>
-  <text x="920" y="373" text-anchor="end" class="mono td-num">39</text>
+  <text x="920" y="373" text-anchor="end" class="mono td-num">40</text>
   <rect x="25" y="385" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="385" x2="936" y2="385" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="402" r="3.5" fill="#0F766E"/>
@@ -110,7 +110,7 @@
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">5,666</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">3,863 (457)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">5,790</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">5,811</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
@@ -164,10 +164,10 @@
   <text x="50" y="637" class="mono td-repo">knowledge</text>
   <text x="268" y="637" class="font td-cat">运行时组件</text>
   <text x="368" y="637" class="mono td-sub">v0.13.14</text>
-  <text x="545" y="637" text-anchor="end" class="mono td-num">0 / 3</text>
+  <text x="545" y="637" text-anchor="end" class="mono td-num">1 / 3</text>
   <text x="665" y="637" text-anchor="end" class="mono td-bold">8,884</text>
   <text x="815" y="637" text-anchor="end" class="mono td-num">3,641 (1,643)</text>
-  <text x="920" y="637" text-anchor="end" class="mono td-num">113</text>
+  <text x="920" y="637" text-anchor="end" class="mono td-num">116</text>
   <rect x="25" y="649" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="649" x2="936" y2="649" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="666" r="3.5" fill="#475569"/>
