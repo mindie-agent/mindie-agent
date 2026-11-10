@@ -569,8 +569,12 @@ def _matches_dsh_peer(requirement: str, version: str) -> bool:
     return True
 
 
+BASELINE_HOST_PROBES: dict[str, tuple[str, ...]] = {
+    "codex": ("0.153.4", "0.162.0-alpha.2", "0.162.0-alpha.17.2"),
+}
+
 FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
-    "codex": ("0.166.0", "0.166.1", "0.167.0-alpha.1", "0.199.0"),
+    "codex": ("0.162.3-alpha.17.2", "0.166.0", "0.166.1", "0.167.0-alpha.1", "0.199.0"),
     "claude-code": ("2.1.299", "2.1.300", "2.2.0-rc.1", "2.99.0"),
     "kimi-code": ("2.3.1", "2.3.2", "2.4.0-rc.1", "2.99.0"),
     "antigravity": ("2.0.0", "2.1.0", "2.99.0-rc.1"),
@@ -709,10 +713,12 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
                     f"{plugin_name}: highest supported interval {highest} is point-locked or excludes prereleases; "
                     "must declare a forward-compatible range with include_prerelease=true"
                 )
-            for probe_ver in FORWARD_HOST_PROBES.get(harness_key, ()):
+            probes = (BASELINE_HOST_PROBES.get(harness_key, ())
+                      + FORWARD_HOST_PROBES.get(harness_key, ()))
+            for probe_ver in probes:
                 if not supports_harness(compat_data, harness_name=harness_key, harness_version=probe_ver):
                     errors.append(
-                        f"{plugin_name}: harness-compatibility.json rejects synthetic forward host version {probe_ver}"
+                        f"{plugin_name}: harness-compatibility.json rejects required host version {probe_ver}"
                     )
 
     errors.extend(verify_windows_windowless_spawns(siblings_roots))
@@ -742,19 +748,34 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
         desktop_codex = "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
         if os.path.isfile(desktop_codex) and desktop_codex not in codex_bins:
             codex_bins.append(desktop_codex)
-        cfg_file = Path.home() / ".config/mindie-agent/codex.json"
+        running_codex = os.environ.get("CODEX_APP_RUNTIME_CLI_PATH")
+        if (running_codex and Path(running_codex).is_absolute()
+                and os.path.isfile(running_codex) and running_codex not in codex_bins):
+            codex_bins.append(running_codex)
+        cfg_file = Path(os.environ.get(
+            "MINDIE_AGENT_CONFIG", Path.home() / ".config/mindie-agent/codex.json"
+        )).expanduser()
         if cfg_file.is_file():
             try:
-                cfg_bin = ((json.loads(cfg_file.read_text(encoding="utf-8")).get("native") or {}).get("MINDIE_CODEX_BIN"))
-                if isinstance(cfg_bin, str) and os.path.isfile(cfg_bin) and cfg_bin not in codex_bins:
-                    codex_bins.append(cfg_bin)
+                config = json.loads(cfg_file.read_text(encoding="utf-8"))
+                for key in ("native_context", "native"):
+                    cfg_bin = (config.get(key) or {}).get("MINDIE_CODEX_BIN")
+                    if isinstance(cfg_bin, str) and os.path.isfile(cfg_bin) and cfg_bin not in codex_bins:
+                        codex_bins.append(cfg_bin)
+            except TimeoutError:
+                raise
             except (OSError, ValueError):
                 pass
         for binary in codex_bins:
             resolved_bin = shutil.which(binary) or binary
             res = _run_cmd([resolved_bin, "--version"])
             ver = _extract_semver(res.stdout + "\n" + res.stderr)
-            if ver and not supports_harness(compat, harness_name="codex", harness_version=ver):
+            if res.returncode != 0 or not ver:
+                errors.append(
+                    f"mindie-agent-codex: installed Codex CLI version unavailable "
+                    f"({resolved_bin}, exit={res.returncode})"
+                )
+            elif not supports_harness(compat, harness_name="codex", harness_version=ver):
                 errors.append(
                     f"mindie-agent-codex: harness-compatibility.json does not support installed Codex CLI "
                     f"{ver} ({resolved_bin})"

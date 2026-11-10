@@ -100,7 +100,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
 - [ ] **`R2. Knowledge Corpus Monotonic Revisions & Validator Floor`**：校验 7 个 `knowledge-*` 语料仓自上一通道版本以来所有内容变更单元的 `revision` 严格递增、`publication-contract.json` 的 `validator.revision <= channel knowledge version`，且插件 `verified_commit` 为通道语料 Commit 的合法祖先；
 - [ ] **`R3. Component & Plugin Tag/Commit/Release Integrity`**：校验 `channels/0.1.json` 中全部 13 个组件与插件的本地 Tag 解引用 Commit SHA、远端正式 GitHub Release（`isDraft=false`、`isPrerelease=false`）及 `SHA256SUMS` 资产完整性；
 - [ ] **`R4. Five-Host Cross-Version Component Compatibility`**：通过最新 `mindie-knowledge` 跨版本接口校验；组件 pin 的正式发布与产品组合范围由 R3 检查。全量宿主插件与共享组件的后台更新器、Hook、MCP 与子进程封装满足 Windows 零控制台弹窗契约（Node.js `windowsHide: true` + Python `CREATE_NO_WINDOW`）；
-- [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
+- [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 `CODEX_APP_RUNTIME_CLI_PATH` 指向的当前桌面内核及安装配置 `native_context` 保存的二进制）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
 - [ ] **`R6. Scoped Release Documentation & Unix LF Hygiene`**：默认 independent，只校验 `--release-repo` 所选仓自身源码版本、README 徽章、wheel 链接和 LF，不读取其他仓 README 来要求同步。显式 product 才检查主仓通道内部字段、发行说明、版本表和全部组合仓 README 的一致性，并按产品发布流程同步组织首页。组件仓发布流水线继续要求自身徽章、wheel 链接和 Tag 版本一致；独立发布不因此触发产品全量同步。
 
 此外，人工与流水线复核遵循以下细则：
@@ -144,6 +144,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
 1. **机器可读的兼容性清单（`harness-compatibility.json` / `mindie-plugin-release.json`）**：
    - 插件仓库维护 `harness-compatibility.json`（并在 Release 资产中发布 `mindie-plugin-release.json`），集中登记插件实际调用的所有宿主接口（Hook、MCP、CLI 参数、环境变量）、代码调用位置、官方依据、测试用例以及经过验证的宿主 SemVer 版本区间（DSH 同时核对 `package.json` 中的 `peerDependencies["@deepseek-ai/dsh"]`）。
    - 发布前门禁脚本与客户端 `validate_compatibility` 会自动校验：插件声明支持的宿主版本区间，必须完全落在所有被使用接口（`used_interfaces`）的支持区间交集之内，且 `verify_release_source` 会二次核对不可变 Git Commit 中的兼容性文件字节摘要。
+   - **兼容区间与验收样本分离**：已验收的宿主版本不是运行时白名单。区间内的后续 patch/minor 及已允许的预发布版本自动参与选择，不因尚未逐版验收而拒绝安装；新增验收样本不能自动提高最低支持版本，只有实际使用的接口新增最低要求时才调整边界。
 2. **宿主插件与共享组件的协同单调升级**：
    - 插件选择器根据本机当前安装的宿主版本，选出**当前宿主能用的最高兼容正式版插件 Release**（排除 `draft` 与 `prerelease`）。
    - 当没有更高版本的插件 Release 可用时，宿主更新器直接调用组件更新流程（`component_update.py`），将共享运行时组件独立推进至各组件仓库最新的正式 Release；当升级到新插件 Release 时，也会继承当前已安装组件的版本下界（`max(已安装版本, 新插件基线, 组件正式 Release)`），防止新插件把已独立升级过的组件回退到旧基线。
@@ -153,7 +154,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
      - **灵活组件独立升级下界校验（默认 `flexible-component-update` 模式）与锁步发版校验（`--strict-lockstep` 模式）**：
        - **日常独立组件/语料发版（无需重发 5 款宿主插件）**：默认 independent 模式下，`check_auto_update_readiness.py` 校验宿主插件锁定的每个组件 SHA 均对应官方组件仓库的正式 Release Tag；开启远端核验时还检查实际依赖的正式 Release 与校验资产。历史 channel 不作为独立依赖版本上限；product 范围仍要求 `plugin_baseline_version <= channel_component_version`。同时校验 `product-contract.json` 的 `verified_commit` 是通道语料提交的合法祖先，并执行跨版本 API 兼容性检查（`verify_flexible_component_compatibility`）。单独发布共享组件（如 `knowledge`、`remote-dev`、`diagnostics`、`coordinator`、`profiler`、`sim`、`npu-top`）或推送 `knowledge-*` 语料时，无需重发宿主插件；已安装宿主通过各自的 `component_update.py`（`mindie_knowledge.component_runtime.discover` + `build`）独立发现并原子切换至最新组件正式版。原生工具目录或宿主代码变更仍需配套插件版本；
        - **插件同步重发（`--strict-lockstep`）**：当插件自身适配器代码、MCP Schema 或 `harness-compatibility.json` 发生变更需要重发插件时，传入 `--strict-lockstep` 额外强制插件源码基线 SHA 与通道最新版本完全相等；
-     - **本机活跃宿主 CLI 兼容覆盖率**：自动探测本机已安装的 `codex`（含 ChatGPT Desktop 内置 `codex-cli`）、`claude`、`kimi` 等宿主版本，校验其均处于对应插件 `harness-compatibility.json` 的声明支持区间内，防止宿主自动小版本升级后出现 `"no_compatible_release"`。
+     - **已验证宿主基线与本机活跃宿主 CLI 兼容覆盖率**：R4 同时保留最低验收版本（Codex `0.153.4`、`0.162.0-alpha.2`、`0.162.0-alpha.17.2`）与未来版本探针，防止只检查前向升级却漏掉较早的桌面内核。R5 自动探测本机已安装的 `codex`（含当前 `CODEX_APP_RUNTIME_CLI_PATH` 与保存的 `native_context`）、`claude`、`kimi` 等宿主版本，校验其均处于对应插件 `harness-compatibility.json` 的声明支持区间内，防止出现 `"no_compatible_release"`。
 
 ---
 
