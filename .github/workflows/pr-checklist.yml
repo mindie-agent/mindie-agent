@@ -34,7 +34,21 @@ jobs:
       - name: Verify Automatic-Update Readiness Manifest & Schema
         if: steps.product.outputs.changed == 'true'
         run: python3 .github/scripts/check_auto_update_readiness.py --release-scope product
+      - name: Read the recorded compatibility validator revision
+        id: knowledge
+        run: python3 -c 'import json,os; value=json.load(open("channels/0.1.json"))["components"]["knowledge"]["commit"]; open(os.environ["GITHUB_OUTPUT"],"a").write("commit="+value+"\n")'
+      - name: Checkout the recorded compatibility validator
+        uses: actions/checkout@v4
+        with:
+          repository: mindie-agent/knowledge
+          ref: ${{ steps.knowledge.outputs.commit }}
+          path: .ci/knowledge
+          persist-credentials: false
+      - name: Install compatibility validator dependencies
+        run: python3 -m pip install "semantic-version==2.10.0" "PyYAML>=6.0" "packaging>=24"
       - name: Verify release scope and publication input contracts
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci/knowledge
         run: python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py'
       - name: Validate PR Checklist and Review Evidence
         if: github.event_name == 'pull_request'
