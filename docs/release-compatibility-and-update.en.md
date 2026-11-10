@@ -18,7 +18,7 @@ MindIE Agent uses a two-tier **`0.Y.0` Feature Milestone + `0.Y.Z` Maintenance P
 | --- | --- | --- | --- |
 | **Feature Milestone Release** | `0.Y.0` (`0.1.0` → `0.2.0`) | Major feature additions or cross-component protocol evolution; ships with 12-repository benchmark verification and an updated [`channels/0.1.json`](../channels/0.1.json) milestone manifest | **Yes** (all four Harness plugins align on the new `0.Y.0` milestone baseline) |
 | **Host Plugin Release Selection** | Formal GitHub Releases in each of the 4 plugin repositories (`mindie-plugin-release.json`) | Client selects the highest compatible formal plugin Release directly from the official plugin repository based on the installed host CLI version and `harness-compatibility.json` (`mindie_knowledge.releases` / `releases_io.py`) | Published independently when plugin code changes |
-| **Independent Shared Component Update** | Formal GitHub Releases in each of the 8 component repositories (`knowledge`, `remote-dev`, `diagnostics`, `profiler`, `sim`, `npu-top`, `coordinator`, `mindie-bench`) | Client **discovers formal GitHub Releases directly from each official component repository** (`mindie_knowledge.component_releases` / `component_runtime.py`), builds a side-by-side isolated `uv` environment from the exact Git SHA, runs a native API probe, and cuts over when idle | **No** (a component bugfix Release can be discovered directly without republishing the four Harness plugins) |
+| **Independent Shared Component Update** | Formal GitHub Releases for eight shared components plus the evaluation component (`knowledge`, `remote-dev`, `diagnostics`, `debugger`, `profiler`, `sim`, `npu-top`, `coordinator`, `mindie-bench`) | Client **discovers formal GitHub Releases directly from each official component repository** (`mindie_knowledge.component_releases` / `component_runtime.py`), builds a side-by-side isolated `uv` environment from the exact Git SHA, runs a native API probe, and cuts over when idle | **No** (a component bugfix Release can be discovered directly without republishing host plugins) |
 | **Product Channel Manifest** | [`channels/0.1.json`](../channels/0.1.json) (`schema: "mindie-release-channel/1"`) | Records the product-verified 12-repository + 7-corpus version and immutable commit SHA combination for each product milestone (`0.Y.0`) or patch (`0.Y.Z`) for release pipeline gating and audit provenance; **not used by clients as the runtime update selection source** | Updated when assembling a main product milestone or patch record |
 
 ### 1. Role and Field Identity of `channels/0.1.json`
@@ -30,7 +30,7 @@ MindIE Agent uses a two-tier **`0.Y.0` Feature Milestone + `0.Y.Z` Maintenance P
 
 ### 2. Direct Component Release Discovery & Verification (`component_releases.py`)
 
-Rather than reading `channels/0.1.json` to select runtime updates, client updaters query each official component repository (`mindie-agent/{knowledge,remote-dev,diagnostics,profiler,sim,npu-top,coordinator,mindie-bench}`) directly via `mindie_knowledge.component_releases` and `runtime_inventory.py`:
+Rather than reading `channels/0.1.json` to select runtime updates, client updaters query each official component repository (`mindie-agent/{knowledge,remote-dev,diagnostics,debugger,profiler,sim,npu-top,coordinator,mindie-bench}`) directly via `mindie_knowledge.component_releases` and `runtime_inventory.py`:
 
 1. **Monotonic Non-Downgrading Selection (`component_releases.select`)**:
    - Reads the active Python environment's installed first-party component versions and immutable 40-character commit SHAs (`direct_url.json`) via `python -I runtime_inventory.py` without importing runtime engines;
@@ -70,7 +70,23 @@ Milestone or coordinated patch releases follow a **bottom-up dependency order** 
 3. Publish [`coordinator`](https://github.com/mindie-agent/coordinator) pinned to the formal `remote-dev` and `diagnostics` Releases;
 4. When host plugins are also being released, publish the four Harness plugins ([`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex), [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc), [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi), [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)) pinned to their runtime dependencies, followed by [`channels/0.1.json`](../channels/0.1.json) and the main product release record.
    - Host plugin runtime baselines include `knowledge`, `remote-dev`, and `diagnostics`; a packaged dependency does not imply public knowledge discovery. Codex `0.1.8` registers only remote-dev and deterministic component entries in default MCP discovery, with a private knowledge catalog loaded by the manual Skill. Independently installed `coordinator`, `profiler`, and `sim` can use these entries; `npu-top` remains a standalone human dashboard. Verify other hosts against their own release evidence.
-   - `mindie-bench` maintains its own version sequence and is referenced by immutable commit SHA in release workflows.
+   - `mindie-bench` maintains its own version sequence. Release entries follow its protected-main controller, verify that controller's CI, and resolve one immutable tool commit for dependency validation, benchmarks and publication within each run.
+
+### Standard Publication Transaction and Server Controls
+
+Code repositories dispatch `release.yml` from protected main. Merge the candidate versions, dependencies, README and notes through a reviewed PR, wait for all main CI, then run:
+
+```bash
+gh workflow run release.yml --repo mindie-agent/sim --ref main
+```
+
+The controller validates installed first-party dependencies with the published old consumer, builds deliverables and measures the clean source. An explicitly staged candidate feed lets that unchanged updater perform real discovery, isolated generation installation, inventory readback and component CLI probes. Codex publication also starts with formal plugin `0.1.23`, independently upgrades its components, binds external sim/profiler interpreters, then uses native installation and idle activation to verify monotonic components, standard-command rebinding, the explicitly disabled Stop hook and fresh native MCP discovery.
+
+Every caller explicitly forwards `MINDIE_RELEASE_DEPLOY_KEY`. The reusable workflow requires that secret and verifies its availability in the main-only environment before long tests. Validation installs the published old consumer's complete declared runtime and exercises its real process interface before dependency checks.
+
+All assets and upgrade evidence are uploaded to a private draft and downloaded for verification. The draft ID confirmed by its creation response remains the authority for ownership checks, uploads, deletion reconciliation and publication readback; an uncreated tag alias cannot determine whether that private object exists. Only then does the main-only release environment's deploy key create the exact tested tag, followed by complete formal publication. Fresh old-client profiles repeat upgrades through normal public release discovery in a separate clean job afterward. Workflow artifacts retain both stages; `upgrade-acceptance.json` ships with the release, with `native-upgrade-acceptance.json` required for Codex. Failures remain failures; uncertain external writes are reconciled, and formal assets are never overwritten or patched in place.
+
+Server rules restrict creation of every tag to the publishing deploy key, deny tag updates/deletion without bypass actors, and enable immutable releases. The key belongs to the main-only `mindie-release` environment. Main requires PRs, aggregate platform CI and the review gate. Administrator deployment audits inspect immutability, tag bypass identities and the dedicated environment's branch restrictions; workflow tokens inspect publicly readable tag rules and verify the public release's `immutable` field. An administrator API returning 403 is never treated as success, and omitted bypass identities in public responses are not interpreted as an empty list. Administrators can deliberately change the control plane; ordinary manual tags and incomplete publication cannot bypass the deployed boundary.
 
 Before and after a component, corpus, plugin or product release, pass R1–R6 for the actual publication scope. Official component Releases drive independent discovery; `channels/0.1.json` records a historical verified product combination and may lag newer formal components. An independent release requires no main product bump, channel update or peer README edits:
 
@@ -89,7 +105,7 @@ Independent R6 requires selected targets and reads their candidate versions from
 
 `--strict-lockstep` controls dependency pin equality independently of documentation scope. Both full synchronization tools (`sync_org_versions.py`, `sibling_readme_sync.py`) require explicit `--release-scope product` for checking or writing. Periodic telemetry updates telemetry artifacts only; it no longer rewrites product or organization version tables.
 
-An independently released host plugin may pin formal components newer than the historical channel. R3 continues to validate that recorded combination and requires the current plugin pins to resolve to formal tags. With `--verify-github-releases`, it also checks those actual dependencies for formal Releases and checksum assets. Product scope retains its component ceiling, and explicit `--strict-lockstep` still requires exact equality. A new plugin does not require republishing a product combination to raise a historical ceiling.
+An independently released host plugin may pin formal components newer than the historical channel. R3 continues to validate that recorded combination and requires the current plugin pins to resolve to formal tags. With `--verify-github-releases`, it also checks those actual dependencies for formal Releases and checksum assets, then executes the production consumer's `Catalog.latest(force=True)` against all eight shared components plus `mindie-bench`. A healthy historical combination cannot substitute for healthy current update sources. Product scope retains its component ceiling, and explicit `--strict-lockstep` still requires exact equality. A new plugin does not require republishing a product combination to raise a historical ceiling.
 
 R6 therefore validates selected repositories against their own source versions in independent mode, and validates the full channel/document/README combination only in product mode. Review these remaining release requirements as well:
 
@@ -111,7 +127,7 @@ Independent component updates cover component fixes that preserve the host plugi
 
 ### Benchmark Evidence on Every Release
 
-Each code repository declares fixed workloads in `benchmarks/release.json`, executed by a pinned `mindie-bench` runner. The tag-triggered release workflow verifies source and package versions, installs declared dependencies, verifies formal Releases for first-party dependencies, runs local contract tests (excluding `live_npu`), and then executes the benchmark suite and builds release artifacts.
+Each code repository declares fixed workloads in `benchmarks/release.json`, executed by the transaction's immutable `mindie-bench` runner. The main-dispatched workflow verifies source and package versions, installs dependencies, validates formal first-party Releases, runs local contracts (excluding `live_npu`), measures benchmarks, builds artifacts and performs real old-client upgrades. The tag is created only after complete draft verification.
 
 Every new code repository Release ships the following alongside its wheel/sdist or plugin archive:
 

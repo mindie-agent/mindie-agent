@@ -47,6 +47,7 @@ from sibling_readme_sync import (
     verify_unreleased_plugin_main,
 )
 from release_doc_hygiene import verify_release_doc_hygiene
+from release_latest_integrity import verify_current_release_heads
 
 
 def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 15.0) -> subprocess.CompletedProcess[str]:
@@ -852,7 +853,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--verify-github-releases",
         action="store_true",
-        help="Verify via gh CLI that every component and plugin in channels/0.1.json has a published formal GitHub Release with SHA256SUMS",
+        help="Verify channel/pinned releases and run the production consumer against every latest component head",
     )
     args = parser.parse_args(argv)
     if args.release_scope == "independent" and not args.release_repo:
@@ -887,6 +888,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.verify_github_releases:
         r3_errors.extend(verify_github_releases(manifest))
     r4_errors = verify_flexible_component_compatibility(siblings_roots)
+    if args.verify_github_releases:
+        if _ensure_knowledge_importable(siblings_roots):
+            r3_errors.extend(verify_current_release_heads())
+        else:
+            r3_errors.append("latest component verification requires the real knowledge release consumer")
     r5_errors = verify_local_host_compatibility(siblings_roots) if args.verify_local_hosts else []
     r6_errors = verify_release_doc_hygiene(
         main_repo,
