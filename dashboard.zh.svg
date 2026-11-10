@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent 开源仓库与下载统计</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-10 05:42 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-10 13:03 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release 下载量</text>
-  <text x="734" y="124" class="font kpi-val">12,974</text>
-  <text x="734" y="144" class="font kpi-sub">含全部附件共 20,136 次</text>
+  <text x="734" y="124" class="font kpi-val">13,073</text>
+  <text x="734" y="144" class="font kpi-sub">含全部附件共 20,337 次</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">客户端插件拉取分布</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -110,7 +110,7 @@
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">7,215</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">4,389 (460)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">8,405</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">8,498</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
@@ -120,7 +120,7 @@
   <text x="545" y="472" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="472" text-anchor="end" class="mono td-bold">3,189</text>
   <text x="815" y="472" text-anchor="end" class="mono td-num">1,092 (224)</text>
-  <text x="920" y="472" text-anchor="end" class="mono td-num">245</text>
+  <text x="920" y="472" text-anchor="end" class="mono td-num">247</text>
   <line x1="24" y1="484" x2="936" y2="484" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="501" r="3.5" fill="#2563EB"/>
   <text x="50" y="505" class="mono td-repo">mindie-agent-kimi</text>
@@ -129,7 +129,7 @@
   <text x="545" y="505" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="505" text-anchor="end" class="mono td-bold">3,663</text>
   <text x="815" y="505" text-anchor="end" class="mono td-num">1,346 (239)</text>
-  <text x="920" y="505" text-anchor="end" class="mono td-num">2,259</text>
+  <text x="920" y="505" text-anchor="end" class="mono td-num">2,260</text>
   <rect x="25" y="517" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="517" x2="936" y2="517" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="534" r="3.5" fill="#0EA5E9"/>
@@ -192,20 +192,20 @@
   <circle cx="40" cy="732" r="3.5" fill="#475569"/>
   <text x="50" y="736" class="mono td-repo">profiler</text>
   <text x="268" y="736" class="font td-cat">运行时组件</text>
-  <text x="368" y="736" class="mono td-sub">v0.5.8</text>
+  <text x="368" y="736" class="mono td-sub">v0.5.9</text>
   <text x="545" y="736" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="736" text-anchor="end" class="mono td-bold">2,288</text>
   <text x="815" y="736" text-anchor="end" class="mono td-num">2,091 (1,085)</text>
-  <text x="920" y="736" text-anchor="end" class="mono td-num">63</text>
+  <text x="920" y="736" text-anchor="end" class="mono td-num">64</text>
   <line x1="24" y1="748" x2="936" y2="748" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="765" r="3.5" fill="#475569"/>
   <text x="50" y="769" class="mono td-repo">sim</text>
   <text x="268" y="769" class="font td-cat">运行时组件</text>
-  <text x="368" y="769" class="mono td-sub">v0.9.6</text>
+  <text x="368" y="769" class="mono td-sub">v0.9.7</text>
   <text x="545" y="769" text-anchor="end" class="mono td-num">1 / 0</text>
   <text x="665" y="769" text-anchor="end" class="mono td-bold">2,847</text>
   <text x="815" y="769" text-anchor="end" class="mono td-num">2,201 (1,256)</text>
-  <text x="920" y="769" text-anchor="end" class="mono td-num">63</text>
+  <text x="920" y="769" text-anchor="end" class="mono td-num">65</text>
   <rect x="25" y="781" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="781" x2="936" y2="781" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="798" r="3.5" fill="#D97706"/>
