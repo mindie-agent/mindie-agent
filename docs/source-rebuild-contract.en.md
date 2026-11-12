@@ -54,6 +54,8 @@ Distribution metadata establishes package presence, not importability, ABI compa
 
 ### Coordinator boundary
 
+MindIE task attachment is not a prerequisite for SSH connectivity, host/NPU/container inspection, source/model discovery or tests that do not use devices. The hosts, probe, container and lease interfaces support independent environment operations with context_file omitted; actual host leases still arbitrate resource allocation. Without a managed task association, continue those environment operations and authorized direct inspection. Pause only actions that depend on device, directory or process ownership that cannot actually be established.
+
 Managed mindie.run captures local sources and materializes a separate remote execution root, potentially preparing a task interpreter. Sources are local inputs, not remote directories for in-place edits. Develop in an explicitly selected existing or new remote directory using remote-dev and coordinator resource leases; rebuilding alone should not change the workflow into managed materialization.
 
 Container readiness uses the shared interpreter inventory to find Torch/Torch-NPU metadata, plus the corresponding framework for MindIE-SD. Task virtualenv creation uses the selected donor as its creator while retaining a separate task prefix and installation scheme. System-site-packages does not inherit packages privately installed in another virtualenv. Missing target dependencies therefore fail before native compilation, with guidance to reuse a compatible prepared runtime or install matching task dependencies, without modifying the donor or silently choosing another system Python.
