@@ -312,7 +312,7 @@
         }
       },
       "latest_snapshot": {
-        "stars": 88,
+        "stars": 90,
         "forks": 59,
         "clones_14d": 1902,
         "clones_14d_uniques": 726,
@@ -321,8 +321,8 @@
         "views_14d": 970,
         "views_14d_uniques": 375,
         "cumulative_views": 1390,
-        "pkg_downloads": 40,
-        "all_asset_downloads": 177,
+        "pkg_downloads": 45,
+        "all_asset_downloads": 203,
         "latest_release": "v0.1.12"
       }
     },
@@ -969,9 +969,9 @@
         "views_14d": 73,
         "views_14d_uniques": 33,
         "cumulative_views": 115,
-        "pkg_downloads": 9851,
-        "all_asset_downloads": 10076,
-        "latest_release": "v0.1.26"
+        "pkg_downloads": 10845,
+        "all_asset_downloads": 11095,
+        "latest_release": "v0.1.27"
       }
     },
     "mindie-agent-cc": {
@@ -1293,9 +1293,9 @@
         "views_14d": 5,
         "views_14d_uniques": 4,
         "cumulative_views": 10,
-        "pkg_downloads": 256,
-        "all_asset_downloads": 422,
-        "latest_release": "v0.1.17"
+        "pkg_downloads": 289,
+        "all_asset_downloads": 480,
+        "latest_release": "v0.1.18"
       }
     },
     "mindie-agent-kimi": {
@@ -1617,9 +1617,9 @@
         "views_14d": 4,
         "views_14d_uniques": 4,
         "cumulative_views": 6,
-        "pkg_downloads": 2279,
-        "all_asset_downloads": 2452,
-        "latest_release": "v0.1.18"
+        "pkg_downloads": 2321,
+        "all_asset_downloads": 2525,
+        "latest_release": "v0.1.19"
       }
     },
     "mindie-agent-dsh": {
@@ -1941,9 +1941,9 @@
         "views_14d": 58,
         "views_14d_uniques": 35,
         "cumulative_views": 63,
-        "pkg_downloads": 86,
-        "all_asset_downloads": 245,
-        "latest_release": "v0.1.16"
+        "pkg_downloads": 111,
+        "all_asset_downloads": 298,
+        "latest_release": "v0.1.17"
       }
     },
     "knowledge": {
@@ -2265,8 +2265,8 @@
         "views_14d": 37,
         "views_14d_uniques": 21,
         "cumulative_views": 68,
-        "pkg_downloads": 116,
-        "all_asset_downloads": 1576,
+        "pkg_downloads": 117,
+        "all_asset_downloads": 1689,
         "latest_release": "v0.13.14"
       }
     },
@@ -2913,8 +2913,8 @@
         "views_14d": 30,
         "views_14d_uniques": 20,
         "cumulative_views": 41,
-        "pkg_downloads": 111,
-        "all_asset_downloads": 1490,
+        "pkg_downloads": 112,
+        "all_asset_downloads": 1621,
         "latest_release": "v0.11.7"
       }
     },
@@ -3237,9 +3237,9 @@
         "views_14d": 125,
         "views_14d_uniques": 14,
         "cumulative_views": 129,
-        "pkg_downloads": 78,
-        "all_asset_downloads": 979,
-        "latest_release": "v0.7.6"
+        "pkg_downloads": 98,
+        "all_asset_downloads": 1180,
+        "latest_release": "v0.7.7"
       }
     },
     "npu-top": {
@@ -3561,8 +3561,8 @@
         "views_14d": 6,
         "views_14d_uniques": 4,
         "cumulative_views": 36,
-        "pkg_downloads": 667,
-        "all_asset_downloads": 934,
+        "pkg_downloads": 668,
+        "all_asset_downloads": 1013,
         "latest_release": "v0.3.1"
       }
     },
@@ -3886,7 +3886,7 @@
         "views_14d_uniques": 1,
         "cumulative_views": 1,
         "pkg_downloads": 122,
-        "all_asset_downloads": 1504,
+        "all_asset_downloads": 1612,
         "latest_release": "v0.5.9"
       }
     },
@@ -4209,9 +4209,9 @@
         "views_14d": 19,
         "views_14d_uniques": 17,
         "cumulative_views": 66,
-        "pkg_downloads": 69,
-        "all_asset_downloads": 189,
-        "latest_release": "v0.4.7"
+        "pkg_downloads": 90,
+        "all_asset_downloads": 249,
+        "latest_release": "v0.4.8"
       }
     },
     "profiler": {
@@ -4437,8 +4437,8 @@
         "views_14d": 29,
         "views_14d_uniques": 17,
         "cumulative_views": 39,
-        "pkg_downloads": 85,
-        "all_asset_downloads": 832,
+        "pkg_downloads": 88,
+        "all_asset_downloads": 964,
         "latest_release": "v0.5.11"
       }
     },
@@ -4665,8 +4665,8 @@
         "views_14d": 92,
         "views_14d_uniques": 33,
         "cumulative_views": 105,
-        "pkg_downloads": 94,
-        "all_asset_downloads": 851,
+        "pkg_downloads": 98,
+        "all_asset_downloads": 984,
         "latest_release": "v0.9.10"
       }
     },
@@ -6245,9 +6245,9 @@
         "views_14d": 10,
         "views_14d_uniques": 7,
         "cumulative_views": 10,
-        "pkg_downloads": 19,
-        "all_asset_downloads": 45,
-        "latest_release": "v0.1.8"
+        "pkg_downloads": 46,
+        "all_asset_downloads": 98,
+        "latest_release": "v0.1.9"
       }
     },
     "mindie-agent-wb": {
@@ -6441,9 +6441,9 @@
         "views_14d": 6,
         "views_14d_uniques": 6,
         "cumulative_views": 6,
-        "pkg_downloads": 12,
-        "all_asset_downloads": 36,
-        "latest_release": "v0.1.8"
+        "pkg_downloads": 35,
+        "all_asset_downloads": 85,
+        "latest_release": "v0.1.9"
       }
     },
     "debugger": {
@@ -6646,7 +6646,7 @@
         "views_14d_uniques": 3,
         "cumulative_views": 5,
         "pkg_downloads": 5,
-        "all_asset_downloads": 609,
+        "all_asset_downloads": 735,
         "latest_release": "v0.1.0"
       }
     },
@@ -7043,5 +7043,5 @@
       }
     }
   },
-  "updated_at_cst": "2026-11-12 02:57"
+  "updated_at_cst": "2026-11-12 12:44"
 }
