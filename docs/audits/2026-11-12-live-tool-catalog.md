@@ -42,7 +42,7 @@ CI 还发现旧测试将目录通知误当作调用响应、要求响应按请�
 
 补充的本机完整旧环境升级试验在候选准备阶段触及既有 85 秒总预算，临时输出文件清理随后报 `WinError 32`；该次保留为失败，不计入通过。同一最终源码的 Antigravity、WorkBuddy Linux/Windows 原生旧环境升级 CI 均已通过，未放宽预算或跳过升级门禁。
 
-Codex 初次合入后的 macOS CI 另暴露既有诊断用例与后台更新的竞态：故意不包含原生安装信息的配置触发更新错误，使待投递列表先出现 `update`，而不是该用例预置的 `worker_failed`。补充 PR [#111](https://github.com/mindie-agent/mindie-agent-codex/pull/111) 只在该真实 stdio 用例中写入既有的近期检查回执，将独立维护排除在采集投递场景之外；保留原有故障码、只投递一次、未激活知识和不要求用户命令的断言。相关本地回归为 13 passed / 4 subtests，正式发布等待补充源码完整 CI。
+Codex 初次合入后的 macOS CI 另暴露既有诊断用例与后台更新的竞态：故意不包含原生安装信息的配置触发更新错误，使待投递列表先出现 `update`，而不是该用例预置的 `worker_failed`。补充 PR [#111](https://github.com/mindie-agent/mindie-agent-codex/pull/111) 只在该真实 stdio 用例中写入既有的近期检查回执，将独立维护排除在采集投递场景之外；保留原有故障码、只投递一次、未激活知识和不要求用户命令的断言。相关本地回归为 13 passed / 4 subtests，补充源码完整 PR/main CI 随后通过。
 
 发布前最终复核还以真实配置文件的原子替换复现 Codex 缓存键与目录内容跨代的竞态：修复前第二次查询仍返回 `old`（1 failed / 0.59s），修复后同一 Gate 下一次查询返回 `new` 及其新 schema。修复 PR [#112](https://github.com/mindie-agent/mindie-agent-codex/pull/112) 将缓存键改为从已选绑定直接计算，没有增加锁、选择器或持久状态。目录、完整 helper 转发、未发送回执及真实原生同回合刷新相关回归为 15 passed / 8.19s。其余五端转发完整已选 helper，没有复用此目录内容缓存。
 
@@ -53,6 +53,10 @@ Codex 初次合入后的 macOS CI 另暴露既有诊断用例与后台更新的�
 已经驻留的旧 facade 无法凭磁盘更新获得新代码。宿主尚未消费的新功能配置也不能当作当前会话已经生效的证明。首次迁移沿用宿主支持的原生重载边界，保留活动会话；已载入本轮 facade 且支持通知的宿主，之后的运行代切换自动刷新目录。所有回执区分安装、功能配置和宿主载入状态。
 
 本机更新前的实际绑定为插件 `0.1.27` / remote-dev `0.11.9`，而桌面常驻入口的完整运行代回执仍为插件 `0.1.26` / remote-dev `0.11.7`。这两项分别从当前配置和驻留进程所用的 `runtime.json` 核对，不能用已写入的新配置替代驻留版本证据。
+
+正式发布后，正常后台更新已自动安装并启用插件 `0.1.28`（`e6d6018bc7e940e4bb5c49fc73837030517f3b3e`），选中运行代同时提供 remote-dev `0.11.9` 与 Coordinator `0.7.8`。原生更新回执为 `status=active`、`native.stage=active`；工具目录功能回执为 `status=enabled`、`changed=true`、`response_lost=false`、`applies=native_reload_boundary`，用户配置已回读确认 `mcp_tool_list_changed=true`。这证明安装与功能配置成功，不等同于首次迁移已完成。
+
+另使用该正式安装的解释器、完整脚本和真实原生 Codex 进程重复同回合对照验收：关闭功能时为 `before → before`，开启时为 `before → after`，每组只发生一次业务调用且未使用付费模型。该证据证明正式安装产物具备自动刷新能力；当前既有桌面连接的发现说明和驻留进程仍对应 `0.1.26`，首次原生重载尚未确认，因此此项保持未完成。
 
 公开的 `config/mcpServer/reload` 作用于收到请求的 app-server 及其已加载会话。另起一个管理 app-server 调用它，不能证明桌面正在使用的 app-server 已刷新。本轮没有采用这种误报方式，也没有终止活动用户会话来制造更新已生效的表象。
 
@@ -68,16 +72,19 @@ Codex 初次合入后的 macOS CI 另暴露既有诊断用例与后台更新的�
 
 ## 正式发布与升级验收
 
-已完成的七仓均通过受保护主分支检查和标准正式发布。另以固定已发布旧消费者独立下载、校验全部 57 个资产，核对精确标签提交、不可变状态、实际 latest 发现和完整共享组件的候选及公开源升级报告。Codex 等待补充测试隔离源码的完整 PR/main CI 后发布；尚未完成的阶段不计为成功。
+八个仓库均已通过受保护主分支检查和标准正式发布。另以固定已发布旧消费者独立下载、校验全部 67 个资产，核对精确标签提交、不可变状态、实际 latest 发现和完整共享组件的候选及公开源升级报告。Codex 的正式产物还通过公开源原生旧客户端升级验收，包含实际启动恢复、外部组件重新绑定和过期快照拒绝。上述发布与升级结论分别来自各自完成的工作流和回读报告，不替代首次迁移的当前桌面连接验收。
 
 | 仓库 | 正式版本与 PR | 精确源码 | 完成的发布工作流 | 下载校验资产数 |
 | --- | --- | --- | --- | --- |
 | remote-dev | [0.11.9](https://github.com/mindie-agent/remote-dev/releases/tag/v0.11.9) / [#62](https://github.com/mindie-agent/remote-dev/pull/62) | `6e9882e0fa495bf2feeef29ec86492498d364531` | [43184303535](https://github.com/mindie-agent/remote-dev/actions/runs/43184303535) | 8 |
 | coordinator | [0.7.8](https://github.com/mindie-agent/coordinator/releases/tag/v0.7.8) / [#78](https://github.com/mindie-agent/coordinator/pull/78) | `db9b0c6432001d6049056eabd37422d0bfb9f75a` | [43181294226](https://github.com/mindie-agent/coordinator/actions/runs/43181294226) | 8 |
+| mindie-agent-codex | [0.1.28](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.28) / [#110](https://github.com/mindie-agent/mindie-agent-codex/pull/110)、[#111](https://github.com/mindie-agent/mindie-agent-codex/pull/111)、[#112](https://github.com/mindie-agent/mindie-agent-codex/pull/112) | `e6d6018bc7e940e4bb5c49fc73837030517f3b3e` | [43197571451](https://github.com/mindie-agent/mindie-agent-codex/actions/runs/43197571451) | 10 |
 | mindie-agent-cc | [0.1.19](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.19) / [#73](https://github.com/mindie-agent/mindie-agent-cc/pull/73) | `5ea6651becfd3d6207604a9c02ecbe56a7e33862` | [43189223765](https://github.com/mindie-agent/mindie-agent-cc/actions/runs/43189223765) | 9 |
 | mindie-agent-kimi | [0.1.20](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.20) / [#75](https://github.com/mindie-agent/mindie-agent-kimi/pull/75) | `f96be0ad70b4489dbe682fb08801c6640002e09d` | [43189210790](https://github.com/mindie-agent/mindie-agent-kimi/actions/runs/43189210790) | 8 |
 | mindie-agent-dsh | [0.1.18](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.18) / [#46](https://github.com/mindie-agent/mindie-agent-dsh/pull/46) | `40bbf51deea5df27e97d29f97ed3ed75d148bc2e` | [43188097374](https://github.com/mindie-agent/mindie-agent-dsh/actions/runs/43188097374) | 8 |
 | mindie-agent-agy | [0.1.10](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.10) / [#13](https://github.com/mindie-agent/mindie-agent-agy/pull/13) | `e1a3d763d1d66c5e22f48083b68ce55b145f4ee8` | [43189351414](https://github.com/mindie-agent/mindie-agent-agy/actions/runs/43189351414) | 8 |
 | mindie-agent-wb | [0.1.10](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.10) / [#11](https://github.com/mindie-agent/mindie-agent-wb/pull/11) | `fa22917fb8136753756cb56e26724e466d8e5ea4` | [43189365841](https://github.com/mindie-agent/mindie-agent-wb/actions/runs/43189365841) | 8 |
 
-五端插件的自动发行元数据步骤全部成功，基准工具来源均为已发布 `mindie-bench 0.4.8` 的精确提交 `8f0abbff1559653377e12babcd0e3024c2c44e8d`。独立验证同时检查完整校验资产、源码/版本对应及候选与公开源报告的 `all_shared_components` / `passed`；未把组件升级报告扩写为各宿主 UI 或真实 NPU 验收。
+六端插件的自动发行元数据步骤全部成功，基准工具来源均为已发布 `mindie-bench 0.4.8` 的精确提交 `8f0abbff1559653377e12babcd0e3024c2c44e8d`。独立验证同时检查完整校验资产、源码/版本对应及候选与公开源报告的 `all_shared_components` / `passed`；未把组件升级报告扩写为各宿主 UI 或真实 NPU 验收。
+
+最终八仓发布后 R1–R6 再次全部通过，命令显式选择 remote-dev、coordinator 与六端插件，包含 `--require-siblings --verify-local-hosts --verify-github-releases`。独立发布没有修改主产品版本或历史通道。
