@@ -2,7 +2,7 @@
 
 [中文](harness-boundary-and-lifecycle.md) · [Back to Documentation Center](README.en.md)
 
-This document explains how responsibilities are divided between MindIE Agent's native Harness plugins (**Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**) and its shared runtime components, as well as how task identity, user consent, long-running jobs, and local data recovery work in practice.
+This document explains how responsibilities are divided between MindIE Agent's native Harness plugins (**Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**, **Google Antigravity**, **Tencent WorkBuddy**, **OpenCode**) and its shared runtime components, as well as how task identity, user consent, long-running jobs, and local data recovery work in practice.
 
 - Governed by: [Engineering Design Principles](design-principles.en.md) · [Architecture & Module Boundaries](architecture.en.md)
 - Release Records: [Release Records & Roadmap](README.en.md#release-records--roadmap)
@@ -16,7 +16,7 @@ MindIE Agent does not invent a proprietary chat UI or force you into a custom ta
 | Layer / Module | What It Owns | What It Never Does |
 | --- | --- | --- |
 | **Host Native Plugin Manager** | Downloading, installing, and recording installed plugin packages | Does not replace MindIE Agent's SemVer host-compatibility check |
-| **Harness Plugin Adapters** (`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh`) | Verifying native task identity, locating trusted transcripts, extracting public dialogue, invoking the host's lightweight native model, shipping locked dependencies (`uv.lock`), and running silent background updates | Never maintains a second knowledge database or duplicate process-supervision state machine |
+| **Harness Plugin Adapters** (`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`) | Verifying native task identity, locating trusted transcripts, extracting public dialogue, invoking the host's lightweight native model, shipping locked dependencies (`uv.lock`), and running silent background updates | Never maintains a second knowledge database or duplicate process-supervision state machine |
 | **Shared Knowledge Engine** (`knowledge`) | Managing consent & cursors, running deterministic privacy redaction, coordinating block navigation indexing, serving `TechnicalTokenizerV1`-based ReMe search, and tracking PR receipts & recovery | Never imports host-private session tables or guesses task ownership from working directories or timestamps |
 | **Remote & Diagnostics Components** (`remote-dev` / `diagnostics`) | SSH execution and background jobs, bounded local logs, and fault reporting under the contribution switch | SSH tools and local logs remain available with contribution off; outgoing fault reports obey that switch and never truncate user job output |
 

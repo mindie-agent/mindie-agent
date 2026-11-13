@@ -17,8 +17,9 @@ import sys
 import tomllib
 
 from sibling_readme_sync import (
-    EXPECTED_PLUGINS, PRODUCT_DOC_PATHS, resolve_sibling_repo, sync_sibling_readmes,
-    transform_own_readme_versions, verify_markdown_anchors, verify_no_stale_self_versions,
+    ALL_PLUGINS, EXPECTED_PLUGINS, INDEPENDENT_PLUGINS, PRODUCT_DOC_PATHS, resolve_sibling_repo,
+    sync_sibling_readmes, transform_own_readme_versions, verify_markdown_anchors,
+    verify_no_stale_self_versions,
 )
 
 VERSION_FILES = (
@@ -32,7 +33,7 @@ READMES = ("README.md", "README.en.md", "docs/README.md", "docs/README.en.md")
 def source_version(repo: Path, name: str) -> str:
     """Use the candidate's own manifests, including native plugin manifests."""
     versions = {}
-    for filename in VERSION_FILES if name in EXPECTED_PLUGINS else ("pyproject.toml",):
+    for filename in VERSION_FILES if name in ALL_PLUGINS else ("pyproject.toml",):
         path = repo / filename
         if not path.is_file():
             continue
@@ -62,7 +63,7 @@ def verify_own_readmes(repo: Path, name: str, version: str | None) -> list[str]:
         text = path.read_text(encoding="utf-8")
         # Preserve the existing native-plugin anchor gate without expanding
         # independent component release checks into unrelated documentation lint.
-        if name in EXPECTED_PLUGINS:
+        if name in ALL_PLUGINS:
             errors.extend(verify_markdown_anchors(f"{name}/{filename}", text))
         if version is None:
             continue  # Corpora use unit revisions, not a software package version.
@@ -101,7 +102,7 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
         return errors
     if scope != "independent" or not release_repos:
         raise ValueError("independent R6 requires --release-repo; full synchronization requires product scope")
-    entries = set(manifest.get("components", {})) | set(manifest.get("corpora", {}))
+    entries = set(manifest.get("components", {})) | set(manifest.get("corpora", {})) | set(INDEPENDENT_PLUGINS)
     for name in dict.fromkeys(release_repos):
         if name not in entries:
             errors.append(f"{name}: release repository is not declared in the channel")
