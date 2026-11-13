@@ -46,6 +46,23 @@ The main installation entry, all six plugin auto-install protocols, and first-us
 - Confirm the path in the native result or project list before reporting registration complete. Creating a directory, changing a child shell's directory, or adding filesystem access does not establish native registration. When the native entry needs user interaction, state the one remaining step.
 - GitHub authentication, workspace registration and contribution consent retain their separate settings. Installing a workspace does not widen contribution scope.
 
+## GitHub connection failures
+
+Opening `github.com` in a browser does not establish that the installer, `gh`, or a scheduled worker can reach `api.github.com`. Browsers may use a separate proxy, PAC, VPN or trust configuration. Inspect the network context of the failing process; another machine's successful request does not establish the affected machine's connectivity.
+
+| Observed result | Boundary and next action |
+| --- | --- |
+| DNS resolution fails | Check the process and selected proxy's DNS; preserve the original failure |
+| DNS succeeds but TCP 443 times out | Check effective egress proxy, `NO_PROXY`, VPN, routes and firewall; no GitHub authentication response has been received |
+| Proxy returns 407 or rejects CONNECT | Check proxy authentication and destination allowlisting; a new GitHub token cannot fix proxy authentication |
+| TLS handshake or certificate validation fails | Check the actual client's system trust or explicit CA; retain TLS verification |
+| GitHub returns 401 | Inspect the effective credential source, account and token validity |
+| GitHub returns 403/404 | Inspect repository access, SSO and rate-limit evidence without repeatedly asking for login |
+
+Read-only verification covers the GitHub API, Git access to the selected repository, and Release asset redirects. A successful webpage or PyPI request does not verify every route. Report only whether proxy/CA settings exist, their scope, and the failure stage; omit proxy passwords, tokens, authentication headers and full environment dumps. If only the browser has a working PAC configuration, use the organization's supplied CLI proxy settings rather than guessing a proxy or changing system configuration.
+
+Preserve caller proxy, CA and TLS options from process-scoped `GIT_CONFIG_COUNT` before appending MindIE's own credentials and hooks options. Background launches reuse their existing one-use service context or private network environment file, projecting only Git HTTP transport options rather than credential helpers, authentication headers or arbitrary Git settings. Consuming the saved context also removes stale proxies and process-scoped Git settings when the caller has withdrawn them.
+
 ## GitHub sign-in flow
 
 During installation, first-use setup or authentication repair, `/mindie-agent` follows this flow. The Agent guides the choice; `gh` owns credential storage and use. No additional authentication service or MindIE token configuration is needed.
