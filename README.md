@@ -17,6 +17,7 @@
   <a href="https://github.com/mindie-agent/mindie-agent-dsh"><img src="https://img.shields.io/badge/DeepSeek_Harness-Plugin-0EA5E9.svg" alt="DeepSeek Harness Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-agy"><img src="https://img.shields.io/badge/Google_Antigravity-Plugin-4285F4.svg" alt="Google Antigravity Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-wb"><img src="https://img.shields.io/badge/Tencent_WorkBuddy-Plugin-0EC8A9.svg" alt="Tencent WorkBuddy Plugin"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent-oc"><img src="https://img.shields.io/badge/OpenCode-Plugin-0F766E.svg" alt="OpenCode Plugin"></a>
   <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_AI_Infra-vLLM--Ascend_%7C_AscendC_%7C_Triton-C7000B.svg" alt="Ascend NPU AI Infra"></a>
 </p>
 <!-- mindie-org-versions:main-badges-zh:end -->
@@ -31,7 +32,7 @@
 
 别自己敲终端命令，也别去背繁琐的安装参数——既然这是给 AI 编程 Agent 用的昇腾能力底座，**安装这件体力活当然也只接受交给你的 Agent 来干**。
 
-打开你正在使用的 **Claude Code**、**OpenAI Codex CLI**、**Kimi Code**、**DeepSeek Harness**、**Google Antigravity** 或 **Tencent WorkBuddy**，直接把下面这句话甩给它：
+打开你正在使用的 **Claude Code**、**OpenAI Codex CLI**、**Kimi Code**、**DeepSeek Harness**、**Google Antigravity**、**Tencent WorkBuddy** 或 **OpenCode**，直接把下面这句话甩给它：
 
 ```text
 帮我安装一下这个 https://github.com/mindie-agent/mindie-agent
@@ -60,16 +61,17 @@
 > 社区贡献默认关闭。用户明确开启目标知识库 `<owner/repo>` 的贡献后，才通过 `setup.py sharing --enable` 自动创建或复用该知识库的个人 Fork，并绑定 `<GH_USER>/<repo>` 作为推送目标。不要因安装而 Fork 主仓、插件仓或所有领域仓库。
 >
 > #### 第三步：识别你所在的宿主客户端并安装对应插件
-> 只安装当前宿主对应的一个插件。打开该适配器仓库的安装页，执行其中的 Agent 自动安装协议。本页保留宿主识别、版本钉和安装页链接。当前插件版本为 Codex `v0.1.21`、Claude Code `v0.1.17`、Kimi Code `v0.1.17`、DSH `v0.1.16`、Google Antigravity `v0.1.8` 与 Tencent WorkBuddy `v0.1.8`，与 [`channels/0.1.json`](./channels/0.1.json) 以及 Codex、DSH harness `main` 安装页上的正式 tag 一致。共享组件由各插件从官方 GitHub Release 发现。
+> 只安装当前宿主对应的一个插件。打开该适配器仓库的安装页，执行其中的 Agent 自动安装协议。本页保留宿主识别、版本钉和安装页链接。当前插件版本为 Codex `v0.1.21`、Claude Code `v0.1.17`、Kimi Code `v0.1.17`、DSH `v0.1.16`、Google Antigravity `v0.1.8`、Tencent WorkBuddy `v0.1.8` 与 OpenCode `v0.1.0`，与 [`channels/0.1.json`](./channels/0.1.json) 以及各宿主安装页上的正式 tag 一致。共享组件由各插件从官方 GitHub Release 发现。
 >
 > 按下面的顺序选定唯一分支，命中即停止。当前进程的会话标记优先于本机 CLI：有 `CODEX_THREAD_ID` 或 `CODEX_CI` 就选分支 B，即使 `claude --version` 也能成功。不要按列表顺序取第一个 `--version` 成功项。
 >
 > 1. 当前进程有 `CODEX_THREAD_ID` 或 `CODEX_CI` → 分支 B。
 > 2. 当前进程有 `CLAUDECODE` → 分支 A。
-> 3. 当前对话就在 Google Antigravity 或 Tencent WorkBuddy 中 → 分支 E 或 F。用应用包和数据目录确认；PATH 上没有 `agy` 或 `cbc`。
-> 4. 当前进程有 `DSH_PROFILE` 或 `DSH_HOME` → 分支 D。
-> 5. 当前进程有 `KIMI_CODE_HOME` → 分支 C。只认进程环境里的变量，不把磁盘上的 `~/.kimi-code` 当成会话。
-> 6. 以上都没有时，再用各分支写出的 `codex --version`、`claude --version`、`kimi --version`、`dsh --version` 和应用包探测。多个入口同时存在时询问用户。
+> 3. 当前进程有 `OPENCODE_SESSION_ID`（或当前对话就在 OpenCode 会话中）→ 分支 G。
+> 4. 当前对话就在 Google Antigravity 或 Tencent WorkBuddy 中 → 分支 E 或 F。用应用包和数据目录确认；PATH 上没有 `agy` 或 `cbc`。
+> 5. 当前进程有 `DSH_PROFILE` 或 `DSH_HOME` → 分支 D。
+> 6. 当前进程有 `KIMI_CODE_HOME` → 分支 C。只认进程环境里的变量，不把磁盘上的 `~/.kimi-code` 当成会话。
+> 7. 以上都没有时，再用各分支写出的 `codex --version`、`claude --version`、`opencode --version`、`kimi --version`、`dsh --version` 和应用包探测。多个入口同时存在时询问用户。
 >
 > - **分支 A — Claude Code**：安装页：[mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.17/README.md#快速开始)。Claude Code 成功标准：`v0.1.17`（`claude plugin list --json` 里 `mindie-agent@mindie-agent-cc` 已启用）。
 > - **分支 B — OpenAI Codex CLI**：安装页：[mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.21/README.md#快速开始)。Codex 安装 ref 与成功标准：`v0.1.21`（`codex plugin list --json` 里 `mindie-agent@mindie-agent` 已启用，并执行 `setup.py` 完成同会话运行时就绪）。
@@ -77,12 +79,13 @@
 > - **分支 D — DeepSeek Harness（DSH）**：安装页：[mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.16/README.md#快速开始)。
 > - **分支 E — Google Antigravity**：macOS 应用包 `/Applications/Antigravity.app`（也查找 `~/Applications/Antigravity.app`），以及用户数据目录 `~/.gemini/antigravity`（或 `~/.gemini/antigravity-cli`、`~/.gemini/antigravity-ide`、`AGY_APP_DATA_DIR`）。安装页：[mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.8/README.md#快速开始交给-agent-一句话自动安装)。检出钉住的 `v0.1.8` tag，将 `plugins/mindie-agent` 复制到 `~/.gemini/config/plugins/mindie-agent`，并使用 `uv run --no-project --python 3.13 ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$(pwd)"` 完成持久化源码基线（`agy-source`）与运行时环境（`agy-venv`）初始化。
 > - **分支 F — Tencent WorkBuddy / CodeBuddy**：应用包内的 `codebuddy`，路径为 `/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy` 或 `~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`，或已存在的绝对路径 `MINDIE_WB_BIN`；配置目录为 `~/.workbuddy`（绝对路径的 `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` 优先）。在钉住的 tag 检出上通过 `uv run --no-project --python 3.13` 执行安装页中的 `setup.py init --install-wb`，并用该页给出的 `codebuddy plugin validate` 核验。安装页：[mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.8/README.md#3-快速安装与验证)。
-> - **分支 G — Cursor 或其他通用 MCP 客户端**（只要 SSH 远端底座 `remote-dev`）：按 [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.6/README.md) 注册 stdio 服务，来源钉为 `remote-dev@v0.11.6`。
+> - **分支 G — OpenCode（`v2.2.x+`）**：安装页：[mindie-agent-oc 安装、升级与初始化](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.0/README.md#3-安装升级与初始化)。执行 `opencode plugin add github:mindie-agent/mindie-agent-oc`（或双通道 npm 包 `@mindie-agent/oc@0.1.0`），并初始化受管 Python 运行环境（`mindie-agent-oc v0.1.0`）。
+> - **分支 H — Cursor 或其他通用 MCP 客户端**（只要 SSH 远端底座 `remote-dev`）：按 [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.6/README.md) 注册 stdio 服务，来源钉为 `remote-dev@v0.11.6`。
 >
 > 选定唯一分支后，按该安装页的协议安装上面钉住的 tag，随后立即进入第四步与第五步完成原生交互式引导。
 >
 > #### 第四步：了解开发工作区引导规范
-> 六种完整插件安装后均支持首次工作区配置：复用已验证的 GitHub 认证，介绍用户须知，并提供创建/初始化 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace)、复用已有目录或继续当前工作区的选项：
+> 七种完整插件安装后均支持首次工作区配置：复用已验证的 GitHub 认证，介绍用户须知，并提供创建/初始化 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace)、复用已有目录或继续当前工作区的选项：
 >
 > - [Codex 工作区引导](https://github.com/mindie-agent/mindie-agent-codex/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 > - [Claude Code 工作区引导](https://github.com/mindie-agent/mindie-agent-cc/blob/main/skills/mindie-agent/references/workspace-setup.md)
@@ -90,10 +93,12 @@
 > - [DSH 工作区引导](https://github.com/mindie-agent/mindie-agent-dsh/blob/main/skills/mindie-agent/references/workspace-setup.md)
 > - [Google Antigravity 工作区引导](https://github.com/mindie-agent/mindie-agent-agy/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 > - [Tencent WorkBuddy 工作区引导](https://github.com/mindie-agent/mindie-agent-wb/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
+> - [OpenCode 工作区引导](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.0/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 >
 > #### 第五步：弹出宿主原生交互式提问（开发工作区、社区共享与顺手点个 Star ⭐）并完成绑定
 > 插件安装与校验完成后，先通过 `setup.py sharing --status` 检查当前配置状态；若尚未记录用户授权选择（`needs_onboarding_prompt: true`），**必须立即调用当前宿主的原生提问工具弹出交互卡片**（不要只输出纯文本让用户自己敲命令）：
 > - **Google Antigravity**：调用原生 **`ask_question`** 工具；
+> - **OpenCode**：调用原生 **`question`** 工具；
 > - **Claude Code / Tencent WorkBuddy / Kimi Code**：调用原生 **`AskUserQuestion`** 工具；
 > - **OpenAI Codex CLI / App**：调用原生 **`request_user_input`** 工具；
 > - **DeepSeek Harness (DSH)**：优先调用会话中可用的原生提问工具，若无则输出标准三项编号选择卡片（`[1]` / `[2]`）等待用户回复。
@@ -127,7 +132,7 @@
 
 ## ✨ 为什么选择 MindIE Agent？
 
-MindIE Agent 在你已有的 Claude Code、Codex、Kimi Code、DSH、Google Antigravity 或 Tencent WorkBuddy 会话中提供领域知识和远端开发工具，覆盖 `vLLM-Ascend` / `vLLM-Omni`、`xLLM`（`xllm` / `xllm-ops` / `xllm-service` / `xllm-workflow`）、`MindIE-SD`、昇腾算子与分布式推理等核心领域，支撑模型 0day 开发、固定 case 的模型或算子性能优化、问题定位三个核心场景。实现与验收进展见[系统架构](./docs/architecture.md)和下方发布记录。
+MindIE Agent 在你已有的 Claude Code、Codex、Kimi Code、DSH、Google Antigravity、Tencent WorkBuddy 或 OpenCode 会话中提供领域知识和远端开发工具，覆盖 `vLLM-Ascend` / `vLLM-Omni`、`xLLM`（`xllm` / `xllm-ops` / `xllm-service` / `xllm-workflow`）、`MindIE-SD`、昇腾算子与分布式推理等核心领域，支撑模型 0day 开发、固定 case 的模型或算子性能优化、问题定位三个核心场景。实现与验收进展见[系统架构](./docs/architecture.md)和下方发布记录。
 
 | 能力 | 帮你完成的工作 |
 | --- | --- |
@@ -156,6 +161,7 @@ flowchart TB
     DSH["DeepSeek Harness"]
     AGY["Google Antigravity"]
     WB["Tencent WorkBuddy"]
+    OC["OpenCode"]
   end
 
   subgraph Adapters["🔌 原生插件薄适配层 (Thin Harness Plugins)"]
@@ -165,6 +171,7 @@ flowchart TB
     P_DSH["mindie-agent-dsh"]
     P_AGY["mindie-agent-agy"]
     P_WB["mindie-agent-wb"]
+    P_OC["mindie-agent-oc"]
   end
 
   subgraph Core["⚙️ 共享运行时组件底座 (Shared Runtime Components)"]
@@ -189,8 +196,9 @@ flowchart TB
   DSH --> P_DSH
   AGY --> P_AGY
   WB --> P_WB
+  OC --> P_OC
 
-  P_CC & P_Codex & P_Kimi & P_DSH & P_AGY & P_WB --> Knowledge & RemoteDev & Diag & Debug & Profiler & Sim
+  P_CC & P_Codex & P_Kimi & P_DSH & P_AGY & P_WB & P_OC --> Knowledge & RemoteDev & Diag & Debug & Profiler & Sim
   Task["按需安装 TaskClient / coordinator"] --> Coord
   Bench["mindie-bench 评测套件"] --> Task & Clients
   Knowledge <--> Feed
@@ -205,7 +213,7 @@ flowchart TB
 sequenceDiagram
   autonumber
   actor Dev as 开发者
-  participant Agent as Coding Agent (Claude / Codex / Kimi / DSH / Antigravity / WorkBuddy)
+  participant Agent as Coding Agent (Claude / Codex / Kimi / DSH / Antigravity / WorkBuddy / OpenCode)
   participant Know as mindie-knowledge (本地服务)
   participant NPU as remote-dev (远端昇腾容器)
   participant Repo as 公共工程知识库 (knowledge-vllm-ascend 等)
@@ -280,6 +288,7 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 | **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.16`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.16) | DSH 原生插件：`/mindie-agent` Skill、知识检索工具、生命周期桥接与 `remote-dev` 集成 |
 | **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.8`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.8) | Google Antigravity 原生插件：`/mindie-agent` 会话租约门控、原生远端工具别名、8 大共享组件 MCP 桥接与 Brain Transcript 脱敏采集 |
 | **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.8`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.8) | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、`/mindie-agent` 会话门控与 8 大共享组件 MCP 桥接 |
+| **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.0`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.0) | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、`/mindie-agent` 会话租约门控、8 大共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |
 
 ### 3. 共享运行时组件底座（Shared Runtime Components）
 

@@ -49,6 +49,7 @@ CORE_REPOS: list[tuple[str, str, str, str]] = [
     ("mindie-agent-dsh", "客户端插件", "Client Plugin", "#0EA5E9"),
     ("mindie-agent-agy", "客户端插件", "Client Plugin", "#4285F4"),
     ("mindie-agent-wb", "客户端插件", "Client Plugin", "#0EC8A9"),
+    ("mindie-agent-oc", "客户端插件", "Client Plugin", "#0F766E"),
     ("knowledge", "运行时组件", "Core Runtime", "#475569"),
     ("remote-dev", "运行时组件", "Core Runtime", "#475569"),
     ("coordinator", "运行时组件", "Core Runtime", "#475569"),
@@ -76,6 +77,7 @@ PLUGIN_REPOS: list[tuple[str, str, str]] = [
     ("mindie-agent-dsh", "DeepSeek Harness", "#0EA5E9"),
     ("mindie-agent-agy", "Google Antigravity", "#4285F4"),
     ("mindie-agent-wb", "Tencent WorkBuddy", "#0EC8A9"),
+    ("mindie-agent-oc", "OpenCode", "#0F766E"),
 ]
 
 
@@ -334,7 +336,10 @@ def render_svg(rows: list[dict], updated_at_cst: str, lang: str) -> str:
 
     width = 960
     row_height = 33
-    table_top = 314
+    cols_per_row = 4
+    num_leg_rows = (len(PLUGIN_REPOS) + cols_per_row - 1) // cols_per_row
+    bar_sec_h = 124 + (num_leg_rows - 1) * 54
+    table_top = 174 + bar_sec_h + 16
     table_height = 40 + len(rows) * row_height
     height = table_top + table_height + 44
 
@@ -389,7 +394,7 @@ def render_svg(rows: list[dict], updated_at_cst: str, lang: str) -> str:
     )
     lines.extend(
         [
-            f'  <rect x="24" y="{bar_sec_y}" width="{width - 48}" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>',
+            f'  <rect x="24" y="{bar_sec_y}" width="{width - 48}" height="{bar_sec_h}" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>',
             f'  <text x="40" y="{bar_sec_y + 24}" class="font sec-title">{html.escape(sec_label)}</text>',
         ]
     )
@@ -411,11 +416,11 @@ def render_svg(rows: list[dict], updated_at_cst: str, lang: str) -> str:
             )
             cur_x += seg_w
 
-    leg_w = (width - 80) // len(PLUGIN_REPOS)
+    leg_w = (width - 80) // cols_per_row
     for idx, (repo_name, host_name, color) in enumerate(PLUGIN_REPOS):
         r_data = by_repo[repo_name]
-        lx = 40 + idx * leg_w
-        ly = bar_sec_y + 68
+        lx = 40 + (idx % cols_per_row) * leg_w
+        ly = bar_sec_y + 68 + (idx // cols_per_row) * 54
         pct = (r_data["cum_clones"] / denom) * 100.0
         title_line = f"{host_name} ({pct:.1f}%)"
         stat_line = (

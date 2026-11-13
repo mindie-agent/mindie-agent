@@ -80,6 +80,10 @@ EXPECTED_PLUGINS = (
     "mindie-agent-agy",
     "mindie-agent-wb",
 )
+INDEPENDENT_PLUGINS = (
+    "mindie-agent-oc",
+)
+ALL_PLUGINS = (*EXPECTED_PLUGINS, *INDEPENDENT_PLUGINS)
 
 # The synchronizer and CI change routing share the same owned document set.
 PRODUCT_DOC_PATHS = (
@@ -459,7 +463,7 @@ def verify_markdown_anchors(label: str, text: str) -> list[str]:
 def verify_no_stale_self_versions(label: str, text: str, repo_name: str, self_ver: str) -> list[str]:
     errors: list[str] = []
     stripped = _strip_fenced_code(text)
-    if repo_name in EXPECTED_PLUGINS:
+    if repo_name in ALL_PLUGINS:
         for h_match in re.finditer(r"^#{1,6}\s+([^\n]+)$", stripped, flags=re.MULTILINE):
             h_txt = h_match.group(1)
             ver_in_heading = re.search(r"\b(0\.\d+\.\d+)\b", h_txt)
@@ -554,7 +558,7 @@ def sync_sibling_readmes(
                 errors.append(f"{repo_name}/{rel}: missing shields.io Release badge for v{self_ver}")
             elif any(v != self_ver for v in badge_matches):
                 errors.append(f"{repo_name}/{rel}: Release badge versions {badge_matches} != expected {self_ver}")
-            if repo_name in EXPECTED_PLUGINS:
+            if repo_name in ALL_PLUGINS:
                 errors.extend(verify_markdown_anchors(f"{repo_name}/{rel}", current_txt))
             errors.extend(verify_no_stale_self_versions(f"{repo_name}/{rel}", current_txt, repo_name, self_ver))
 

@@ -119,6 +119,14 @@ class ReleaseDocScopeTests(unittest.TestCase):
         (plugin / "pyproject.toml").write_text('[project]\nversion="0.1.17"\n', newline="\n")
         self.assertTrue(self.check("mindie-agent-kimi"))
 
+    def test_independent_opencode_plugin_validates_without_channel_entry(self):
+        self.assertNotIn("mindie-agent-oc", self.manifest["components"])
+        plugin = self.repo("mindie-agent-oc", "0.1.0")
+        (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.0"}\n', newline="\n")
+        self.assertEqual(self.check("mindie-agent-oc"), [])
+        (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.1"}\n', newline="\n")
+        self.assertTrue(self.check("mindie-agent-oc"))
+
     def test_native_plugin_rejects_stale_self_release_statements(self):
         plugin = self.repo("mindie-agent-dsh", "0.1.17")
         (plugin / "pyproject.toml").unlink()
@@ -284,6 +292,11 @@ class ReleaseDocScopeTests(unittest.TestCase):
             self.assertEqual(self.unchanged_inputs(), before)
             self.readmes(self.knowledge, "knowledge", "0.13.14")
             self.assertEqual(gate.main(args), 1)
+
+    def test_extract_semver_parses_v_prefixed_opencode_host_version(self):
+        self.assertEqual(gate._extract_semver("opencode v2.2.7\n"), "2.2.7")
+        self.assertEqual(gate._extract_semver("opencode v2.3.0-rc.1\n"), "2.3.0-rc.1")
+        self.assertIsNone(gate._extract_semver("python3.13.12\n"))
 
 
 if __name__ == "__main__":
