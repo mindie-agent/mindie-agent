@@ -2,7 +2,7 @@
 
 [English](architecture.en.md) · [返回文档中心](README.md)
 
-MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy）提供昇腾领域知识检索、远端容器开发、多卡资源协调、目标负载调试与性能剖析能力。当前版本覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 框架开发与昇腾算子开发**，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查与精度调试**三类日常研发场景。
+MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy、OpenCode）提供昇腾领域知识检索、远端容器开发、多卡资源协调、目标负载调试与性能剖析能力。当前版本覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 框架开发与昇腾算子开发**，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查与精度调试**三类日常研发场景。
 
 本文介绍各组件的职责边界与协同方式。正式发布版本与实测数据见[版本发布记录](README.md)，知识组织与检索机制见[知识与经验系统](knowledge-system.md)，宿主会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，工程准则见[设计原则](design-principles.md)。
 
@@ -10,7 +10,7 @@ MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Co
 
 ```mermaid
 flowchart TB
-    H["Codex / Claude Code / Kimi Code / DSH / Antigravity / WorkBuddy"] --> P["各自的轻量原生插件"]
+    H["Codex / Claude Code / Kimi Code / DSH / Antigravity / WorkBuddy / OpenCode"] --> P["各自的轻量原生插件"]
     P --> K["knowledge：领域路由、条件检索与经验沉淀"]
     P --> R["remote-dev：远端文件编辑、命令与后台作业"]
     P --> D["diagnostics：Agent 自身本地故障日志与可选 Issue 上报"]
@@ -38,7 +38,7 @@ flowchart TB
 | 仓库 | 负责内容 |
 | --- | --- |
 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品架构、领域边界、入口文档、跨仓规范与发布记录；不包含运行时代码或 MCP 服务 |
-| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)、[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
+| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)、[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)、[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
 | [`knowledge`](https://github.com/mindie-agent/knowledge) | 知识检索引擎：适用条件匹配、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、脱敏任务切片、经验提炼校验与社区 PR 投递 |
 | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、`xLLM`、`MindIE-SD`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 9 大结构化分级知识库（`L1–L4`） |
 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |

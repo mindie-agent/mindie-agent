@@ -2,7 +2,7 @@
 
 [English](harness-boundary-and-lifecycle.en.md) · [返回文档中心](README.md)
 
-本文说明 MindIE Agent 各宿主插件（Claude Code、Codex、Kimi Code、DeepSeek Harness）与底层共享组件之间的职责划分，以及任务身份识别、用户授权、长任务执行与本地数据恢复的生命周期规则。
+本文说明 MindIE Agent 各宿主插件（Claude Code、Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy、OpenCode）与底层共享组件之间的职责划分，以及任务身份识别、用户授权、长任务执行与本地数据恢复的生命周期规则。
 
 - 遵循准则：[工程设计原则与演进准则](design-principles.md) · [系统架构与模块分工](architecture.md)
 - 版本与实测记录：[版本发布记录](README.md#版本记录与路线图)
@@ -16,7 +16,7 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 | 层级 / 模块 | 负责什么 | 不做什么 |
 | --- | --- | --- |
 | **宿主原生插件管理器** | 插件包的下载、安装与已安装版本记录 | 不代替 MindIE 做跨宿主兼容性筛选 |
-| **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh`） | 识别宿主原生任务身份、定位可信 Transcript、提取公开对话、调用宿主原生轻量小模型、提供发布清单与锁定依赖（`uv.lock`）及后台静默更新 | 不自己维护第二套知识数据库或重复的进程守护状态机 |
+| **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 识别宿主原生任务身份、定位可信 Transcript、提取公开对话、调用宿主原生轻量小模型、提供发布清单与锁定依赖（`uv.lock`）及后台静默更新 | 不自己维护第二套知识数据库或重复的进程守护状态机 |
 | **共享知识引擎**（`knowledge`） | 管理授权与增量游标、执行确定性隐私脱敏、协调分块目录生成、提供基于 `TechnicalTokenizerV1` 的 ReMe 检索、处理 PR 发布回执与故障恢复 | 不直接耦合特定宿主的私有目录结构，也不靠猜测目录或时间戳来认领任务 |
 | **远端开发与诊断组件**（`remote-dev` / `diagnostics`） | 提供 SSH 远端文件/长作业执行、有界本地日志，以及受统一贡献开关控制的故障上报 | SSH 工具与本地日志不依赖贡献开关；故障外发必须服从该开关，也不截断用户远端作业输出 |
 

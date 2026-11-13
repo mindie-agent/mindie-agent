@@ -56,6 +56,7 @@ REPOS: dict[str, tuple[str, str]] = {
     "mindie-agent-dsh": ("mindie-agent/mindie-agent-dsh", "harness_plugin"),
     "mindie-agent-agy": ("mindie-agent/mindie-agent-agy", "harness_plugin"),
     "mindie-agent-wb": ("mindie-agent/mindie-agent-wb", "harness_plugin"),
+    "mindie-agent-oc": ("mindie-agent/mindie-agent-oc", "harness_plugin"),
     "mindie-bench": ("mindie-agent/mindie-bench", "evaluation_runner"),
     "knowledge-infer-core": ("mindie-agent/knowledge-infer-core", "knowledge_corpus"),
     "knowledge-operators": ("mindie-agent/knowledge-operators", "knowledge_corpus"),
@@ -123,6 +124,13 @@ def corpus_link(repo: str, commit: str, units: int, lang: str) -> str:
     return f"{unit_label} · [`{short}`](https://github.com/{ORG}/{repo}/tree/{commit})"
 
 
+def oc_version_info(components: dict) -> tuple[str, str]:
+    oc = components.get("mindie-agent-oc") or {}
+    ver = str(oc.get("version") or "0.1.0")
+    tag = str(oc.get("tag") or f"v{ver}")
+    return ver, tag
+
+
 def render_main_badges_zh(m: dict) -> str:
     v = m["current_patch_version"]
     notes = m.get("release_notes", f"docs/releases/{v}.md")
@@ -136,6 +144,7 @@ def render_main_badges_zh(m: dict) -> str:
             '  <a href="https://github.com/mindie-agent/mindie-agent-dsh"><img src="https://img.shields.io/badge/DeepSeek_Harness-Plugin-0EA5E9.svg" alt="DeepSeek Harness Plugin"></a>',
             '  <a href="https://github.com/mindie-agent/mindie-agent-agy"><img src="https://img.shields.io/badge/Google_Antigravity-Plugin-4285F4.svg" alt="Google Antigravity Plugin"></a>',
             '  <a href="https://github.com/mindie-agent/mindie-agent-wb"><img src="https://img.shields.io/badge/Tencent_WorkBuddy-Plugin-0EC8A9.svg" alt="Tencent WorkBuddy Plugin"></a>',
+            '  <a href="https://github.com/mindie-agent/mindie-agent-oc"><img src="https://img.shields.io/badge/OpenCode-Plugin-0F766E.svg" alt="OpenCode Plugin"></a>',
             '  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_AI_Infra-vLLM--Ascend_%7C_AscendC_%7C_Triton-C7000B.svg" alt="Ascend NPU AI Infra"></a>',
             "</p>",
         ]
@@ -155,6 +164,7 @@ def render_main_badges_en(m: dict) -> str:
             '  <a href="https://github.com/mindie-agent/mindie-agent-dsh"><img src="https://img.shields.io/badge/DeepSeek_Harness-Plugin-0EA5E9.svg" alt="DeepSeek Harness Plugin"></a>',
             '  <a href="https://github.com/mindie-agent/mindie-agent-agy"><img src="https://img.shields.io/badge/Google_Antigravity-Plugin-4285F4.svg" alt="Google Antigravity Plugin"></a>',
             '  <a href="https://github.com/mindie-agent/mindie-agent-wb"><img src="https://img.shields.io/badge/Tencent_WorkBuddy-Plugin-0EC8A9.svg" alt="Tencent WorkBuddy Plugin"></a>',
+            '  <a href="https://github.com/mindie-agent/mindie-agent-oc"><img src="https://img.shields.io/badge/OpenCode-Plugin-0F766E.svg" alt="OpenCode Plugin"></a>',
             '  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_AI_Infra-vLLM--Ascend_%7C_AscendC_%7C_Triton-C7000B.svg" alt="Ascend NPU AI Infra"></a>',
             "</p>",
         ]
@@ -164,6 +174,7 @@ def render_main_badges_en(m: dict) -> str:
 def render_main_ecosystem_zh(m: dict) -> str:
     v_main = f"v{m['current_patch_version']}"
     c = m["components"]
+    _, oc_tag = oc_version_info(c)
     corp = m["corpora"]
     return "\n".join(
         [
@@ -186,6 +197,7 @@ def render_main_ecosystem_zh(m: dict) -> str:
             f"| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | {rel_link('mindie-agent-dsh', c['mindie-agent-dsh']['tag'])} | DSH 原生插件：`/mindie-agent` Skill、知识检索工具、生命周期桥接与 `remote-dev` 集成 |",
             f"| **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | {rel_link('mindie-agent-agy', c['mindie-agent-agy']['tag'])} | Google Antigravity 原生插件：`/mindie-agent` 会话租约门控、原生远端工具别名、8 大共享组件 MCP 桥接与 Brain Transcript 脱敏采集 |",
             f"| **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | {rel_link('mindie-agent-wb', c['mindie-agent-wb']['tag'])} | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、`/mindie-agent` 会话门控与 8 大共享组件 MCP 桥接 |",
+            f"| **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | {rel_link('mindie-agent-oc', oc_tag)} | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、`/mindie-agent` 会话租约门控、8 大共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |",
             "",
             "### 3. 共享运行时组件底座（Shared Runtime Components）",
             "",
@@ -222,6 +234,7 @@ def render_main_ecosystem_zh(m: dict) -> str:
 def render_main_ecosystem_en(m: dict) -> str:
     v_main = f"v{m['current_patch_version']}"
     c = m["components"]
+    _, oc_tag = oc_version_info(c)
     corp = m["corpora"]
     return "\n".join(
         [
@@ -244,6 +257,7 @@ def render_main_ecosystem_en(m: dict) -> str:
             f"| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | {rel_link('mindie-agent-dsh', c['mindie-agent-dsh']['tag'])} | Native DSH plugin: `/mindie-agent`, knowledge tools, lifecycle bridging, and `remote-dev` integration |",
             f"| **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | {rel_link('mindie-agent-agy', c['mindie-agent-agy']['tag'])} | Native Google Antigravity plugin: per-conversation `/mindie-agent` lease gate, native remote tool aliases, 8-component MCP bridge, and Brain transcript redaction |",
             f"| **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | {rel_link('mindie-agent-wb', c['mindie-agent-wb']['tag'])} | Native Tencent WorkBuddy / CodeBuddy plugin: dual-surface mounting (WorkBuddy Connector + CodeBuddy native plugin), `/mindie-agent` session gate, and 8-component MCP bridge |",
+            f"| **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | {rel_link('mindie-agent-oc', oc_tag)} | Native OpenCode plugin: dual-channel distribution (`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`), `/mindie-agent` session lease gate, 8-component MCP bridge, and SQLite `session_v2` transcript redaction |",
             "",
             "### 3. Shared Runtime Components",
             "",
@@ -291,6 +305,7 @@ def render_org_badges(m: dict) -> str:
             '  <a href="https://github.com/mindie-agent/mindie-agent-dsh"><img src="https://img.shields.io/badge/DeepSeek_Harness-Plugin_Ready-0EA5E9?style=flat-square" alt="DeepSeek Harness"></a>',
             '  <a href="https://github.com/mindie-agent/mindie-agent-agy"><img src="https://img.shields.io/badge/Google_Antigravity-Plugin_Ready-4285F4?style=flat-square" alt="Google Antigravity"></a>',
             '  <a href="https://github.com/mindie-agent/mindie-agent-wb"><img src="https://img.shields.io/badge/Tencent_WorkBuddy-Plugin_Ready-0EC8A9?style=flat-square" alt="Tencent WorkBuddy"></a>',
+            '  <a href="https://github.com/mindie-agent/mindie-agent-oc"><img src="https://img.shields.io/badge/OpenCode-Plugin_Ready-0F766E?style=flat-square" alt="OpenCode"></a>',
             '  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_AI_Infra-vLLM--Ascend_%7C_AscendC_%7C_Triton-C7000B?style=flat-square" alt="Ascend AI Infra Skills"></a>',
             "</p>",
             "",
@@ -305,6 +320,7 @@ def render_org_badges(m: dict) -> str:
             '  <a href="https://github.com/mindie-agent/mindie-agent-dsh"><b>DSH 插件</b></a> ·',
             '  <a href="https://github.com/mindie-agent/mindie-agent-agy"><b>Antigravity 插件</b></a> ·',
             '  <a href="https://github.com/mindie-agent/mindie-agent-wb"><b>WorkBuddy 插件</b></a> ·',
+            '  <a href="https://github.com/mindie-agent/mindie-agent-oc"><b>OpenCode 插件</b></a> ·',
             '  <a href="https://github.com/mindie-agent/mindie-bench"><b>MindIE Bench</b></a> ·',
             '  <a href="https://github.com/mindie-agent/awesome-mindie-skills"><b>Awesome MindIE Skills</b></a>',
             "</p>",
@@ -315,6 +331,7 @@ def render_org_badges(m: dict) -> str:
 def render_org_ecosystem(m: dict) -> str:
     v_main = f"v{m['current_patch_version']}"
     c = m["components"]
+    _, oc_tag = oc_version_info(c)
     corp = m["corpora"]
     return "\n".join(
         [
@@ -337,6 +354,7 @@ def render_org_ecosystem(m: dict) -> str:
             f"| [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | **DeepSeek Harness (DSH)** | {rel_link('mindie-agent-dsh', c['mindie-agent-dsh']['tag'])} | DeepSeek Harness 原生插件：复用宿主插件机制组合提供 `/mindie-agent` Skill、领域知识检索、确定性组件工具与 `remote-dev` |",
             f"| [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) | **Google Antigravity** | {rel_link('mindie-agent-agy', c['mindie-agent-agy']['tag'])} | Google Antigravity 原生插件：提供 `/mindie-agent` 会话租约门控、原生远端工具别名、8 大共享组件 MCP 桥接与 Brain Transcript 脱敏采集 |",
             f"| [`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb) | **Tencent WorkBuddy** | {rel_link('mindie-agent-wb', c['mindie-agent-wb']['tag'])} | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、`/mindie-agent` 会话门控与 8 大共享组件 MCP 桥接 |",
+            f"| [`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | **OpenCode** | {rel_link('mindie-agent-oc', oc_tag)} | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、`/mindie-agent` 会话租约门控、8 大共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |",
             "",
             "### 3. 核心运行时组件（Core Runtime Components）",
             "",
@@ -371,6 +389,7 @@ def render_org_ecosystem(m: dict) -> str:
 def render_org_readme_zh(m: dict) -> str:
     v_main = f"v{m['current_patch_version']}"
     c = m["components"]
+    _, oc_tag = oc_version_info(c)
     return "\n".join(
         [
             f"- 产品总入口与架构文档：[mindie-agent/mindie-agent](https://github.com/mindie-agent/mindie-agent)（{rel_link('mindie-agent', v_main)}）",
@@ -380,6 +399,7 @@ def render_org_readme_zh(m: dict) -> str:
             f"- DeepSeek Harness (DSH) 插件：[mindie-agent/mindie-agent-dsh](https://github.com/mindie-agent/mindie-agent-dsh)（{rel_link('mindie-agent-dsh', c['mindie-agent-dsh']['tag'])}）",
             f"- Google Antigravity 插件：[mindie-agent/mindie-agent-agy](https://github.com/mindie-agent/mindie-agent-agy)（{rel_link('mindie-agent-agy', c['mindie-agent-agy']['tag'])}）",
             f"- Tencent WorkBuddy 插件：[mindie-agent/mindie-agent-wb](https://github.com/mindie-agent/mindie-agent-wb)（{rel_link('mindie-agent-wb', c['mindie-agent-wb']['tag'])}）",
+            f"- OpenCode 插件：[mindie-agent/mindie-agent-oc](https://github.com/mindie-agent/mindie-agent-oc)（{rel_link('mindie-agent-oc', oc_tag)}）",
             f"- 核心运行时组件：[`knowledge`](https://github.com/mindie-agent/knowledge)（{rel_link('knowledge', c['knowledge']['tag'])}）· [`remote-dev`](https://github.com/mindie-agent/remote-dev)（{rel_link('remote-dev', c['remote-dev']['tag'])}）· [`coordinator`](https://github.com/mindie-agent/coordinator)（{rel_link('coordinator', c['coordinator']['tag'])}）· [`profiler`](https://github.com/mindie-agent/profiler)（{rel_link('profiler', c['profiler']['tag'])}）· [`sim`](https://github.com/mindie-agent/sim)（{rel_link('sim', c['sim']['tag'])}）· [`npu-top`](https://github.com/mindie-agent/npu-top)（{rel_link('npu-top', c['npu-top']['tag'])}）· [`diagnostics`](https://github.com/mindie-agent/diagnostics)（{rel_link('diagnostics', c['diagnostics']['tag'])}）· [`debugger`](https://github.com/mindie-agent/debugger)（{rel_link('debugger', c['debugger']['tag'])}）",
             f"- 真机评测与基准套件：[mindie-agent/mindie-bench](https://github.com/mindie-agent/mindie-bench)（{rel_link('mindie-bench', c['mindie-bench']['tag'])}）",
             "- 昇腾 AI Infra 技能目录：[mindie-agent/awesome-mindie-skills](https://github.com/mindie-agent/awesome-mindie-skills)",
@@ -390,6 +410,7 @@ def render_org_readme_zh(m: dict) -> str:
 def render_org_readme_en(m: dict) -> str:
     v_main = f"v{m['current_patch_version']}"
     c = m["components"]
+    _, oc_tag = oc_version_info(c)
     return "\n".join(
         [
             f"- Product Entry & Architecture: [mindie-agent/mindie-agent](https://github.com/mindie-agent/mindie-agent) ({rel_link('mindie-agent', v_main)})",
@@ -399,6 +420,7 @@ def render_org_readme_en(m: dict) -> str:
             f"- DeepSeek Harness (DSH) Plugin: [mindie-agent/mindie-agent-dsh](https://github.com/mindie-agent/mindie-agent-dsh) ({rel_link('mindie-agent-dsh', c['mindie-agent-dsh']['tag'])})",
             f"- Google Antigravity Plugin: [mindie-agent/mindie-agent-agy](https://github.com/mindie-agent/mindie-agent-agy) ({rel_link('mindie-agent-agy', c['mindie-agent-agy']['tag'])})",
             f"- Tencent WorkBuddy Plugin: [mindie-agent/mindie-agent-wb](https://github.com/mindie-agent/mindie-agent-wb) ({rel_link('mindie-agent-wb', c['mindie-agent-wb']['tag'])})",
+            f"- OpenCode Plugin: [mindie-agent/mindie-agent-oc](https://github.com/mindie-agent/mindie-agent-oc) ({rel_link('mindie-agent-oc', oc_tag)})",
             f"- Core Runtime Components: [`knowledge`](https://github.com/mindie-agent/knowledge) ({rel_link('knowledge', c['knowledge']['tag'])}) · [`remote-dev`](https://github.com/mindie-agent/remote-dev) ({rel_link('remote-dev', c['remote-dev']['tag'])}) · [`coordinator`](https://github.com/mindie-agent/coordinator) ({rel_link('coordinator', c['coordinator']['tag'])}) · [`profiler`](https://github.com/mindie-agent/profiler) ({rel_link('profiler', c['profiler']['tag'])}) · [`sim`](https://github.com/mindie-agent/sim) ({rel_link('sim', c['sim']['tag'])}) · [`npu-top`](https://github.com/mindie-agent/npu-top) ({rel_link('npu-top', c['npu-top']['tag'])}) · [`diagnostics`](https://github.com/mindie-agent/diagnostics) ({rel_link('diagnostics', c['diagnostics']['tag'])}) · [`debugger`](https://github.com/mindie-agent/debugger) ({rel_link('debugger', c['debugger']['tag'])})",
             f"- Evaluation & Live NPU Benchmark Suite: [mindie-agent/mindie-bench](https://github.com/mindie-agent/mindie-bench) ({rel_link('mindie-bench', c['mindie-bench']['tag'])})",
             "- Ascend Agent Skills Catalogue: [mindie-agent/awesome-mindie-skills](https://github.com/mindie-agent/awesome-mindie-skills)",
@@ -415,16 +437,22 @@ def render_release_table(m: dict, lang: str) -> str:
         ("mindie-agent-dsh", "原生客户端插件（DeepSeek Harness）", "Native Host Plugin (DeepSeek Harness)"),
         ("mindie-agent-agy", "原生客户端插件（Google Antigravity）", "Native Host Plugin (Google Antigravity)"),
         ("mindie-agent-wb", "原生客户端插件（Tencent WorkBuddy）", "Native Host Plugin (Tencent WorkBuddy)"),
-        ("knowledge", "共享运行时组件", "Shared Runtime Component"),
-        ("remote-dev", "共享运行时组件", "Shared Runtime Component"),
-        ("coordinator", "共享运行时组件", "Shared Runtime Component"),
-        ("profiler", "共享运行时组件", "Shared Runtime Component"),
-        ("sim", "共享运行时组件", "Shared Runtime Component"),
-        ("npu-top", "共享运行时组件", "Shared Runtime Component"),
-        ("diagnostics", "共享运行时组件", "Shared Runtime Component"),
-        ("debugger", "共享运行时组件", "Shared Runtime Component"),
-        ("mindie-bench", "评测运行器与基准套件", "Evaluation Runner & Benchmark Suite"),
     ]
+    if "mindie-agent-oc" in c:
+        rows.append(("mindie-agent-oc", "原生客户端插件（OpenCode）", "Native Host Plugin (OpenCode)"))
+    rows.extend(
+        [
+            ("knowledge", "共享运行时组件", "Shared Runtime Component"),
+            ("remote-dev", "共享运行时组件", "Shared Runtime Component"),
+            ("coordinator", "共享运行时组件", "Shared Runtime Component"),
+            ("profiler", "共享运行时组件", "Shared Runtime Component"),
+            ("sim", "共享运行时组件", "Shared Runtime Component"),
+            ("npu-top", "共享运行时组件", "Shared Runtime Component"),
+            ("diagnostics", "共享运行时组件", "Shared Runtime Component"),
+            ("debugger", "共享运行时组件", "Shared Runtime Component"),
+            ("mindie-bench", "评测运行器与基准套件", "Evaluation Runner & Benchmark Suite"),
+        ]
+    )
     header = "| 仓库 | 角色 | 版本 | 标签源码 SHA |" if lang == "zh" else "| Repository | Role | Version | Tag Source SHA |"
     lines = [header, "| --- | --- | --- | --- |"]
     for key, role_zh, role_en in rows:
@@ -461,6 +489,8 @@ def sync_release_notes_prose(text: str, m: dict) -> str:
         (r"`mindie-profiler [0-9.]+`", f"`mindie-profiler {c['profiler']['version']}`"),
         (r"`mindie-debugger [0-9.]+`", f"`mindie-debugger {c['debugger']['version']}`"),
     ]
+    if "mindie-agent-oc" in c:
+        replacements.append((r"`OpenCode v[0-9.]+`", f"`OpenCode v{c['mindie-agent-oc']['version']}`"))
     for pat, repl in replacements:
         text = re.sub(pat, repl, text)
     return text
@@ -504,46 +534,16 @@ def sync_channel_internal_fields(channel_path: Path, m: dict, write: bool) -> li
     if patch_releases and str(patch_releases[-1].get("patch_version")) == cpv:
         summary = str(patch_releases[-1].get("summary") or "")
         sum_map = [
-            (
-                r"mindie-knowledge [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-knowledge {c['knowledge']['version']} ({c['knowledge']['commit']})",
-            ),
-            (
-                r"mindie-coordinator [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-coordinator {c['coordinator']['version']} ({c['coordinator']['commit']})",
-            ),
-            (
-                r"mindie-sim [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-sim {c['sim']['version']} ({c['sim']['commit']})",
-            ),
-            (
-                r"mindie-profiler [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-profiler {c['profiler']['version']} ({c['profiler']['commit']})",
-            ),
-            (
-                r"mindie-debugger [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-debugger {c['debugger']['version']} ({c['debugger']['commit']})",
-            ),
-            (
-                r"mindie-diagnostics [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-diagnostics {c['diagnostics']['version']} ({c['diagnostics']['commit']})",
-            ),
-            (
-                r"remote-dev [0-9.]+ \([0-9a-f]{40}\)",
-                f"remote-dev {c['remote-dev']['version']} ({c['remote-dev']['commit']})",
-            ),
-            (
-                r"npu-top [0-9.]+ \([0-9a-f]{40}\)",
-                f"npu-top {c['npu-top']['version']} ({c['npu-top']['commit']})",
-            ),
-            (
-                r"mindie-bench [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-bench {c['mindie-bench']['version']} ({c['mindie-bench']['commit']})",
-            ),
-            (
-                r"mindie-agent-wb [0-9.]+ \([0-9a-f]{40}\)",
-                f"mindie-agent-wb {c['mindie-agent-wb']['version']} ({c['mindie-agent-wb']['commit']})",
-            ),
+            (r"mindie-knowledge [0-9.]+ \([0-9a-f]{40}\)", f"mindie-knowledge {c['knowledge']['version']} ({c['knowledge']['commit']})"),
+            (r"mindie-coordinator [0-9.]+ \([0-9a-f]{40}\)", f"mindie-coordinator {c['coordinator']['version']} ({c['coordinator']['commit']})"),
+            (r"mindie-sim [0-9.]+ \([0-9a-f]{40}\)", f"mindie-sim {c['sim']['version']} ({c['sim']['commit']})"),
+            (r"mindie-profiler [0-9.]+ \([0-9a-f]{40}\)", f"mindie-profiler {c['profiler']['version']} ({c['profiler']['commit']})"),
+            (r"mindie-debugger [0-9.]+ \([0-9a-f]{40}\)", f"mindie-debugger {c['debugger']['version']} ({c['debugger']['commit']})"),
+            (r"mindie-diagnostics [0-9.]+ \([0-9a-f]{40}\)", f"mindie-diagnostics {c['diagnostics']['version']} ({c['diagnostics']['commit']})"),
+            (r"remote-dev [0-9.]+ \([0-9a-f]{40}\)", f"remote-dev {c['remote-dev']['version']} ({c['remote-dev']['commit']})"),
+            (r"npu-top [0-9.]+ \([0-9a-f]{40}\)", f"npu-top {c['npu-top']['version']} ({c['npu-top']['commit']})"),
+            (r"mindie-bench [0-9.]+ \([0-9a-f]{40}\)", f"mindie-bench {c['mindie-bench']['version']} ({c['mindie-bench']['commit']})"),
+            (r"mindie-agent-wb [0-9.]+ \([0-9a-f]{40}\)", f"mindie-agent-wb {c['mindie-agent-wb']['version']} ({c['mindie-agent-wb']['commit']})"),
             (r"Codex [0-9.]+", f"Codex {c['mindie-agent-codex']['version']}"),
             (r"Claude Code [0-9.]+", f"Claude Code {c['mindie-agent-cc']['version']}"),
             (r"Kimi [0-9.]+", f"Kimi {c['mindie-agent-kimi']['version']}"),
@@ -551,6 +551,8 @@ def sync_channel_internal_fields(channel_path: Path, m: dict, write: bool) -> li
             (r"Antigravity [0-9.]+", f"Antigravity {c['mindie-agent-agy']['version']}"),
             (r"WorkBuddy [0-9.]+", f"WorkBuddy {c['mindie-agent-wb']['version']}"),
         ]
+        if "mindie-agent-oc" in c:
+            sum_map.append((r"OpenCode [0-9.]+", f"OpenCode {c['mindie-agent-oc']['version']}"))
         for pat, repl in sum_map:
             summary = re.sub(pat, repl, summary)
         patch_releases[-1]["summary"] = summary
@@ -585,18 +587,19 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
     dsh_v = c["mindie-agent-dsh"]["version"]
     agy_v = c["mindie-agent-agy"]["version"]
     wb_v = c["mindie-agent-wb"]["version"]
+    oc_v, _ = oc_version_info(c)
     rdev_v = c["remote-dev"]["version"]
 
     if lang == "zh":
         text = re.sub(
-            r"当前插件版本为 Codex `v[0-9.]+`、Claude Code `v[0-9.]+`、Kimi Code `v[0-9.]+`(?:、| 与 )DSH `v[0-9.]+`(?:(?:、| 与 )Google Antigravity `v[0-9.]+`)?(?: 与 Tencent WorkBuddy `v[0-9.]+`)?",
-            f"当前插件版本为 Codex `v{codex_v}`、Claude Code `v{cc_v}`、Kimi Code `v{kimi_v}`、DSH `v{dsh_v}`、Google Antigravity `v{agy_v}` 与 Tencent WorkBuddy `v{wb_v}`",
+            r"当前插件版本为 Codex `v[0-9.]+`、Claude Code `v[0-9.]+`、Kimi Code `v[0-9.]+`(?:、| 与 )DSH `v[0-9.]+`(?:(?:、| 与 )Google Antigravity `v[0-9.]+`)?(?:(?:、| 与 )Tencent WorkBuddy `v[0-9.]+`)?(?: 与 OpenCode `v[0-9.]+`)?",
+            f"当前插件版本为 Codex `v{codex_v}`、Claude Code `v{cc_v}`、Kimi Code `v{kimi_v}`、DSH `v{dsh_v}`、Google Antigravity `v{agy_v}`、Tencent WorkBuddy `v{wb_v}` 与 OpenCode `v{oc_v}`",
             text,
         )
     else:
         text = re.sub(
-            r"current plugin versions are Codex `v[0-9.]+`, Claude Code `v[0-9.]+`, Kimi Code `v[0-9.]+`, (?:and )?DSH `v[0-9.]+`(?:, (?:and )?Google Antigravity `v[0-9.]+`)?(?:, and Tencent WorkBuddy `v[0-9.]+`)?",
-            f"current plugin versions are Codex `v{codex_v}`, Claude Code `v{cc_v}`, Kimi Code `v{kimi_v}`, DSH `v{dsh_v}`, Google Antigravity `v{agy_v}`, and Tencent WorkBuddy `v{wb_v}`",
+            r"current plugin versions are Codex `v[0-9.]+`, Claude Code `v[0-9.]+`, Kimi Code `v[0-9.]+`, (?:and )?DSH `v[0-9.]+`(?:, (?:and )?Google Antigravity `v[0-9.]+`)?(?:, (?:and )?Tencent WorkBuddy `v[0-9.]+`)?(?:, and OpenCode `v[0-9.]+`)?",
+            f"current plugin versions are Codex `v{codex_v}`, Claude Code `v{cc_v}`, Kimi Code `v{kimi_v}`, DSH `v{dsh_v}`, Google Antigravity `v{agy_v}`, Tencent WorkBuddy `v{wb_v}`, and OpenCode `v{oc_v}`",
             text,
         )
 
@@ -607,6 +610,7 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
         ("mindie-agent-dsh", dsh_v),
         ("mindie-agent-agy", agy_v),
         ("mindie-agent-wb", wb_v),
+        ("mindie-agent-oc", oc_v),
         ("remote-dev", rdev_v),
     ):
         text = re.sub(
@@ -635,6 +639,8 @@ def sync_install_playbook_versions(text: str, m: dict, lang: str) -> str:
         (r"检出钉住的 `v[0-9.]+` tag", f"检出钉住的 `v{agy_v}` tag"),
         (r"Clone the pinned `v[0-9.]+` tag", f"Clone the pinned `v{agy_v}` tag"),
         (r"`mindie-agent-wb v[0-9.]+`", f"`mindie-agent-wb v{wb_v}`"),
+        (r"`mindie-agent-oc v[0-9.]+`", f"`mindie-agent-oc v{oc_v}`"),
+        (r"`@mindie-agent/oc@[0-9.]+`", f"`@mindie-agent/oc@{oc_v}`"),
         (r"remote-dev@v[0-9.]+", f"remote-dev@v{rdev_v}"),
         (r"`mindie-agent-cc v[0-9.]+`", f"`mindie-agent-cc v{cc_v}`"),
         (r"`mindie-agent-codex v[0-9.]+`", f"`mindie-agent-codex v{codex_v}`"),
@@ -653,6 +659,7 @@ def main() -> int:
     parser.add_argument("--repo-root", default=str(Path(__file__).resolve().parents[2]), help="Path to mindie-agent root.")
     parser.add_argument("--channel-file", default="", help="Override path to channels/0.1.json.")
     parser.add_argument("--org-profile-dir", default="", help="Optional path to mindie-agent/.github checkout.")
+    parser.add_argument("--siblings-root", action="append", default=[], help="Optional sibling root directory override.")
     parser.add_argument("--offline", action="store_true", help="Skip live GitHub REST API release verification.")
     parser.add_argument("--check", action="store_true", help="Verify files match channels/0.1.json without writing.")
     parser.add_argument("--write", action="store_true", help="Rewrite managed version blocks in place.")
@@ -693,7 +700,8 @@ def main() -> int:
         )
     )
     errors.extend(sync_docs_versions(repo_root, manifest, args.write))
-    errors.extend(sync_sibling_readmes(repo_root, manifest, args.write))
+    siblings_roots = [Path(p).resolve() for p in args.siblings_root] if args.siblings_root else None
+    errors.extend(sync_sibling_readmes(repo_root, manifest, args.write, siblings_roots=siblings_roots))
     errors.extend(
         process_file(
             repo_root / "README.md",

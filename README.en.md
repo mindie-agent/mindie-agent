@@ -17,6 +17,7 @@
   <a href="https://github.com/mindie-agent/mindie-agent-dsh"><img src="https://img.shields.io/badge/DeepSeek_Harness-Plugin-0EA5E9.svg" alt="DeepSeek Harness Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-agy"><img src="https://img.shields.io/badge/Google_Antigravity-Plugin-4285F4.svg" alt="Google Antigravity Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-wb"><img src="https://img.shields.io/badge/Tencent_WorkBuddy-Plugin-0EC8A9.svg" alt="Tencent WorkBuddy Plugin"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent-oc"><img src="https://img.shields.io/badge/OpenCode-Plugin-0F766E.svg" alt="OpenCode Plugin"></a>
   <a href="https://github.com/mindie-agent/awesome-mindie-skills"><img src="https://img.shields.io/badge/Ascend_AI_Infra-vLLM--Ascend_%7C_AscendC_%7C_Triton-C7000B.svg" alt="Ascend NPU AI Infra"></a>
 </p>
 <!-- mindie-org-versions:main-badges-en:end -->
@@ -31,7 +32,7 @@
 
 Put down the terminal—don't memorize CLI flags or copy-paste setup scripts by hand. Since MindIE Agent is built for AI coding Agents, **we only accept installation by your Agent**.
 
-Open **Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**, **Google Antigravity**, or **Tencent WorkBuddy**, and toss this single sentence into your chat:
+Open **Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**, **Google Antigravity**, **Tencent WorkBuddy**, or **OpenCode**, and toss this single sentence into your chat:
 
 ```text
 Please install MindIE Agent for me: https://github.com/mindie-agent/mindie-agent
@@ -60,16 +61,17 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 > Community contribution is off by default. Only after the user enables contribution to a target corpus `<owner/repo>` does `setup.py sharing --enable` automatically create or reuse that corpus's personal Fork and bind `<GH_USER>/<repo>` as the push target. Do not Fork the main repository, plugin repositories or all domain repositories as an installation step.
 >
 > #### Step 3: Identify your host environment and install the matching plugin
-> Install only the plugin for the current host. Open that adapter repository's install page and run the Agent protocol written there. This page keeps host detection, version pins, and install-page links; current plugin versions are Codex `v0.1.21`, Claude Code `v0.1.17`, Kimi Code `v0.1.17`, DSH `v0.1.16`, Google Antigravity `v0.1.8`, and Tencent WorkBuddy `v0.1.8`. These pins match [`channels/0.1.json`](./channels/0.1.json) and the formal tags on the Codex and DSH install pages at harness `main`. Each plugin discovers shared components from official GitHub Releases.
+> Install only the plugin for the current host. Open that adapter repository's install page and run the Agent protocol written there. This page keeps host detection, version pins, and install-page links; current plugin versions are Codex `v0.1.21`, Claude Code `v0.1.17`, Kimi Code `v0.1.17`, DSH `v0.1.16`, Google Antigravity `v0.1.8`, Tencent WorkBuddy `v0.1.8`, and OpenCode `v0.1.0`. These pins match [`channels/0.1.json`](./channels/0.1.json) and the formal tags on each host's install page. Each plugin discovers shared components from official GitHub Releases.
 >
 > Select exactly one branch in this order and stop at the first hit. Session markers in the current process outrank a local CLI. `CODEX_THREAD_ID` or `CODEX_CI` selects Branch B even when `claude --version` succeeds. Do not take the first `--version` that exits 0.
 >
 > 1. `CODEX_THREAD_ID` or `CODEX_CI` in the current process → Branch B.
 > 2. `CLAUDECODE` in the current process → Branch A.
-> 3. This conversation is already inside Google Antigravity or Tencent WorkBuddy → Branch E or F. Confirm with the app bundle and data directory. There is no `agy` or `cbc` executable on `PATH`.
-> 4. `DSH_PROFILE` or `DSH_HOME` in the current process → Branch D.
-> 5. `KIMI_CODE_HOME` in the current process → Branch C. A `~/.kimi-code` directory on disk is not a session.
-> 6. Otherwise probe `codex --version`, `claude --version`, `kimi --version`, `dsh --version`, and the app bundles named below. If more than one entry exists, ask the user.
+> 3. `OPENCODE_SESSION_ID` in the current process (or this conversation is already inside OpenCode) → Branch G.
+> 4. This conversation is already inside Google Antigravity or Tencent WorkBuddy → Branch E or F. Confirm with the app bundle and data directory. There is no `agy` or `cbc` executable on `PATH`.
+> 5. `DSH_PROFILE` or `DSH_HOME` in the current process → Branch D.
+> 6. `KIMI_CODE_HOME` in the current process → Branch C. A `~/.kimi-code` directory on disk is not a session.
+> 7. Otherwise probe `codex --version`, `claude --version`, `opencode --version`, `kimi --version`, `dsh --version`, and the app bundles named below. If more than one entry exists, ask the user.
 >
 > - **Branch A — Claude Code**: Install page: [mindie-agent-cc Quick Start](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.17/README.en.md#quick-start). Claude Code success version: `v0.1.17` (`mindie-agent@mindie-agent-cc` enabled in `claude plugin list --json`).
 > - **Branch B — OpenAI Codex CLI**: Install page: [mindie-agent-codex Quick Start](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.21/README.en.md#quick-start). Codex install ref and success version: `v0.1.21` (`mindie-agent@mindie-agent` enabled in `codex plugin list --json`, followed by running `setup.py` for same-session runtime readiness).
@@ -77,12 +79,13 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 > - **Branch D — DeepSeek Harness (DSH)**: Install page: [mindie-agent-dsh Quick Start](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.16/README.en.md#quick-start).
 > - **Branch E — Google Antigravity**: the macOS app bundle `/Applications/Antigravity.app` (also look for `~/Applications/Antigravity.app`) and the user data directory `~/.gemini/antigravity` (or `~/.gemini/antigravity-cli`, `~/.gemini/antigravity-ide`, `AGY_APP_DATA_DIR`). Install page: [mindie-agent-agy Quick Start](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.8/README.en.md#quick-start-one-sentence-agent-install). Clone the pinned `v0.1.8` tag, copy `plugins/mindie-agent` to `~/.gemini/config/plugins/mindie-agent`, and run `uv run --no-project --python 3.13 ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$(pwd)"` to provision the persistent source baseline (`agy-source`) and runtime (`agy-venv`).
 > - **Branch F — Tencent WorkBuddy / CodeBuddy**: the bundled `codebuddy` binary at `/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy` or `~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`, or an existing absolute `MINDIE_WB_BIN`; the config directory is `~/.workbuddy` (absolute `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` take precedence). On the pinned tag checkout, run the install page's `setup.py init --install-wb` via `uv run --no-project --python 3.13` and its `codebuddy plugin validate` check. Install page: [mindie-agent-wb Installation](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.8/README.en.md#installation).
-> - **Branch G — Cursor or another generic MCP client** (`remote-dev` SSH base only): register the stdio server from the [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.6/README.md). Source pin: `remote-dev@v0.11.6`.
+> - **Branch G — OpenCode (`v2.2.x+`)**: Install page: [mindie-agent-oc Installation & Upgrades](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.0/README.en.md#2-installation--upgrades). Run `opencode plugin add github:mindie-agent/mindie-agent-oc` (or dual-channel npm package `@mindie-agent/oc@0.1.0`) and provision the managed Python runtime (`mindie-agent-oc v0.1.0`).
+> - **Branch H — Cursor or another generic MCP client** (`remote-dev` SSH base only): register the stdio server from the [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.6/README.md). Source pin: `remote-dev@v0.11.6`.
 >
 > After selecting the single matching branch, install the tag pinned above by following that page, then proceed immediately to Step 4 and Step 5 for interactive onboarding.
 >
 > #### Step 4: Development workspace onboarding references
-> All six full plugin installations support first-time workspace onboarding: reuse verified GitHub authentication, present the user notice, and offer creating/initializing [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace), reusing an existing directory, or keeping the current directory:
+> All seven full plugin installations support first-time workspace onboarding: reuse verified GitHub authentication, present the user notice, and offer creating/initializing [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace), reusing an existing directory, or keeping the current directory:
 >
 > - [Codex Workspace Setup](https://github.com/mindie-agent/mindie-agent-codex/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 > - [Claude Code Workspace Setup](https://github.com/mindie-agent/mindie-agent-cc/blob/main/skills/mindie-agent/references/workspace-setup.md)
@@ -90,10 +93,12 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 > - [DSH Workspace Setup](https://github.com/mindie-agent/mindie-agent-dsh/blob/main/skills/mindie-agent/references/workspace-setup.md)
 > - [Google Antigravity Workspace Setup](https://github.com/mindie-agent/mindie-agent-agy/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 > - [Tencent WorkBuddy Workspace Setup](https://github.com/mindie-agent/mindie-agent-wb/blob/main/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
+> - [OpenCode Workspace Setup](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.0/plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md)
 >
 > #### Step 5: Pop up native interactive questions (Workspace, Community Sharing & GitHub Star ⭐) and persist choices
 > Right after plugin installation and verification complete, check `setup.py sharing --status`; when `needs_onboarding_prompt: true`, **immediately invoke the current host's native interactive question tool** (do not just print plain text asking the user to run CLI commands):
 > - **Google Antigravity**: call the native **`ask_question`** tool;
+> - **OpenCode**: call the native **`question`** tool;
 > - **Claude Code / Tencent WorkBuddy / Kimi Code**: call the native **`AskUserQuestion`** tool;
 > - **OpenAI Codex CLI / App**: call the native **`request_user_input`** tool;
 > - **DeepSeek Harness (DSH)**: call the native question tool if available in the session, or present a structured 3-item numbered choice card (`[1]` / `[2]`) and wait for the user's reply.
@@ -127,7 +132,7 @@ Sit back while your Agent reads this page, verifies a **stable `gh` (GitHub CLI)
 
 ## ✨ Why MindIE Agent?
 
-MindIE Agent brings domain knowledge and remote development tools into your existing Claude Code, Codex, Kimi Code, DSH, Google Antigravity, or Tencent WorkBuddy session across `vLLM-Ascend` / `vLLM-Omni`, `xLLM` (`xllm` / `xllm-ops` / `xllm-service` / `xllm-workflow`), `MindIE-SD`, Ascend operators, and distributed inference—covering new model bring-up (0-day adaptation), model and operator performance tuning, and fault diagnosis. See the [architecture](./docs/architecture.en.md) and release records below for implementation and acceptance details.
+MindIE Agent brings domain knowledge and remote development tools into your existing Claude Code, Codex, Kimi Code, DSH, Google Antigravity, Tencent WorkBuddy, or OpenCode session across `vLLM-Ascend` / `vLLM-Omni`, `xLLM` (`xllm` / `xllm-ops` / `xllm-service` / `xllm-workflow`), `MindIE-SD`, Ascend operators, and distributed inference—covering new model bring-up (0-day adaptation), model and operator performance tuning, and fault diagnosis. See the [architecture](./docs/architecture.en.md) and release records below for implementation and acceptance details.
 
 | Capability | What it helps you do |
 | --- | --- |
@@ -156,6 +161,7 @@ flowchart TB
     DSH["DeepSeek Harness"]
     AGY["Google Antigravity"]
     WB["Tencent WorkBuddy"]
+    OC["OpenCode"]
   end
 
   subgraph Adapters["🔌 Thin Native Harness Plugins"]
@@ -165,6 +171,7 @@ flowchart TB
     P_DSH["mindie-agent-dsh"]
     P_AGY["mindie-agent-agy"]
     P_WB["mindie-agent-wb"]
+    P_OC["mindie-agent-oc"]
   end
 
   subgraph Core["⚙️ Shared Runtime Components"]
@@ -189,8 +196,9 @@ flowchart TB
   DSH --> P_DSH
   AGY --> P_AGY
   WB --> P_WB
+  OC --> P_OC
 
-  P_CC & P_Codex & P_Kimi & P_DSH & P_AGY & P_WB --> Knowledge & RemoteDev & Diag & Debug & Profiler & Sim
+  P_CC & P_Codex & P_Kimi & P_DSH & P_AGY & P_WB & P_OC --> Knowledge & RemoteDev & Diag & Debug & Profiler & Sim
   Task["Optional TaskClient / coordinator"] --> Coord
   Bench["mindie-bench Evaluation Suite"] --> Task & Clients
   Knowledge <--> Feed
@@ -205,7 +213,7 @@ flowchart TB
 sequenceDiagram
   autonumber
   actor Dev as Developer
-  participant Agent as Coding Agent (Claude / Codex / Kimi / DSH / Antigravity / WorkBuddy)
+  participant Agent as Coding Agent (Claude / Codex / Kimi / DSH / Antigravity / WorkBuddy / OpenCode)
   participant Know as mindie-knowledge (Local Service)
   participant NPU as remote-dev (Remote Ascend Container)
   participant Repo as Public Knowledge Repo (knowledge-vllm-ascend, etc.)
@@ -280,6 +288,7 @@ Every repository under `@mindie-agent` has a clean, single-purpose boundary and 
 | **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.16`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.16) | Native DSH plugin: `/mindie-agent`, knowledge tools, lifecycle bridging, and `remote-dev` integration |
 | **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.8`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.8) | Native Google Antigravity plugin: per-conversation `/mindie-agent` lease gate, native remote tool aliases, 8-component MCP bridge, and Brain transcript redaction |
 | **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.8`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.8) | Native Tencent WorkBuddy / CodeBuddy plugin: dual-surface mounting (WorkBuddy Connector + CodeBuddy native plugin), `/mindie-agent` session gate, and 8-component MCP bridge |
+| **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.0`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.0) | Native OpenCode plugin: dual-channel distribution (`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`), `/mindie-agent` session lease gate, 8-component MCP bridge, and SQLite `session_v2` transcript redaction |
 
 ### 3. Shared Runtime Components
 

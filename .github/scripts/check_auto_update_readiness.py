@@ -41,12 +41,13 @@ from sibling_readme_sync import (
     EXPECTED_CORPORA,
     EXPECTED_PLUGINS,
     EXPECTED_SHARED_COMPONENTS,
+    INDEPENDENT_PLUGINS,
     SHA_RE,
     verify_channel_schema,
     verify_github_releases,
     verify_unreleased_plugin_main,
 )
-from release_doc_hygiene import verify_release_doc_hygiene
+from release_doc_hygiene import source_version, verify_release_doc_hygiene
 from release_latest_integrity import verify_current_release_heads
 
 
@@ -488,17 +489,21 @@ def verify_components_and_plugins(
             "mindie-agent-dsh", dsh_dir / "uv.lock", "mindie-agent-dsh-runtime", core_seven, dsh_pins
         )
 
-    for plugin_name in ("mindie-agent-agy", "mindie-agent-wb"):
+    for plugin_name in ("mindie-agent-agy", "mindie-agent-wb", "mindie-agent-oc"):
         p_dir = _resolve_repo(plugin_name, siblings_roots)
         if p_dir is None:
             continue
         pyp = (p_dir / "pyproject.toml").read_text(encoding="utf-8")
-        for comp_name in (*core_seven, "npu-top"):
-            _check_pin_floor(
-                plugin_name,
-                comp_name,
-                _extract_default_dep_pin(pyp, comp_name, uses_uv_sources=True),
-                "pyproject.toml",
+        all_eight = (*core_seven, "npu-top")
+        p_pins = {
+            comp_name: _extract_default_dep_pin(pyp, comp_name, uses_uv_sources=True)
+            for comp_name in all_eight
+        }
+        for comp_name in all_eight:
+            _check_pin_floor(plugin_name, comp_name, p_pins[comp_name], "pyproject.toml")
+        if plugin_name == "mindie-agent-oc":
+            _check_uv_lock_default_deps(
+                plugin_name, p_dir / "uv.lock", plugin_name, all_eight, p_pins
             )
         pc = json.loads((p_dir / "product-contract.json").read_text(encoding="utf-8"))
         pub_vc = ((pc.get("publication") or {}).get("verified_commit") or "")
@@ -514,7 +519,7 @@ def verify_components_and_plugins(
             "mindie-sim": comp_entries["sim"]["version"],
             "npu-top": comp_entries["npu-top"]["version"],
         }
-        if plugin_name == "mindie-agent-wb" or "mindie-debugger" in comps:
+        if plugin_name in {"mindie-agent-wb", "mindie-agent-oc"} or "mindie-debugger" in comps:
             expected_map["mindie-debugger"] = comp_entries["debugger"]["version"]
         for pkg, ch_ver in expected_map.items():
             pin_ver = str(comps.get(pkg) or "")
@@ -580,6 +585,7 @@ FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
     "kimi-code": ("2.3.1", "2.3.2", "2.4.0-rc.1", "2.99.0"),
     "antigravity": ("2.0.0", "2.1.0", "2.99.0-rc.1"),
     "workbuddy": ("1.0.0", "1.1.0", "2.0.0-rc.1"),
+    "opencode": ("2.2.0", "2.2.7", "2.3.0-rc.1", "2.99.0"),
 }
 
 WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str], ...] = (
@@ -588,6 +594,9 @@ WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str], ...] = (
     ("mindie-agent-agy", "plugins/mindie-agent/scripts/component_update.py"),
     ("mindie-agent-wb", "plugins/mindie-agent/scripts/bounded.py"),
     ("mindie-agent-wb", "plugins/mindie-agent/scripts/component_update.py"),
+    ("mindie-agent-oc", "plugins/mindie-agent/scripts/bounded.py"),
+    ("mindie-agent-oc", "plugins/mindie-agent/scripts/component_update.py"),
+    ("mindie-agent-oc", "plugins/mindie-agent/scripts/mindie_launch.py"),
     ("mindie-agent-cc", "scripts/bounded_win32.py"),
     ("mindie-agent-codex", "plugins/mindie-agent/scripts/windows_process.py"),
     ("mindie-agent-kimi", "scripts/bounded.py"),
@@ -606,16 +615,21 @@ WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str], ...] = (
 def verify_windows_windowless_spawns(siblings_roots: list[Path]) -> list[str]:
     """Ensure Node.js spawn calls set windowsHide:true and Windows Python subprocess wrappers set CREATE_NO_WINDOW."""
     errors: list[str] = []
-    dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
-    if dsh_dir is not None:
-        host_mjs = dsh_dir / "host3.mjs"
+    for node_repo, rel_mjs in (
+        ("mindie-agent-dsh", "host3.mjs"),
+        ("mindie-agent-oc", "plugins/mindie-agent/opencode_host.mjs"),
+    ):
+        r_dir = _resolve_repo(node_repo, siblings_roots)
+        if r_dir is None:
+            continue
+        host_mjs = r_dir / rel_mjs
         if host_mjs.is_file():
             text = host_mjs.read_text(encoding="utf-8")
             spawn_count = len(re.findall(r"\bspawn\s*\(", text))
             hide_count = len(re.findall(r"\bwindowsHide\s*:\s*true\b", text))
             if spawn_count == 0 or hide_count < spawn_count:
                 errors.append(
-                    f"mindie-agent-dsh: host3.mjs has {spawn_count} spawn() call(s) but only "
+                    f"{node_repo}: {rel_mjs} has {spawn_count} spawn() call(s) but only "
                     f"{hide_count} windowsHide: true setting(s) (Windows console popup risk)"
                 )
     for repo_name, rel_path in WINDOWS_NO_WINDOW_REQUIRED_FILES:
@@ -642,8 +656,18 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
     from mindie_knowledge.runtime_inventory import COMPONENTS
 
     expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity", "workbuddy"}
-    if set(REPOSITORIES) != expected_harnesses:
+    if set(REPOSITORIES) not in (expected_harnesses, expected_harnesses | {"opencode"}):
         errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} != {expected_harnesses}")
+    oc_dir = _resolve_repo("mindie-agent-oc", siblings_roots)
+    if oc_dir is not None:
+        oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
+        if oc_scripts not in sys.path:
+            sys.path.insert(0, oc_scripts)
+        from oc_native_compat import ensure_oc_native_support
+        ensure_oc_native_support()
+    harness_repos = dict(REPOSITORIES)
+    if oc_dir is not None:
+        harness_repos["opencode"] = "mindie-agent/mindie-agent-oc"
 
     required_pkgs = {
         "mindie-knowledge",
@@ -666,7 +690,7 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
             f"mindie_knowledge.component_bindings.COMPONENT_MODULES['debugger'] unexpected module {COMPONENT_MODULES['debugger']!r}"
         )
 
-    for harness_key, repo_slug in REPOSITORIES.items():
+    for harness_key, repo_slug in harness_repos.items():
         plugin_name = repo_slug.split("/", 1)[1]
         plugin_dir = _resolve_repo(plugin_name, siblings_roots)
         if plugin_dir is None:
@@ -727,7 +751,7 @@ def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[
 
 
 def _extract_semver(raw: str) -> str | None:
-    m = re.search(r"\b(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b", raw)
+    m = re.search(r"\bv?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b", raw)
     return m.group(1) if m else None
 
 
@@ -813,6 +837,26 @@ def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
                 f"does not support installed dsh {ver}"
             )
 
+    oc_dir = _resolve_repo("mindie-agent-oc", siblings_roots)
+    if oc_dir is not None:
+        oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
+        if oc_scripts not in sys.path:
+            sys.path.insert(0, oc_scripts)
+        from oc_native_compat import ensure_oc_native_support
+        ensure_oc_native_support()
+        compat = json.loads((oc_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
+        oc_bins = [b for b in (shutil.which("opencode"), str(Path.home() / ".opencode/bin/opencode")) if b and os.path.isfile(b)]
+        for binary in dict.fromkeys(oc_bins):
+            res = _run_cmd([binary, "--version"])
+            ver = _extract_semver(res.stdout + "\n" + res.stderr)
+            if res.returncode != 0 or not ver:
+                errors.append(
+                    f"mindie-agent-oc: installed OpenCode CLI version unavailable "
+                    f"({binary}, exit={res.returncode})"
+                )
+            elif not supports_harness(compat, harness_name="opencode", harness_version=ver):
+                errors.append(f"mindie-agent-oc: harness-compatibility.json does not support installed opencode {ver}")
+
     return errors
 
 
@@ -887,6 +931,18 @@ def main(argv: list[str] | None = None) -> int:
         r3_errors.extend(verify_unreleased_plugin_main(manifest, siblings_roots))
     if args.verify_github_releases:
         r3_errors.extend(verify_github_releases(manifest))
+        for ind_name in dict.fromkeys(args.release_repo):
+            if ind_name in INDEPENDENT_PLUGINS:
+                ind_dir = _resolve_repo(ind_name, siblings_roots)
+                if ind_dir is not None:
+                    head_sha = _run_cmd(["git", "rev-parse", "HEAD"], cwd=ind_dir).stdout.strip()
+                    ind_ver = source_version(ind_dir, ind_name)
+                    r3_errors.extend(
+                        verify_github_releases(
+                            {"components": {ind_name: {"repository": f"mindie-agent/{ind_name}", "version": ind_ver, "commit": head_sha}}},
+                            verify_commits=True,
+                        )
+                    )
     r4_errors = verify_flexible_component_compatibility(siblings_roots)
     if args.verify_github_releases:
         if _ensure_knowledge_importable(siblings_roots):
