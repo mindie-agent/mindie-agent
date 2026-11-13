@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-13 03:17 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-13 11:57 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">16,167</text>
-  <text x="734" y="144" class="font kpi-sub">27,333 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">16,209</text>
+  <text x="734" y="144" class="font kpi-sub">27,548 total asset downloads</text>
   <rect x="24" y="174" width="912" height="124" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -110,7 +110,7 @@
   <text x="545" y="439" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="439" text-anchor="end" class="mono td-bold">8,437</text>
   <text x="815" y="439" text-anchor="end" class="mono td-num">5,011 (475)</text>
-  <text x="920" y="439" text-anchor="end" class="mono td-num">11,083</text>
+  <text x="920" y="439" text-anchor="end" class="mono td-num">11,124</text>
   <rect x="25" y="451" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="451" x2="936" y2="451" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="468" r="3.5" fill="#D97757"/>
@@ -139,7 +139,7 @@
   <text x="545" y="538" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="538" text-anchor="end" class="mono td-bold">2,433</text>
   <text x="815" y="538" text-anchor="end" class="mono td-num">1,132 (301)</text>
-  <text x="920" y="538" text-anchor="end" class="mono td-num">142</text>
+  <text x="920" y="538" text-anchor="end" class="mono td-num">143</text>
   <line x1="24" y1="550" x2="936" y2="550" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="567" r="3.5" fill="#4285F4"/>
   <text x="50" y="571" class="mono td-repo">mindie-agent-agy</text>
