@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -37,6 +38,8 @@ import subprocess
 import sys
 import urllib.parse
 from typing import Callable
+
+from host_compatibility_gate import subprocess_window_kwargs, which_native
 
 PACKAGE_INFO: dict[str, tuple[str, str]] = {
     "diagnostics": ("mindie-diagnostics", "mindie_diagnostics"),
@@ -207,7 +210,13 @@ def verify_product_benchmark_manifest(manifest: dict, main_repo: Path) -> list[s
 
 def default_siblings_roots(repo_root: Path, extra_roots: list[Path] | None = None) -> list[Path]:
     roots: list[Path] = []
-    for candidate in (*(extra_roots or ()), repo_root.parent, Path("/Volumes/data/code")):
+    if extra_roots:
+        candidates: tuple[Path, ...] = tuple(extra_roots)
+    elif os.name == "nt":
+        candidates = (repo_root.parent,)
+    else:
+        candidates = (repo_root.parent, Path("/Volumes/data/code"))
+    for candidate in candidates:
         resolved = candidate.resolve()
         if resolved.is_dir() and resolved not in roots:
             roots.append(resolved)
@@ -235,7 +244,7 @@ def process_markdown_file(path: Path, transform: Callable[[str], str], write: bo
             print(f"Updated {path}")
             return []
         reason = "CRLF line endings" if has_crlf and updated == original.replace("\r\n", "\n") else "Out-of-sync version block or pin"
-        return [f"{reason} in {path} (product combination: run sync_org_versions.py --release-scope product --write)"]
+        return [f"{reason} in {path.as_posix()} (product combination: run sync_org_versions.py --release-scope product --write)"]
     return []
 
 
@@ -496,14 +505,17 @@ def verify_unreleased_plugin_main(manifest: dict, siblings_roots: list[Path]) ->
         repo_dir = resolve_sibling_repo(plugin_name, siblings_roots)
         if repo_dir is None:
             continue
+        git_bin = which_native("git", os_mod=os, shutil_mod=shutil) or "git"
         res = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
+            [git_bin, "rev-parse", "HEAD"],
             cwd=str(repo_dir),
             capture_output=True,
             text=True,
             encoding="utf-8",
+            errors="replace",
             timeout=15.0,
             check=False,
+            **subprocess_window_kwargs(os_mod=os, subprocess_mod=subprocess),
         )
         if res.returncode == 0:
             head_sha = res.stdout.strip()
@@ -578,7 +590,7 @@ def sync_sibling_readmes(
 def verify_github_releases(manifest: dict, *, verify_commits: bool = False) -> list[str]:
     """Verify formal Releases and optionally compare remote tags with source pins."""
     errors: list[str] = []
-    gh_bin = shutil.which("gh")
+    gh_bin = which_native("gh", os_mod=os, shutil_mod=shutil)
     if not gh_bin:
         return ["gh CLI not found in PATH for --verify-github-releases"]
     comp_entries = manifest.get("components") or {}
@@ -592,8 +604,10 @@ def verify_github_releases(manifest: dict, *, verify_commits: bool = False) -> l
             capture_output=True,
             text=True,
             encoding="utf-8",
+            errors="replace",
             timeout=15.0,
             check=False,
+            **subprocess_window_kwargs(os_mod=os, subprocess_mod=subprocess),
         )
         if res.returncode != 0:
             errors.append(f"{repo}: formal GitHub Release {tag} not found ({res.stderr.strip()})")

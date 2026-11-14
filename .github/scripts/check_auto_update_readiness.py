@@ -3,7 +3,7 @@
 
 [Role]
 Verifies that `channels/0.1.json`, all 9 `knowledge-*` domain corpora, all 8 shared
-runtime components, and all 6 native host plugins satisfy zero-intervention update
+runtime components, and all 7 native host plugins satisfy zero-intervention update
 invariants for both flexible independent component/corpus releases (`max(installed,
 plugin_baseline, latest_component_release)`) and lockstep plugin releases.
 
@@ -14,12 +14,13 @@ plugin_baseline, latest_component_release)`) and lockstep plugin releases.
 - Independent releases use formal component tags without a historical channel ceiling.
   Product combinations retain their component ceiling and explicit lockstep policy.
 - Cross-Version Compatibility Probe: Shared component sources must pass model-free
-  compatibility checks against all 6 host plugin adapters.
+  compatibility checks against all 7 host plugin adapters.
 - Documentation Scope: Independent R6 reads only selected repositories' own
   versions/READMEs; full channel-wide alignment requires explicit product scope.
 
 [Timeouts & Locks]
-- Subprocess probes (`git`, host `--version`, sync checks) enforce a strict `15s` timeout.
+- Direct `git` / `--version` subprocess probes enforce `15s`; outer R6 subprocess checks
+  (`check_lf_eol.py`, `sync_org_versions.py`) enforce `35s` (`>= 2 * 15s + 5s` cleanup grace).
 - Purely read-only inspection with zero file locks or network mutations.
 
 [Side-Effect Policy]
@@ -47,6 +48,20 @@ from sibling_readme_sync import (
     verify_github_releases,
     verify_unreleased_plugin_main,
 )
+from host_compatibility_gate import (
+    BASELINE_HOST_PROBES,
+    FORWARD_HOST_PROBES,
+    WINDOWS_NODE_WINDOWLESS_FILES,
+    WINDOWS_NO_WINDOW_REQUIRED_FILES,
+    extract_semver as _extract_semver,
+    filter_native_executable,
+    matches_dsh_peer as _matches_dsh_peer,
+    subprocess_window_kwargs,
+    verify_flexible_component_compatibility_impl,
+    verify_local_host_compatibility_impl,
+    verify_windows_windowless_spawns,
+    which_native,
+)
 from release_doc_hygiene import source_version, verify_release_doc_hygiene
 from release_latest_integrity import verify_current_release_heads
 
@@ -54,18 +69,33 @@ from release_latest_integrity import verify_current_release_heads
 def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 15.0) -> subprocess.CompletedProcess[str]:
     resolved_argv = list(argv)
     if resolved_argv:
-        resolved_bin = shutil.which(resolved_argv[0])
-        if resolved_bin:
+        cmd0 = resolved_argv[0]
+        if "/" in cmd0 or (os.name == "nt" and "\\" in cmd0):
+            accepted = filter_native_executable(cmd0, os_mod=os)
+            if accepted is None:
+                return subprocess.CompletedProcess(resolved_argv, 127, "", f"rejected non-native executable: {cmd0}")
+            resolved_argv[0] = accepted
+        else:
+            resolved_bin = which_native(cmd0, os_mod=os, shutil_mod=shutil)
+            if resolved_bin is None:
+                return subprocess.CompletedProcess(resolved_argv, 127, "", f"native executable not found: {cmd0}")
             resolved_argv[0] = resolved_bin
-    return subprocess.run(
-        resolved_argv,
-        cwd=str(cwd) if cwd else None,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        timeout=timeout,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            resolved_argv,
+            cwd=str(cwd) if cwd else None,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+            check=False,
+            **subprocess_window_kwargs(os_mod=os, subprocess_mod=subprocess),
+        )
+    except TimeoutError:
+        raise
+    except OSError as exc:
+        return subprocess.CompletedProcess(resolved_argv, 126, "", str(exc))
 
 
 def _parse_semver(ver: str) -> tuple[int, ...]:
@@ -537,327 +567,22 @@ def verify_components_and_plugins(
     return errors
 
 
-def _matches_dsh_peer(requirement: str, version: str) -> bool:
-    """Evaluate exact or comparator-range DSH peerDependencies with includePrerelease semantics."""
-    from semantic_version import Version
-
-    if not isinstance(requirement, str) or not requirement.strip():
-        return False
-    try:
-        actual = Version(version.strip())
-    except ValueError:
-        return False
-    for token in requirement.strip().split():
-        for op, fn in (
-            (">=", lambda a, b: a >= b),
-            ("<=", lambda a, b: a <= b),
-            (">", lambda a, b: a > b),
-            ("<", lambda a, b: a < b),
-            ("=", lambda a, b: a == b),
-        ):
-            if token.startswith(op):
-                target_str = token[len(op) :]
-                break
-        else:
-            op, fn, target_str = "=", (lambda a, b: a == b), token
-        try:
-            target = Version(target_str)
-        except ValueError:
-            return False
-        if (
-            op == "<"
-            and not target.prerelease
-            and (actual.major, actual.minor, actual.patch) == (target.major, target.minor, target.patch)
-        ):
-            return False
-        if not fn(actual, target):
-            return False
-    return True
-
-
-BASELINE_HOST_PROBES: dict[str, tuple[str, ...]] = {
-    "codex": ("0.153.4", "0.162.0-alpha.2", "0.162.0-alpha.17.2"),
-}
-
-FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
-    "codex": ("0.162.3-alpha.17.2", "0.166.0", "0.166.1", "0.167.0-alpha.1", "0.199.0"),
-    "claude-code": ("2.1.299", "2.1.300", "2.2.0-rc.1", "2.99.0"),
-    "kimi-code": ("2.3.1", "2.3.2", "2.4.0-rc.1", "2.99.0"),
-    "antigravity": ("2.0.0", "2.1.0", "2.99.0-rc.1"),
-    "workbuddy": ("1.0.0", "1.1.0", "2.0.0-rc.1"),
-    "opencode": ("2.2.0", "2.2.7", "2.3.0-rc.1", "2.99.0"),
-}
-
-WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str], ...] = (
-    ("mindie-agent-dsh", "scripts/setup_process.py"),
-    ("mindie-agent-agy", "plugins/mindie-agent/scripts/bounded.py"),
-    ("mindie-agent-agy", "plugins/mindie-agent/scripts/component_update.py"),
-    ("mindie-agent-wb", "plugins/mindie-agent/scripts/bounded.py"),
-    ("mindie-agent-wb", "plugins/mindie-agent/scripts/component_update.py"),
-    ("mindie-agent-oc", "plugins/mindie-agent/scripts/bounded.py"),
-    ("mindie-agent-oc", "plugins/mindie-agent/scripts/component_update.py"),
-    ("mindie-agent-oc", "plugins/mindie-agent/scripts/mindie_launch.py"),
-    ("mindie-agent-cc", "scripts/bounded_win32.py"),
-    ("mindie-agent-codex", "plugins/mindie-agent/scripts/windows_process.py"),
-    ("mindie-agent-kimi", "scripts/bounded.py"),
-    ("knowledge", "mindie_knowledge/windows_process.py"),
-    ("knowledge", "mindie_knowledge/loop/process.py"),
-    ("knowledge", "mindie_knowledge/gitread.py"),
-    ("knowledge", "mindie_knowledge/release_http.py"),
-    ("knowledge", "mindie_knowledge/graded/experiment_ledger.py"),
-    ("diagnostics", "mindie_diagnostics/platform_service.py"),
-    ("diagnostics", "mindie_diagnostics/github_transport.py"),
-    ("remote-dev", "remote_dev/core/local_process.py"),
-    ("coordinator", "mindie_coordinator/service_client.py"),
-)
-
-
-def verify_windows_windowless_spawns(siblings_roots: list[Path]) -> list[str]:
-    """Ensure Node.js spawn calls set windowsHide:true and Windows Python subprocess wrappers set CREATE_NO_WINDOW."""
-    errors: list[str] = []
-    for node_repo, rel_mjs in (
-        ("mindie-agent-dsh", "host3.mjs"),
-        ("mindie-agent-oc", "plugins/mindie-agent/opencode_host.mjs"),
-    ):
-        r_dir = _resolve_repo(node_repo, siblings_roots)
-        if r_dir is None:
-            continue
-        host_mjs = r_dir / rel_mjs
-        if host_mjs.is_file():
-            text = host_mjs.read_text(encoding="utf-8")
-            spawn_count = len(re.findall(r"\bspawn\s*\(", text))
-            hide_count = len(re.findall(r"\bwindowsHide\s*:\s*true\b", text))
-            if spawn_count == 0 or hide_count < spawn_count:
-                errors.append(
-                    f"{node_repo}: {rel_mjs} has {spawn_count} spawn() call(s) but only "
-                    f"{hide_count} windowsHide: true setting(s) (Windows console popup risk)"
-                )
-    for repo_name, rel_path in WINDOWS_NO_WINDOW_REQUIRED_FILES:
-        repo_dir = _resolve_repo(repo_name, siblings_roots)
-        if repo_dir is None:
-            continue
-        target = repo_dir / rel_path
-        if not target.is_file():
-            errors.append(f"{repo_name}: missing expected subprocess wrapper {rel_path}")
-            continue
-        if "CREATE_NO_WINDOW" not in target.read_text(encoding="utf-8"):
-            errors.append(f"{repo_name}: {rel_path} missing subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
-    return errors
-
-
 def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[str]:
-    """Verify that the latest shared component code is API-compatible with all 6 host plugins."""
-    errors: list[str] = []
-    if not _ensure_knowledge_importable(siblings_roots):
-        return errors
-    from semantic_version import Version
-    from mindie_knowledge.component_bindings import COMPONENT_MODULES
-    from mindie_knowledge.releases import REPOSITORIES, supports_harness, validate_compatibility
-    from mindie_knowledge.runtime_inventory import COMPONENTS
-
-    expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity", "workbuddy"}
-    if set(REPOSITORIES) not in (expected_harnesses, expected_harnesses | {"opencode"}):
-        errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} != {expected_harnesses}")
-    oc_dir = _resolve_repo("mindie-agent-oc", siblings_roots)
-    if oc_dir is not None:
-        oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
-        if oc_scripts not in sys.path:
-            sys.path.insert(0, oc_scripts)
-        from oc_native_compat import ensure_oc_native_support
-        ensure_oc_native_support()
-    harness_repos = dict(REPOSITORIES)
-    if oc_dir is not None:
-        harness_repos["opencode"] = "mindie-agent/mindie-agent-oc"
-
-    required_pkgs = {
-        "mindie-knowledge",
-        "remote-dev",
-        "mindie-diagnostics",
-        "mindie-debugger",
-        "mindie-profiler",
-        "mindie-sim",
-        "npu-top",
-        "mindie-coordinator",
-    }
-    if not required_pkgs.issubset(set(COMPONENTS)):
-        errors.append(f"mindie_knowledge.runtime_inventory.COMPONENTS missing {required_pkgs - set(COMPONENTS)}")
-
-    required_modules = {"profiler", "sim", "coordinator", "diagnostics", "debugger"}
-    if not required_modules.issubset(set(COMPONENT_MODULES)):
-        errors.append(f"mindie_knowledge.component_bindings.COMPONENT_MODULES missing {required_modules - set(COMPONENT_MODULES)}")
-    elif not str(COMPONENT_MODULES["debugger"][1]).startswith("mindie_debugger"):
-        errors.append(
-            f"mindie_knowledge.component_bindings.COMPONENT_MODULES['debugger'] unexpected module {COMPONENT_MODULES['debugger']!r}"
-        )
-
-    for harness_key, repo_slug in harness_repos.items():
-        plugin_name = repo_slug.split("/", 1)[1]
-        plugin_dir = _resolve_repo(plugin_name, siblings_roots)
-        if plugin_dir is None:
-            continue
-        compat_path = (
-            plugin_dir / "plugins/mindie-agent/harness-compatibility.json"
-            if plugin_name == "mindie-agent-codex"
-            else plugin_dir / "harness-compatibility.json"
-        )
-        if not compat_path.is_file():
-            errors.append(f"{plugin_name}: missing {compat_path.name}")
-            continue
-        compat_data = json.loads(compat_path.read_text(encoding="utf-8"))
-        if harness_key == "dsh":
-            pkg_json = json.loads((plugin_dir / "package.json").read_text(encoding="utf-8"))
-            peer_req = ((pkg_json.get("peerDependencies") or {}).get("@deepseek-ai/dsh") or "").strip()
-            if not peer_req or (" " not in peer_req and not peer_req.startswith((">=", "^", "~"))):
-                errors.append(
-                    f"mindie-agent-dsh: package.json peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
-                    "is point-locked; must declare a forward-compatible SemVer range"
-                )
-            for ver in ("0.2.0-rc.2", "0.2.1-rc.2", "0.2.2-alpha.2", "0.99.99"):
-                if not _matches_dsh_peer(peer_req, ver):
-                    errors.append(
-                        f"mindie-agent-dsh: peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
-                        f"rejects forward DSH version {ver}"
-                    )
-            supported_list = compat_data.get("supported") or []
-            if not supported_list or all(item.get("minimum") == item.get("maximum") for item in supported_list):
-                errors.append(
-                    "mindie-agent-dsh: harness-compatibility.json missing forward-compatible 'supported' range"
-                )
-            continue
-
-        if "supported" in compat_data and "interface_registry" in compat_data:
-            try:
-                validate_compatibility(compat_data, harness_name=harness_key)
-            except Exception as exc:
-                errors.append(f"{plugin_name}: validate_compatibility failed under latest mindie-knowledge: {exc}")
-                continue
-            supported_list = compat_data.get("supported") or []
-            highest = max(supported_list, key=lambda item: Version(item["maximum"]))
-            if highest["minimum"] == highest["maximum"] or not highest.get("include_prerelease"):
-                errors.append(
-                    f"{plugin_name}: highest supported interval {highest} is point-locked or excludes prereleases; "
-                    "must declare a forward-compatible range with include_prerelease=true"
-                )
-            probes = (BASELINE_HOST_PROBES.get(harness_key, ())
-                      + FORWARD_HOST_PROBES.get(harness_key, ()))
-            for probe_ver in probes:
-                if not supports_harness(compat_data, harness_name=harness_key, harness_version=probe_ver):
-                    errors.append(
-                        f"{plugin_name}: harness-compatibility.json rejects required host version {probe_ver}"
-                    )
-
-    errors.extend(verify_windows_windowless_spawns(siblings_roots))
-    return errors
-
-
-def _extract_semver(raw: str) -> str | None:
-    m = re.search(r"\bv?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\b", raw)
-    return m.group(1) if m else None
+    """Verify that the latest shared component code is API-compatible with all 7 host plugins."""
+    return verify_flexible_component_compatibility_impl(
+        siblings_roots,
+        ensure_knowledge_importable=_ensure_knowledge_importable,
+        windowless_check=verify_windows_windowless_spawns,
+    )
 
 
 def verify_local_host_compatibility(siblings_roots: list[Path]) -> list[str]:
-    errors: list[str] = []
-    if not _ensure_knowledge_importable(siblings_roots):
-        return ["mindie_knowledge.releases unavailable for host compatibility verification"]
-    from mindie_knowledge.releases import supports_harness
-
-    codex_dir = _resolve_repo("mindie-agent-codex", siblings_roots)
-    if codex_dir is not None:
-        compat = json.loads(
-            (codex_dir / "plugins/mindie-agent/harness-compatibility.json").read_text(encoding="utf-8")
-        )
-        codex_bins: list[str] = []
-        which_codex = shutil.which("codex")
-        if which_codex:
-            codex_bins.append(which_codex)
-        desktop_codex = "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
-        if os.path.isfile(desktop_codex) and desktop_codex not in codex_bins:
-            codex_bins.append(desktop_codex)
-        running_codex = os.environ.get("CODEX_APP_RUNTIME_CLI_PATH")
-        if (running_codex and Path(running_codex).is_absolute()
-                and os.path.isfile(running_codex) and running_codex not in codex_bins):
-            codex_bins.append(running_codex)
-        cfg_file = Path(os.environ.get(
-            "MINDIE_AGENT_CONFIG", Path.home() / ".config/mindie-agent/codex.json"
-        )).expanduser()
-        if cfg_file.is_file():
-            try:
-                config = json.loads(cfg_file.read_text(encoding="utf-8"))
-                for key in ("native_context", "native"):
-                    cfg_bin = (config.get(key) or {}).get("MINDIE_CODEX_BIN")
-                    if isinstance(cfg_bin, str) and os.path.isfile(cfg_bin) and cfg_bin not in codex_bins:
-                        codex_bins.append(cfg_bin)
-            except TimeoutError:
-                raise
-            except (OSError, ValueError):
-                pass
-        for binary in codex_bins:
-            resolved_bin = shutil.which(binary) or binary
-            res = _run_cmd([resolved_bin, "--version"])
-            ver = _extract_semver(res.stdout + "\n" + res.stderr)
-            if res.returncode != 0 or not ver:
-                errors.append(
-                    f"mindie-agent-codex: installed Codex CLI version unavailable "
-                    f"({resolved_bin}, exit={res.returncode})"
-                )
-            elif not supports_harness(compat, harness_name="codex", harness_version=ver):
-                errors.append(
-                    f"mindie-agent-codex: harness-compatibility.json does not support installed Codex CLI "
-                    f"{ver} ({resolved_bin})"
-                )
-
-    cc_dir = _resolve_repo("mindie-agent-cc", siblings_roots)
-    resolved_claude = shutil.which("claude")
-    if cc_dir is not None and resolved_claude:
-        compat = json.loads((cc_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
-        res = _run_cmd([resolved_claude, "--version"])
-        ver = _extract_semver(res.stdout + "\n" + res.stderr)
-        if ver and not supports_harness(compat, harness_name="claude-code", harness_version=ver):
-            errors.append(f"mindie-agent-cc: harness-compatibility.json does not support installed claude {ver}")
-
-    kimi_dir = _resolve_repo("mindie-agent-kimi", siblings_roots)
-    resolved_kimi = shutil.which("kimi")
-    if kimi_dir is not None and resolved_kimi:
-        compat = json.loads((kimi_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
-        res = _run_cmd([resolved_kimi, "--version"])
-        ver = _extract_semver(res.stdout + "\n" + res.stderr)
-        if ver and not supports_harness(compat, harness_name="kimi-code", harness_version=ver):
-            errors.append(f"mindie-agent-kimi: harness-compatibility.json does not support installed kimi {ver}")
-
-    dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
-    resolved_dsh = shutil.which("dsh")
-    if dsh_dir is not None and resolved_dsh:
-        pkg_json = json.loads((dsh_dir / "package.json").read_text(encoding="utf-8"))
-        peer_req = ((pkg_json.get("peerDependencies") or {}).get("@deepseek-ai/dsh") or "").strip()
-        res = _run_cmd([resolved_dsh, "--version"])
-        ver = _extract_semver(res.stdout + "\n" + res.stderr)
-        if ver and not _matches_dsh_peer(peer_req, ver):
-            errors.append(
-                f"mindie-agent-dsh: package.json peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
-                f"does not support installed dsh {ver}"
-            )
-
-    oc_dir = _resolve_repo("mindie-agent-oc", siblings_roots)
-    if oc_dir is not None:
-        oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
-        if oc_scripts not in sys.path:
-            sys.path.insert(0, oc_scripts)
-        from oc_native_compat import ensure_oc_native_support
-        ensure_oc_native_support()
-        compat = json.loads((oc_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
-        oc_bins = [b for b in (shutil.which("opencode"), str(Path.home() / ".opencode/bin/opencode")) if b and os.path.isfile(b)]
-        for binary in dict.fromkeys(oc_bins):
-            res = _run_cmd([binary, "--version"])
-            ver = _extract_semver(res.stdout + "\n" + res.stderr)
-            if res.returncode != 0 or not ver:
-                errors.append(
-                    f"mindie-agent-oc: installed OpenCode CLI version unavailable "
-                    f"({binary}, exit={res.returncode})"
-                )
-            elif not supports_harness(compat, harness_name="opencode", harness_version=ver):
-                errors.append(f"mindie-agent-oc: harness-compatibility.json does not support installed opencode {ver}")
-
-    return errors
+    return verify_local_host_compatibility_impl(
+        siblings_roots,
+        ensure_knowledge_importable=_ensure_knowledge_importable,
+        which_fn=lambda name: which_native(name, os_mod=os, shutil_mod=shutil),
+        run_cmd=_run_cmd,
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -907,12 +632,14 @@ def main(argv: list[str] | None = None) -> int:
 
     main_repo = args.channel.resolve().parents[1]
     siblings_roots = list(args.siblings_root)
-    default_parent = main_repo.parent
-    if default_parent not in siblings_roots:
-        siblings_roots.append(default_parent)
-    volumes_code = Path("/Volumes/data/code")
-    if volumes_code.is_dir() and volumes_code not in siblings_roots:
-        siblings_roots.append(volumes_code)
+    if not siblings_roots:
+        default_parent = main_repo.parent
+        if default_parent not in siblings_roots:
+            siblings_roots.append(default_parent)
+        if os.name != "nt":
+            volumes_code = Path("/Volumes/data/code")
+            if volumes_code.is_dir() and volumes_code not in siblings_roots:
+                siblings_roots.append(volumes_code)
 
     manifest = json.loads(args.channel.read_text(encoding="utf-8"))
     mode = "strict-lockstep" if args.strict_lockstep else "flexible-component-update"
@@ -964,7 +691,7 @@ def main(argv: list[str] | None = None) -> int:
         ("R1", f"Channel Schema & Release Track ({mode})", r1_errors),
         ("R2", "Knowledge Corpus Monotonic Revisions & Validator Floor", r2_errors),
         ("R3", "Component & Plugin Tag/Commit/Release Integrity", r3_errors),
-        ("R4", "Six-Host Cross-Version Component Compatibility", r4_errors),
+        ("R4", "Seven-Host Cross-Version Component Compatibility", r4_errors),
         (
             "R5",
             "Local Active Host CLI Compatibility Coverage"

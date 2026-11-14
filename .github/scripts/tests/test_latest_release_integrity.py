@@ -41,7 +41,8 @@ class LatestReleaseIntegrityTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix="mindie-latest-integrity-")
         self.addCleanup(temporary.cleanup)
-        sandbox = patch.dict(os.environ, {name: str(Path(temporary.name) / name) for name in (
+        self.temp_root = Path(temporary.name)
+        sandbox = patch.dict(os.environ, {name: str(self.temp_root / name) for name in (
             "HOME", "USERPROFILE", "MINDIE_CONFIG_HOME", "MINDIE_DATA_HOME",
             "MINDIE_DIAGNOSTICS_ROOT")})
         sandbox.start()
@@ -74,8 +75,13 @@ class LatestReleaseIntegrityTests(unittest.TestCase):
             output, errors = io.StringIO(), io.StringIO()
             stack.enter_context(contextlib.redirect_stdout(output))
             stack.enter_context(contextlib.redirect_stderr(errors))
-            self.assertEqual(gate.main(["--release-repo", "knowledge",
-                                        "--verify-github-releases"]), 1)
+            channel = Path(__file__).resolve().parents[3] / "channels" / "0.1.json"
+            self.assertEqual(gate.main([
+                "--channel", str(channel),
+                "--siblings-root", str(self.temp_root),
+                "--release-repo", "knowledge",
+                "--verify-github-releases",
+            ]), 1)
         self.assertIn("mindie-agent/sim", errors.getvalue())
         self.assertIn("mindie-agent/profiler", errors.getvalue())
 

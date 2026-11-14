@@ -2,6 +2,8 @@
 import json
 import os
 from pathlib import Path
+import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -14,11 +16,26 @@ import release_tag_integrity
 import sibling_readme_sync
 
 
+def _rmtree_force(path: Path) -> None:
+    if not path.exists():
+        return
+
+    def _onerr(fn, target, exc_info):
+        exc = exc_info[1] if isinstance(exc_info, tuple) else exc_info
+        if isinstance(exc, TimeoutError):
+            raise exc
+        os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+        fn(target)
+
+    shutil.rmtree(path, onerror=_onerr)
+
+
 class IndependentPluginPinsTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='mindie-plugin-pins-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.addCleanup(_rmtree_force, self.root)
         environment = patch.dict(os.environ, {key: str(self.root / key) for key in (
             'HOME', 'USERPROFILE', 'MINDIE_CONFIG_HOME', 'MINDIE_DATA_HOME',
             'MINDIE_DIAGNOSTICS_ROOT', 'MINDIE_DIAGNOSTICS_CONFIG')})
@@ -39,18 +56,18 @@ class IndependentPluginPinsTests(unittest.TestCase):
             corpora={'knowledge-vllm-ascend': {'commit': 'a' * 40}})
         self.plugin = self.root / 'mindie-agent-codex/plugins/mindie-agent'
         self.plugin.mkdir(parents=True)
-        gate._run_cmd(['git', 'init', '-q', str(self.plugin.parents[1])]).check_returncode()
+        gate._run_cmd(['git', '-c', 'core.autocrlf=false', 'init', '-q', str(self.plugin.parents[1])]).check_returncode()
         self.pin(self.new)
 
     def git(self, *args):
-        return subprocess.run(['git', '-c', 'user.name=Release Test',
+        return subprocess.run(['git', '-c', 'core.autocrlf=false', '-c', 'user.name=Release Test',
             '-c', 'user.email=release@example.invalid', *args], cwd=self.repo,
-            capture_output=True, text=True, check=True, timeout=5,
+            capture_output=True, text=True, encoding='utf-8', check=True, timeout=5,
             creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)).stdout.strip()
 
     def commit(self, version):
         (self.repo / 'pyproject.toml').write_text(
-            f'[project]\nname = "remote-dev"\nversion = "{version}"\n', newline='\n')
+            f'[project]\nname = "remote-dev"\nversion = "{version}"\n', encoding='utf-8', newline='\n')
         self.git('add', '.')
         self.git('commit', '-qm', version)
         return self.git('rev-parse', 'HEAD')
@@ -64,15 +81,15 @@ class IndependentPluginPinsTests(unittest.TestCase):
                    'dependencies = ' + json.dumps(list(dist.values())) + '\n[tool.uv.sources]\n')
         project += ''.join(f'{dist[name]} = {{git = "https://github.com/mindie-agent/{name}", '
                            f'rev = "{sha}"}}\n' for name, sha in sources.items())
-        (self.plugin / 'pyproject.toml').write_text(project, newline='\n')
+        (self.plugin / 'pyproject.toml').write_text(project, encoding='utf-8', newline='\n')
         lock = ('[[package]]\nname = "mindie-agent-codex"\ndependencies = [' +
                 ','.join('{name = "' + name + '"}' for name in dist.values()) + ']\n')
         lock += ''.join(f'[[package]]\nname = "{dist[name]}"\nsource = {{git = '
                         f'"https://github.com/mindie-agent/{name}?rev={sha}#{sha}"}}\n'
                         for name, sha in sources.items())
-        (self.plugin / 'uv.lock').write_text(lock, newline='\n')
+        (self.plugin / 'uv.lock').write_text(lock, encoding='utf-8', newline='\n')
         (self.plugin / 'product-contract.json').write_text(json.dumps({
-            'publication': {'verified_commit': 'a' * 40}}), newline='\n')
+            'publication': {'verified_commit': 'a' * 40}}), encoding='utf-8', newline='\n')
 
     def check(self, **kwargs):
         return gate.verify_components_and_plugins(self.manifest, [self.root],
