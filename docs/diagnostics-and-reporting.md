@@ -35,11 +35,11 @@
 
 | 模块 / 角色 | 职责范围 |
 | --- | --- |
-| **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh`） | 记录原生入口、Hook、MCP 启动与协议层故障，提供清晰的配置开关与状态查询入口 |
-| **业务运行时组件**（`knowledge` / `remote-dev`） | 在内部发生真实故障的边界记录阶段、版本、耗时、退出码与清理结果；严格区分“用户远端命令正常返回非零退出码”与“MindIE 工具自身缺陷” |
-| **诊断组件**（`diagnostics`） | **仅负责 MindIE Agent 自身内部 DFX**：日志格式校验、严格字段白名单脱敏、本地磁盘滚动清理、故障指纹去重、有限重试预算控制与 GitHub Issue 自动提交 |
+| **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 全量 7 端覆盖原生入口、Hook、MCP 分发、组件更新器与自有组件 CLI 溯源崩溃网关（`record_component_crash`），自动附带插件源码栈帧（`source_root`）与 40 位精确 Git Commit `revision` |
+| **业务运行时组件**（`knowledge` / `remote-dev` / `coordinator` / `profiler` / `sim` / `debugger` / `npu-top`） | 在内部发生真实故障或权威状态/输出契约损坏（`category="contract_violation"`）边界记录阶段、子阶段、静态原因码（`reason_code`）与自有代码栈帧；严格区分“用户命令业务报错”与“MindIE 工具自身缺陷” |
+| **诊断组件**（`diagnostics`） | **仅负责 MindIE Agent 自身内部 DFX**：日志格式校验、严格字段白名单脱敏、Triage Card v2 精确代码行永久链接渲染、跨版本根因去重与回归追加评论、本地快速导出（`diagnostics_bundle` 免填 `root` + 支持 `incident_id`）及有界外发队列 |
 | **NPU 调试组件**（`debugger` / `mindie_debugger`） | **专门面向被调优的目标 NPU 业务负载**（`vllm-ascend`、`MindIE-SD`、CANN 算子）：提供确定性昇腾 NPU 日志分诊（`npu_fault_triage`）、通用三原语精度/内存踩踏定位（`precision`）与 `ACLGraph` 捕获/重放逐层 Dump 工具（`aclgraph`），与 Agent 自身 DFX 严格职责隔离 |
-| **GitHub 仓库维护者** | 根据上报的结构化故障证据排查根因并发布修复版本 |
+| **GitHub 仓库维护者** | 统一在主仓 `mindie-agent/mindie-agent` 接收结构化 Triage Card，一键跳转对应组件/插件仓库精确 Commit 代码行定位根因并发布修复 |
 
 如果底层共享组件已经记录了某次错误，它会把诊断关联编号直接传给上层插件，避免同一故障在底层和外层被重复记录两次。
 
@@ -50,22 +50,26 @@
 公开提交的 GitHub Issue 完全由确定性程序从**白名单字段**拼装生成，全程不调用大模型：
 
 - **允许包含的公开字段（仅限代码与执行元数据）**：
-  - 组件名称、软件版本号或 Git Commit SHA、操作名称、执行阶段、静态错误类别/错误码、耗时、退出码和资源清理结果。公开稳定故障指纹用于去重；随机诊断关联编号和进程时钟仅保留在本地。
+  - 组件名称、软件版本号与 40 位精确 Git Commit SHA（`package_revision`）及子组件构建信息（`child_build`）、操作名称、执行阶段（`stage`）/子阶段（`substage`）、同一 `operation_id` 下的前置阶段耗时面包屑（`operation.phase`）、静态错误类别/错误码/原因码（`reason_code`）/契约名（`contract_name`）、异常类名链（`exception_chain`，不含异常消息）、**仅限自有包前缀或 `source_root` 内的代码栈帧（`module` / `function` / `line`）**、宿主标识（`harness`）、运行平台矩阵（`platform` / `arch` / `py_version`）、耗时、退出码和资源清理结果。Triage Card v2 自动将栈帧与 `package_revision` 拼装为指向对应组件/插件仓库精确 Commit 代码行的 GitHub Permalink（`https://github.com/mindie-agent/<repo>/blob/<sha>/<path>#L<line>`）。
 - **严禁进入公开 Issue 的隐私内容**：
-  - **绝不包含**：用户执行的命令、命令参数、环境变量、终端原始 `stdout`/`stderr` 输出、自由文本异常消息、对话 Transcript、配置文件内容、密钥凭据、原生任务 ID、远端作业 ID、本机或远端文件路径、以及服务器 IP/主机名。
+  - **绝不包含**：用户执行的命令、命令参数、环境变量、终端原始 `stdout`/`stderr` 输出、自由文本异常消息（本地事件与公开投影均零自由文本）、对话 Transcript、配置文件内容、密钥凭据、原生任务 ID、远端作业 ID、本机或远端文件路径、以及服务器 IP/主机名。自有组件 CLI 溯源崩溃网关（`record_component_crash`）完全不解析子进程 `stderr` 自由文本或回溯输出：每次调用生成一次性随机令牌（`MINDIE_DIAGNOSTICS_INVOCATION_TOKEN`，仅保留在本地日志、绝不进入导出包或公开 Issue），仅当本地诊断事件库中已存在同一令牌绑定的子组件 `status="error"` 且 `reportable=True` 故障记录时直接复用该可信编号避免重复上报；仅当子进程因致命原生崩溃信号（`SIGSEGV` / `SIGABRT` / `SIGBUS` / `SIGFPE` / `SIGILL`）异常终止且未落盘故障记录时，才以静态白名单子命令阶段（`stage`）、信号原因码（`reason_code`）与可信安装包版本/Commit 元数据记录外层进程崩溃事件（普通非零业务退出码在无令牌核验故障记录时绝不误报），全程绝不采信任何未核实的 `stdout`/`stderr` 输出、异常备注（`__notes__`）或调用参数。
 - **哪些情况不会触发自动提单？**
-  - 参数传错、缺少配置、用户主动按了取消（Cancel/Interrupt）、功能未启用、权限不足、普通的网络断开或 SSH 认证失败、以及**用户自己的远端测试命令返回非零退出码或超时**，都属于正常业务反馈，绝不会当成产品 Bug 自动提 Issue。
-  - 只有工具未捕获的内部异常、自有辅助子进程崩溃、协议损坏或安装包文件缺失，才会进入故障上报队列。
+  - 参数传错（如 CLI `exit_code == 2` 或 Schema 校验拒绝）、缺少配置、用户主动按了取消（Cancel/Interrupt）、功能未启用、权限不足、普通的网络断开或 SSH 认证失败、以及**用户自己的远端测试命令返回非零退出码或超时**，都属于正常业务反馈，绝不会当成产品 Bug 自动提 Issue。
+  - 只有工具未捕获的内部异常、自有辅助子进程崩溃、协议损坏、安装包文件缺失或权威本地状态/输出契约损坏（`category="contract_violation"`），才会进入故障上报队列。
 
 ---
 
-## 4.1 更新失败覆盖与上报资格
+## 4.1 更新失败、契约探针与本地快速排障（Fast-Path Triage）
 
-`diagnostics`（`v0.5.4`）为更新器提供统一的 `category="update"` 记录入口：根据异常类型、结构化错误码和保留的异常原因分类，不分析异常自由文本。模块缺失、包内容或协议异常属于产品故障；网络、凭据、权限、取消和本地前置条件问题保留本地可见。插件负责在失败边界调用该入口，不能仅写更新状态文件，也不能把更新失败全部设为 `reportable=False`。
+`diagnostics` 为更新器提供统一的 `category="update"` 记录入口，同时支持跨组件 `category="contract_violation"` 确定性契约探针：根据异常类型、结构化 `error_code`/`reason_code`、契约名称（`contract_name`）和保留的异常原因分类，不分析异常自由文本。模块缺失、包内容或协议异常、以及自有权威状态损坏（如 `knowledge` 权威 SQLite 表结构损坏、`coordinator` `machines.json` 契约损坏、`remote-dev` 状态记录损坏、`debugger` 分诊输出契约异常）属于产品故障；网络、凭据、权限、取消和本地前置条件问题保留本地可见。
 
-四端插件（Codex `v0.1.13`、Claude Code `v0.1.10`、Kimi `v0.1.10` 和 DSH `v0.1.9`）均已接入此分类，覆盖组件继承子进程启动失败和更新子进程在写状态前崩溃的路径；可传递的内部诊断编号在外层复用，避免重复记录。各插件的安装基线锁定正式 `diagnostics v0.5.4`，并通过包管理器覆盖旧组件的间接诊断固定版本。
+七端插件（`mindie-agent-codex`、`-cc`、`-kimi`、`-dsh`、`-agy`、`-wb`、`-oc`）均已统一接入，覆盖组件继承子进程启动失败、更新子进程崩溃以及自有组件 CLI（`profiler` / `sim` / `coordinator` / `debugger` / `npu-top`）进程级异常退出网关；子组件进程内已记录的故障通过一次性调用令牌核验并直接复用，避免重复记录。
 
-只读状态中的近期错误提供 `error_code` 和 `reporting_eligibility`：
+本地快速排障链路支持一步到位：
+- `diagnostics_status`（及 `mindie-diagnostics reporting status`）的 `local.recent` 视图直接返回近期故障的 `incident_id`、`error_code`、`reason_code`、`contract_name`、`substage`、自有 `stack_frames`、运行环境矩阵与 `reporting_eligibility`。
+- `diagnostics_bundle`（及 `mindie-diagnostics bundle`）默认自动解析当前诊断日志根目录（`root` 为可选参数），并同时支持 `--incident-id` / `incident_id` 与 `--operation-id` / `operation_id`，拿到报错返回中的 `incident_id` 即可一键导出脱敏证据包。
+
+只读状态中的近期错误提供 `error_code`、`reason_code` 和 `reporting_eligibility`：
 
 | 资格状态 | 含义 |
 | --- | --- |
@@ -79,16 +83,19 @@
 
 ---
 
-## 5. 自动去重与发送队列恢复（Loop Prevention）
+## 5. 主仓统一投放、跨版本根因去重与追加评论（Loop Prevention）
 
-为了防止同一个 Bug 重复建单，或因临时网络故障丢失待报故障：
+为了防止同一个根因在日常小版本迭代中反复新建重复 Issue，同时不错过新版本中的真实复现或关闭后回归：
 
-1. **跨任务稳定指纹去重**：
-   - 相同组件版本、操作、阶段、错误类别和内部代码栈帧会生成唯一的稳定故障指纹（Fingerprint）。无论切换了多少个会话或宿主客户端，同一个已知故障都会通过 GitHub 只读查重关联到已有 Issue，不会重复创建 Issue。
+1. **主仓统一投放 + 双层指纹去重（`fingerprint` vs `fault_signature`）**：
+   - 所有自动诊断 Issue 统一投放在主仓 **`mindie-agent/mindie-agent`**，并在正文 Triage Card v2 中生成指向所属组件/插件仓库精确 Commit 的源码链接。
+   - **构建级指纹（`fingerprint`）**：包含 `package_version` / `package_revision`，用于在本地 `Outbox` 合并同一构建下的重复触发。
+   - **跨版本根因签名（`fault_signature`，`<!-- mindie-fault:<sha256> -->`）**：与版本号及代码行微调解耦，仅由 `(component, operation, stage, substage, category, error_code, reason_code, contract_name, error_type, 最内层自有栈帧 module + function)` 计算生成。
+   - 当新版本命中已有相同 `fault_signature` 的 Issue 时，上报器**不会重复新建 Issue**：若原 Issue 处于 `OPEN` 状态且尚未记录当前构建指纹，则自动追加一条结构化 **Additional Occurrence** 评论（携带新版本 Commit 代码行链接）；若原 Issue 已 `CLOSED`，则自动追加 **Regression Observed After Issue Closure** 回归评论提醒维护者，并通过评论内 `<!-- mindie-incident:<fingerprint> -->` 标记跨页保留游标核对，相同构建指纹绝不重复刷屏。
 2. **有界请求与可恢复的发送队列**：
-   - 每个处理周期受统一请求超时约束；当网络或 GitHub 认证暂时不可用时，队列保留待发记录、显式记录当前错误并延后重试，不会因瞬时只读查询失败而丢弃待报故障。
-   - 仅当提交请求可能已到达 GitHub 但未收到响应时，该记录才标记为 `unknown`，并在后续最多 **2 次有界外发对账重试（bounded 2-attempt outbound reconciliation）** 中优先通过只读查询核对远端是否已创建成功，避免盲目重发；子进程尚未启动或被远端明确拒绝的请求不会误记为 `unknown`。
-   - 若 GitHub 已确认创建 Issue 但本地回执落盘失败，系统会单独报告本地写入错误而不反转已完成的外部结果。用户关闭贡献开关后，未发出的队列项立即停止外发；重新开启后仅处理新授权修订下产生的事件。
+   - 每个处理周期受统一请求超时与字节预算约束；当网络、GitHub 认证暂时不可用或历史 Issue/评论分页扫描尚未完成时，队列保留待发记录与分页游标、显式记录当前错误并延后重试，严格分离全量历史根因发现与近期 `uncertain` 写入对账，绝不因瞬时只读查询失败或分页截断而漏判或丢弃待报故障。
+   - 无论是新建 Issue 还是追加跨版本评论，仅当请求可能已到达 GitHub 但未收到响应时才标记为 `uncertain`，并在后续对账周期中优先通过只读查询（含 Issue 与评论隐藏标记 `<!-- mindie-incident:<fingerprint> -->` 核对）确认远端是否已落盘，绝不盲目重发。
+   - 若 GitHub 已确认创建 Issue 或评论但本地回执落盘失败，系统会单独报告本地写入错误而不反转已完成的外部结果。用户关闭贡献开关后，未发出的队列项立即停止外发；重新开启后仅处理新授权修订下产生的事件。
 3. **上报器自身错误不递归提单**：
    - 上报器在访问 GitHub 时遇到的错误仅记录在本地状态中，不会触发递归提单。
 

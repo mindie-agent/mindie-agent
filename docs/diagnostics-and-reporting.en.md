@@ -35,11 +35,11 @@ When a remote command or background indexing step fails, a vague error string wa
 
 | Module / Role | Responsibility |
 | --- | --- |
-| **Harness Plugin Adapters** (`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh`) | Log native entrypoint, Hook, MCP startup, and protocol errors; provide setup toggles and human-readable status |
-| **Runtime Components** (`knowledge` / `remote-dev`) | Record stage, version, monotonic duration, exit code, and cleanup outcome at the exact boundary where an internal fault occurs, cleanly separating normal user-command exits from internal tool bugs |
-| **Diagnostics Engine** (`diagnostics`) | **Strictly scoped to MindIE Agent's own internal DFX**: enforce log schemas, allowlist-only redaction, bounded disk rotation, fingerprint deduplication, finite retry budgets, and GitHub Issue creation |
+| **Harness Plugin Adapters** (`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`) | Cover native entrypoints, Hooks, MCP dispatch, component updaters, and the provenance-verified component CLI crash gateway (`record_component_crash`) across all 7 harnesses, attaching owned `source_root` stack frames and 40-char Git commit `revision` |
+| **Runtime Components** (`knowledge` / `remote-dev` / `coordinator` / `profiler` / `sim` / `debugger` / `npu-top`) | Record stage, substage, static `reason_code`, and owned stack frames at internal fault and authoritative state/schema contract boundaries (`category="contract_violation"`), separating normal user-command exits from internal tool defects |
+| **Diagnostics Engine** (`diagnostics`) | **Strictly scoped to MindIE Agent's own internal DFX**: enforce log schemas, allowlist-only redaction, Triage Card v2 exact-commit GitHub source permalinks, cross-version root-cause deduplication with regression comments, fast-path local export (`diagnostics_bundle` with optional `root` + `incident_id`), and bounded outbox delivery |
 | **Target NPU Debugger** (`debugger` / `mindie_debugger`) | **Scoped exclusively to target NPU workloads** (`vllm-ascend`, `MindIE-SD`, CANN operators): deterministic Ascend NPU fault log triage (`npu_fault_triage`), 3-primitive precision/memory-stomp localization (`precision`), and `ACLGraph` capture/replay layerwise dumping (`aclgraph`) |
-| **GitHub Maintainers** | Investigate reported fault evidence and ship fixes |
+| **GitHub Maintainers** | Triage centralized Issues in `mindie-agent/mindie-agent` via exact-commit source permalinks into the owning component/plugin repo and ship fixes |
 
 When a shared component has already logged an internal fault, it passes a trusted diagnostic reference ID to the outer plugin layer so the same error is never logged or reported twice.
 
@@ -50,22 +50,26 @@ When a shared component has already logged an internal fault, it passes a truste
 Public GitHub Issues are assembled deterministically from **allowlisted metadata fields** without calling any LLM:
 
 - **Allowed in public Issues (code & execution metadata only)**:
-  - Component name, package version or Git commit SHA, operation name, stage, static error category/code, duration, exit code, and cleanup outcome. A stable public fault fingerprint supports deduplication; random diagnostic correlation IDs and process clocks stay local.
+  - Component name, package version, 40-char Git commit SHA (`package_revision`), child component build metadata (`child_build`), operation name, stage/substage, prior `operation.phase` timing breadcrumbs within the same `operation_id`, static error category/code/`reason_code`/`contract_name`, `exception_chain` class names (never messages), **owned-package or `source_root` stack frames (`module` / `function` / `line` only)**, harness identifier (`harness`), host runtime matrix (`platform` / `arch` / `py_version`), duration, exit code, and cleanup outcome. Triage Card v2 turns owned stack frames + `package_revision` into clickable GitHub source permalinks (`https://github.com/mindie-agent/<repo>/blob/<sha>/<path>#L<line>`).
 - **Strictly excluded from public Issues**:
-  - **Never included**: User commands, command arguments, environment variables, raw `stdout`/`stderr`, free-text exception messages, conversation transcripts, config files, credentials/tokens, native task IDs, remote job IDs, local or remote file paths, and hostnames or IP addresses.
+  - **Never included**: User commands, command arguments, environment variables, raw `stdout`/`stderr`, free-text exception messages (excluded from both local diagnostic events and public projections), conversation transcripts, config files, credentials/tokens, native task IDs, remote job IDs, local or remote file paths, and hostnames or IP addresses. Component CLI crash handling (`record_component_crash`) never parses or trusts raw child `stderr` text or formatted tracebacks: each invocation mints a per-call random token (`MINDIE_DIAGNOSTICS_INVOCATION_TOKEN`, kept strictly local and stripped from bundles and public Issues), reuses an existing incident ID only when persisted local diagnostic JSONL events contain a matching `status="error"` and `reportable=True` record for that component and invocation token, and otherwise records a process-level crash envelope only on fatal native crash signals (`SIGSEGV` / `SIGABRT` / `SIGBUS` / `SIGFPE` / `SIGILL`, never on unverified ordinary non-zero exit codes) using a closed static `stage` allowlist, signal `reason_code`, and atomic installed-package build metadata—never trusting unverified `stdout`/`stderr` output, `__notes__`, or caller arguments.
 - **What never triggers an Issue**:
-  - Invalid arguments, missing configuration, user cancellation (Interrupt), disabled features, permission errors, ordinary network/SSH authentication failures, and **non-zero exit codes or timeouts from your own remote commands** are normal operational outcomes and never file product-defect Issues.
-  - Only unhandled internal exceptions, abnormal crashes of owned helper subprocesses, protocol corruption, or missing package files qualify as reportable tool faults.
+  - Invalid arguments (such as CLI `exit_code == 2` or schema validation errors), missing configuration, user cancellation (Interrupt), disabled features, permission errors, ordinary network/SSH authentication failures, and **non-zero exit codes or timeouts from your own remote commands** are normal operational outcomes and never file product-defect Issues.
+  - Only unhandled internal exceptions, abnormal crashes of owned helper subprocesses, protocol corruption, missing package files, or authoritative local state/schema contract violations (`category="contract_violation"`) qualify as reportable tool faults.
 
 ---
 
-## 4.1 Update Failure Coverage and Reporting Eligibility
+## 4.1 Update Failures, Contract Violation Probes & Fast-Path Local Triage
 
-`diagnostics` (`v0.5.4`) provides a shared `category="update"` recorder policy based on exception types, structured codes, and retained causes. It never analyzes free-form exception text. Missing modules and broken artifacts or protocols are product faults; transport, credentials, permissions, cancellation, and local prerequisites remain visible locally. Plugins record failures at their boundaries instead of only saving an updater receipt or marking every update failure non-reportable.
+`diagnostics` provides a shared `category="update"` recorder policy alongside `category="contract_violation"` deterministic invariant probes based on exception types, structured `error_code`/`reason_code`, `contract_name`, and retained causes—never analyzing free-form exception text. Missing modules, broken artifacts or protocols, and corrupted owned state/schema contracts (such as `knowledge` authoritative SQLite schema damage, `coordinator` `machines.json` contract damage, `remote-dev` persisted record corruption, or `debugger` triage payload schema mismatch) are product faults; transport, credentials, permissions, cancellation, and local prerequisites remain visible locally.
 
-All four host plugins (Codex `v0.1.13`, Claude Code `v0.1.10`, Kimi `v0.1.10`, and DSH `v0.1.9`) adopt this policy, covering component-inheritance helper startup failures and updater children that crash before writing a receipt. Trusted inner incident references are reused across outer boundaries. Plugin baselines pin formal `diagnostics v0.5.4` and use the package manager to override older transitive diagnostics pins.
+All seven host plugins (`mindie-agent-codex`, `-cc`, `-kimi`, `-dsh`, `-agy`, `-wb`, and `-oc`) adopt this pipeline, covering component-inheritance helper startup failures, updater crashes, and process-level abnormal exits of owned component CLIs (`profiler`, `sim`, `coordinator`, `debugger`, and `npu-top`). In-process child fault records verified via per-invocation tokens are reused across outer boundaries so faults are never double-reported.
 
-Recent local failures include `error_code` and `reporting_eligibility`:
+Fast-path local triage requires no path hunting:
+- `diagnostics_status` (and `mindie-diagnostics reporting status`) surfaces `incident_id`, `error_code`, `reason_code`, `contract_name`, `substage`, owned `stack_frames`, runtime matrix, and `reporting_eligibility` directly in `local.recent`.
+- `diagnostics_bundle` (and `mindie-diagnostics bundle`) resolves `root` automatically when omitted and accepts both `incident_id` (`--incident-id`) and `operation_id` (`--operation-id`).
+
+Recent local failures include `error_code`, `reason_code`, and `reporting_eligibility`:
 
 | Eligibility | Meaning |
 | --- | --- |
@@ -79,16 +83,19 @@ This bounded view reads at most eight 16 KiB log tails and returns five failures
 
 ---
 
-## 5. Deduplication & Recoverable Delivery Queue (Loop Prevention)
+## 5. Central Issue Routing, Cross-Version Deduplication & Regression Comments (Loop Prevention)
 
-To prevent duplicate Issues and retain pending reports across transient network outages:
+To prevent duplicate Issues across rapid patch releases while surfacing new-build occurrences and post-closure regressions:
 
-1. **Cross-task fingerprint deduplication**:
-   - Faults sharing the same component version, operation, stage, error category, and internal stack frame location produce a deterministic fingerprint. Switching sessions or host CLIs never creates a duplicate Issue for an already reported bug; read-only GitHub lookup links matching faults to the existing Issue without spamming comments.
+1. **Central `mindie-agent/mindie-agent` routing + dual-key deduplication (`fingerprint` vs. `fault_signature`)**:
+   - All automatic Issues are filed centrally in **`mindie-agent/mindie-agent`** with Triage Card v2 exact-commit source permalinks pointing into the owning component or plugin repository.
+   - **Per-build `fingerprint`**: Includes `package_version` / `package_revision` to collapse repeated occurrences on the same build inside the local `Outbox`.
+   - **Version-independent `fault_signature` (`<!-- mindie-fault:<sha256> -->`)**: Keyed on `(component, operation, stage, substage, category, error_code, reason_code, contract_name, error_type, innermost owned module + function)`, independent of version bumps or line-number shifts.
+   - When a newer build matches an existing Issue by `fault_signature`, the reporter **appends a structured comment instead of opening a duplicate Issue**: an **Additional Occurrence** comment on `OPEN` Issues (with updated source permalinks for the new commit) or a **Regression Observed After Issue Closure** comment on `CLOSED` Issues, deduplicated per `fingerprint` via `<!-- mindie-incident:<fingerprint> -->` with retained pagination cursors.
 2. **Bounded requests and recoverable pending reports**:
-   - Each processing cycle operates under a bounded request deadline. Temporary network or GitHub authentication failures preserve pending records, surface the actual error, and defer retries rather than dropping faults after transient read-only lookup failures.
-   - Only a submission that may have reached GitHub without a response is marked `unknown` and reconciled read-only via **bounded 2-attempt outbound reconciliation** before any write. A subprocess that never started or a request explicitly rejected by the server is never misclassified as `unknown`.
-   - If GitHub confirms Issue creation but local receipt persistence fails, the local storage error is reported separately without reversing the completed external result. Disabling the contribution switch stops unsent queue items immediately; re-enabling processes only events recorded under the new consent revision.
+   - Each processing cycle operates under bounded request deadlines and response byte budgets. Temporary network/auth failures or multi-page historical Issue/comment scans preserve pending records and pagination cursors, strictly separating full historical fault discovery from recent `uncertain`-write reconciliation so incomplete windows never authorize duplicate Issues or drop faults.
+   - For both new Issues and cross-version comments, only a submission that may have reached GitHub without a response is marked `uncertain` and reconciled read-only (checking both Issue and comment `<!-- mindie-incident:<fingerprint> -->` markers) without ever blindly replaying an uncertain write.
+   - If GitHub confirms Issue or comment creation but local receipt persistence fails, the local storage error is reported separately without reversing the completed external result. Disabling the contribution switch stops unsent queue items immediately; re-enabling processes only events recorded under the new consent revision.
 3. **No self-reporting loops**:
    - Failures inside the reporter itself stay strictly local so the reporter never files Issues about its own reporting errors.
 
