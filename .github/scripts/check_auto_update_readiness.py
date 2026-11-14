@@ -606,7 +606,7 @@ WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str], ...] = (
     ("knowledge", "mindie_knowledge/release_http.py"),
     ("knowledge", "mindie_knowledge/graded/experiment_ledger.py"),
     ("diagnostics", "mindie_diagnostics/platform_service.py"),
-    ("diagnostics", "mindie_diagnostics/reporter.py"),
+    ("diagnostics", "mindie_diagnostics/github_transport.py"),
     ("remote-dev", "remote_dev/core/local_process.py"),
     ("coordinator", "mindie_coordinator/service_client.py"),
 )
