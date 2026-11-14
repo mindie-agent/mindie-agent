@@ -88,10 +88,15 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
     scripts = Path(__file__).resolve().parent
     errors = []
     if scope == "product":
+        sync_cmd = [
+            sys.executable, str(scripts / "sync_org_versions.py"), "--release-scope", "product",
+            "--repo-root", str(main_repo), "--check", "--offline",
+        ]
+        for root in roots or ():
+            sync_cmd.extend(["--siblings-root", str(root)])
         commands = (
             [sys.executable, str(scripts / "check_lf_eol.py"), "--repo-root", str(main_repo)],
-            [sys.executable, str(scripts / "sync_org_versions.py"), "--release-scope", "product",
-             "--repo-root", str(main_repo), "--check", "--offline"],
+            sync_cmd,
         )
         for command in commands:
             result = run(command, cwd=main_repo, timeout=15.0)
@@ -128,10 +133,13 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
 
 def product_inputs_changed(base: str, *, repository: Path, head: str = "HEAD") -> bool:
     """Route actual Git changes, including every document the product sync owns."""
+    if not base or re.fullmatch(r"0+", base.strip()):
+        return True
     paths = (
         "channels/", "docs/releases/", "README.md", "README.en.md", *PRODUCT_DOC_PATHS,
         ".github/workflows/release.yml", ".github/workflows/pr-checklist.yml",
-        ".github/scripts/check_auto_update_readiness.py", ".github/scripts/release_doc_hygiene.py",
+        ".github/scripts/check_auto_update_readiness.py", ".github/scripts/host_compatibility_gate.py",
+        ".github/scripts/release_doc_hygiene.py",
         ".github/scripts/sibling_readme_sync.py", ".github/scripts/sync_org_versions.py",
     )
     result = subprocess.run(

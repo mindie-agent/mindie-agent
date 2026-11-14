@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -18,11 +19,26 @@ from release_doc_hygiene import product_inputs_changed, verify_release_doc_hygie
 from sibling_readme_sync import PRODUCT_DOC_PATHS, sync_docs_versions, sync_sibling_readmes
 
 
+def _rmtree_force(path: Path) -> None:
+    if not path.exists():
+        return
+
+    def _onerr(fn, target, _exc):
+        try:
+            os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+            fn(target)
+        except OSError:
+            pass
+
+    shutil.rmtree(path, onerror=_onerr)
+
+
 class ReleaseDocScopeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base = tempfile.TemporaryDirectory(prefix="mindie-r6-fixtures-")
+        cls.base = tempfile.TemporaryDirectory(prefix="mindie-r6-fixtures-", ignore_cleanup_errors=True)
         cls.addClassCleanup(cls.base.cleanup)
+        cls.addClassCleanup(_rmtree_force, Path(cls.base.name))
         root = Path(cls.base.name)
         environment = patch.dict(os.environ, {name: str(root / name) for name in (
             "HOME", "USERPROFILE", "XDG_CONFIG_HOME", "XDG_STATE_HOME", "XDG_DATA_HOME",
@@ -32,13 +48,14 @@ class ReleaseDocScopeTests(unittest.TestCase):
         cls.addClassCleanup(environment.stop)
         cls.template = root / "git-template"
         cls.template.mkdir()
-        gate._run_cmd(["git", "init", "-q", str(cls.template)]).check_returncode()
-        (cls.template / ".gitattributes").write_text("* text=auto eol=lf\n", newline="\n")
-        (cls.template / ".editorconfig").write_text("root = true\n[*]\nend_of_line = lf\n", newline="\n")
+        gate._run_cmd(["git", "-c", "core.autocrlf=false", "init", "-q", str(cls.template)]).check_returncode()
+        (cls.template / ".gitattributes").write_text("* text=auto eol=lf\n", encoding="utf-8", newline="\n")
+        (cls.template / ".editorconfig").write_text("root = true\n[*]\nend_of_line = lf\n", encoding="utf-8", newline="\n")
 
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix="case-", dir=self.base.name)
+        self.temp = tempfile.TemporaryDirectory(prefix="case-", dir=self.base.name, ignore_cleanup_errors=True)
         self.addCleanup(self.temp.cleanup)
+        self.addCleanup(_rmtree_force, Path(self.temp.name))
         self.root = Path(self.temp.name)
         self.main = self.root / "mindie-agent"
         self.main.mkdir()
@@ -47,8 +64,8 @@ class ReleaseDocScopeTests(unittest.TestCase):
         self.manifest["components"]["diagnostics"]["version"] = "0.5.8"
         (self.main / "channels").mkdir()
         self.channel = self.main / "channels/0.1.json"
-        self.channel.write_text(json.dumps(self.manifest), newline="\n")
-        (self.main / "README.md").write_text("Historical product combination\n", newline="\n")
+        self.channel.write_text(json.dumps(self.manifest), encoding="utf-8", newline="\n")
+        (self.main / "README.md").write_text("Historical product combination\n", encoding="utf-8", newline="\n")
         self.knowledge = self.repo("knowledge", "0.13.15")
         self.diagnostics = self.repo("diagnostics", "0.5.9")
         # An unrelated repository's stale README must not block knowledge.
@@ -58,7 +75,7 @@ class ReleaseDocScopeTests(unittest.TestCase):
         repo = self.root / name
         shutil.copytree(self.template, repo)
         (repo / "pyproject.toml").write_text(
-            f'[project]\nname = "mindie-{name}"\nversion = "{version}"\n', newline="\n")
+            f'[project]\nname = "mindie-{name}"\nversion = "{version}"\n', encoding="utf-8", newline="\n")
         self.readmes(repo, name, version)
         return repo
 
@@ -97,7 +114,7 @@ class ReleaseDocScopeTests(unittest.TestCase):
         docs.mkdir()
         (docs / "README.md").write_text(
             "https://github.com/mindie-agent/knowledge/releases/download/v0.13.14/"
-            "mindie_knowledge-0.13.14-py3-none-any.whl\n", newline="\n")
+            "mindie_knowledge-0.13.14-py3-none-any.whl\n", encoding="utf-8", newline="\n")
         self.assertTrue(self.check("knowledge"))
         (docs / "README.md").unlink()
         (self.knowledge / "source.py").write_bytes(b"print('fixture')\r\n")
@@ -108,29 +125,29 @@ class ReleaseDocScopeTests(unittest.TestCase):
     def test_source_manifest_errors_never_fall_back_to_channel_version(self):
         (self.knowledge / "pyproject.toml").unlink()
         self.assertTrue(self.check("knowledge"))
-        (self.knowledge / "kimi.plugin.json").write_text('{"version":"0.13.15"}\n', newline="\n")
+        (self.knowledge / "kimi.plugin.json").write_text('{"version":"0.13.15"}\n', encoding="utf-8", newline="\n")
         self.assertTrue(self.check("knowledge"))
 
     def test_native_plugin_uses_its_manifests_and_rejects_conflicting_versions(self):
         plugin = self.repo("mindie-agent-kimi", "0.1.18")
         (plugin / "pyproject.toml").unlink()
-        (plugin / "kimi.plugin.json").write_text('{"version":"0.1.18"}\n', newline="\n")
+        (plugin / "kimi.plugin.json").write_text('{"version":"0.1.18"}\n', encoding="utf-8", newline="\n")
         self.assertEqual(self.check("mindie-agent-kimi"), [])
-        (plugin / "pyproject.toml").write_text('[project]\nversion="0.1.17"\n', newline="\n")
+        (plugin / "pyproject.toml").write_text('[project]\nversion="0.1.17"\n', encoding="utf-8", newline="\n")
         self.assertTrue(self.check("mindie-agent-kimi"))
 
     def test_independent_opencode_plugin_validates_without_channel_entry(self):
         self.assertNotIn("mindie-agent-oc", self.manifest["components"])
         plugin = self.repo("mindie-agent-oc", "0.1.0")
-        (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.0"}\n', newline="\n")
+        (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.0"}\n', encoding="utf-8", newline="\n")
         self.assertEqual(self.check("mindie-agent-oc"), [])
-        (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.1"}\n', newline="\n")
+        (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.1"}\n', encoding="utf-8", newline="\n")
         self.assertTrue(self.check("mindie-agent-oc"))
 
     def test_native_plugin_rejects_stale_self_release_statements(self):
         plugin = self.repo("mindie-agent-dsh", "0.1.17")
         (plugin / "pyproject.toml").unlink()
-        (plugin / "package.json").write_text('{"version":"0.1.17"}\n', newline="\n")
+        (plugin / "package.json").write_text('{"version":"0.1.17"}\n', encoding="utf-8", newline="\n")
         for statement in ("当前正式版本为 `0.1.16`", "latest `v0.1.16` release"):
             with self.subTest(statement=statement):
                 self.readmes(plugin, plugin.name, "0.1.17")
@@ -153,10 +170,10 @@ class ReleaseDocScopeTests(unittest.TestCase):
             '<img alt="Release v0.13.14" src="release.svg">',
         ):
             with self.subTest(declaration=declaration):
-                readme.write_text(original + peers + declaration + "\n", newline="\n")
+                readme.write_text(original + peers + declaration + "\n", encoding="utf-8", newline="\n")
                 self.assertTrue(self.check("knowledge"))
                 readme.write_text(original + peers + declaration.replace("0.13.14", "0.13.15") + "\n",
-                                  newline="\n")
+                                  encoding="utf-8", newline="\n")
                 self.assertEqual(self.check("knowledge"), [])
 
     def test_nested_relative_sibling_root_checks_the_selected_repository(self):
@@ -181,11 +198,11 @@ class ReleaseDocScopeTests(unittest.TestCase):
     def test_corpus_release_does_not_invent_a_package_version(self):
         corpus = self.root / "knowledge-infer-core"
         shutil.copytree(self.template, corpus)
-        (corpus / "README.md").write_text("Corpus uses per-unit revisions.\n", newline="\n")
+        (corpus / "README.md").write_text("Corpus uses per-unit revisions.\n", encoding="utf-8", newline="\n")
         self.assertEqual(self.check("knowledge-infer-core"), [])
 
     def test_missing_selected_checkout_cannot_be_implicitly_skipped(self):
-        shutil.rmtree(self.knowledge)
+        _rmtree_force(self.knowledge)
         self.assertTrue(self.check("knowledge"))
 
     def test_source_read_timeout_stays_a_timeout(self):
@@ -216,8 +233,9 @@ class ReleaseDocScopeTests(unittest.TestCase):
             self.main, self.manifest, False, siblings_roots=[self.root]), [])
 
     def commit_product_fixture(self):
-        gate._run_cmd(["git", "add", "--all"], cwd=self.main).check_returncode()
-        gate._run_cmd(["git", "-c", "user.name=R6 Fixture", "-c", "user.email=r6@example.invalid",
+        gate._run_cmd(["git", "-c", "core.autocrlf=false", "add", "--all"], cwd=self.main).check_returncode()
+        gate._run_cmd(["git", "-c", "core.autocrlf=false", "-c", "user.name=R6 Fixture",
+                       "-c", "user.email=r6@example.invalid",
                        "commit", "--no-verify", "-q", "-m", "fixture"], cwd=self.main).check_returncode()
         return gate._run_cmd(["git", "rev-parse", "HEAD"], cwd=self.main).stdout.strip()
 
@@ -226,18 +244,18 @@ class ReleaseDocScopeTests(unittest.TestCase):
         for relative in PRODUCT_DOC_PATHS:
             path = self.main / relative
             path.parent.mkdir(exist_ok=True)
-            path.write_text("Product fixture\n", newline="\n")
+            path.write_text("Product fixture\n", encoding="utf-8", newline="\n")
         migration = self.main / "docs/simulation-consumer-migration.md"
         version = self.manifest["components"]["mindie-agent-codex"]["version"]
-        migration.write_text(f"| **`mindie-agent-codex`** | `v{version}` |\n", newline="\n")
+        migration.write_text(f"| **`mindie-agent-codex`** | `v{version}` |\n", encoding="utf-8", newline="\n")
         self.assertEqual(sync_docs_versions(self.main, self.manifest, False), [])
         base = self.commit_product_fixture()
         architecture = self.main / "docs/architecture.md"
-        architecture.write_text("An independent documentation change\n", newline="\n")
+        architecture.write_text("An independent documentation change\n", encoding="utf-8", newline="\n")
         self.commit_product_fixture()
         self.assertFalse(product_inputs_changed(base, repository=self.main))
 
-        migration.write_text("| **`mindie-agent-codex`** | `v0.0.0` |\n", newline="\n")
+        migration.write_text("| **`mindie-agent-codex`** | `v0.0.0` |\n", encoding="utf-8", newline="\n")
         head = self.commit_product_fixture()
         self.assertTrue(product_inputs_changed(base, repository=self.main))
         self.assertTrue(any("simulation-consumer-migration.md" in error
@@ -246,6 +264,7 @@ class ReleaseDocScopeTests(unittest.TestCase):
         # Every document owned by the sync and the gate implementation must
         # route through product checks even when it is the only changed input.
         for relative in (*PRODUCT_DOC_PATHS, ".github/scripts/release_doc_hygiene.py",
+                         ".github/scripts/host_compatibility_gate.py",
                          ".github/workflows/pr-checklist.yml"):
             with self.subTest(relative=relative):
                 base = head

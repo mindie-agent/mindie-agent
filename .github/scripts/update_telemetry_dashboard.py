@@ -16,8 +16,8 @@ dashboards (dashboard.zh.svg, dashboard.en.svg) plus a detailed Markdown report.
 - All XML/SVG text interpolations are strictly HTML-escaped to guarantee valid SVG 1.1.
 
 [Timeouts & Locks]
-- Each GitHub REST API request enforces a bounded 15-second HTTP timeout.
-- Total script execution across 21 repositories completes within < 90 seconds.
+- Each GitHub REST API request enforces a bounded 15-second HTTP timeout across all
+  27 tracked repositories (4 sequential endpoints per repository).
 
 [Side-Effect Policy]
 - Read-only against GitHub REST APIs; writes output artifacts strictly into the
@@ -593,10 +593,10 @@ def main() -> None:
     history["updated_at_cst"] = updated_at_cst
     history, rows = collect_org_telemetry(token, history, channel_pins)
 
-    history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    (out_dir / "dashboard.zh.svg").write_text(render_svg(rows, updated_at_cst, "zh"), encoding="utf-8")
-    (out_dir / "dashboard.en.svg").write_text(render_svg(rows, updated_at_cst, "en"), encoding="utf-8")
-    (out_dir / "README.md").write_text(render_markdown_report(rows, updated_at_cst), encoding="utf-8")
+    history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    (out_dir / "dashboard.zh.svg").write_text(render_svg(rows, updated_at_cst, "zh"), encoding="utf-8", newline="\n")
+    (out_dir / "dashboard.en.svg").write_text(render_svg(rows, updated_at_cst, "en"), encoding="utf-8", newline="\n")
+    (out_dir / "README.md").write_text(render_markdown_report(rows, updated_at_cst), encoding="utf-8", newline="\n")
     print(f"Successfully generated telemetry artifacts in {out_dir} at {updated_at_cst} (UTC+8)")
 
 

@@ -20,6 +20,7 @@ contain zero Windows CRLF (`\\r\\n`) or mixed line endings.
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -59,6 +60,7 @@ def validate_repo_lf(repo_root: Path) -> list[str]:
         capture_output=True,
         timeout=GIT_TIMEOUT_SECONDS,
         check=False,
+        creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" and hasattr(subprocess, "CREATE_NO_WINDOW") else 0,
     )
     if proc.returncode != 0:
         stderr = proc.stderr.decode("utf-8", errors="replace").strip()
