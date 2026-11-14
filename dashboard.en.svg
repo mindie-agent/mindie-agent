@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-15 01:26 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-15 03:11 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">17,440</text>
-  <text x="734" y="144" class="font kpi-sub">34,328 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">17,479</text>
+  <text x="734" y="144" class="font kpi-sub">34,615 total asset downloads</text>
   <rect x="24" y="174" width="912" height="178" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -115,7 +115,7 @@
   <text x="545" y="493" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="493" text-anchor="end" class="mono td-bold">9,645</text>
   <text x="815" y="493" text-anchor="end" class="mono td-num">5,710 (485)</text>
-  <text x="920" y="493" text-anchor="end" class="mono td-num">11,612</text>
+  <text x="920" y="493" text-anchor="end" class="mono td-num">11,618</text>
   <rect x="25" y="505" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="505" x2="936" y2="505" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="522" r="3.5" fill="#D97757"/>
@@ -140,20 +140,20 @@
   <circle cx="40" cy="588" r="3.5" fill="#0EA5E9"/>
   <text x="50" y="592" class="mono td-repo">mindie-agent-dsh</text>
   <text x="268" y="592" class="font td-cat">Client Plugin</text>
-  <text x="368" y="592" class="mono td-sub">v0.1.19</text>
+  <text x="368" y="592" class="mono td-sub">v0.1.20</text>
   <text x="545" y="592" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="592" text-anchor="end" class="mono td-bold">2,539</text>
   <text x="815" y="592" text-anchor="end" class="mono td-num">957 (260)</text>
-  <text x="920" y="592" text-anchor="end" class="mono td-num">165</text>
+  <text x="920" y="592" text-anchor="end" class="mono td-num">182</text>
   <line x1="24" y1="604" x2="936" y2="604" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="621" r="3.5" fill="#4285F4"/>
   <text x="50" y="625" class="mono td-repo">mindie-agent-agy</text>
   <text x="268" y="625" class="font td-cat">Client Plugin</text>
-  <text x="368" y="625" class="mono td-sub">v0.1.12</text>
+  <text x="368" y="625" class="mono td-sub">v0.1.13</text>
   <text x="545" y="625" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="625" text-anchor="end" class="mono td-bold">818</text>
   <text x="815" y="625" text-anchor="end" class="mono td-num">818 (230)</text>
-  <text x="920" y="625" text-anchor="end" class="mono td-num">101</text>
+  <text x="920" y="625" text-anchor="end" class="mono td-num">117</text>
   <rect x="25" y="637" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="637" x2="936" y2="637" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="654" r="3.5" fill="#0EC8A9"/>
