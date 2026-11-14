@@ -20,19 +20,19 @@ def _rmtree_force(path: Path) -> None:
     if not path.exists():
         return
 
-    def _onerr(fn, target, _exc):
-        try:
-            os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
-            fn(target)
-        except OSError:
-            pass
+    def _onerr(fn, target, exc_info):
+        exc = exc_info[1] if isinstance(exc_info, tuple) else exc_info
+        if isinstance(exc, TimeoutError):
+            raise exc
+        os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+        fn(target)
 
     shutil.rmtree(path, onerror=_onerr)
 
 
 class IndependentPluginPinsTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='mindie-plugin-pins-', ignore_cleanup_errors=True)
+        self.temp = tempfile.TemporaryDirectory(prefix='mindie-plugin-pins-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.addCleanup(_rmtree_force, self.root)

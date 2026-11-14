@@ -7,8 +7,9 @@ Extracted R4/R5 verification helpers for `check_auto_update_readiness.py`: valid
 (`CREATE_NO_WINDOW` / `windowsHide: true`), and active local host CLI versions.
 
 [Invariants]
-- WSL2 / POSIX binary lookups reject `/mnt/<drive>/...` DrvFS paths and `.exe`/`.cmd`/`.bat`/`.ps1`
-  Windows shims; Windows lookups skip 0-byte `WindowsApps` store execution aliases.
+- WSL2 / POSIX binary lookups reject `.exe`/`.cmd`/`.bat`/`.ps1` files and PE/CRLF/MSYS Windows
+  shims on `/mnt/<drive>/...`, while preserving native Linux ELF binaries and LF scripts stored on
+  WSL mounts; Windows lookups skip 0-byte `WindowsApps` store execution aliases.
 - Refactored component subprocess wrappers may declare ordered candidate paths; the first present
   candidate in the checkout is authoritative and must enforce `CREATE_NO_WINDOW`.
 
@@ -70,6 +71,7 @@ WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str | tuple[str, ...]], ...] 
     ("knowledge", "mindie_knowledge/gitread.py"),
     ("knowledge", "mindie_knowledge/release_http.py"),
     ("knowledge", "mindie_knowledge/graded/experiment_ledger.py"),
+    ("diagnostics", "mindie_diagnostics/platform_service.py"),
     ("diagnostics", ("mindie_diagnostics/github_transport.py", "mindie_diagnostics/reporter.py")),
     ("remote-dev", "remote_dev/core/local_process.py"),
     ("coordinator", "mindie_coordinator/service_client.py"),
@@ -104,14 +106,42 @@ def is_windows_apps_stub(candidate: str | Path, *, os_mod=os) -> bool:
         return True
 
 
+def _is_native_linux_file_on_wsl_mount(candidate: str | Path, *, os_mod=os) -> bool:
+    read_head = getattr(os_mod, "read_head", None)
+    try:
+        if read_head is not None:
+            head = read_head(candidate)
+        else:
+            path_obj = Path(candidate)
+            if not path_obj.is_file():
+                return False
+            with path_obj.open("rb") as handle:
+                head = handle.read(512)
+    except TimeoutError:
+        raise
+    except OSError:
+        return False
+    if head.startswith(b"\x7fELF"):
+        return True
+    if head.startswith(b"#!"):
+        first_line = head.split(b"\n", 1)[0]
+        if b"\r" in first_line:
+            return False
+        if re.search(rb"(?:CYGWIN|MINGW|MSYS|cygpath|(?<!\\)\.exe\b|[A-Za-z]:[\\/])", head, re.IGNORECASE):
+            return False
+        return True
+    return False
+
+
 def filter_native_executable(candidate: str | None, *, os_mod=os) -> str | None:
     if not candidate:
         return None
     if os_mod.name != "nt":
-        if is_wsl_windows_mount_path(candidate, os_mod=os_mod):
-            return None
         if Path(candidate).suffix.lower() in WINDOWS_SHIM_SUFFIXES:
             return None
+        if is_wsl_windows_mount_path(candidate, os_mod=os_mod):
+            if not _is_native_linux_file_on_wsl_mount(candidate, os_mod=os_mod):
+                return None
         return candidate
     if is_windows_apps_stub(candidate, os_mod=os_mod):
         return None
@@ -127,8 +157,6 @@ def which_native(cmd: str, *, path: str | None = None, os_mod=os, shutil_mod=shu
     raw_path = getattr(os_mod, "environ", os.environ).get("PATH", "") if path is None else path
     pathsep = getattr(os_mod, "pathsep", os.pathsep)
     entries = [entry for entry in raw_path.split(pathsep) if entry]
-    if os_mod.name != "nt":
-        entries = [entry for entry in entries if not is_wsl_windows_mount_path(entry, os_mod=os_mod)]
     if not entries:
         return filter_native_executable(shutil_mod.which(cmd, path=path), os_mod=os_mod)
     for entry in entries:
@@ -385,15 +413,20 @@ def verify_local_host_compatibility_impl(
             desktop_codex = ""
         else:
             desktop_codex = "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
-        if desktop_codex and os.path.isfile(desktop_codex) and desktop_codex not in codex_bins:
-            codex_bins.append(desktop_codex)
-        if (
-            runtime_override
-            and Path(runtime_override).is_absolute()
-            and os.path.isfile(runtime_override)
-            and runtime_override not in codex_bins
-        ):
-            codex_bins.append(runtime_override)
+        if desktop_codex and os.path.isfile(desktop_codex):
+            accepted_desktop = filter_native_executable(desktop_codex, os_mod=os)
+            if accepted_desktop is None and desktop_override is not None:
+                errors.append(f"mindie-agent-codex: configured Codex CLI is not a native executable ({desktop_codex})")
+            elif accepted_desktop and accepted_desktop not in codex_bins:
+                codex_bins.append(accepted_desktop)
+        if runtime_override and Path(runtime_override).is_absolute() and os.path.isfile(runtime_override):
+            accepted_runtime = filter_native_executable(runtime_override, os_mod=os)
+            if accepted_runtime is None:
+                errors.append(
+                    f"mindie-agent-codex: configured Codex CLI is not a native executable ({runtime_override})"
+                )
+            elif accepted_runtime not in codex_bins:
+                codex_bins.append(accepted_runtime)
         for cfg_file in _codex_config_candidates():
             if not cfg_file.is_file():
                 continue
@@ -401,14 +434,19 @@ def verify_local_host_compatibility_impl(
                 config = json.loads(cfg_file.read_text(encoding="utf-8"))
                 for key in ("native_context", "native"):
                     cfg_bin = (config.get(key) or {}).get("MINDIE_CODEX_BIN")
-                    if isinstance(cfg_bin, str) and os.path.isfile(cfg_bin) and cfg_bin not in codex_bins:
-                        codex_bins.append(cfg_bin)
+                    if isinstance(cfg_bin, str) and os.path.isfile(cfg_bin):
+                        accepted_cfg = filter_native_executable(cfg_bin, os_mod=os)
+                        if accepted_cfg is None:
+                            errors.append(
+                                f"mindie-agent-codex: configured Codex CLI is not a native executable ({cfg_bin})"
+                            )
+                        elif accepted_cfg not in codex_bins:
+                            codex_bins.append(accepted_cfg)
             except TimeoutError:
                 raise
             except (OSError, ValueError):
                 pass
-        for binary in codex_bins:
-            resolved_bin = filter_native_executable(which_fn(binary)) or binary
+        for resolved_bin in codex_bins:
             res = run_cmd([resolved_bin, "--version"])
             ver = extract_semver(res.stdout + "\n" + res.stderr)
             if res.returncode != 0 or not ver:
@@ -432,7 +470,11 @@ def verify_local_host_compatibility_impl(
             compat = json.loads((plugin_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
             res = run_cmd([resolved_cli, "--version"])
             ver = extract_semver(res.stdout + "\n" + res.stderr)
-            if ver and not supports_harness(compat, harness_name=harness_key, harness_version=ver):
+            if res.returncode != 0 or not ver:
+                errors.append(
+                    f"{repo_name}: installed {cli_name} CLI version unavailable ({resolved_cli}, exit={res.returncode})"
+                )
+            elif not supports_harness(compat, harness_name=harness_key, harness_version=ver):
                 errors.append(f"{repo_name}: harness-compatibility.json does not support installed {cli_name} {ver}")
 
     dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
@@ -442,7 +484,11 @@ def verify_local_host_compatibility_impl(
         peer_req = ((pkg_json.get("peerDependencies") or {}).get("@deepseek-ai/dsh") or "").strip()
         res = run_cmd([resolved_dsh, "--version"])
         ver = extract_semver(res.stdout + "\n" + res.stderr)
-        if ver and not matches_dsh_peer(peer_req, ver):
+        if res.returncode != 0 or not ver:
+            errors.append(
+                f"mindie-agent-dsh: installed dsh CLI version unavailable ({resolved_dsh}, exit={res.returncode})"
+            )
+        elif not matches_dsh_peer(peer_req, ver):
             errors.append(
                 f"mindie-agent-dsh: package.json peerDependencies['@deepseek-ai/dsh']={peer_req!r} "
                 f"does not support installed dsh {ver}"
@@ -460,7 +506,11 @@ def verify_local_host_compatibility_impl(
         home_oc_names = ("opencode.exe", "opencode.cmd") if os.name == "nt" else ("opencode",)
         oc_candidates = [
             filter_native_executable(which_fn("opencode")),
-            *(str(Path.home() / ".opencode/bin" / name) for name in home_oc_names),
+            *(
+                filter_native_executable(str(Path.home() / ".opencode/bin" / name), os_mod=os)
+                for name in home_oc_names
+                if (Path.home() / ".opencode/bin" / name).is_file()
+            ),
         ]
         oc_bins = [b for b in oc_candidates if b and os.path.isfile(b)]
         for binary in dict.fromkeys(oc_bins):

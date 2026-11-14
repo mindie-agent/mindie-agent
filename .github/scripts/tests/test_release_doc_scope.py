@@ -23,12 +23,12 @@ def _rmtree_force(path: Path) -> None:
     if not path.exists():
         return
 
-    def _onerr(fn, target, _exc):
-        try:
-            os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
-            fn(target)
-        except OSError:
-            pass
+    def _onerr(fn, target, exc_info):
+        exc = exc_info[1] if isinstance(exc_info, tuple) else exc_info
+        if isinstance(exc, TimeoutError):
+            raise exc
+        os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+        fn(target)
 
     shutil.rmtree(path, onerror=_onerr)
 
@@ -36,7 +36,7 @@ def _rmtree_force(path: Path) -> None:
 class ReleaseDocScopeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.base = tempfile.TemporaryDirectory(prefix="mindie-r6-fixtures-", ignore_cleanup_errors=True)
+        cls.base = tempfile.TemporaryDirectory(prefix="mindie-r6-fixtures-")
         cls.addClassCleanup(cls.base.cleanup)
         cls.addClassCleanup(_rmtree_force, Path(cls.base.name))
         root = Path(cls.base.name)
@@ -53,7 +53,7 @@ class ReleaseDocScopeTests(unittest.TestCase):
         (cls.template / ".editorconfig").write_text("root = true\n[*]\nend_of_line = lf\n", encoding="utf-8", newline="\n")
 
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix="case-", dir=self.base.name, ignore_cleanup_errors=True)
+        self.temp = tempfile.TemporaryDirectory(prefix="case-", dir=self.base.name)
         self.addCleanup(self.temp.cleanup)
         self.addCleanup(_rmtree_force, Path(self.temp.name))
         self.root = Path(self.temp.name)

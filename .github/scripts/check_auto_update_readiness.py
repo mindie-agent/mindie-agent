@@ -19,7 +19,8 @@ plugin_baseline, latest_component_release)`) and lockstep plugin releases.
   versions/READMEs; full channel-wide alignment requires explicit product scope.
 
 [Timeouts & Locks]
-- Subprocess probes (`git`, host `--version`, sync checks) enforce a strict `15s` timeout.
+- Direct `git` / `--version` subprocess probes enforce `15s`; outer R6 subprocess checks
+  (`check_lf_eol.py`, `sync_org_versions.py`) enforce `35s` (`>= 2 * 15s + 5s` cleanup grace).
 - Purely read-only inspection with zero file locks or network mutations.
 
 [Side-Effect Policy]
@@ -53,6 +54,7 @@ from host_compatibility_gate import (
     WINDOWS_NODE_WINDOWLESS_FILES,
     WINDOWS_NO_WINDOW_REQUIRED_FILES,
     extract_semver as _extract_semver,
+    filter_native_executable,
     matches_dsh_peer as _matches_dsh_peer,
     subprocess_window_kwargs,
     verify_flexible_component_compatibility_impl,
@@ -67,20 +69,33 @@ from release_latest_integrity import verify_current_release_heads
 def _run_cmd(argv: list[str], *, cwd: Path | None = None, timeout: float = 15.0) -> subprocess.CompletedProcess[str]:
     resolved_argv = list(argv)
     if resolved_argv:
-        resolved_bin = which_native(resolved_argv[0], os_mod=os, shutil_mod=shutil)
-        if resolved_bin:
+        cmd0 = resolved_argv[0]
+        if "/" in cmd0 or (os.name == "nt" and "\\" in cmd0):
+            accepted = filter_native_executable(cmd0, os_mod=os)
+            if accepted is None:
+                return subprocess.CompletedProcess(resolved_argv, 127, "", f"rejected non-native executable: {cmd0}")
+            resolved_argv[0] = accepted
+        else:
+            resolved_bin = which_native(cmd0, os_mod=os, shutil_mod=shutil)
+            if resolved_bin is None:
+                return subprocess.CompletedProcess(resolved_argv, 127, "", f"native executable not found: {cmd0}")
             resolved_argv[0] = resolved_bin
-    return subprocess.run(
-        resolved_argv,
-        cwd=str(cwd) if cwd else None,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        timeout=timeout,
-        check=False,
-        **subprocess_window_kwargs(os_mod=os, subprocess_mod=subprocess),
-    )
+    try:
+        return subprocess.run(
+            resolved_argv,
+            cwd=str(cwd) if cwd else None,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout,
+            check=False,
+            **subprocess_window_kwargs(os_mod=os, subprocess_mod=subprocess),
+        )
+    except TimeoutError:
+        raise
+    except OSError as exc:
+        return subprocess.CompletedProcess(resolved_argv, 126, "", str(exc))
 
 
 def _parse_semver(ver: str) -> tuple[int, ...]:

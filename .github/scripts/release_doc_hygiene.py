@@ -2,7 +2,7 @@
 
 [Invariants] Independent releases use selected repositories' source versions.
 Only an explicit product scope compares READMEs across the channel combination.
-[Timeouts & Locks] The caller bounds LF and product-sync commands to 15 seconds.
+[Timeouts & Locks] Outer LF and product-sync checks enforce 35s (>= 2*15s Git + 5s grace).
 [Side-Effect Policy] Read-only; never rewrites a channel, README or user setting.
 """
 from __future__ import annotations
@@ -27,6 +27,7 @@ VERSION_FILES = (
     "package.json", ".claude-plugin/plugin.json", "plugins/mindie-agent/plugin.json",
     "plugins/mindie-agent/.codex-plugin/plugin.json",
 )
+OUTER_CHECK_TIMEOUT_SECONDS = 35.0
 READMES = ("README.md", "README.en.md", "docs/README.md", "docs/README.en.md")
 
 
@@ -99,7 +100,7 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
             sync_cmd,
         )
         for command in commands:
-            result = run(command, cwd=main_repo, timeout=15.0)
+            result = run(command, cwd=main_repo, timeout=OUTER_CHECK_TIMEOUT_SECONDS)
             if result.returncode:
                 errors.append(f"{Path(command[1]).name} failed: {(result.stderr or result.stdout).strip()}")
         errors.extend(sync_sibling_readmes(
@@ -118,7 +119,7 @@ def verify_release_doc_hygiene(main_repo, manifest, roots, *, scope, release_rep
             continue
         repo = repo.resolve()
         result = run([sys.executable, str(scripts / "check_lf_eol.py"), "--repo-root", str(repo)],
-                     cwd=repo, timeout=15.0)
+                     cwd=repo, timeout=OUTER_CHECK_TIMEOUT_SECONDS)
         if result.returncode:
             errors.append(f"{name}: LF check failed: {(result.stderr or result.stdout).strip()}")
         try:

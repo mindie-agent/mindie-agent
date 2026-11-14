@@ -26,15 +26,20 @@ class HostCompatibilityGateTests(unittest.TestCase):
         sandbox = patch.dict(
             os.environ,
             {
-                key: str(self.root / key)
-                for key in (
-                    "HOME",
-                    "USERPROFILE",
-                    "APPDATA",
-                    "MINDIE_CONFIG_HOME",
-                    "MINDIE_DATA_HOME",
-                    "MINDIE_DIAGNOSTICS_ROOT",
-                )
+                **{
+                    key: str(self.root / key)
+                    for key in (
+                        "HOME",
+                        "USERPROFILE",
+                        "APPDATA",
+                        "MINDIE_CONFIG_HOME",
+                        "MINDIE_DATA_HOME",
+                        "MINDIE_DIAGNOSTICS_ROOT",
+                    )
+                },
+                "MINDIE_AGENT_CONFIG": "",
+                "MINDIE_DESKTOP_CODEX_CLI_PATH": "",
+                "CODEX_APP_RUNTIME_CLI_PATH": "",
             },
         )
         sandbox.start()
@@ -47,14 +52,23 @@ class HostCompatibilityGateTests(unittest.TestCase):
 
     def test_diagnostics_r4_accepts_github_transport_or_legacy_reporter_and_rejects_missing_flag(self):
         diag = self._make_repo("diagnostics")
+        svc = diag / "mindie_diagnostics" / "platform_service.py"
         transport = diag / "mindie_diagnostics" / "github_transport.py"
         reporter = diag / "mindie_diagnostics" / "reporter.py"
         transport.parent.mkdir(parents=True)
+        svc.write_text("subprocess.CREATE_NO_WINDOW\n", encoding="utf-8", newline="\n")
 
         # 1. Refactored layout (diagnostics >= 0.5.11): github_transport.py enforces CREATE_NO_WINDOW
         transport.write_text("flags = getattr(subprocess, 'CREATE_NO_WINDOW', 0)\n", encoding="utf-8", newline="\n")
         reporter.write_text("# reporter delegates to github_transport\n", encoding="utf-8", newline="\n")
         self.assertEqual(host_gate.verify_windows_windowless_spawns([self.root]), [])
+
+        # 1b. Missing CREATE_NO_WINDOW in platform_service.py is also caught
+        svc.write_text("# missing flag\n", encoding="utf-8", newline="\n")
+        svc_errors = host_gate.verify_windows_windowless_spawns([self.root])
+        self.assertEqual(len(svc_errors), 1)
+        self.assertIn("diagnostics: mindie_diagnostics/platform_service.py", svc_errors[0])
+        svc.write_text("subprocess.CREATE_NO_WINDOW\n", encoding="utf-8", newline="\n")
 
         # 2. First present candidate is authoritative: if github_transport.py omits CREATE_NO_WINDOW, fail
         transport.write_text("# missing flag\n", encoding="utf-8", newline="\n")
@@ -103,12 +117,31 @@ class HostCompatibilityGateTests(unittest.TestCase):
         self.assertIn("mindie-agent-dsh: host3.mjs", errors[0])
 
     def test_which_native_filters_wsl_mounts_and_windows_store_stubs(self):
-        posix_os = SimpleNamespace(name="posix", pathsep=":", environ={"PATH": "/mnt/c/Windows:/shim:/usr/bin"})
+        heads = {
+            "/mnt/c/npm/codex": (
+                b"#!/bin/sh\n"
+                b"case `uname` in *CYGWIN*|*MINGW*|*MSYS*) basedir=`cygpath -w \"$basedir\"`;; esac\n"
+                b"exec node \"$basedir/cli.js\"\n"
+            ),
+            "/mnt/c/work/.venv/bin/kimi": (
+                b"#!/mnt/c/work/.venv/bin/python\n"
+                b"import re, sys\n"
+                b"sys.argv[0] = re.sub(r'(-script\\.pyw|\\.exe)?$', '', sys.argv[0])\n"
+            ),
+        }
+        posix_os = SimpleNamespace(
+            name="posix",
+            pathsep=":",
+            environ={"PATH": "/mnt/c/npm:/shim:/usr/bin"},
+            read_head=lambda p: heads.get(str(p), b"MZ\x90\x00"),
+        )
 
         def posix_which(cmd, path=None):
             mapping = {
+                "/mnt/c/npm": f"/mnt/c/npm/{cmd}",
                 "/shim": f"/shim/{cmd}.cmd",
                 "/usr/bin": f"/usr/bin/{cmd}",
+                "/mnt/c/work/.venv/bin": f"/mnt/c/work/.venv/bin/{cmd}",
             }
             return mapping.get(path)
 
@@ -116,6 +149,17 @@ class HostCompatibilityGateTests(unittest.TestCase):
         self.assertEqual(
             host_gate.which_native("codex", os_mod=posix_os, shutil_mod=fake_shutil),
             "/usr/bin/codex",
+        )
+        # Valid Linux pip/uv virtualenv script on /mnt/c/... (including r'(-script\.pyw|\.exe)?$') is accepted
+        venv_os = SimpleNamespace(
+            name="posix",
+            pathsep=":",
+            environ={"PATH": "/mnt/c/work/.venv/bin:/usr/bin"},
+            read_head=lambda p: heads.get(str(p), b"\x7fELF"),
+        )
+        self.assertEqual(
+            host_gate.which_native("kimi", os_mod=venv_os, shutil_mod=fake_shutil),
+            "/mnt/c/work/.venv/bin/kimi",
         )
 
         win_stub = r"C:\Users\alice\AppData\Local\Microsoft\WindowsApps\python.exe"
@@ -162,7 +206,12 @@ class HostCompatibilityGateTests(unittest.TestCase):
             captured.update(kwargs)
             return subprocess.CompletedProcess(argv, 0, "ok", "")
 
-        nt_os = SimpleNamespace(name="nt", pathsep=";", environ={"PATH": r"C:\Git\cmd"}, stat=os.stat)
+        nt_os = SimpleNamespace(
+            name="nt",
+            pathsep=";",
+            environ={"PATH": r"C:\Git\cmd"},
+            stat=lambda _p: SimpleNamespace(st_size=102400),
+        )
         nt_subproc = SimpleNamespace(
             CREATE_NO_WINDOW=0x08000000,
             run=fake_run,
@@ -174,6 +223,82 @@ class HostCompatibilityGateTests(unittest.TestCase):
             res = gate._run_cmd(["git", "--version"])
         self.assertEqual(res.returncode, 0)
         self.assertEqual(captured.get("creationflags"), 0x08000000)
+
+        # Launch boundary preserves rejection: non-native .exe on POSIX returns 127 without calling subprocess.run
+        posix_os = SimpleNamespace(name="posix", pathsep=":", environ={"PATH": "/usr/bin"})
+        never_run = SimpleNamespace(
+            run=lambda *_a, **_kw: (_ for _ in ()).throw(AssertionError("subprocess.run must not be called")),
+            CompletedProcess=subprocess.CompletedProcess,
+        )
+        with patch.object(gate, "os", posix_os), patch.object(gate, "subprocess", never_run):
+            rejected = gate._run_cmd(["/mnt/c/Windows/git.exe", "--version"])
+        self.assertEqual(rejected.returncode, 127)
+
+        # Smart App Control OSError (e.g. WinError 4551) maps to exit 126, while TimeoutError propagates
+        sac_subproc = SimpleNamespace(
+            CREATE_NO_WINDOW=0x08000000,
+            run=lambda *_a, **_kw: (_ for _ in ()).throw(OSError(4551, "Smart App Control blocked file")),
+            CompletedProcess=subprocess.CompletedProcess,
+        )
+        with patch.object(gate, "os", nt_os), patch.object(gate, "subprocess", sac_subproc), patch.object(
+            gate.shutil, "which", return_value=r"C:\Python\python.exe"
+        ):
+            sac_res = gate._run_cmd(["python", "--version"])
+        self.assertEqual(sac_res.returncode, 126)
+
+        timeout_subproc = SimpleNamespace(
+            CREATE_NO_WINDOW=0x08000000,
+            run=lambda *_a, **_kw: (_ for _ in ()).throw(TimeoutError("probe timed out")),
+            CompletedProcess=subprocess.CompletedProcess,
+        )
+        with patch.object(gate, "os", nt_os), patch.object(gate, "subprocess", timeout_subproc), patch.object(
+            gate.shutil, "which", return_value=r"C:\Python\python.exe"
+        ):
+            with self.assertRaises(TimeoutError):
+                gate._run_cmd(["python", "--version"])
+
+    def test_configured_non_native_codex_binary_is_reported_without_launching(self):
+        codex_repo = self._make_repo("mindie-agent-codex")
+        compat_file = codex_repo / "plugins" / "mindie-agent" / "harness-compatibility.json"
+        compat_file.parent.mkdir(parents=True)
+        compat_file.write_text(
+            '{\n'
+            '  "schema": "mindie.harness_compatibility/1",\n'
+            '  "harness": "codex",\n'
+            '  "supported": [{"minimum": "0.150.0", "maximum": "0.199.0", "include_prerelease": true}],\n'
+            '  "used_interfaces": ["codex.plugin.manifest/1"],\n'
+            '  "interface_registry": {"codex.plugin.manifest/1": {"introduced": "0.150.0"}}\n'
+            '}\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+
+        bad_exe = self.root / "codex.exe"
+        bad_exe.write_bytes(b"MZ\x90\x00")
+        cfg_dir = Path(os.environ["MINDIE_CONFIG_HOME"])
+        cfg_dir.mkdir(parents=True, exist_ok=True)
+        (cfg_dir / "codex.json").write_text(
+            f'{{"native_context": {{"MINDIE_CODEX_BIN": "{bad_exe.as_posix()}"}}}}\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+        launched: list[list[str]] = []
+        posix_os = SimpleNamespace(
+            name="posix",
+            environ=os.environ,
+            path=os.path,
+            pathsep=":",
+        )
+        with patch.object(host_gate, "os", posix_os):
+            errors = host_gate.verify_local_host_compatibility_impl(
+                [self.root],
+                ensure_knowledge_importable=lambda _r: True,
+                which_fn=lambda _c: None,
+                run_cmd=lambda argv: launched.append(argv) or subprocess.CompletedProcess(argv, 0, "0.153.4", ""),
+            )
+        self.assertEqual(launched, [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("configured Codex CLI is not a native executable", errors[0])
 
 
 if __name__ == "__main__":
