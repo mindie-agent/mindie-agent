@@ -567,12 +567,30 @@ def verify_components_and_plugins(
     return errors
 
 
-def verify_flexible_component_compatibility(siblings_roots: list[Path]) -> list[str]:
+def verify_flexible_component_compatibility(
+    siblings_roots: list[Path],
+    *,
+    main_repo: Path | None = None,
+    require_siblings: bool = False,
+    required_repos: list[str] | tuple[str, ...] = (),
+) -> list[str]:
     """Verify that the latest shared component code is API-compatible with all 7 host plugins."""
+
+    def _run_windowless(roots: list[Path]) -> list[str]:
+        if main_repo is None and not require_siblings and not required_repos:
+            return verify_windows_windowless_spawns(roots)
+        return verify_windows_windowless_spawns(
+            roots,
+            main_repo=main_repo,
+            require_siblings=require_siblings,
+            required_repos=required_repos,
+        )
+
     return verify_flexible_component_compatibility_impl(
         siblings_roots,
         ensure_knowledge_importable=_ensure_knowledge_importable,
-        windowless_check=verify_windows_windowless_spawns,
+        windowless_check=_run_windowless,
+        require_siblings=require_siblings,
     )
 
 
@@ -670,7 +688,12 @@ def main(argv: list[str] | None = None) -> int:
                             verify_commits=True,
                         )
                     )
-    r4_errors = verify_flexible_component_compatibility(siblings_roots)
+    r4_errors = verify_flexible_component_compatibility(
+        siblings_roots,
+        main_repo=main_repo,
+        require_siblings=args.require_siblings,
+        required_repos=args.release_repo,
+    )
     if args.verify_github_releases:
         if _ensure_knowledge_importable(siblings_roots):
             r3_errors.extend(verify_current_release_heads())

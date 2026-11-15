@@ -265,6 +265,7 @@ class ReleaseDocScopeTests(unittest.TestCase):
         # route through product checks even when it is the only changed input.
         for relative in (*PRODUCT_DOC_PATHS, ".github/scripts/release_doc_hygiene.py",
                          ".github/scripts/host_compatibility_gate.py",
+                         ".github/scripts/windows_zero_popup_gate.py",
                          ".github/workflows/pr-checklist.yml"):
             with self.subTest(relative=relative):
                 base = head
