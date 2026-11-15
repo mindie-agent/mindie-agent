@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent 开源仓库与下载统计</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-15 03:11 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-15 11:38 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -39,8 +39,8 @@
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release 下载量</text>
-  <text x="734" y="124" class="font kpi-val">17,479</text>
-  <text x="734" y="144" class="font kpi-sub">含全部附件共 34,615 次</text>
+  <text x="734" y="124" class="font kpi-val">17,505</text>
+  <text x="734" y="144" class="font kpi-sub">含全部附件共 34,739 次</text>
   <rect x="24" y="174" width="912" height="178" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">客户端插件拉取分布</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -115,7 +115,7 @@
   <text x="545" y="493" text-anchor="end" class="mono td-num">0 / 3</text>
   <text x="665" y="493" text-anchor="end" class="mono td-bold">9,645</text>
   <text x="815" y="493" text-anchor="end" class="mono td-num">5,710 (485)</text>
-  <text x="920" y="493" text-anchor="end" class="mono td-num">11,618</text>
+  <text x="920" y="493" text-anchor="end" class="mono td-num">11,631</text>
   <rect x="25" y="505" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="505" x2="936" y2="505" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="522" r="3.5" fill="#D97757"/>
@@ -125,7 +125,7 @@
   <text x="545" y="526" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="526" text-anchor="end" class="mono td-bold">3,513</text>
   <text x="815" y="526" text-anchor="end" class="mono td-num">965 (213)</text>
-  <text x="920" y="526" text-anchor="end" class="mono td-num">426</text>
+  <text x="920" y="526" text-anchor="end" class="mono td-num">427</text>
   <line x1="24" y1="538" x2="936" y2="538" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="555" r="3.5" fill="#2563EB"/>
   <text x="50" y="559" class="mono td-repo">mindie-agent-kimi</text>
@@ -144,7 +144,7 @@
   <text x="545" y="592" text-anchor="end" class="mono td-num">0 / 0</text>
   <text x="665" y="592" text-anchor="end" class="mono td-bold">2,539</text>
   <text x="815" y="592" text-anchor="end" class="mono td-num">957 (260)</text>
-  <text x="920" y="592" text-anchor="end" class="mono td-num">182</text>
+  <text x="920" y="592" text-anchor="end" class="mono td-num">185</text>
   <line x1="24" y1="604" x2="936" y2="604" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="621" r="3.5" fill="#4285F4"/>
   <text x="50" y="625" class="mono td-repo">mindie-agent-agy</text>
@@ -191,7 +191,7 @@
   <text x="545" y="757" text-anchor="end" class="mono td-num">1 / 2</text>
   <text x="665" y="757" text-anchor="end" class="mono td-bold">7,817</text>
   <text x="815" y="757" text-anchor="end" class="mono td-num">2,865 (1,930)</text>
-  <text x="920" y="757" text-anchor="end" class="mono td-num">187</text>
+  <text x="920" y="757" text-anchor="end" class="mono td-num">196</text>
   <rect x="25" y="769" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="769" x2="936" y2="769" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="786" r="3.5" fill="#475569"/>
