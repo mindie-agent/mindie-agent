@@ -54,43 +54,43 @@ flowchart LR
     E --> C[进程所有权、超时与排空]
 ```
 
-本机满足请求时可以本地执行，包括高配 Windows/macOS/Linux 工作站；不按操作系统名称决定放置。需要远端专属环境或设备时再选择匹配的远端。内存不足一名 worker 时应等待、分流或拒绝，不能仅用 `max(1, ...)` 强行启动。
+本机硬件规格充裕时（包括高配 Windows / macOS / Linux 开发工作站），任务可直接在本地执行，绝不按操作系统名称硬编码一刀切分流；仅当本机容量不足或任务明确需要远端专属容器与物理 NPU 时，才自动路由至匹配的远端主机。若可用主机内存连单个 Worker 的峰值需求都无法满足，执行层应显式等待、分流至大内存节点或直接报错拒绝，严禁用 `max(1, ...)` 强行拉起必然 OOM 的任务。
 
-coordinator 的环境 catalog 负责兼容环境和构建 donor；容量来自同次放置决策的 fleet 快照。显式声明 CPU/内存/HBM 下限时，每个候选主机取一次观测并传给 donor 选择、容器开通检查和后续兼容性判断。未声明这些约束的旧作业不增加探测。探测失败沿用现有 waiting/cache-miss 结果并保留主机错误，不伪装成空集群。
+在 `coordinator` 内部，环境目录（Catalog）负责筛选兼容的软件栈与 Donor 解释器，而硬件容量判定则消费同一次放置决策采集的集群快照（`host_specs`）：当请求显式声明了 CPU、内存或 HBM 下限时，每个候选主机仅采样一次，并将同一份观测结果复用于 Donor 选择、容器准备检查与后续兼容性判定；未声明资源下限的旧式作业则零新增探测开销。若某台候选主机探测失败，系统沿用既有的 `waiting` / `cache-miss` 状态并完整保留该主机的原始错误信息，绝不将其伪装成“空闲无机器”。
 
-这是候选可行性检查，不能冒充资源保留。编译期间容量可能变化；真正启动设备负载时，已有主机队列仍是当前设备状态和租约的唯一授予者。后续逐设备 HBM 约束应接到这个现有授予点，消费当前观测与请求，不再建立第二套分配账本，也不以准备开始时的旧快照保证启动时显存充足。
+需要注意，放置阶段的容量比对仅属于**候选可行性初筛**，并不等同于物理资源预留：在漫长的镜像/编译准备期间，主机负载与空闲显存随时可能变化。真正拉起设备负载时，目标主机上的既有租约队列（`HostQueue`）仍是当前设备状态与物理租约的唯一权威授予者。后续逐卡/逐 Die 的 HBM 余量门禁也应直接内聚到该授予点，基于启动时刻的最新观测与任务请求做原子裁决——既不另建第二套显存分配账本，也不拿编译开始前的旧快照去担保启动时不发生 OOM。
 
-规格判定本身是纯算术；采集 fleet 可能需要 SSH。不能把网络探测连同分流都宣称为“毫秒级”。单次 SSH 的 30s 上限不是整次放置的上限：一次探测可能包含主查询、可选的补充查询与缓存写入，候选主机又是串行的，因此不存在一个已证明的外部总时限，也不应由候选数乘单次上限充当该时限。任何外层期限都必须覆盖这些阶段；短于已知内层预算的期限会把 live 探测中途掐断。缓存观测保留其年龄，不能把 cache hit 改写为实时采集。
+同时必须厘清纯内存算术与网络探测的耗时边界：`evaluate_placement` 自身的规格比对只是微秒级纯算术，但跨机采集 `fleet_probe` 往往涉及真实 SSH 往返，绝不能把“含远端实时探测的分流全链路”笼统宣传为毫秒级。单次 SSH 命令的 `30s` 超时也不等于整轮集群放置的总上限——单台主机探测可能依次经历主查询、可选卡级补充查询与本地缓存落盘，且多台候选主机串行探测时，外层超时预算必须完整覆盖各阶段耗时之和（过短的外层 Deadline 会把正常的实时探测中途掐断）。命中本地缓存的容量快照必须如实保留其采样年龄（Age），不得将缓存命中伪装成刚刚完成的实时探测。
 
-采样时长落在哪条路径上也要分清。守护进程模式（`_async_progress`）在后台进度工作线程上推进，`status`/`target`/`tail` 以非阻塞方式读取已持久化的事实并报告观测新鲜度，不被探测阻塞；同进程同步调用则要等探测返回。不能因此宣称探测对所有调用零开销，也不能宣称它会阻塞状态查询。
+此外，探测耗时落在哪条调用路径上也严格分离：后台守护模式（`_async_progress`）在独立进度线程中异步推进集群探测，`status`、`target` 与 `tail` 等查询接口仅以非阻塞方式读取已落盘的状态与数据新鲜度，绝不会被慢 SSH 探测卡住；而同进程同步调用则必须等待探测返回。文档与契约中既不宣称“远端探测对所有调用零延迟”，也不宣称“探测会阻塞日常状态轮询”。
 
 ## 四、编译槽位只分配一次预算
 
-当前缺口是“主机槽位数 × 每槽 worker 数”分别按同一份整机内存计算。目标是在现有主机队列授予编译租约时给出每槽份额，下游直接使用，不在每个构建脚本里重新证明整机容量。
+当前实现的一项已知缺口在于：“主机并发编译槽位数（Slots）”与“单槽内部并行编译进程数（Workers）”各自独立读取同一份宿主机 `MemAvailable` 计算上限，极端并发下两者的乘积仍可能超出整机物理内存。目标演进方案是在主机队列授予 `CompileLease` 时一次性算出单槽专属的 CPU/内存配额并随租约下发，供下游构建脚本直接消费，无需每个脚本各自重复探测整机容量：
 
-1. 实际执行主机读取 CPU 可用配额和内存 headroom；Linux 同时考虑 cgroup CPU 配额、`memory.max - memory.current` 与宿主 `MemAvailable`。本地开发机的 `MAX_JOBS` 不能冒充远端规格。
-2. 初期按已配置的并发槽位数静态分份额，避免后续槽位进入时使早先授予失效。对于同质 worker，需满足 `slots * jobs_per_slot <= floor(usable_memory / worker_peak)`，同时受 CPU 配额约束；不够一名 worker 时不授予。
-3. `CompileLease` 复用既有授予回执携带份额，`PreparationProcess` 将其传给构建环境。`MAX_JOBS`、`MINDIE_BUILD_JOBS`、`CMAKE_BUILD_PARALLEL_LEVEL` 消费同一个上限；显式降低可以保留，不能绕过授予上限。
-4. 在授予到消费的链路与兼容行为完成前，不先删除现有 worker 上限。旧组件无法提供份额时明确说明保护能力未提供，不声称乘积预算已经成立。
-
-这是一项待实施的协议接线，不是已完成的全局资源隔离。是否需要动态份额，留给静态方案的实机观测回答。
+1. **按真实执行环境采集配额**：由实际执行编译的目标主机读取可用 CPU 配额与内存余量；在 Linux 容器内同时取 cgroup CPU 配额、`memory.max - memory.current` 与宿主机 `MemAvailable` 的交集下界，严禁拿本地开发机的 `MAX_JOBS` 充当远端容器规格。
+2. **静态切分乘积闭环**：初期按主机配置的并发编译槽位数静态切分单槽预算，防止后进入的编译任务挤爆早先已获批的槽位。对于同质编译 Worker，必须同时满足 CPU 配额约束与内存乘积不等式 `slots * jobs_per_slot <= floor(usable_memory / worker_peak)`；若单槽分得的内存不足以支撑 `1` 个编译 Worker，则挂起等待或拒绝授予租约。
+3. **租约回执透传与统一环境变量消费**：`CompileLease` 直接复用既有租约回执结构携带单槽并发上限，由 `PreparationProcess` 统一注入构建环境，令 `MAX_JOBS`、`MINDIE_BUILD_JOBS` 与 `CMAKE_BUILD_PARALLEL_LEVEL` 共同服从同一上限（允许调用方显式传更小的并发数，但严禁越过租约授予上限）。
+4. **平滑演进与诚实能力声明**：在“队列授予 → `CompileLease` → 构建脚本消费”全链路打通并完成兼容验证前，暂保留构建脚本现有的本地保底计算；当旧版组件尚未下发槽位份额时，如实标注乘积内存保护尚未启用，绝不提前宣称全局乘积预算已闭环。是否需要进一步引入动态弹性份额，留待静态切分方案上线后的真机遥测数据决定。
 
 ## 五、进程回收与内存硬限额分开验收
 
-Windows Job Object 可以对关联进程设置作业级内存限制（仅当显式传入 `OwnedProcess(max_memory_mb=...)` 时启用）；POSIX 进程组与 Linux subreaper 提供进程树所有权、超时取消和后代排空。[Job Memory Limit](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information) 与单进程限制不同；POSIX [RLIMIT_AS](https://docs.python.org/3/library/resource.html#resource.RLIMIT_AS) 仅限制单进程虚拟地址空间，不能作为整个子进程树物理内存（RSS）硬上限的证明。**因此，绝不能宣称当前代码已在跨平台（Windows / Linux / macOS）上实现了统一的进程树内存硬上限。**
+在跨平台进程管理中，**进程树生命周期回收**与**内核级物理内存硬限额（Hard Limit）**是两项完全独立的能力：
+- Windows 命名 Job Object（`KILL_ON_JOB_CLOSE`）支持在显式传入 `OwnedProcess(max_memory_mb=...)` 时配置作业级内存上限（[Job Memory Limit](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information)）；
+- POSIX 进程组与 Linux `PR_SET_CHILD_SUBREAPER` 保障了子孙进程树归属追踪、超时取消与退出排空，但标准 POSIX [`RLIMIT_AS`](https://docs.python.org/3/library/resource.html#resource.RLIMIT_AS) 仅限制单个进程的虚拟地址空间，既管不住多进程编译树的总物理驻留内存（RSS），也会误伤合法的大虚拟地址映射。
 
-Linux 的整树内存硬限额应使用实际已部署且具备写权限的 [cgroup v2 内存控制器](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files)；macOS 在没有等价内核机制时明确报告 `observed-only` 能力。调用方可按任务需要的执行能力选择目标，不以操作系统名称代替能力探测。任何实现都不能把“调用方传入了 `max_memory_mb` 参数”等同于“操作系统内核已经对该进程树强制执行了内存硬限额”。
+**因此，绝不能宣称当前代码已在 Windows、Linux 与 macOS 三端实现了统一的进程树物理内存硬上限。** 在 Linux 上强制约束整棵子进程树的物理内存峰值，必须接入已实际挂载且具备写权限的 [cgroup v2 内存控制器（`memory.max`）](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-interface-files)；而在缺乏等价内核机制的 macOS 上，运行时应如实报告 `observed-only`（仅观测告警、无内核硬拦截）。上层调用方按任务所需的真实执行保障能力筛选目标机器，而非按 `sys.platform` 字符串盲猜；任何实现均不得把“函数接收了 `max_memory_mb` 参数”偷换概念说成“内核已强制启用整树内存硬限额”。
 
-清理和记账错误保持可见，但不覆盖已确认的业务结果；外部写的不确定性沿用现有 receipt 语义，不为本地探测或分流创建永久故障状态。
+收尾阶段的进程清理与本地记账异常必须显式保留告警，但不得覆写已确认成功的业务主结果；不可逆外部写入的结果不确定性继续沿用标准 `unknown` 回执对账机制，绝不为本地容量探测或分流失败写入永久自锁死状态。
 
 ## 六、分期与判别性验收
 
-| 阶段 | 归属与实际改动 | 能证明什么 |
+| 演进阶段 | 责任组件与核心改动 | 验收能证明的真实边界 |
 | --- | --- | --- |
-| 容量语义 | remote-dev 统一物理 Die/空闲 HBM；coordinator parser 保留实测 HBM，忙闲单独判定 | 真实 A2/A3/A5 golden capture 的单位与可用量正确；不证明任务已实机运行 |
-| 放置接线 | coordinator 从真实 catalog 与 fleet seam 执行约束，无约束零新增 probe | TaskClient→service→RuntimePool 的满足/不足/探测失败路径与一次观测复用 |
-| 编译份额 | 既有主机队列→CompileLease→PreparationProcess→编译器 | 单测证明乘积上限与接线；实机再验证并发编译的进程数、峰值内存和退出回收 |
-| 组件入口 | sim/profiler 在实际 CLI 接入工作集估算与规格分流 | 低规格/高规格主机的分流及不足一个 worker 时不启动；不是全模型仿真精度验收 |
-| 内存执行能力 | 各平台既有进程 owner 接入真实内核能力 | Windows/Linux/macOS 分别报告已实现的 hard-limit 或 observed-only；超时回收与内存限制分别验证 |
+| **1. 容量与物理单元语义对齐** | `remote-dev` 统一按可租用物理 Die 与实测空闲 HBM 建模；`coordinator` 解析器保留实测 HBM 并与设备忙闲解耦 | 证明 A2 / A3 双 Die / A5 真机 Golden Capture 下的物理单元计数与可用显存核算准确（不等于已跑通端到端业务负载） |
+| **2. 集群放置与单次探测接线** | `coordinator` 打通环境 Catalog 与 `fleet_probe` 容量快照校验，无资源约束的旧作业保持零额外探测 | 证明 `TaskClient` → `service` → `RuntimePool` 的容量满足、容量不足与探测失败三条路径行为正确且单轮仅探测一次 |
+| **3. 编译槽位乘积预算闭环** | 打通主机队列 → `CompileLease` → `PreparationProcess` → 构建环境变量（`MAX_JOBS` 等）配额透传 | 单测证明乘积不等式与参数透传生效；真机并发编译进一步验证实际子进程数、RSS 内存峰值与中断排空 |
+| **4. 分析与仿真 CLI 动态分流** | `sim` 与 `profiler` 在真实 CLI 入口接入工作集动态估算与本机/远端自动分流 | 证明低配轻薄本自动分流远端、高配工作站原地执行、内存不足单 Worker 时安全拦截（不等同于全模型仿真精度验收） |
+| **5. 平台原生内存硬限额接入** | 各平台进程管理器按内核真实能力接入 Job Limit 或 cgroup v2 `memory.max` | 证明 Windows / Linux / macOS 分别如实报告 `hard-limit` 或 `observed-only`，且超时进程排空与内存越界拦截各自独立通过验证 |
 
-真实主机验证使用隔离状态目录，不扰动现有工作负载。CPU 单测、容器边界、NPU 执行与模型收益分别记录；没有实机证据的阶段保持待验收。
+所有真机集成验收均须使用隔离的临时状态目录，严禁干扰集群现有线上任务。纯 CPU 单测、容器边界测试、NPU 实机执行与端到端模型性能收益必须分项独立记录；尚未取得真机实测证据的阶段一律保持“待验收”状态。

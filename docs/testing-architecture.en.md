@@ -2,11 +2,13 @@
 
 [中文](testing-architecture.md) · [Back to Documentation Center](README.en.md)
 
-This document defines the unified **Test Validity Redlines** and **Four-Tier Testing Pyramid (Tier 0 – Tier 3)** across all MindIE Agent repositories (`knowledge`, `remote-dev`, `coordinator`, `profiler`, `sim`, `npu-top`, `diagnostics`, native Harness plugins, and `mindie-bench`).
+This document defines the unified **Test Validity Redlines** and **Four-Tier Testing Pyramid (Tier 0 – Tier 3)** across all MindIE Agent repositories (`knowledge`, `remote-dev`, `coordinator`, `profiler`, `sim`, `npu-top`, `diagnostics`, `debugger`, native Harness plugins, and `mindie-bench`).
 
 > **Note**: The four tiers and time budgets below are engineering design targets; the exact source SHAs, test scopes, environments, wall times, and known boundaries for each release are recorded in the corresponding [Release Records](README.en.md#release-records--roadmap).
 
 - Governed by: [Engineering Design Principles](design-principles.en.md) · [Architecture & Module Boundaries](architecture.en.md)
+
+Dedicated evaluation plans for the knowledge flywheel and `L1–L4` architectural capabilities are documented in the [L1–L4 Knowledge Flywheel Testing Plan](knowledge-tiered-testing-plan.md). Note the two orthogonal numbering schemes: `L1–L4` denotes cognitive and execution knowledge tiers (`axiom/measurement`, `sop`, `workflow`, and `mutator` units in `knowledge`), whereas `Tier 0–3` denotes engineering test execution scope; full-task net value, cross-task learning, and multi-round exploration experiments carry dedicated budgets rather than being approximated by short Canary runs.
 
 ---
 

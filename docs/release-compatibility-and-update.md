@@ -4,9 +4,7 @@
 
 本文说明 MindIE Agent 的双层版本演进架构（特性里程碑与主仓产品组合清单 `channels/0.1.json`）、组件与插件配套发布门禁、宿主 CLI 兼容性筛选规则，以及共享运行时组件的独立正式 Release 发现、旁路隔离 `uv` 环境构建与空闲切换机制。
 
-2026-10-29 的知识 P0 开发补充了独立组件绑定的更新覆盖与版本下限检查，具体实现和配对验证边界见 [P0 验收记录](audits/2026-10-29-knowledge-p0.md)。源码合入、正式发布和已安装用户的运行绑定切换分别记录；未发布的开发提交不能作为正式 Release 的升级验收证据。
-
-该轮配套正式版本与四端实际安装结果见 [0.1.4 发布记录](releases/0.1.4.md)及[自动升级验收](releases/0.1.4/automatic-update-acceptance.json)。验收回读实际解释器中的包版本、提交与新进程工具目录；插件注册版本不代替运行时证据。发现的 DSH 发布失败与 Kimi 组件回退均保留原始结论，修复后的自动路径和一次性恢复分别列明。
+> **历史验收说明**：2026-10-29 的知识 P0 演进补齐了独立组件绑定的后台更新覆盖与版本下界保护（详见 [P0 验收记录](audits/2026-10-29-knowledge-p0.md)），配套正式版本与四端实装结果见 [0.1.4 发布记录](releases/0.1.4.md) 与 [自动升级验收回执](releases/0.1.4/automatic-update-acceptance.json)。所有升级验收均严格区分“源码合入”、“正式 Release 发布”与“既有安装运行态切换”三个阶段，直接回读真实运行解释器中的包版本、Commit SHA 与新进程加载的工具目录，绝不用未发布的开发提交或静态注册版本号充当运行态生效证据；实测暴露的 DSH 发布异常与 Kimi 组件回退亦完整保留原始记录，并将自动升级路径与一次性手动恢复分开列明。
 
 - 遵循准则：[工程设计原则与演进准则](design-principles.md)
 - 主仓产品组合清单：[`channels/0.1.json`](../channels/0.1.json)（`schema: "mindie-release-channel/1"`，`track: "0.1"`）
@@ -73,26 +71,23 @@ MindIE Agent 对外发布的是**经过验证的组件与插件组合**。OpenAI
 2. 并行准备并发布依赖它们的 [`remote-dev`](https://github.com/mindie-agent/remote-dev)、[`knowledge`](https://github.com/mindie-agent/knowledge)、[`profiler`](https://github.com/mindie-agent/profiler) 与 [`npu-top`](https://github.com/mindie-agent/npu-top)；
 3. 发布锁定正式 `remote-dev` 与 `diagnostics` 版本的 [`coordinator`](https://github.com/mindie-agent/coordinator)；
 4. 若需同步发布宿主插件，则发布锁定实际运行时依赖的四个宿主插件（[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)），最后更新 [`channels/0.1.json`](../channels/0.1.json) 并汇总发布主仓库版本说明。
-   - 宿主插件运行时基线包含 `knowledge`、`remote-dev` 与 `diagnostics`，打包依赖不代表默认暴露知识接口。Codex `0.1.8` 的默认 MCP 仅注册 remote-dev 和确定性组件入口，知识目录由手动 Skill 私有加载；`coordinator`、`profiler`、`sim` 可独立安装并接入这些入口，`npu-top` 保持为面向人的独立看板。其他宿主按各自发布记录核验发现边界。
-   - `mindie-bench` 版本独立演进。各仓发布入口跟随其受保护 `main` 上的统一控制器；每次运行先核验控制器 CI，再固定本次唯一工具 Commit SHA，供依赖校验、基准和发布共同使用。
+   - 宿主插件运行时基线默认打包 `knowledge`、`remote-dev` 与 `diagnostics`（以及 `debugger`），但打包依赖不等于默认公开暴露知识接口：例如自 Codex `0.1.8` 起，默认 MCP 工具发现仅注册 `remote-dev` 与确定性工程组件入口，`knowledge` 工具目录仅在手动调用 `/mindie-agent` Skill 时私有挂载；独立安装的 `coordinator`、`profiler`、`sim` 可直接接入确定性入口，`npu-top` 则保持为面向开发者的独立监控看板（其余宿主按各自发布验收记录核对发现边界）。
+   - `mindie-bench` 保持独立版本号演进。各代码仓的发布工作流统一委托受保护 `main` 分支上的发布控制器执行：每次发版先校验控制器自身 CI 状态，再解析并锁定唯一工具 Commit SHA，供后续依赖核验、基准测试与正式发布全程共用。
 
 ### 标准发布事务与服务端约束
 
-代码仓统一从受保护主分支启动 `release.yml` 的 `workflow_dispatch`。版本、依赖、README 与发布说明先通过 PR 合入，主分支全部 CI 成功后执行：
+所有代码仓统一在版本、依赖、README 与发布说明经 PR 合入且受保护 `main` 分支 CI 全绿后，通过 `workflow_dispatch` 触发 `release.yml`：
 
 ```bash
 gh workflow run release.yml --repo mindie-agent/sim --ref main
 ```
 
-每个调用方显式传入 `MINDIE_RELEASE_DEPLOY_KEY`，复用工作流将其声明为必填，并在主分支专用环境中先验证可用性，避免完成长测试后才发现密钥未传递。控制器使用已发布旧更新器声明的完整运行依赖，提前执行其真实进程接口，再核验实际安装的第一方依赖、构建安装包并生成干净源码基准。候选源明确标为暂存输入，旧更新器实际完成版本发现、隔离整代安装、清单回读和组件 CLI 探针。Codex 插件还需从正式 `0.1.23` 安装出发，先独立升级组件并设置外部 sim/profiler 解释器，再通过原生更新器完成候选插件安装和空闲切换，验证组件版本不回退、外部标准入口重绑、禁用的 Stop hook 保留，以及新宿主进程实际加载的 MCP 目录。
+1. **前置密钥与旧版消费端真实接口校验**：调用方必须显式传入 `MINDIE_RELEASE_DEPLOY_KEY`；复用工作流将其声明为必填项，并在耗时的测试启动前先在 `main` 专属发布环境中验证密钥可用性。发布控制器先按已发布旧版更新器声明的完整依赖安装真实运行环境并实际拉起其进程接口，再依次完成第一方依赖校验、安装包构建与干净工作区基准测试。候选发布源显式标记为暂存输入（Staged Feed），由未修改的旧版更新器真实跑通版本发现、旁路隔离安装、清单回读与组件 CLI 探针。其中 Codex 插件发版还需从正式版 `0.1.23` 既有安装出发，先独立升级底层组件并绑定外部 `sim`/`profiler` 解释器，再通过原生更新器完成候选插件安装与空闲切换，端到端验证组件版本单调不回退、外部标准命令重绑、已禁用的 `Stop` Hook 保持禁用，以及新宿主进程实际加载的 MCP 工具目录。
+2. **原生插件元数据自动拼装（`mindie-plugin-release.json`）**：各端原生宿主插件的 `mindie-plugin-release.json` 由共享发布流水线在构建打包后自动生成，无需维护者手动执行生成脚本。元数据严格取自已核验的包版本号、精确测试提交 SHA 以及该提交内的规范兼容性清单（仓库映射、清单路径与校验逻辑统一复用固定版本的已发布旧更新器）。缺失该资产时自动生成，已有同名资产则必须逐字节匹配候选内容；一旦兼容性声明缺失、格式陈旧或工作区偏离测试提交，流水线立即在计算校验和、升级验收及创建草稿前报错阻断。共享运行时组件则继续沿用各自的组件发行契约。
+3. **私有草稿核验、精确打 Tag 与发后二次干净升级验收**：所有构建产物与升级证据先上传至私有 Release Draft 并逐一下载核验；全流程统一以创建接口返回的数值 Draft ID 作为归属校验、资产上传、删除对账与发布回读的唯一权威标识，绝不用尚未创建的 Tag 别名去猜测私有草稿是否存在。待全部草稿校验通过后，才由 `main` 专属发布环境中的部署密钥对精确测试提交创建不可变 Tag 并正式公开 Release。正式公开后，独立干净作业再从全新旧版客户端配置出发，走公网正式发布源完整重跑一遍后台发现与升级：两阶段验收报告均归档至工作流产物，候选阶段报告随包发布为 `upgrade-acceptance.json`（Codex 额外随包发布 `native-upgrade-acceptance.json`）。任一环节失败即终止发版；任何状态不确定的外部写入先只读回读对账，已公开的正式 Release 资产严禁原地覆写或事后补传。
+4. **服务端分支、Tag 与不可变 Release 强约束**：GitHub 服务端规则限制所有 Tag 仅允许 `mindie-release`（仅限 `main` 分支）专用环境中的发布部署密钥创建，禁止任何身份更新或删除已有 Tag，并强制开启 **Immutable Releases（不可变正式版）**；受保护 `main` 分支强制要求 PR 评审、全平台汇总 CI 与 PR 自查清单门禁。部署审计通过管理员 API 核验不可变开关、Tag 绕过白名单与发布环境分支限制，发布工作流则在自身令牌权限内核验公开可读的 Tag 规则及公开后 Release 的 `immutable == true` 字段——管理员接口返回 HTTP `403` 绝不当作“校验通过”，公开接口响应中省略的绕过列表也绝不当作“无绕过者”。除仓库管理员显式变更控制面策略外，任何手工打 Tag 或残缺发版操作均无法绕过上述服务端防线。
 
-六端原生插件的 `mindie-plugin-release.json` 由共享发布流水线在打包后自动准备，调用方无需另行添加生成命令。内容来自已核验的包版本、精确测试提交和该提交中的规范兼容性声明；仓库映射、声明路径和校验器复用固定版本的已发布旧更新器。缺少资产时生成，已有资产必须与候选一致且保留合法原始字节。声明缺失、旧格式或工作区偏离测试提交时，在校验和、升级验收及草稿创建前失败。共享组件继续使用自身发行契约。
-
-所有资产和升级证据先上传草稿并逐一下载校验。创建响应确认的草稿 ID 贯穿所有权检查、资产上传、删除对账和发布读回，不使用尚未创建的 tag 别名判断草稿是否存在。验证完成后，主分支专用发布环境中的部署密钥才创建精确测试提交的 tag，随后公开完整 Release。公开后再从全新旧客户端配置出发，在独立干净任务中用正常正式发布源重复升级；两阶段报告保留在工作流产物中，候选报告随包发布为 `upgrade-acceptance.json`，Codex 另附 `native-upgrade-acceptance.json`。任何阶段失败均保持失败；已完成的外部写先读回对账，正式资产不覆盖、不拼补。
-
-服务端对全部 tag 限制创建，部署密钥仅由 `mindie-release` 的 `main` 分支环境提供；tag 更新和删除没有绕过者，正式 Release 启用不可变设置。主分支要求 PR、平台 CI 汇总和自查门禁。部署时使用管理员接口核验不可变设置、tag 绕过身份与专用环境分支限制；工作流核验其权限内可读取的 tag 规则，并在公开后核验 Release 的 `immutable` 字段，不能把管理员接口的 403 当成通过，也不能把公开响应中省略的绕过身份当成空列表。仓库管理员主动改变这些控制面设置仍属于显式管理操作；普通手工 tag／不完整发布路径不能绕过当前部署的约束。
-
-在发布共享组件、知识库语料、宿主插件或产品组合前后，**必须按实际发布范围通过 R1–R6**。组件仓正式 Release 是独立更新的发现源；`channels/0.1.json` 是已验证产品组合的历史记录，允许它落后于组件最新正式版。独立发布不要求主仓升版、通道更新或修改其他仓 README：
+在发布任何共享组件、知识语料、宿主插件或主仓产品组合前后，**必须按实际发布范围完整通过 `R1–R6` 六项门禁**。其中各组件仓的正式 GitHub Release 是客户端独立更新的真实发现源，而主仓 [`channels/0.1.json`](../channels/0.1.json) 仅记录某次主产品汇总验证通过的历史组合快照（允许落后于单个组件的最新正式版）。因此，独立发布单个组件、语料或插件时，无需升版主仓、无需改动 `channels/0.1.json`，也无需连坐修改兄弟仓库的 README：
 
 ```bash
 # 独立组件/语料/插件发布：默认 independent，显式选择待发布仓库；可重复 --release-repo。
@@ -105,11 +100,9 @@ python3 .github/scripts/check_auto_update_readiness.py --release-scope product -
 python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
 ```
 
-`--release-repo` 只选择 R6 的独立发布文档范围；省略目标会明确报错，不会退回全量同步。R6 从所选仓的 `pyproject.toml` 或原生插件清单读取候选版本，检查自身版本徽章、当前版本声明、Release/安装链接和 LF。语料使用自身 LF/README 与既有 R2 单元修订门禁，不伪造软件包版本。其他仓的版本漂移、配套产品版本和交叉组件引用不会成为独立发布的文档同步要求。候选 Tag、包和发行资产仍由对应仓的正式发布工作流验证；R1–R5 保留既有组合、语料、依赖和宿主兼容性检查。
-
-`--strict-lockstep` 只控制依赖 pin 是否必须等于通道组合，与文档范围正交；它不会隐式启用全量文档同步。两个全量同步工具 `sync_org_versions.py`、`sibling_readme_sync.py` 的检查和写入都要求显式 `--release-scope product`。周期遥测只更新遥测产物，不再自动改写主仓或组织版本表。
-
-独立发布的宿主插件可以锁定比历史 channel 更新的正式组件。R3 继续校验历史组合，并要求当前插件的依赖 pin 对应正式 Tag；开启 `--verify-github-releases` 时，还检查这些实际依赖的正式 Release 与校验资产，并执行生产客户端的 `Catalog.latest(force=True)`，核验全部八个共享组件加 `mindie-bench` 的实际最新正式版本。历史组合通过不能代替当前更新源健康。产品组合范围仍检查组件版本上限，显式 `--strict-lockstep` 仍要求精确相等。发布新插件无需为了提高这个历史上限而重新发布产品组合。
+- **`R6` 文档范围隔离（`--release-repo` vs `--release-scope product`）**：`--release-repo` 仅圈定独立发布时的 `R6` 文档检查对象（若未传目标仓库且未指定 `product` 范围则直接报错，绝不隐式回退为全量同步）。独立模式下，`R6` 直接读取目标仓库自身的 `pyproject.toml` 或原生插件清单中的候选版本号，仅核查该仓库自身的版本徽章、当前版本声明、Release/wheel 链接与 Unix `LF` 行尾；语料仓仅核查自身 README/`LF` 与既有 `R2` 单元 `revision` 单调性，不凭空捏造软件包版本号；其他仓库的版本演进或配套引用不会阻塞当前仓库独立发版。
+- **锁步依赖开关与全量同步显式解耦**：`--strict-lockstep` 仅控制“插件依赖 Pin 是否必须严格等于通道清单版本”，与 `R6` 文档同步范围完全正交，绝不会隐式触发全仓文档改写。全量同步脚本 `sync_org_versions.py` 与 `sibling_readme_sync.py` 无论检查还是写入均强制要求显式传入 `--release-scope product`；日常定时遥测任务仅更新遥测数据产物，不再自动改写主仓或组织首页版本表。
+- **独立插件发版与在线更新源健康核验**：独立发布的宿主插件允许锁定比历史 `channels/0.1.json` 更新的正式组件版本。此时 `R3` 一方面继续校验历史通道快照完好，另一方面校验当前插件锁定的所有依赖均指向正式 Release Tag；开启 `--verify-github-releases` 时，还会调用生产客户端 `Catalog.latest(force=True)` 实测核验全部 8 个共享组件加 `mindie-bench` 的线上最新正式 Release 与校验和资产——“历史通道组合合法”绝不能替代“当前线上更新源健康”。（唯有在 `--release-scope product` 下才检查插件基线不超过通道上限，显式传入 `--strict-lockstep` 时才要求完全相等；发新插件无需为了抬高历史上限而强行重发主产品组合。）
 
 脚本会逐项输出并强制拦截以下 `R1–R6` 六项必检门禁（任一项未通过直接返回非零退出码）：
 - [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性、内部描述字段（`known_boundaries`、`patch_releases[-1]`）与当前版本说明（`docs/releases/<patch>.md` 及 `.en.md` 十三仓版本与 SHA 表）的一致性，并区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
@@ -133,7 +126,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
 | **8. 既有安装升级验收** | 从仍受支持的已发布插件及其旧更新器出发验证候选准备、失败保留旧代与空闲切换；检查最终宿主包保留 MCP 超时、环境变量和用户授权，并核对实际加载的工具目录与参数。隔离候选源验证须明确标注；正式发布后，再验证正常后台发现与激活路径 |
 | **9. 按范围检查发布文档** | 独立发布只维护所选仓自身版本与 README/LF。只有主动更新 `channels/0.1.json`、发布产品组合时，才运行 `sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>`，全量同步主仓说明、组合版本表、兄弟仓配套引用和组织首页；不因组件领先历史组合而创建主仓维护版。 |
 
-组件独立更新适用于宿主插件接口不变的组件修复。若变更涉及原生工具目录、宿主 MCP 超时、插件环境变量或常驻启动器自身代码，必须发布包含这些变更的插件版本。更新回执应区分“候选已准备”“安装绑定已切换”与“宿主已加载新定义”：磁盘上的版本或组件指针更新，不能单独证明常驻宿主中的新接口已经生效。沿用宿主支持的刷新边界；需要自然重载或新进程时，保留活动会话，并明确记录该边界。
+组件独立热更新仅适用于**宿主插件对外接口保持不变**的底层组件修复与优化。一旦变更涉及原生工具目录、宿主 MCP 超时配置、插件环境变量或常驻启动器自身代码，则必须同步发布包含该变更的新版宿主插件。同时，升级验收回执必须严格区分**“候选环境已准备就绪”**、**“本地安装绑定指针已切换”**与**“常驻宿主进程已实际加载新定义”**三层状态：磁盘上的版本号或组件指针更新，并不单独证明正在运行的常驻宿主已经刷新了内存中的工具目录；需遵循各宿主原生支持的重载边界，在需要自然重启或新开进程生效时妥善保留在途活跃会话，并如实记录该生效边界。
 
 ### 每次发布的 benchmark 交付
 
