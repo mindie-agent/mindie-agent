@@ -24,6 +24,7 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 | Document (English) | 中文 | What It Covers |
 |---|---|---|
 | [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | Task identity attribution, persistent user consent, operation lifetimes, and local state protection |
+| [Windows Knowledge Invocation & Recovery](knowledge-invocation-recovery.en.md) | [Windows 知识调用与恢复](knowledge-invocation-recovery.md) | Configured runtimes, PowerShell encoding, Windows service launchers, session authorization, and recovery by failure stage |
 | [Source Rebuild & Recovery](source-rebuild-contract.en.md) | [源码开发、重编译与产物恢复契约](source-rebuild-contract.md) | Workspace and container source discovery, Python interpreter alignment, native C++/AscendC rebuilds, baseline recovery, and native escape routes |
 | [Execution Resource Expectations & Spec Placement](execution-resource-budget-design.md) | [执行资源预期、代码有界性与规格匹配设计](execution-resource-budget-design.md) | Code-level bounded memory/VRAM rules (Principle 18), workload resource expectations, and cross-platform (Windows/macOS/Linux) local vs. remote `fleet_probe` spec-driven placement |
 | [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | [版本兼容与无感更新](release-compatibility-and-update.md) | Two-tier release architecture & product combination manifest (`channels/0.1.json`), direct component Release discovery, SemVer host compatibility, and idle atomic cutover |

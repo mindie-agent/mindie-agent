@@ -32,6 +32,7 @@
 | 文档 | English | 核心内容 |
 |---|---|---|
 | [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | 任务身份识别、持久授权设置、操作生命周期管理与本地状态保护机制 |
+| [Windows 知识调用与恢复](knowledge-invocation-recovery.md) | [Windows Knowledge Invocation & Recovery](knowledge-invocation-recovery.en.md) | 配置运行时、PowerShell 编码、Windows 服务启动器、会话授权与分层恢复 |
 | [源码开发、重编译与产物恢复契约](source-rebuild-contract.md) | [Source Rebuild & Recovery](source-rebuild-contract.en.md) | 工作区与容器源码定位、Python 解释器对齐、原生扩展重编译、基线备份恢复及受阻时的原生逃生通道 |
 | [执行资源预期、代码有界性与规格匹配设计](execution-resource-budget-design.md) | — | 代码层内存/显存有界性红线（Principle 18）、工作负载资源预期声明，以及 Windows/macOS/Linux 本机与远端 `fleet_probe` 硬件规格自动匹配分流 |
 | [版本兼容与无感更新](release-compatibility-and-update.md) | [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | 双层版本演进与产品组合清单（`channels/0.1.json`）、组件仓库正式 Release 直接发现、宿主兼容匹配及空闲无感切换 |
