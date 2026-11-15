@@ -173,6 +173,7 @@ def verify_corpora(
     siblings_roots: list[Path],
     *,
     require_siblings: bool,
+    independent: bool = False,
 ) -> list[str]:
     errors: list[str] = []
     if not _ensure_knowledge_importable(siblings_roots):
@@ -196,7 +197,12 @@ def verify_corpora(
         head_res = _run_cmd(["git", "rev-parse", "HEAD"], cwd=repo_dir)
         head_sha = head_res.stdout.strip()
         if head_sha != entry["commit"]:
-            errors.append(f"{corpus_name}: channels/0.1.json commit {entry['commit']} != repo HEAD {head_sha}")
+            if not independent:
+                errors.append(f"{corpus_name}: channels/0.1.json commit {entry['commit']} != repo HEAD {head_sha}")
+            elif _run_cmd(["git", "merge-base", "--is-ancestor", entry["commit"], head_sha], cwd=repo_dir).returncode != 0:
+                errors.append(
+                    f"{corpus_name}: channels/0.1.json commit {entry['commit']} is not an ancestor of repo HEAD {head_sha}"
+                )
 
         contract_path = repo_dir / "publication-contract.json"
         if not contract_path.is_file():
@@ -210,7 +216,7 @@ def verify_corpora(
                         f"{corpus_name}: publication-contract.json validator.revision {val_rev} "
                         f"is not a formal mindie-knowledge release tag commit"
                     )
-                elif _parse_semver(valid_knowledge_shas[val_rev]) > channel_knowledge_ver:
+                elif not independent and _parse_semver(valid_knowledge_shas[val_rev]) > channel_knowledge_ver:
                     errors.append(
                         f"{corpus_name}: validator.revision {val_rev} ({valid_knowledge_shas[val_rev]}) "
                         f"is newer than channel knowledge {manifest['components']['knowledge']['version']}"
@@ -219,7 +225,7 @@ def verify_corpora(
         report = build_routing_index(repo_dir, check=True)
         if not report.get("ok"):
             errors.append(f"{corpus_name}: build_routing_index(check=True) failed: {report.get('errors')}")
-        if report.get("unit_count") != entry["units"]:
+        if not independent and report.get("unit_count") != entry["units"]:
             errors.append(
                 f"{corpus_name}: channels/0.1.json units {entry['units']} != actual {report.get('unit_count')}"
             )
@@ -663,7 +669,13 @@ def main(argv: list[str] | None = None) -> int:
     mode = "strict-lockstep" if args.strict_lockstep else "flexible-component-update"
 
     r1_errors = verify_channel_schema(manifest, main_repo)
-    r2_errors = verify_corpora(main_repo, manifest, siblings_roots, require_siblings=args.require_siblings)
+    r2_errors = verify_corpora(
+        main_repo,
+        manifest,
+        siblings_roots,
+        require_siblings=args.require_siblings,
+        independent=args.release_scope == "independent",
+    )
     r3_errors = verify_components_and_plugins(
         manifest,
         siblings_roots,

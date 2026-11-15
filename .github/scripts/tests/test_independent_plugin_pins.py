@@ -140,6 +140,44 @@ class IndependentPluginPinsTests(unittest.TestCase):
                 if errors:
                     self.assertIn('expected pinned source ' + self.new, errors[0])
 
+    def test_independent_corpus_advance_verifies_ancestry_without_channel_equality(self):
+        corpus = self.root / 'knowledge-operators'
+        corpus.mkdir()
+        run_git = lambda *args: subprocess.run(
+            ['git', '-c', 'core.autocrlf=false', '-c', 'user.name=Release Test',
+             '-c', 'user.email=release@example.invalid', *args],
+            cwd=corpus, capture_output=True, text=True, encoding='utf-8', check=True, timeout=5,
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0),
+        ).stdout.strip()
+        run_git('init', '-q')
+        (corpus / 'publication-contract.json').write_text(
+            json.dumps({'validator': {'revision': ''}}), encoding='utf-8', newline='\n'
+        )
+        (corpus / 'README.md').write_text('v1\n', encoding='utf-8', newline='\n')
+        run_git('add', '.')
+        run_git('commit', '-qm', 'base')
+        base_sha = run_git('rev-parse', 'HEAD')
+        (corpus / 'README.md').write_text('v2\n', encoding='utf-8', newline='\n')
+        run_git('add', '.')
+        run_git('commit', '-qm', 'advance')
+        head_sha = run_git('rev-parse', 'HEAD')
+        manifest = {
+            'components': {'knowledge': {'version': '0.13.18'}},
+            'corpora': {'knowledge-operators': {'commit': base_sha, 'units': 103}},
+        }
+        import mindie_knowledge.graded.maintenance as maint
+        with patch.object(gate, '_ensure_knowledge_importable', return_value=True), \
+             patch.object(maint, 'build_routing_index', return_value={'ok': True, 'unit_count': 105}):
+            self.assertEqual(
+                gate.verify_corpora(self.root, manifest, [self.root], require_siblings=True, independent=True),
+                [],
+            )
+            prod_errors = gate.verify_corpora(
+                self.root, manifest, [self.root], require_siblings=True, independent=False
+            )
+            self.assertTrue(any('commit ' + base_sha in err for err in prod_errors))
+            self.assertTrue(any('units 103 != actual 105' in err for err in prod_errors))
+
 
 if __name__ == '__main__':
     unittest.main()
