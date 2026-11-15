@@ -99,7 +99,9 @@ flowchart LR
 
 ### 4.1 触发时机与输入脱敏
 
-`knowledge_distill(inputs, task_state, domain=...)` 仅在任务达到已验证里程碑（`verified_milestone`）或全部完成（`completed`）时触发。调用方传入经筛选的实验记录、运行清单、脱敏会话记录或源码引用（每项标明 `kind`、`outcome`、`source_locator` 与复现次数）。`prepare_request` 先执行确定性隐私脱敏与 Gitleaks 扫描，对尚未跑完（`in_flight`）或空输入直接返回 `noop`。
+`knowledge_distill(inputs, task_state, domain=...)` 在所选证据包含可提炼发现时调用；`task_state` 描述更广的任务状态（`in_flight`、`verified_milestone` 或 `completed`），当存在实质且已验证的里程碑时也可保持为 `in_flight`——该准入语义在已检查的 `knowledge 0.13.17` 与 `0.13.19` 中均已生效。每个 `inputs` 项必须提供 `kind`、`outcome`、`source_locator`、`content` 与 `evidence_refs`，可选 `repetitions`（整数且 ≥ 1）；公开 Schema 与允许取值见 [Windows 知识调用与恢复 · 蒸馏输入与结果](knowledge-invocation-recovery.md#distillation)。`prepare_request` 先执行确定性隐私脱敏与 Gitleaks 扫描。
+
+因此，`task_state="in_flight"` 并不无条件返回 `noop`：未完成任务中**有实质证据且已验证的里程碑**仍可被准入；空输入、未验证或琐碎输入才可能产生 `noop`。`Stop` 事件本身不代表任务完成。不要把“任务尚未结束”当成拒绝提炼的唯一理由，也不要把 `noop` 当作已经发布知识变更。
 
 ### 4.2 证据强度校验与本地准入
 

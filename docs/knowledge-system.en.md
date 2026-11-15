@@ -99,7 +99,9 @@ flowchart LR
 
 ### 4.1 Trigger and Evidence Redaction
 
-`knowledge_distill(inputs, task_state, domain=...)` runs when a task reaches a `verified_milestone` or `completed` state. Callers pass selected, authorized evidence items (`experiment_ledger`, `run_manifest`, `authorized_transcript`, `ecosystem_repo`, `hardware_spec`, or `ablation_receipt`). `prepare_request` runs deterministic privacy rules and Gitleaks scanning once, returning `noop` if inputs are empty or still `in_flight`.
+`knowledge_distill(inputs, task_state, domain=...)` is invoked when selected evidence contains a distillable finding; `task_state` describes the wider task (`in_flight`, `verified_milestone`, or `completed`) and may remain `in_flight` when a substantive verified milestone is available, as enforced in both inspected `knowledge 0.13.17` and `0.13.19`. Every `inputs` item must provide `kind`, `outcome`, `source_locator`, `content`, and `evidence_refs`, with optional `repetitions` (integer ≥ 1); see [Windows Knowledge Invocation & Recovery · Distillation inputs and outcomes](knowledge-invocation-recovery.en.md#distillation) for the public schema and allowed values. `prepare_request` runs deterministic privacy rules and Gitleaks scanning first.
+
+Consequently, `task_state="in_flight"` does not unconditionally return `noop`: a **substantive, verified milestone within an unfinished task** can still be admitted, while empty, unverified, or trivial input may still produce `noop`. A `Stop` event does not establish task completion. Do not treat "the task is unfinished" as the sole reason to refuse distillation, and do not treat `noop` as a published knowledge change.
 
 ### 4.2 Provenance Validation and Atomic Admission
 

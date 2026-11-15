@@ -46,6 +46,16 @@ In chats where `/mindie-agent` has not been invoked, default MCP discovery omits
 - **Re-verify consent before every write**: Every external write (such as pushing a branch or opening a knowledge PR) re-verifies current consent before executing.
 - **Read-only reconciliation for `unknown` outcomes**: If a network glitch leaves an external write without a receipt, it is recorded as `unknown` with its original operation identity. Before any future write, the runtime reconciles read-only against the remote repository rather than blindly retrying as if the operation had never been sent.
 
+### 2.4 Shell Input Encoding, Native Session Identity, Domain Leases, and Windows Service Launchers
+
+- **Shell transport is not native authorization**: PowerShell's `$OutputEncoding` and `Out-File` / `>` redirection determine only the bytes the CLI receives. ASCII substitution or a UTF-16LE file is a transport-layer problem; repeating `/mindie-agent` cannot repair it, and it never establishes a session grant.
+- **Native session identity and authorization**: `CODEX_THREAD_ID` must be supplied by the current host tool environment. Never fabricate it, copy it from another session, or assemble internal fields. Session authorization is verified independently for the current session and is not inherited across forks or subagents.
+- **Domain leases are independent**: public retrieval may route to a selected domain using the current session's default-engine grant, whereas distillation and capture attachment additionally require the selected engine's own valid lease (distillation without it returns `lease_required`); `knowledge_inactive` can also appear during query.
+- **Persistent contribution consent and scope are independent**: the contribution switch, destination repository, and authorized project scope persist across upgrades independently of session authorization and domain leases. When sharing is disabled or capture is out of scope, do not cold-start capture merely to satisfy a health check.
+- **Windows service-launcher capability is independent**: a working knowledge API does not imply a working scheduled-task entrypoint. Both registration and recovered launch must verify that the actual entry binary has PE `Subsystem == 2`; API-only success with an unavailable service launcher must be reported honestly as service-not-ready rather than bypassed by patching the interpreter binary.
+
+See [Session, domain and contribution authorization](knowledge-invocation-recovery.en.md#session-authorization) and [Capability-specific readiness](knowledge-invocation-recovery.en.md#readiness) for the authorization matrix, readiness criteria, and recovery steps.
+
 ---
 
 ## 3. Conversation Extraction & Small-Model Indexing
