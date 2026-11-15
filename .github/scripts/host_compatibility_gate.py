@@ -10,8 +10,9 @@ Extracted R4/R5 verification helpers for `check_auto_update_readiness.py`: valid
 - WSL2 / POSIX binary lookups reject `.exe`/`.cmd`/`.bat`/`.ps1` files and PE/CRLF/MSYS Windows
   shims on `/mnt/<drive>/...`, while preserving native Linux ELF binaries and LF scripts stored on
   WSL mounts; Windows lookups skip 0-byte `WindowsApps` store execution aliases.
-- Refactored component subprocess wrappers may declare ordered candidate paths; the first present
-  candidate in the checkout is authoritative and must enforce `CREATE_NO_WINDOW`.
+- Windows zero-popup checks (`windows_zero_popup_gate.py`) run unconditionally before
+  `mindie_knowledge` import probes, inspect every co-existing refactored module via AST, and
+  enforce per-call `windowsHide: true` across Node.js child-process launches.
 
 [Timeouts & Locks]
 - Delegates all subprocess execution to the caller's bounded `15s` runner; acquires no locks.
@@ -22,6 +23,7 @@ Extracted R4/R5 verification helpers for `check_auto_update_readiness.py`: valid
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -30,6 +32,14 @@ import shutil
 import subprocess
 import sys
 from typing import Callable
+
+from windows_zero_popup_gate import (
+    WINDOWS_NODE_WINDOWLESS_FILES,
+    WINDOWS_NO_WINDOW_COMPANION_FILES,
+    WINDOWS_NO_WINDOW_REQUIRED_FILES,
+    inspect_node_windowless_file,
+    verify_windows_windowless_spawns,
+)
 
 WINDOWS_MOUNT_RE = re.compile(r"^/mnt/[a-zA-Z](?:/|$)")
 WINDOWS_SHIM_SUFFIXES = frozenset({".exe", ".cmd", ".bat", ".ps1"})
@@ -46,36 +56,6 @@ FORWARD_HOST_PROBES: dict[str, tuple[str, ...]] = {
     "workbuddy": ("1.0.0", "1.1.0", "2.0.0-rc.1"),
     "opencode": ("2.2.0", "2.2.7", "2.3.0-rc.1", "2.99.0"),
 }
-
-WINDOWS_NODE_WINDOWLESS_FILES: tuple[tuple[str, str], ...] = (
-    ("mindie-agent-dsh", "host3.mjs"),
-    ("mindie-agent-oc", "plugins/mindie-agent/opencode_host.mjs"),
-)
-
-WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str | tuple[str, ...]], ...] = (
-    ("mindie-agent-dsh", "scripts/setup_process.py"),
-    ("mindie-agent-dsh", "scripts/knowledge_mcp.py"),
-    ("mindie-agent-agy", "plugins/mindie-agent/scripts/bounded.py"),
-    ("mindie-agent-agy", "plugins/mindie-agent/scripts/component_update.py"),
-    ("mindie-agent-wb", "plugins/mindie-agent/scripts/bounded.py"),
-    ("mindie-agent-wb", "plugins/mindie-agent/scripts/component_update.py"),
-    ("mindie-agent-oc", "plugins/mindie-agent/scripts/bounded.py"),
-    ("mindie-agent-oc", "plugins/mindie-agent/scripts/component_update.py"),
-    ("mindie-agent-oc", "plugins/mindie-agent/scripts/mindie_launch.py"),
-    ("mindie-agent-cc", "scripts/bounded_win32.py"),
-    ("mindie-agent-codex", "plugins/mindie-agent/scripts/windows_process.py"),
-    ("mindie-agent-kimi", "scripts/bounded.py"),
-    ("mindie-bench", ("src/mindie_bench/runner/host_platform.py", "src/mindie_bench/runner/process.py")),
-    ("knowledge", "mindie_knowledge/windows_process.py"),
-    ("knowledge", "mindie_knowledge/loop/process.py"),
-    ("knowledge", "mindie_knowledge/gitread.py"),
-    ("knowledge", "mindie_knowledge/release_http.py"),
-    ("knowledge", "mindie_knowledge/graded/experiment_ledger.py"),
-    ("diagnostics", "mindie_diagnostics/platform_service.py"),
-    ("diagnostics", ("mindie_diagnostics/github_transport.py", "mindie_diagnostics/reporter.py")),
-    ("remote-dev", "remote_dev/core/local_process.py"),
-    ("coordinator", "mindie_coordinator/service_client.py"),
-)
 
 
 def subprocess_window_kwargs(*, os_mod=os, subprocess_mod=subprocess) -> dict[str, int]:
@@ -218,53 +198,18 @@ def extract_semver(raw: str) -> str | None:
     return match.group(1) if match else None
 
 
-def verify_windows_windowless_spawns(siblings_roots: list[Path]) -> list[str]:
-    """Ensure Node.js spawn calls set windowsHide:true and Windows Python subprocess wrappers set CREATE_NO_WINDOW."""
-    errors: list[str] = []
-    for node_repo, rel_mjs in WINDOWS_NODE_WINDOWLESS_FILES:
-        r_dir = _resolve_repo(node_repo, siblings_roots)
-        if r_dir is None:
-            continue
-        host_mjs = r_dir / rel_mjs
-        if host_mjs.is_file():
-            text = host_mjs.read_text(encoding="utf-8")
-            uncommented = "\n".join(
-                line for line in text.splitlines() if not line.lstrip().startswith("//")
-            )
-            spawn_count = len(
-                re.findall(r"\b(?:spawn|spawnSync|execFile|execFileSync|execSync)\s*\(", uncommented)
-            )
-            hide_count = len(re.findall(r"\bwindowsHide\s*:\s*true\b", uncommented))
-            if spawn_count == 0 or hide_count < spawn_count:
-                errors.append(
-                    f"{node_repo}: {rel_mjs} has {spawn_count} child-process spawn call(s) but only "
-                    f"{hide_count} windowsHide: true setting(s) (Windows console popup risk)"
-                )
-    for repo_name, rel_spec in WINDOWS_NO_WINDOW_REQUIRED_FILES:
-        repo_dir = _resolve_repo(repo_name, siblings_roots)
-        if repo_dir is None:
-            continue
-        candidates = (rel_spec,) if isinstance(rel_spec, str) else rel_spec
-        chosen_rel = next((rel for rel in candidates if (repo_dir / rel).is_file()), None)
-        if chosen_rel is None:
-            label = candidates[0] if len(candidates) == 1 else f"one of {', '.join(candidates)}"
-            errors.append(f"{repo_name}: missing expected subprocess wrapper {label}")
-            continue
-        target = repo_dir / chosen_rel
-        if "CREATE_NO_WINDOW" not in target.read_text(encoding="utf-8"):
-            errors.append(f"{repo_name}: {chosen_rel} missing subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
-    return errors
-
-
 def verify_flexible_component_compatibility_impl(
     siblings_roots: list[Path],
     *,
     ensure_knowledge_importable: Callable[[list[Path]], bool],
     windowless_check: Callable[[list[Path]], list[str]],
+    require_siblings: bool = False,
 ) -> list[str]:
     """Verify that the latest shared component code is API-compatible with all 7 host plugins."""
-    errors: list[str] = []
+    errors: list[str] = list(windowless_check(siblings_roots))
     if not ensure_knowledge_importable(siblings_roots):
+        if require_siblings:
+            errors.append("knowledge: mindie_knowledge unavailable for R4 host compatibility verification")
         return errors
     from semantic_version import Version
     from mindie_knowledge.component_bindings import COMPONENT_MODULES
@@ -364,7 +309,6 @@ def verify_flexible_component_compatibility_impl(
                         f"{plugin_name}: harness-compatibility.json rejects required host version {probe_ver}"
                     )
 
-    errors.extend(windowless_check(siblings_roots))
     return errors
 
 
@@ -525,3 +469,45 @@ def verify_local_host_compatibility_impl(
                 errors.append(f"mindie-agent-oc: harness-compatibility.json does not support installed opencode {ver}")
 
     return errors
+
+
+def _can_import_knowledge() -> bool:
+    try:
+        import mindie_knowledge.graded.maintenance  # noqa: F401
+        import mindie_knowledge.releases  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Run R4 host compatibility and Windows zero-popup checks.")
+    parser.add_argument("--main-repo", type=Path, default=Path(__file__).resolve().parents[2])
+    parser.add_argument("--siblings-root", type=Path, action="append", default=[])
+    parser.add_argument("--require-siblings", action="store_true")
+    parser.add_argument("--release-repo", action="append", default=[])
+    args = parser.parse_args(argv)
+    roots = [p.resolve() for p in args.siblings_root]
+    main_repo = args.main_repo.resolve()
+    errors = verify_flexible_component_compatibility_impl(
+        roots,
+        ensure_knowledge_importable=lambda _r: _can_import_knowledge(),
+        windowless_check=lambda r: verify_windows_windowless_spawns(
+            r,
+            main_repo=main_repo,
+            require_siblings=args.require_siblings,
+            required_repos=args.release_repo,
+        ),
+        require_siblings=args.require_siblings,
+    )
+    if errors:
+        for err in errors:
+            print(f"[host-compatibility-gate:FAIL] {err}", file=sys.stderr)
+        return 1
+    print("[host-compatibility-gate:OK] R4 host compatibility and Windows zero-popup invariants verified.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
