@@ -32,7 +32,7 @@
 | **`mindie-agent-kimi`** | `v0.1.17` | 在 Kimi Code `mindie-tools` / `components` MCP 桥中同步暴露新版 `sim` 与 `profiler` 接口及参数说明，支持受管 Python 模块命令自动迁移 |
 | **`mindie-agent-dsh`** | `v0.1.16` | 通过 DSH `component_tools.py` 透传统一组件工具目录，支持在 DSH 会话中直接调用新版 `sim` 与 `profiler` |
 | **`mindie-agent-agy`** | `v0.1.8` | 通过 Google Antigravity `mindie-tools` MCP 服务暴露 `sim`、`profiler`、`coordinator`、`npu_top`、`diagnostics_*` 与 `mindie_status` |
-| **`mindie-profiler`** | `v0.5.6` | 原生消费 `mindie-model-structure/1` 完成事件关联、同构 Cohort 统计与 Decode/Prefill 拓扑引导切分（含 `AddRmsNormQuant`、`SparseFlashMla` 与 DP-partner EP 对齐），并提供 Wave 5 三芯片 `1,653 / 1,653 <= 10%` 样本内校准流水线 |
+| **`mindie-profiler`** | `v0.5.6` | 原生消费 `mindie-model-structure/1` 完成事件关联、同构 Cohort 统计与 Decode/Prefill 拓扑引导切分（含 `AddRmsNormQuant`、`SparseFlashMla` 与 DP-partner EP 对齐），并提供跨 A2/A3/A5 三芯片 `1,653 / 1,653 <= 10%` 的样本内多工况校准流水线 |
 | **`mindie-bench`** | `v0.4.6` | `value_sim.py` 与 `value_scenarios.py` 全面采用公开的 `target_operators`、`operator_costs`、`target_graphs`、`graph_costs` 与 `predict` 接口，在 `sim-causal-modeling-boundaries` 场景中验证因果依赖、图/服务边界与资源释放 |
 
 ---
@@ -45,4 +45,4 @@
    - 图捕获模式（`ACLGraph`）继承后按单次图提交核算 Host Launch，不把 Eager 模式的逐算子 Python 下发间隔混入静态图执行。
 2. **有界内存与隔离环境验证**：
    - 14 个完整大图模型（Qwen3.8/3.5/3.6、Kimi K3、GLM5.3、DeepSeek V4.1 等）延迟展开分析的进程峰值 RSS 仅为 **`287.6 MiB`**（`< 512 MiB`），执行完毕后存活任务与程序引用计数归零；
-   - 五端插件组件桥测试、`mindie-bench` 消费者测试、280 个 Decode 用例、15 个 Prefill 用例、Wave 5 跨 A2/A3/A5 的 1,653 份实测 Profile 样本内校准评估（`100.00% <= 10%`）及独立 856 个 DSH 集群泛化用例（整体 `841/856 = 98.25% <= 15%`，其中 561 例独立 Held-out 盲测 `546/561 = 97.33% <= 15%`）全部通过。
+   - 五端插件组件桥测试、`mindie-bench` 消费者测试、280 个 Decode 用例、15 个 Prefill 用例、跨 A2/A3/A5 三芯片的 1,653 份实测 Profile 样本内多工况校准评估（`100.00% <= 10%`）及独立 856 个 DSH 集群泛化用例（整体 `841/856 = 98.25% <= 15%`，其中 561 例独立 Held-out 盲测 `546/561 = 97.33% <= 15%`）全部通过。

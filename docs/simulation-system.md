@@ -27,9 +27,9 @@
 | 层次 | 输入与核心职责 | 工程产出与边界 |
 | --- | --- | --- |
 | **1. 物理资源与服务**<br/>（Physical Resources & Services） | 容量、工作量单位、供给速率、参与核数、片上缓冲（`L1 Buffer / L0A / L0B / L0C / UB / L2 Cache`）与互联链路；处理共享资源竞争与有限流水深度 | 基于 `Hardware` / `Device` / `Link` 声明计算 Cube、Vector、MTE/HBM 搬运与集合通信链路的执行耗时与重叠率 |
-| **2. 算子族与源码实现**<br/>（Operator Families & Lowerings） | 语义算子与显式软件实现选择（`runtime.kernels.lowerings`），生成资源包络、分块流水或源码级资源程序；保留真实 Kernel 调用边界 | 支持通用解析配方及 GDN Prefill、GQA、MLA Decode、MLA Prolog、LightningIndexer、RMSNorm、AddRMSNorm、Grouped GEMM、动态 INT8 量化等显式源码实现 |
+| **2. 算子族与源码实现**<br/>（Operator Families & Lowerings） | 语义算子与显式软件实现选择（`runtime.kernels.lowerings`），生成资源包络、分块流水或源码级资源程序；保留真实 Kernel 调用边界 | 支持通用解析配方、两阶段 **`RecoverSSM`** 投机状态恢复（通用于全部 **7 类秩-1 结合律线性注意力家族**：`kda`、`gdn`、`mamba`、`gla`、`deltanet`、`lightning`、`retnet`，GLM 专属 Kernel 上限严格收敛于 `glm_kda_backend`），以及 GDN Prefill、GQA、MLA Decode/Prolog、LightningIndexer、RMSNorm/AddRMSNorm、Grouped GEMM、动态 INT8 量化等显式源码实现 |
 | **3. 结构与子图**<br/>（Structure & Subgraphs） | 组合投影、Attention、FFN/MoE、状态更新、布局转换与 `DP`/`TP`/`EP`/`PP`/`DCP`（Decode Context Parallelism）/`DSA-CP`（DeepSeek Sparse Attention Context Parallelism）/`PCP`（Prefill Context Parallelism）通信；处理流间依赖、EP Rendezvous 与显式子图融合（`native_fusion`） | 通过 `graph_costs` / `graph` 计算子图关键路径、流间重叠、片上缓存可行性与融合前后 HBM 流量变化 |
-| **4. 纯模型前向**<br/>（Pure Model Forward） | 完整模型层计划（`LayerPlan`）展开、算子重复次数、累计成本与设备图完成时间；不引入外部请求到达或服务排队 | `operators --scope model` 输出独立算子成本之和，`graph --scope model` 与 `predict(scope="body"\|"model")` 输出纯模型前向时延与 4D 效率拆解 |
+| **4. 纯模型前向**<br/>（Pure Model Forward） | 完整模型层计划（`LayerPlan`）与投机草案层（Draft `LayerPlan`，完整继承稀疏注意力、滑动窗口 `SWA` window、KV 压缩与多流超连接 `mHC` 字段）展开、算子重复次数、累计成本与设备图完成时间；不引入外部请求到达或服务排队 | `operators --scope model` 输出独立算子成本之和，`graph --scope model` 与 `predict(scope="body"\|"model")` 输出纯模型前向时延与 4D 效率拆解 |
 | **5. 服务约束与 SLA 求解**<br/>（Serving Constraints & SLA Solver） | 在纯模型成本之上叠加请求到达、Continuous Batching、KV Cache 容量、PD 分离与 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 并行拓扑及 Host 调度开销，评估 TTFT / TPOT | 输出请求级服务指标，并通过 `scale_case_hardware` / `solve_hardware_sla_throughput` 提供面向目标 TPOT（如 `<= 30ms`）的最小卡数、最大可行并发 `B* = min(B*_SLA, B*_VRAM)`、最优并行拓扑与硬件缩放推演 |
 
 ```mermaid
@@ -106,6 +106,11 @@ Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`
 | `grouped_gemm` | `ascendc_grouped_nd_bf16` | MoE Gate/Up 与 Down 分组矩阵乘，支持显式整数路由（`runtime.routing.realizations`）或均衡活跃专家分布 |
 | `quantize` | `cuda_dynamic_int8_quant_symmetric_no_azp` | 逐行 FP32 Scale 的对称动态 INT8 量化生产链，保留独立量化 Kernel 边界 |
 
+在线性注意力状态恢复与投机解码层计划展开中，模型前端与算子 Lowering 严格遵守两项跨家族正交契约：
+- **两阶段 `RecoverSSM` 投机状态恢复跨 7 类秩-1 结合律线性注意力通用化**：当线性注意力层与多 Token 投机解码（MTP / EAGLE / DSpark）结合时，两阶段状态回滚与推进算子 **`RecoverSSM`** 统一覆盖全部 **7 类秩-1 结合律线性注意力家族**（`kda`、`gdn`、`mamba`、`gla`、`deltanet`、`lightning`、`retnet`），而非仅限于 `GLM/KDA`；GLM 特定算子核的几何与分块上限严格收敛在 `glm_kda_backend` 后端分支内，不污染通用结合律状态恢复语义。
+- **投机解码 Draft `LayerPlan` 结构属性无损继承**：合成或展开投机解码草案层计划（Speculative Draft `LayerPlan`）时，完整继承对应层的**稀疏注意力（Sparse Attention，`DSA` / `SFA`）**、**滑动窗口半径（`SWA` window）**、**KV 压缩与共享几何（KV Compression / `SharedKV`）**及**多流超连接（`mHC`）**字段，严禁将投机 Draft 层静默退化为稠密全窗口无压缩层。
+- **多 SKU 精细切分、前缀共享与四时钟守恒暴露拆解**：原生支持机内稠密子图局部切分（`o_proj_tp`、`linear_proj_tp`、`lm_head_tp`，计算图流量与静态权重账本同源推导）、跨并发请求共享前缀池化与批量读摊销（`prefix_cache_mode` / `prefix_read_mode`）、EPLB 物理冗余专家驻留与活跃槽位访存（`redundant_experts_per_rank`）、集合通信拓扑感知启动轮次（`collective_startup_mode`）、打包 `MXA8W4` 硬件原生 FP8 Cube 解析、参数化芯片 SKU 派生（`derive_hardware_sku`）与同构副本语义图复用，以及基于四时钟 Max-Plus 偏序代数（`ordered_critical_span_v1`）严格守恒于步长的四象限暴露耗时拆解（`exposed_breakdown_ms` / `exposed_breakdown_pct`）。
+
 ---
 
 ## 4. 与 `mindie-profiler` 的结构对齐与实测校准
@@ -122,9 +127,10 @@ Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`
 ## 5. 验证体系与多集群泛化实测结果
 
 - **有界内存与零权重控制面**：仿真主循环严格保持 `O(Active State)` 内存占用，不加载模型权重、不初始化 `torch_npu`/CANN 上下文；在 Qwen3.8 / Qwen3.5 / Qwen3.6 / Kimi K3 / GLM5.3 / DeepSeek V4.1 等 14 个完整模型图基准上，单进程峰值 RSS 仅为 **`287.6 MiB`**（严格低于 `512 MiB` 目标红线），任务完成后存活对象清零。
+- **Lean 4 形式化守恒验证内核（`formal/MindIESimSpec`）**：以零运行时依赖的离线纯 Lean 4 证明内核对四时钟 Max-Plus 暴露拆解守恒律（非负性、流顺序置换不变性、双缓冲后台搬运零误计与 100% 求和守恒）、跨算子权重预取钳位与半开生命周期区间显存账本、局部子图 `TP` / EPLB 冗余槽位 / 昇腾 `FRACTAL_NZ` 切分排布同构、`RecoverSSM` 投机快照回滚与接受前缀重演状态等价性、以及 `UB-Mesh` 对数集合通信轮次界完成机械化证明（零 `sorry` / 零自定义 `axiom`），并配套 Python 随机属性差分对拍单测锁死实现边界。
 - **跨芯片、跨模型的真实硬件收敛结果**：
   - **Decode 主体预测**：覆盖 A3 / A5 集群的 **280 个真实 Decode 用例**（含高低并发、TP/DP/EP、MTP 与 FlashComm 场景）全部收敛在 **`<= 15%`** 误差容差内；
   - **Prefill 阶段预测**：**15 个完整 Prefill 用例**全部收敛在 **`<= 15%`** 误差容差内；
-  - **Wave 5 三芯片样本内体制校准（A2 + A3 + A5）**：覆盖 A2（`565/565`）、A3（`580/580`）与 A5（`508/508`）共 **202 个 Cohort-Phase、1,653 份** 实测 Golden Profiles（含 `4K..400K` 超长上下文与合成少专家 MoE），实现 **`1,653 / 1,653 = 100.00% <= 10%`** 样本内误差收敛（平均绝对误差 `2.77%`，中位数 `2.11%`）；
+  - **三芯片样本内多工况校准（A2 + A3 + A5）**：覆盖 A2（`565/565`）、A3（`580/580`）与 A5（`508/508`）共 **202 个 Cohort-Phase、1,653 份** 实测 Golden Profiles（含 `4K..400K` 超长上下文与合成少专家 MoE），实现 **`1,653 / 1,653 = 100.00% <= 10%`** 样本内误差收敛（平均绝对误差 `2.77%`，中位数 `2.11%`）；
   - **大规模集群盲测泛化（DSH Fleet Generalization）**：在独立的 **856 个 DSH 真实集群用例**上整体预测准确率达到 **`841 / 856 = 98.25%`（误差 `<= 15%`）**，其中 **561 个独立 Held-out 盲测用例**达到 **`546 / 561 = 97.33%`（误差 `<= 15%`）**。
 - **五端宿主与评测套件全量集成**：`mindie-sim v0.9.4` 已通过 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi`、`mindie-agent-dsh` 与 `mindie-agent-agy` 的 `components` / `mindie-tools` MCP 服务在五端统一暴露，并与 `mindie-bench` 的 `sim-causal-modeling-boundaries` 基准完成闭环验证（接口迁移说明见[消费者迁移指南](simulation-consumer-migration.md)）。

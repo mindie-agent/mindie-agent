@@ -35,7 +35,7 @@ Following the [Engineering Design Principles](design-principles.en.md) (Principl
 
 ```mermaid
 flowchart LR
-    A["Host Agent<br/>Formulate hypotheses · Select windows · Design experiments"] -->|"In-place remote CLI calls"| P["mindie_profiler<br/>inventory / analyze / correlate / compare / sql"]
+    A["Host Agent<br/>Formulate hypotheses · Select windows · Design experiments"] -->|"In-place remote CLI calls"| P["mindie_profiler<br/>inventory / analyze / correlate / compare / capture / sql"]
     D["Remote NPU Container Artifacts<br/>DB / CSV / Trace / Memory & Serving Logs"] --> P
     P -->|"Compact JSON facts + source locators"| A
     A -->|"Trigger minimal targeted capture on demand"| C["collect.py + remote-dev / coordinator"]
@@ -67,9 +67,10 @@ Model structure and measured trace parsing each have a single owner: `mindie-sim
 | --- | --- | --- |
 | **Source Discovery & Scoping** | `segment.py`, `sources_db.py`, `sources_csv.py`, `sources_trace.py` (new) | Rank directory discovery, explicit time/step window parsing, read-only SQLite (`mode=ro` + `query_only=ON`) with `STRING_IDS` resolution, CSV scanning, and streaming JSON Trace sidecar indexing |
 | **Interval Accounting, Cluster Stragglers & EP Balance** | `accounting.py`, `classify.py`, `cross_rank.py`, `events.py` | Integer-nanosecond interval union/subtraction, semantic block and execution engine classification, variant-aware (`shape`/`dtype`/`format`) hotspot grouping, cross-rank P50 and slowest-rank statistics, **orthogonal `slow_rank` vs. `slow_link` attribution**, and **MoE EP load-balance metrics (`ep_imbalance_cv` / `eplb_recommended`)** |
-| **Progressive Queries & Reporting** | `__main__.py`, `analyze.py`, `report.py`, `correlate.py` (new) | Expose `inventory`, `analyze`, `correlate`, and `sql` subcommands producing compact JSON with source table locators |
+| **Progressive Queries & Reporting** | `__main__.py`, `analyze.py`, `report.py`, `correlate.py` (new) | Expose `inventory`, `analyze`, `correlate`, and `sql` subcommands (alongside `compare` and `capture` for six core entrypoints) producing compact JSON with source table locators |
 | **Advisor Rules, Memory Forensics & Modeling** | `enrichment*.py`, `advisor_rules.py`, `memory_profile.py`, `memory_forensics.py`, `theoretical_model.py`, `tensor_cast_provider.py` | Unambiguous single-occurrence `waitNs` / `TASK_PMU_INFO` binding, **Ascend Advisor anomaly & fusible sequence scanning (AICPU fallbacks, 32B/512B alignment, multi-stream MTE contention, stream syncs & suspected GC freezes)**, P0–P4 HBM attribution, **4 memory inefficiency patterns & step-monotonic leak forensics**, single-operator Roofline lower bounds, and optional injectable `msmodeling` (`tensor_cast`) predictions |
 | **Cross-Run Comparison & Online Control** | `compare.py`, `cli_compare.py`, `collect.py`, `framework_capture.py` | Per-metric comparability checks and A/B diff reports; `/start_profile` and `/stop_profile` window control with `completed / failed / unknown` reconciliation |
+| **CANN 9.x Native Steady-State Capture** | `cann_abi.py`, `native_capture_shm.py`, `native_capture.py`, `cli_capture.py`, `_cann9_capture_shim.c`, `_cann9_capture_mspti.h` | Framework-agnostic steady-state capture built on public CANN `>= 9.0` C APIs (`mspti.h`, `aclrtApiInjectionSetFunc`, `acl_prof.h`) and a `/dev/shm` multi-worker control plane (Gear 1 zero-`msprof` streaming hotspot/union accounting + Gear 2 targeted `aclprof` + Standby Attach) |
 
 ### 3.2 Five Mandatory Accounting and Identity Corrections (P0)
 
@@ -165,9 +166,9 @@ Each event carries three distinct dimensions:
 
 - **Explicit Phase and Step Boundaries**: `inventory` extracts native `ProfilerStep#` and `MSTX_EVENTS` markers (`warmup`, `prefill`, `decode`, `draft`, `verify`, `graph_capture`) from the DB when present; otherwise the caller must supply explicit `--window START:END` or `--full-range` bounds—steps are never guessed from repeating kernel patterns.
 - **Hybrid Architecture (Dense + MoE + MTP) Layer Segmentation & Compute Stream Selection Contract**:
-  - **Primary Stream Is an Observation View**: When selecting a primary compute `streamId`, use maximum cumulative device execution duration (`argmax_s sum(duration_ns)`), not the first-seen event. The selected stream does not establish layer or step boundaries.
-  - **Separate Declared Structure from Event Attribution**: Reuse sim's attention types, Dense/MoE layer plans and optional MTP/DSpark declarations. Names such as `MlaPrologV3`, SFA and KV Update suggest semantic roles; assigning them to a particular layer still requires a Host module association or an explicit event binding. Kernel order and repetition counts do not prove layer identity.
-  - **Optional Paths Remain Optional**: MTP in a model configuration does not establish that the selected capture executed MTP. Native markers or caller-supplied windows determine whether Dense, MoE, draft and verify belong to one iteration. Operator-pattern transitions must not invent steps, and declared layer counts must not force incomplete observations into a complete step.
+  - **Primary Stream Is Only an Observation View**: When selecting a primary compute `streamId`, rank streams by maximum cumulative device execution duration (`argmax_s sum(duration_ns)`) rather than picking the first-seen event. The chosen stream serves only as a timeline lens and never establishes model-layer or step boundaries on its own.
+  - **Decouple Declared Structure from Measured Attribution**: Attention types, Dense/MoE layer plans, and optional MTP/DSpark blocks come from `sim`'s structural declarations. Operator names such as `MlaPrologV3`, SFA, and KV Update suggest candidate semantic roles, but assigning an event to a specific layer still requires Host module correlation or an explicit event binding—kernel order and repetition counts never prove layer identity.
+  - **Verify Optional Paths Against Measured Execution**: Declaring MTP in a model configuration does not imply that the captured window executed MTP. Whether Dense, MoE, `draft`, and `verify` events belong to the same iteration is governed strictly by native markers or caller-supplied windows; never split synthetic steps on operator-pattern transitions or force partial captures to match declared layer counts.
 - **Speculative Decoding (DSpark / MTP)**: Alongside `draft` and `verify` kernel timings, reports and comparisons track serving-side `mean_acceptance_length` and `acceptance_rate` to prevent false optimizations where a faster Verify kernel degrades acceptance length and hurts end-to-end TPOT.
 - **Multi-Dimensional Parallelism & Cross-Rank Aggregation**: Group only homogeneous ranks (e.g., never average across distinct PP stages). Report both `median_rank_p50` and the **per-step slowest rank (`max_rank_per_step`)** distribution so rotating stragglers are not masked by per-rank medians.
 
@@ -175,9 +176,9 @@ Each event carries three distinct dimensions:
 
 ## 6. Progressive CLI and Module Interfaces for Agents
 
-`mindie-profiler` exposes five focused subcommands via a unified CLI (`python -m mindie_profiler <subcommand>`), requiring no background daemon:
+`mindie-profiler` exposes six focused subcommands via a unified CLI (`python -m mindie_profiler <subcommand>`), requiring no background daemon:
 
-### 6.1 Five Core CLI Subcommands
+### 6.1 Six Core CLI Subcommands
 
 | Subcommand | Typical Agent Use Case | Key Inputs | Bounded Output |
 | --- | --- | --- | --- |
@@ -185,18 +186,25 @@ Each event carries three distinct dimensions:
 | **`analyze`** | Compute windowed interval accounting, semantic block shares, and variant-aware hotspots | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel`; optional `--structure` and `--bindings` | Window metrics (`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`), 6 semantic block shares, Top-K hotspots with Shape/Dtype and source Locators, cross-rank P50/straggler stats, AICPU/PMU summaries; `structure_mapping` when structure is supplied |
 | **`correlate`** | Drill down into a specific device gap or hotspot kernel to inspect its Host call stack and launch chain | `--root`, `--window START:END`, `--rank`, `--kernel-name <pat>` or `--min-gap-ms <val>` | Matched `PYTORCH_API` / `MSTX_EVENTS` same-thread parent call stacks, `CANN_API` launch durations, Host-to-Device launch delay, and uncorrelated event ratio |
 | **`compare`** | A/B comparison of structural changes and duration distributions across two runs | `<baseline_report.json> <candidate_report.json>` | Workload/environment comparability checks, operator sequence/fusion/shape diffs, aligned step/block/variant P50 deltas and confidence intervals |
+| **`capture`** | CANN 9.x native NPU steady-state capture (bypassing framework HTTP latency and ramp-up noise) | `--gear fast\|deep`, `--prepare-session <id>` / `--attach <id>` / `-- <cmd>`, `--min-warmup-steps`, `--steady-window-steps`, `--steps`, `--max-cv-pct`, `--expected-workers` | `mindie-native-capture/1` report: 3-tier `SteadyStateGate` audit receipt (`transient_contaminated`), multi-worker `/dev/shm` barrier skew, Gear 1 MSPTI hotspots & interval-union accounting, or full Gear 2 `analyze` report |
 | **`sql`** | Read-only SQL escape hatch for custom investigation of new operators or unmapped columns | `--db <path>`, `--query "<SELECT ...>"`, `--limit 50`, `--timeout-s 10` | Read-only (`mode=ro` + `query_only=ON`), row- and timeout-bounded query results with automatic `STRING_IDS` resolution helpers |
 
 ### 6.2 Online Capture Control, Memory Attribution, and Theoretical Modeling
 
-1. **Controlled Online Capture (`collect.py`)**
+1. **CANN 9.x Native NPU Steady-State Capture (`capture` subcommand, `mindie_profiler.native_capture.capture_profile` / `mindie_profiler.capture_profile`)**
+   - **Public C ABI & Version Boundary**: Compiles and caches `libmindie_cann9_capture.so` on demand strictly against public **CANN `>= 9.0`** headers (`<mspti.h>` `msptiActivityRegisterCallbacks` / `msptiActivityEnable`, `<acl/acl_rt.h>` `aclrtApiInjectionSetFunc`, `<acl/acl_prof.h>` `aclprofStart` / `aclprofStop` + `ACL_PROF_AICORE_SHAPE`), coordinating in-process callbacks through a fixed-layout `/dev/shm` control segment (`MindieCaptureShm`, `MINDIE_CAPTURE_ABI_VERSION = 3`, exclusive controller lock `.ctl.lock`, up to 32 `MindieWorkerSlot` entries, and `acked_generation` epoch isolation). Requires no framework `/start_profile` HTTP endpoint and works uniformly across `vllm-ascend` (including `NPUGraph` replay), `xLLM`, `MindIE-SD`, and standalone operator benchmarks.
+   - **Dual-Gear Architecture**:
+     - **Gear 1 (`--gear fast`, default for rapid ablations)**: Uses a pre-allocated 16 MiB `MSPTI` Activity buffer pool (`KERNEL` / `HCCL` / `COMMUNICATION`) to perform in-process FNV-1a hotspot aggregation and device interval-union scans (`device_busy_union_ms`, `exposed_comm_ms`, `device_uncovered_ms`, `underfeed_bubble_ratio`), **bypassing `msprof` offline export and multi-pass PMU replay completely** to avoid online disk stalls and ramp-up jitter;
+     - **Gear 2 (`--gear deep`, for PMU counters & call stacks)**: Invokes `aclprofStart` / `aclprofStop` strictly across the exact `N` steady-state step boundaries gated by `SteadyStateGate` into generation-isolated `gen_<k>/rank_<r>` directories, then runs deadline-guarded (`export_budget_s`) `msprof --export=on` and feeds `analyze_profile` automatically (compatible with CANN 9.x `mindstudio_profiler_output/op_summary_*.csv` and `task_time_*.csv`).
+   - **Three-Tier `SteadyStateGate`, Completeness Gates & Hot-Attach**: Enforces `/dev/shm` checks across L1 (`active_graph_captures == 0` and zero `aclrtMalloc` churn inside the window), L2 (sliding-window step-latency `CV <= max_cv_pct` with multi-rank `PHASE_START_NOW` barrier alignment), and L3 (post-capture `transient_contaminated` audit). If captured steps fall short of `--steps`, reporting workers fall short of `--expected-workers`, `MSPTI` activity records drop (`mspti_records_dropped`), or worker slots overflow (`worker_slot_exhausted`), the capture explicitly fails closed (`status="failed"` with `incomplete_capture_window` / `incomplete_worker_count`) rather than misreporting a truncated window as complete. Long-lived serving instances can inject `STANDBY` state via `--prepare-session <id>` and run repeated zero-restart captures via `--attach <id>` (with optional `mark_capture_step()` markers and `PHASE_STOP_NOW` teardown convergence).
+2. **Controlled Framework Online Capture (`collect.py`)**
    - Verifies that the target serving process was started with `--profiler-config` or `VLLM_TORCH_PROFILER_DIR` before sending requests; if absent, fails immediately with actionable configuration guidance and **never silently restarts a live serving instance**.
    - Distinguishes `completed`, `failed` (non-2xx HTTP or connection refusal), and `unknown` (timeout or lost response after sending `POST /start_profile` or `POST /stop_profile`). An `unknown` state blocks further start/stop calls until `reconcile()` verifies artifact state on disk.
    - Offline parsing (`torch_npu.profiler.analyse(profile_dir, max_process_number=...)`) runs as a managed job via `remote-dev`, tracked separately from the HTTP control receipt.
-2. **P0–P4 HBM Memory Attribution (`memory_profile.py`)**
+3. **P0–P4 HBM Memory Attribution (`memory_profile.py`)**
    - Combines five explicit sources in priority order: `P0` (`msprof` `npu_module_mem` component records), `P1` (whole-device runtime peak), `P2` (framework startup logs for weights / KV cache / graph pools), `P3` (`safetensors` header byte counts), and `P4` (`config.json` theoretical estimates).
    - Separates co-temporal additive components (`included_in_sum`) from non-coincident phase peaks, reporting unattributed `residual_bytes` honestly.
-3. **Three-Way Separation in Theoretical Modeling (`theoretical_model.py` & `tensor_cast_provider.py`)**
+4. **Three-Way Separation in Theoretical Modeling (`theoretical_model.py` & `tensor_cast_provider.py`)**
    - Keeps **`measured_device_ms`**, single-operator Roofline lower bound **`ideal_hardware_lower_bound_ms`**, and external provider prediction **`model_predicted_ms`** (e.g., pinned `msmodeling` / `tensor_cast`) strictly separate. Missing shapes or unverified hardware mappings remain `unmodeled` (`None`).
 
 ### 6.3 Shared Structure, Isomorphic Cohorts, and Automatic Decode Segmentation

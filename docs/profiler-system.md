@@ -35,7 +35,7 @@
 
 ```mermaid
 flowchart LR
-    A["宿主 Agent<br/>提出假设 · 选择窗口 · 决定实验"] -->|"远端原地调用 CLI"| P["mindie_profiler<br/>inventory / analyze / correlate / compare / sql"]
+    A["宿主 Agent<br/>提出假设 · 选择窗口 · 决定实验"] -->|"远端原地调用 CLI"| P["mindie_profiler<br/>inventory / analyze / correlate / compare / capture / sql"]
     D["远端 NPU 容器产物<br/>DB / CSV / Trace / 显存与服务日志"] --> P
     P -->|"紧凑 JSON 事实 + 源表定位符"| A
     A -->|"按需触发最小补充采集"| C["collect.py + remote-dev / coordinator"]
@@ -67,7 +67,7 @@ flowchart LR
 | --- | --- | --- |
 | **数据源与范围发现** | `segment.py`, `sources_db.py`, `sources_csv.py`, `sources_trace.py`（新增） | Rank 目录识别、显式时间/Step 窗口解析、只读 SQLite（`mode=ro` + `query_only=ON`）与 `STRING_IDS` 解析、CSV 及流式 JSON Trace 旁路索引 |
 | **区间计量、集群快慢卡与 EP 均衡** | `accounting.py`, `classify.py`, `cross_rank.py`, `events.py` | 整数纳秒区间并集/差集运算、语义块与执行引擎分类、按算子变体（Shape/Dtype/Format）聚合、跨 Rank P50 与最慢 Rank 统计、**集群快慢卡（`slow_rank`）vs 慢链路（`slow_link`）正交归因**及 **MoE EP 负载均衡度（`ep_imbalance_cv` / `eplb_recommended`）** |
-| **渐进查询与报告** | `__main__.py`, `analyze.py`, `report.py`, `correlate.py`（新增） | 提供 `inventory`、`analyze`、`correlate`、`sql` 子命令，输出带源表定位符（Locator）的紧凑结构化 JSON |
+| **渐进查询与报告** | `__main__.py`, `analyze.py`, `report.py`, `correlate.py`（新增） | 提供 `inventory`、`analyze`、`correlate`、`sql` 子命令（配合 `compare` 与 `capture` 共六大入口），输出带源表定位符（Locator）的紧凑结构化 JSON |
 | **异常规则、内存取证与理论建模** | `enrichment*.py`, `advisor_rules.py`, `memory_profile.py`, `memory_forensics.py`, `theoretical_model.py`, `tensor_cast_provider.py` | 单实例 `waitNs` / `TASK_PMU_INFO` 绑定、**昇腾 Advisor 异常与可融合算子序列扫描（AICPU 回退、32B/512B 对齐、多流 MTE 争用、流同步与疑似 GC 停顿）**、P0–P4 显存归因、**4 类低效内存分配模式与跨 Step 单调泄漏取证**、单算子 Roofline 下界与可选 `msmodeling`（`tensor_cast`）注入式预测 |
 | **跨 Run 对比与在线控制** | `compare.py`, `cli_compare.py`, `collect.py`, `framework_capture.py` | 按指标判定可比性的 A/B 差异报告；`/start_profile` 与 `/stop_profile` 在线采集控制及 `completed / failed / unknown` 状态对账 |
 | **CANN 9.x 原生稳态采集** | `cann_abi.py`, `native_capture_shm.py`, `native_capture.py`, `cli_capture.py`, `_cann9_capture_shim.c`, `_cann9_capture_mspti.h` | 基于 CANN `>= 9.0` 公开 C 接口（`mspti.h`、`aclrtApiInjectionSetFunc`、`acl_prof.h`）与 `/dev/shm` 多卡控制面的框架无关稳态采集（Gear 1 零 `msprof` 流式热点聚合 + Gear 2 狙击式 `aclprof` + Standby Attach 热挂载） |
@@ -166,9 +166,9 @@ flowchart TB
 
 - **显式阶段与 Step 边界**：`inventory` 自动提取 DB 中的 `ProfilerStep#` 与 `MSTX_EVENTS` 阶段标记（区分 `warmup`、`prefill`、`decode`、`draft`、`verify`、`graph_capture`）；若源文件无标记，要求调用方显式传入 `--window START:END` 或 `--full-range`，绝不靠 Kernel 周期性规律猜测 Step。
 - **混合架构（Dense + MoE + MTP）层切分与主流选择契约**：
-  - **主计算流只是观察视角**：若需选取主计算 `streamId`，按窗口内累计设备执行时长最大值（`argmax_s sum(duration_ns)`）判定，禁止取首个出现事件；该视角不能证明层或 Step 边界。
-  - **结构来源与实测关联分开**：Attention 类型、Dense/MoE 层计划及可选 MTP/DSpark 结构复用 `sim` 的声明。`MlaPrologV3`、SFA 与 KV Update 等名称可提供语义候选，确认它们属于哪一层仍需 Host 模块关联或显式事件绑定；不得按 Kernel 顺序或重复次数补造层号。
-  - **可选路径保持可选**：模型配置包含 MTP 不代表本次窗口执行了 MTP。Dense、MoE、draft、verify 是否属于同一次迭代，由原生标记或调用方给定窗口确定；不得按算子类型突变拆出伪 Step，也不得用模型层数强行拼成完整 Step。
+  - **主计算流仅作观察视角**：若需选取主计算 `streamId`，统一按窗口内累计设备执行时长最大值（`argmax_s sum(duration_ns)`）判定，禁止盲目取首个出现的事件；同时，所选主流仅作为时间线观察视角，不能单凭流号推断模型层或 Step 边界。
+  - **声明结构与实测关联严格解耦**：Attention 类型、Dense/MoE 层计划及可选 MTP/DSpark 结构直接复用 `sim` 的模型声明。`MlaPrologV3`、SFA 与 KV Update 等算子名可提供语义候选，但将事件确切归属到某一层仍须依赖 Host 模块调用链或显式事件绑定，严禁仅凭 Kernel 先后顺序或重复次数强行推算层号。
+  - **可选执行路径按实测判定**：模型配置开启了 MTP 并不代表当前采样窗口实际执行了 MTP。Dense、MoE、`draft` 与 `verify` 是否属于同一次迭代，一律以原生打点或调用方显式给定的窗口为准；严禁按算子类型突变切出伪 Step，也不得按声明层数将残缺片段强行拼凑为完整 Step。
 - **投机采样（Speculative Decoding / DSpark）**：不仅统计单次 `draft` / `verify` 的设备耗时，还在报告与对比中关联服务侧的 `mean_acceptance_length` 与 `acceptance_rate`——防止“单次 Verify Kernel 变快但接受长度下降，导致端到端 TPOT 劣化”的假优化。
 - **多维并行与跨 Rank 统计**：按同质角色分组（例如不同 PP Stage 不混算均值）。同时报告 `median_rank_p50` 与**逐 Step 最慢 Rank（`max_rank_per_step`）**分布，防止慢 Rank 轮换时被单 Rank 中位数掩盖长尾。
 
@@ -176,9 +176,9 @@ flowchart TB
 
 ## 6. 面向 Agent 的 CLI 与模块接口
 
-`mindie-profiler` 通过统一 CLI（`python -m mindie_profiler <subcommand>`）向宿主 Agent 与插件提供五项内聚操作，无需常驻守护进程：
+`mindie-profiler` 通过统一 CLI（`python -m mindie_profiler <subcommand>`）向宿主 Agent 与插件提供六项内聚操作，无需常驻守护进程：
 
-### 6.1 五大核心子命令
+### 6.1 六大核心子命令
 
 | 子命令 | 典型调用场景 | 核心输入参数 | 有界输出内容 |
 | --- | --- | --- | --- |
@@ -186,7 +186,7 @@ flowchart TB
 | **`analyze`** | 计算指定窗口的时间线核算、语义块拆解与变体热点 | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel`；可选 `--structure`、`--bindings` | 窗口时间指标（`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`）、6 大语义块占比、带 Shape/Dtype 与源表 Locator 的 Top-K 热点、跨 Rank P50/最慢 Rank、AICPU/PMU 摘要；提供结构时附带 `structure_mapping` |
 | **`correlate`** | 针对某段设备空隙或热点 Kernel，下钻追查对应的 Host 调用栈与下发关系 | `--root`, `--window START:END`, `--rank`, `--kernel-name <pat>` 或 `--min-gap-ms <val>` | 关联的 `PYTORCH_API` / `MSTX_EVENTS` 同线程父调用栈、`CANN_API` 下发耗时、Host 到 Device 启动延迟及未关联事件比例 |
 | **`compare`** | 优化前后两次 Run 的结构差异与耗时分布 A/B 对比 | `<baseline_report.json> <candidate_report.json>` | 工作负载与环境可比性核查、算子序列/融合/Shape 结构变化、对齐 Step/语义块/算子变体的 P50 差值与置信区间 |
-| **`capture`** | CANN 9.x 原生 NPU 稳态采集（绕过框架 HTTP 延迟与爬坡期污染） | `--gear fast\|deep`, `--prepare-session <id>` / `--attach <id>` / `-- <cmd>`, `--min-warmup-steps`, `--steady-window-steps`, `--steps`, `--max-cv-pct`, `--expected-workers` | `mindie-native-capture/1` 报告：三级 `SteadyStateGate` 审计回执（`transient_contaminated`）、多卡 `/dev/shm` 栅栏偏斜、Gear 1 MSPTI 热点与区间并集核算或 Gear 2 C7 完整报告 |
+| **`capture`** | CANN 9.x 原生 NPU 稳态采集（绕过框架 HTTP 延迟与爬坡期污染） | `--gear fast\|deep`, `--prepare-session <id>` / `--attach <id>` / `-- <cmd>`, `--min-warmup-steps`, `--steady-window-steps`, `--steps`, `--max-cv-pct`, `--expected-workers` | `mindie-native-capture/1` 报告：三级 `SteadyStateGate` 审计回执（`transient_contaminated`）、多卡 `/dev/shm` 栅栏偏斜、Gear 1 MSPTI 热点与区间并集核算或 Gear 2 深度 `analyze` 完整报告 |
 | **`sql`** | 标准视图无法覆盖的新算子或特殊字段自定义探索 | `--db <path>`, `--query "<SELECT ...>"`, `--limit 50`, `--timeout-s 10` | 强制只读（`mode=ro` + `query_only=ON`）与行数/超时受限的查询结果，支持自动关联 `STRING_IDS` |
 
 ### 6.2 在线采集控制、显存归因与理论建模接口
@@ -195,7 +195,7 @@ flowchart TB
    - **公开 C ABI 与版本边界**：严格面向 **CANN `>= 9.0`** 公开头文件按需编译并缓存 `libmindie_cann9_capture.so`（`<mspti.h>` `msptiActivityRegisterCallbacks` / `msptiActivityEnable`、`<acl/acl_rt.h>` `aclrtApiInjectionSetFunc`、`<acl/acl_prof.h>` `aclprofStart` / `aclprofStop` + `ACL_PROF_AICORE_SHAPE`），通过固定布局 `/dev/shm` 控制段（`MindieCaptureShm`，`MINDIE_CAPTURE_ABI_VERSION = 3`，独占控制器锁 `.ctl.lock`、最多 32 个 `MindieWorkerSlot` 槽位与 `acked_generation` 代际隔离）协同进程内回调，不依赖框架 `/start_profile` HTTP 接口，通用于 `vllm-ascend`（含 `NPUGraph` 图重放）、`xLLM`、`MindIE-SD` 与单算子基准。
    - **双档位采集架构（Dual-Gear）**：
      - **Gear 1（`--gear fast`，日常消融默认档）**：通过预分配 16 MiB `MSPTI` Activity 缓冲池（`KERNEL` / `HCCL` / `COMMUNICATION`）在进程内流式完成 FNV-1a 算子聚合与设备区间并集扫描（`device_busy_union_ms`、`exposed_comm_ms`、`device_uncovered_ms`、`underfeed_bubble_ratio`），**100% 绕开 `msprof` 离线导出与 PMU 多遍重放**，避免在线采集落盘阻塞与爬坡抖动；
-     - **Gear 2（`--gear deep`，PMU 与调用栈精查档）**：仅在稳态门禁锁定的精确 `N` 个 Step 边界调用 `aclprofStart` / `aclprofStop` 输出按代际隔离的 `gen_<k>/rank_<r>` 产物，随后执行共享截止时间（`export_budget_s`）保护的 `msprof --export=on` 并自动接入 C7 `analyze_profile`（兼容 CANN 9.x `mindstudio_profiler_output/op_summary_*.csv` 与 `task_time_*.csv`）。
+     - **Gear 2（`--gear deep`，PMU 与调用栈精查档）**：仅在稳态门禁锁定的精确 `N` 个 Step 边界调用 `aclprofStart` / `aclprofStop` 输出按代际隔离的 `gen_<k>/rank_<r>` 产物，随后执行共享截止时间（`export_budget_s`）保护的 `msprof --export=on` 并自动接入深度 `analyze_profile`（兼容 CANN 9.x `mindstudio_profiler_output/op_summary_*.csv` 与 `task_time_*.csv`）。
    - **三级稳态门禁（`SteadyStateGate`）、完整性门控与热挂载**：通过 `/dev/shm` 同步校验 L1（`active_graph_captures == 0` 且窗口内零 `aclrtMalloc` 抖动）、L2（滑动窗口 Step 时延变异系数 `CV <= max_cv_pct` 及多卡 `PHASE_START_NOW` 栅栏对齐）与 L3（采后 `transient_contaminated` 污染审计）；若实际采样步数低于 `--steps`、落盘 Worker 数低于 `--expected-workers`、`MSPTI` 活动记录丢包（`mspti_records_dropped`）或进程槽位溢出（`worker_slot_exhausted`），显式标记 `status="failed"`（含 `incomplete_capture_window` / `incomplete_worker_count`），拒绝残缺或截断窗口冒充成功。长驻服务可通过 `--prepare-session <id>` 注入 `STANDBY` 环境，随时执行 `--attach <id>` 多次无重启稳态采样（支持可选 `mark_capture_step()` 显式打点，退出前通过 `PHASE_STOP_NOW` 收敛残留采集状态）。
 2. **框架侧受控在线采集（`collect.py`）**
    - 接入前先校验目标服务进程是否已注入 `--profiler-config` 或 `VLLM_TORCH_PROFILER_DIR`；未注入时直接报错返回缺失配置，**绝不静默重启线上推理服务**。

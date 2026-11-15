@@ -26,9 +26,9 @@ flowchart TB
     B --> H
 ```
 
-六个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
+七个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
 - **领域知识按需激活**：输入 `/mindie-agent`（在 Codex 中也可使用 `$mindie-agent`）即可按当前任务加载昇腾领域知识与工作流引导。
-- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试，以及 `diagnostics` 本地诊断通过 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在六端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
+- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试，以及 `diagnostics` 本地诊断通过 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在七端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
 - **经验沉淀按授权运行**：仅当当前会话显式调用 `/mindie-agent` 且满足用户保存的本地授权与项目范围时，宿主生命周期事件才会触发脱敏会话采集与经验提炼。
 
 默认插件依赖 `knowledge`、`remote-dev`、`diagnostics` 与 `debugger`；`coordinator`、`profiler`、`sim` 与 `npu-top` 可按团队环境独立安装或组合使用。
@@ -46,7 +46,7 @@ flowchart TB
 | [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向开发者的 NPU 集群监控看板：支持 A2/A3/A5 集群监控、共享读取 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环实时 Web 界面（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天利用率历史 |
 | [`diagnostics`](https://github.com/mindie-agent/diagnostics) | **仅面向 MindIE Agent 自身内部 DFX**：本地结构化故障日志（4×1 MiB 自动轮转）、离线脱敏诊断包导出与带 2 次有界外发对账重试（bounded 2-attempt outbound reconciliation）的可选 GitHub Issue 上报（`mindie_diagnostics`） |
 | [`debugger`](https://github.com/mindie-agent/debugger) | **专门面向被调优的目标 NPU 业务负载**（`vllm-ascend`、`MindIE-SD`、CANN 算子）：确定性昇腾 NPU 日志分诊（`npu_fault_triage`）、通用三原语精度/内存踩踏定位（`precision`）与 `ACLGraph` 图内逐 Replay 步无同步 Dump / 捕获守卫 / 静态指针追踪（`aclgraph`，包名 `mindie_debugger`） |
-| [`profiler`](https://github.com/mindie-agent/profiler) | 昇腾 Profiling 采集与原地解析工具：支持 `inventory / analyze / correlate / compare / sql`，提供 Host-Device 关联、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）、`auto_segment_decode_forwards` Decode 自动切分、显存拆解与跨轮次耗时对比（`mindie_profiler`） |
+| [`profiler`](https://github.com/mindie-agent/profiler) | 昇腾 Profiling 采集与原地解析工具：支持 `inventory / analyze / correlate / compare / capture / sql`，提供 Host-Device 关联、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）、`auto_segment_decode_forwards` Decode 自动切分、显存拆解与跨轮次耗时对比（`mindie_profiler`） |
 | [`sim`](https://github.com/mindie-agent/sim) | 硬件无关的五层因果性能建模组件（`mindie_sim`）：统一组合物理资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持 4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、30ms SLA 硬件缩放求解、模型结构导出及 856 用例跨集群校准（见[建模系统](simulation-system.md)） |
 | [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | 昇腾真机端到端评测套件：覆盖 20 个行为级验证任务（109 项三态与辅助变体对照）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、跨任务经验复用评测及版本基准报告 |
 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)、[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace) | 昇腾 AI Infra 开源 Skills 目录，以及支持 Git Worktree 多任务隔离的 `vLLM` + `vLLM-Ascend` 本地开发工作区 |
@@ -54,14 +54,14 @@ flowchart TB
 ### 跨组件核心协作边界
 
 - **共享 SSH 认证底座（`remote_dev.auth`）**：SSH 认证与密钥维护由 `remote-dev` 统一实现，`coordinator` 与 `npu-top` 仅保存端点配置与 `auth_ref` 引用。同一操作系统用户下的不同进程、会话与宿主插件共享 `~/.mindie/ssh/credentials.json`（由用户目录权限保护，不依赖系统钥匙串或系统登录密码；Windows 与 WSL 各自使用所在环境的用户目录）。普通开发调用在业务命令提交前自动完成密码回退与公钥修复，已提交的业务命令绝不盲目重放；只读诊断与监控探针可在握手阶段回退密码认证而不修改远端公钥。
-  - **首次接入由 Agent 完成**：用户已为远端任务提供 SSH 密码时，Agent 通过 `remote_auth(action="setup", password=...)` 将其导入共享认证底座，自动验证密码、安装并独立验证公钥，随后继续原任务。缺少本地 `auth_ref` 不等于缺少用户凭据。`password_env` 仅适用于服务进程已经继承的变量；旧工具目录可通过本地进程 stdin 调用 `remote-dev auth setup --password-stdin`。各宿主保留共享层的安全恢复提示、业务提交状态与装钥状态，不能将其压缩成“请用户配置凭据”。实现与交付范围见[SSH 认证契约审计](audits/2026-11-06-ssh-auth-contract.md)。
+  - **首次接入由 Agent 无感完成**：当用户在对话中提供了远端机器的 SSH 密码时，Agent 直接调用 `remote_auth(action="setup", password=...)` 将其写入共享认证底座，自动完成密码核验、Ed25519 公钥下发与独立免密复验，随后无缝继续原任务——本地尚未登记 `auth_ref` 不代表用户未提供凭据。其中 `password_env` 仅读取 MCP 服务进程启动时已继承的环境变量；旧版工具目录也可通过本地子进程标准输入调用 `remote-dev auth setup --password-stdin` 完成导入。各端插件适配器完整透传共享层的安全恢复提示、业务命令是否已提交以及公钥安装状态，绝不将其笼统压缩成“请用户手动配置凭据”（详见 [SSH 认证契约审计](audits/2026-11-06-ssh-auth-contract.md)）。
 - **`sim` 与 `profiler` 的结构与实测协同**：`mindie-sim` 负责声明模型与算子拓扑结构（Case 前端与 `OpSpec` DAG 统一导出 `mindie-model-structure/1`），并由单一五层因果执行引擎完成资源、算子族、子图、纯模型与服务约束的机理预测、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）及 SLA 硬件配比求解；`mindie-profiler` 负责原始 `msprof` CSV/SQLite 解析、张量形状提取以及基于 `mindie-model-structure/1` 的拓扑引导 Decode 步切分（`auto_segment_decode_forwards`）与事件归因。两者通过结构导出与实测 Cohort / Decode Body 统计解耦协同，详见[性能建模系统](simulation-system.md)、[Profiler 系统设计](profiler-system.md)与[结构复用与实测映射](profiler-sim-structure.md)。
 
 ## 3. 远端 NPU 任务的执行与资源回收
 
-源码开发以用户选定的目录和业务解释器为准；未明确选择时沿用现有检出与兼容环境。新源码目录不意味着新建 Python 环境。remote-dev 提供多解释器依赖元数据发现，coordinator 复用它并保留 venv 身份；托管 `run` 物化独立执行目录，指定远端目录开发则使用直接远端操作和资源租约。原生重编译先保留受影响基线，再验证实际加载和正确性。完整约定见[源码开发、重编译与产物恢复契约](source-rebuild-contract.md)。
+远端源码开发始终以用户选定的源码目录与业务 Python 解释器为准；用户未显式指定时，默认原地沿用目标环境现有的源码检出与兼容运行环境，不会因为切换或修改源码就自动新建虚拟环境。`remote-dev` 提供免导入的多解释器依赖与 editable 路径探测，`coordinator` 直接复用该实现并保留各 `venv` 的独立 `sys.prefix` 身份：其中受管 `mindie.run` 用于将本地快照物化为独立远端执行目录，而在指定的远端目录中开发时则直接组合使用 `remote-dev` 原地操作与 `coordinator` 设备租约。触发 C++/AscendC 原生重编译前必须先备份受影响的基线二进制，构建完成后在新进程中核验实际加载路径与数值正确性（详见[源码开发、重编译与产物恢复契约](source-rebuild-contract.md)）。
 
-工具不适用时，Agent 可在已有授权内通过现有 CLI、原生 SSH 或自行编写的任务脚本继续。失败响应保留已确认事实与作业引用，并给出继续入口；自动探测和标准准备不构成全任务门禁。更换工具仍须保留真实资源归属，未知外部写先对账。
+当标准探测或辅助准备流程不适用于当前非标环境时，Agent 可在会话已有授权内直接改用现有 CLI、宿主原生 SSH 或任务级临时脚本继续推进。失败响应完整保留已确认的环境事实与作业引用，并通过 `next` 给出可执行入口，绝不让自动探测成为阻断全任务的硬门禁；切换执行工具时依然严格遵守物理设备租约归属，任何状态为 `unknown` 的外部写入均须先只读对账再做后续操作。
 
 在远端昇腾服务器上跑编译、测试或压测时，各组件按以下流程协同：
 1. **环境探测与租约申请**：通过 `coordinator` 检查目标主机与容器状态，按实际物理拓扑申请空闲 NPU 卡与端口租约（例如在昇腾 A3 910C 上显式区分单卡双 Die 的 `Phy-ID` 映射，避免两个任务误绑同一物理卡的相邻 Die）。
@@ -70,7 +70,7 @@ flowchart TB
 
 ## 4. 四类知识协同与双模式工作流（经验复用 + 独立探索）
 
-本节的知识上下文加载与经验循环只在手动启用的 session 内运行。`profiler`、`sim`、`coordinator` 等确定性工具可在未启用知识会话时独立使用。
+本节所述的知识上下文挂载与经验沉淀闭环仅在用户显式输入 `/mindie-agent` 唤醒的会话中运行；`profiler`、`sim`、`coordinator`、`debugger` 等确定性工具无需唤醒知识会话即可随时独立调用。
 
 在解决复杂的昇腾推理适配与性能优化问题时，MindIE Agent 将领域知识按工程用途分为四个层级（对应知识库 Schema 中的 `category` 与兼容字段 `tier: L1..L4`），并支持**常规经验复用**与**跳出既有思路的独立探索（`mode="explore"`）**两种工作方式：
 

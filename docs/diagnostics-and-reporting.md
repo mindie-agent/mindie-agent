@@ -132,9 +132,9 @@
 
 此外，在任务启动前、集群探针与评测阶段，`coordinator`（[`env_manager.py`](https://github.com/mindie-agent/coordinator)、[`fleet_probe.py`](https://github.com/mindie-agent/coordinator) 与 [`checkpoint_preflight.py`](https://github.com/mindie-agent/coordinator)）、`npu-top`（[`probe.py`](https://github.com/mindie-agent/npu-top)）和 `mindie-bench`（[`cann_sentry_eval.py`](https://github.com/mindie-agent/mindie-bench)）配套提供前置防踩坑门禁：
 - **运行时环境与硬件特性矩阵前置校验**：自动拦截 `ACLGraph` 与 `ASCEND_LAUNCH_BLOCKING=1` 冲突、自定义算子 `op_api/lib` 路径缺失、多机 `HCCL_SOCKET_IFNAME`/`GLOO_SOCKET_IFNAME` 失配、缺失 `expandable_segments:True` 导致的内存碎片风险、跨代 SoC（`310P` / `910B` A2 / `910_93` A3 / `950` A5）不支持特性误用、以及 NUMA/IRQ 绑核争抢。
-- **零 NPU 权重 Safetensors 头部与量化契约快检（`inspect_safetensors_checkpoint`）**：在申请 NPU 租约前，仅读取 `.safetensors` 前 8 字节头部长度与 JSON 元数据（`< 100ms`），自动校验分片完整性、文件截断、各层 Dtype 字节分布，拦截“`config.json` 声明 W8A8/W4A8 量化但 `routed_expert` 权重仍为 BF16/F16”的隐性显存暴涨，以及 `head_dim` 未对齐昇腾 32B UB 边界风险。
-- **Linux `/proc/<pid>` 磁盘 I/O `D` 状态（`wchan`）与真 NPU 挂死区分**：`fleet_probe` 与 `npu-top` 同步采集 NPU 进程的 `/proc/<pid>/status`（`State`）与 `/proc/<pid>/wchan`，当 AICore 利用率为 `0%` 但进程处于 `D` 态（如 `lock_page_killable` / `nfs_*` / `folio_wait*`）时显式标记 `disk_io_wait=True`，防止将冷存储/NFS 权重读取误判为 HCCL 通信死锁并误杀进程。
-- **推理基准测试有效性审计（`audit_inference_benchmark_validity`）**：自动识别并拦截未剔除 Warmup/图编译耗时、使用 `--load-format dummy` 或未校准量化权重报告精度、投机解码（MTP/EAGLE/DSpark）缺失 `acceptance_rate` / `mean_accepted_tokens` 折算、`output_len < 32` 冒充长稳态 TPOT、PD 分离静默回退本地重算（`transferred_kv_bytes == 0`）、`--enforce-eager` 与 `cudagraph_mode` 冲突或 C++ 算子重编后未清理 `.torchair_cache`、以及跨 VPN/广域网运行压测客户端导致的网络 RTT 失真。
+- **免上卡 Safetensors 文件头与量化契约预检（`inspect_safetensors_checkpoint`）**：在申请 NPU 租约前，仅读取 `.safetensors` 前 8 字节头部长度与 JSON 元数据（`< 100ms`），自动校验分片完整性、文件截断及各层 Dtype 字节分布，及时拦截“`config.json` 声明 W8A8/W4A8 量化但 `routed_expert` 权重仍为 BF16/F16”引发的隐性显存暴涨，以及 `head_dim` 未对齐昇腾 32B UB 边界的风险。
+- **Linux `/proc/<pid>` 磁盘 I/O `D` 状态（`wchan`）与真 NPU 挂死区分**：`fleet_probe` 与 `npu-top` 同步采集 NPU 进程的 `/proc/<pid>/status`（`State`）与 `/proc/<pid>/wchan`，当 AICore 利用率为 `0%` 但进程处于不可中断磁盘等待（`D` 态，如 `lock_page_killable` / `nfs_*` / `folio_wait*`）时显式标记 `disk_io_wait=True`，防止把冷存储或 NFS 权重加载误判为 HCCL 通信死锁并误杀进程。
+- **推理基准测试有效性审计（`audit_inference_benchmark_validity`）**：自动识别并拦截常见评测失真场景——包括未剔除 Warmup/图编译耗时、使用 `--load-format dummy` 或未校准量化权重报告精度、投机解码（MTP/EAGLE/DSpark）缺失 `acceptance_rate` / `mean_accepted_tokens` 折算、用 `output_len < 32` 短窗口冒充长稳态 TPOT、PD 分离静默回退至本地重算（`transferred_kv_bytes == 0`）、`--enforce-eager` 与 `cudagraph_mode` 配置冲突、C++ 自定义算子重编后未清理 `.torchair_cache`，以及跨 VPN/广域网发起压测导致的网络 RTT 污染。
 
 ---
 

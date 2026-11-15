@@ -2,13 +2,13 @@
 
 [English](testing-architecture.en.md) · [返回文档中心](README.md)
 
-本文定义 MindIE Agent 各仓库（`knowledge`、`remote-dev`、`coordinator`、`profiler`、`sim`、`npu-top`、`diagnostics`、四个宿主插件与评测仓 `mindie-bench`）统一的**用例有效性红线**与**四级测试金字塔（Tier 0 ~ Tier 3）**。
+本文定义 MindIE Agent 各仓库（`knowledge`、`remote-dev`、`coordinator`、`profiler`、`sim`、`npu-top`、`diagnostics`、`debugger`、各原生宿主插件与评测仓 `mindie-bench`）统一的**用例有效性红线**与**四级测试金字塔（Tier 0 ~ Tier 3）**。
 
 > **说明**：表中的四级分类与耗时预算是工程测试体系的设计目标；每次版本发布实际覆盖的源码 SHA、测试范围、运行环境、实测耗时与已知限制均在对应版本的[版本发布记录](README.md#版本记录与路线图)中如实记录。
 
 - 遵循准则：[工程设计原则与演进准则](design-principles.md) · [系统架构与模块分工](architecture.md)
 
-知识飞轮与 `L1–L4` 系统架构能力的具体测试见 [L1–L4 架构闭环与知识飞轮测试方案](knowledge-tiered-testing-plan.md)。`L1–L4` 表示系统认知与执行架构层级（由 `knowledge` 的 `axiom/measurement`、`sop`、`workflow`、`mutator` 四类知识单元支撑），`Tier 0–3` 表示工程验证范围；完整任务收益、跨任务学习和长期探索实验单列预算，不以短 Canary 代替。
+知识飞轮与 `L1–L4` 系统能力专项验证详见 [L1–L4 架构闭环与知识飞轮测试方案](knowledge-tiered-testing-plan.md)。需注意区分两套正交编号：`L1–L4` 表示知识认知与执行架构层级（分别对应 `knowledge` 中的 `axiom/measurement`、`sop`、`workflow`、`mutator` 四类分级单元），而 `Tier 0–3` 表示工程测试的执行层级与隔离边界；端到端任务净收益、跨任务经验迁移与长周期探索实验均单列独立预算，不以短耗时 Canary 测试替代。
 
 ---
 

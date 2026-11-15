@@ -25,7 +25,7 @@
 
 ## 2. 插件更新：复用原生插件市场 + 补齐兼容性筛选
 
-详细更新流程见[版本兼容与无感更新](release-compatibility-and-update.md)。由于宿主自带的 Git 插件市场默认只拉取分支最新提交，无法直接根据“当前安装的宿主 CLI 版本”筛选兼容的插件版本，我们在插件侧补了共享的纯函数筛选器（`harness-compatibility.json`），把下载与安装交给宿主原生管理器；而共享运行时组件的更新则直接从各官方组件仓库发现正式 GitHub Release（取 `max(当前已安装版本, 插件基线版本, 仓库正式 Release 版本)`，核验 Tag SHA、`pyproject.toml`、wheel/sdist/校验和资产存在性与 `benchmark-results.json` 后，从精确 Git SHA 在隔离环境中生成有效 `uv.lock`、通过原生 API 探针并在空闲时切换，不以主仓 `channels/0.1.json` 作为客户端更新选择源）：
+详细更新规则见[版本兼容与无感更新](release-compatibility-and-update.md)。由于宿主自带的 Git 插件市场默认只拉取分支最新提交，无法直接根据“当前安装的宿主 CLI 版本”筛选兼容的插件版本，我们在插件侧补充了共享的纯函数兼容筛选器（`harness-compatibility.json`），将实际下载与安装交回宿主原生管理器。与此同时，共享运行时组件的后台更新直接从各官方组件仓库发现正式 GitHub Release（按 `max(当前已安装版本, 插件基线版本, 仓库正式 Release 版本)` 单调优选）：先核验 Tag SHA、`pyproject.toml`、wheel/sdist/校验和资产存在性与 `benchmark-results.json`，再从精确 Git SHA 在隔离环境中构建锁定 `uv.lock`、执行原生 API 冒烟探针并在空闲时原子切换，不将主仓 `channels/0.1.json` 作为客户端实时更新的唯一选择源：
 
 ### 2.1 OpenAI Codex CLI 适配要点
 - **宿主机制特点**：Codex 启动时会刷新配置的 Git 插件市场，但它的缓存管理器（`store.rs`）在更新时会清理旧版本缓存目录，甚至原地替换同版本目录。
