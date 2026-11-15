@@ -1,0 +1,189 @@
+{
+  "schema": "mindie-task-continuity-release-acceptance/1",
+  "product_version": "0.1.9",
+  "verified_at": "2026-11-06T04:19:51.795237+00:00",
+  "scope": {
+    "public_release_assets": true,
+    "model_requests": 0,
+    "npu_workloads": 0,
+    "user_host_bindings_modified": false,
+    "running_host_catalog_reload_verified": false
+  },
+  "releases": {
+    "remote-dev": {
+      "version": "0.11.6",
+      "revision": "991ef7863b2b208f94f54a29db4ac5be50884ea3",
+      "url": "https://github.com/mindie-agent/remote-dev/releases/tag/v0.11.6",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "0fc7e9c053589ce595f25d9fd3a3d25c846e0b373ed7accba9f029d2dcefdc6c",
+        "benchmark-results.json": "4ccaa6ff265ca2cac58bfa7c2bf657daa8dd48b6edac89c8626e3c6e1f227358",
+        "benchmark-results.md": "0c5c025cf9be0c82d6c8feddc59d407d5e08e63d2fdf2d9a0b258e3f970c575d",
+        "release-notes.md": "8b100ee6c0a09a4bddf93fcda240a9d8a752e06c768a3598b57e11650d3c120d",
+        "remote_dev-0.11.6-py3-none-any.whl": "d081217d206457787e70ed1b09bf73e36216dc14fba92db5ffa76a9a0960f1a4",
+        "remote_dev-0.11.6.tar.gz": "9c9e0f304e78a7aaa0287cb2da796c0f8065debff728b6eaee9f46a46ca54efc"
+      }
+    },
+    "coordinator": {
+      "version": "0.7.5",
+      "revision": "819b0deb7bea994d4dff9c009200a48dd9300cc4",
+      "url": "https://github.com/mindie-agent/coordinator/releases/tag/v0.7.5",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "26bd50e6d4cca6f623e194ed3e0035f422b81cf06cacf7f8b04396b2d0b81709",
+        "benchmark-results.json": "a6e5e8730098ed8995c804e7f5348886957e8c9aab051410dbea7cd1c4921a06",
+        "benchmark-results.md": "e62cb5e59e8d86892a0d95003c38e5ea0f2849414c70c2678ebb4c3d22a71571",
+        "mindie_coordinator-0.7.5-py3-none-any.whl": "47a112710843ae358c0dfc41620b0745bd908da03333af60276e1bc782904ae6",
+        "mindie_coordinator-0.7.5.tar.gz": "63891036218690a59014423fb8c9cf7468062a7f365e11c919e07c1663ca1a9f",
+        "release-notes.md": "9359e6c92be8e7dddba413cee11b3283048c4ffef261aecd2e3a3afd8a055c32"
+      }
+    },
+    "mindie-agent-codex": {
+      "version": "0.1.21",
+      "revision": "b77035bdd3ca1de0d7ac41c6a5d654205a3136bd",
+      "url": "https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.21",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "472b950fefc4f8fabe01b7888aa4594a50bcb552f3d25e27f09645536b33ee23",
+        "benchmark-results.json": "563e7546a0a249355086df5a3e0570a4c1763cbe751cf06957addd9354454408",
+        "benchmark-results.md": "ff70df0578ff214b7d529d0dd7034d52b2fba3e84049ac29a8b5272729fbe403",
+        "mindie-plugin-release.json": "263cd551a2fa49243519de800b2014ef5e9a6f6d73e7027ece1300f670ba4855",
+        "mindie_agent_codex-0.1.21-py3-none-any.whl": "150a0dd2d31291d8834304d40f592cee5c882ae46a894d7a95ef71f8f423f5bb",
+        "mindie_agent_codex-0.1.21.tar.gz": "babe19500a141f514d4429fd1054216ad2d80e0455d0528f27461477137f4a57",
+        "release-notes.md": "71419081ed4bbcebffcae3e6b848d3a39cd315ce2904dc3c1e620c3cabd9f7e3"
+      }
+    },
+    "mindie-agent-cc": {
+      "version": "0.1.17",
+      "revision": "dc2ab3558fee8b22cdc111d8bdebec1472619f9a",
+      "url": "https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.17",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "0ba3d6c2e3e4048d17cfc9348b6ff5bb7900e823963098eb95524d7c1fdc6af9",
+        "benchmark-results.json": "9c3a0ea14fae0a58043989a4496cdd4ca82d34a837453ada4325a9823608ddf1",
+        "benchmark-results.md": "b8ec41575d68ef1cc14ec70f2c8ecc6f95ca043be006aec91149ebcfae7ca555",
+        "mindie-plugin-release.json": "329053f275c7cef70c396a253683cc8fbf5e82505f38c1633b7af06c6f3e0eb2",
+        "mindie_agent_cc-0.1.17-py3-none-any.whl": "d4f5d2d3c6e1e865bf20585941d25b58d8a3eb4dcc32bf29431a84b19b6753d8",
+        "mindie_agent_cc-0.1.17.tar.gz": "a6679eca91dc835be21bf10733ae1a8a4a533daaa18d5560a166670281ac507f",
+        "release-notes.md": "824168e148ba5c4fbbbb5051a0fdd2c7b0eaa91b6497ab66c6e14426f71a881e"
+      }
+    },
+    "mindie-agent-kimi": {
+      "version": "0.1.17",
+      "revision": "ce0589d8a6a07cca66a23677b2cd77bb8ee8cb50",
+      "url": "https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.17",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "9e50ed36d971fe555dfd8846d259fcd64362a9878e3f8939aaf4748e5380f4b7",
+        "benchmark-results.json": "ccd213b8b6d30a98cae2ff9267897445dd34582ba0d00e3f9cd3b9d52e37718c",
+        "benchmark-results.md": "5802b94531bf36fa51bdb804c94061bebc99ee4154c5f1d20360c6570e8fdd9d",
+        "mindie-agent-kimi-0.1.17.tar.gz": "692692d424a819fb6eed0300e9f56a375371cc4e502433038eee9c5be9addf98",
+        "mindie-plugin-release.json": "77da81957c6e92d6399b0d5fa3afb6e8b333227f57f6e22f1456fa404d411085",
+        "release-notes.md": "270681899e55e296699190c028fc6abe56addd80114b0cf9814db88dda8ae608"
+      }
+    },
+    "mindie-agent-dsh": {
+      "version": "0.1.16",
+      "revision": "bf02b5938623a00461e2db0c8119b3a95a4be937",
+      "url": "https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.16",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "efb78c2608012d9a049f5b51dd8e948a2acef20d97c8c35e44c1538f39403b67",
+        "benchmark-results.json": "809476dc1c5bbccadf18c5c0ae96a9d5313c605a29f17890dba555602d5cd997",
+        "benchmark-results.md": "2fc2b7156dac83064070090577ef924fe4643f7d37fe5a2f00047a4ad7a6af98",
+        "mindie-agent-dsh-0.1.16.tgz": "7b7b313450aa87bd08f892bc89b91b8ff5194b95b3d7bf489c318df7a015b623",
+        "release-notes.md": "51a88f8ffcb675b691c31ea1d575e9ebdca15800c6349af0932560a2ed319a6b"
+      }
+    },
+    "mindie-agent-agy": {
+      "version": "0.1.7",
+      "revision": "25513fdccc36a098738b5c5e4091b5eb57a6f9a2",
+      "url": "https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.7",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "64f3e2832e3e1799216bb6b5089c0ffb639100abbbd13fc9d521f92336ff29ca",
+        "benchmark-results.json": "6f28d1755af6ad063cfba9c626d25f982e6cabfbe35bfe7bf8f8e6307862ef0c",
+        "benchmark-results.md": "3ef4805f1bd62041ff801a51f7b9278ef0516d51dd065923aa97f17e2cef598e",
+        "mindie-agent-agy-0.1.7.tar.gz": "a9c387193797dc336b941ee7ac717b3d118743857f2aac76ee57d277a87484e5",
+        "release-notes.md": "00212b1ba9e45f57728ecedd88469db3b29414511b02e1acc3aa28cb7fac6b4b"
+      }
+    },
+    "mindie-agent-wb": {
+      "version": "0.1.7",
+      "revision": "356d0cbba475f14e7deb37f45dd66800a71a8ed6",
+      "url": "https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.7",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "e9d75cea7654c98fd6b3662b4533fefe7878b4dfbbfefbd509d5fa5b780d0303",
+        "benchmark-results.json": "e3fe840688c5cf4c1c8b377a0a08ce7ae734eb17877962193d6a23d732e61d78",
+        "benchmark-results.md": "1ebc85e5e912d386e786c20d60b1796e25d17b2d9b3f4500a4c913123e23ce48",
+        "mindie-agent-wb-0.1.7.tar.gz": "8b6677522136599fbe2aac671673bf34f6f5b6c6b7183af20a46ac64fe780155",
+        "release-notes.md": "d139f60cd80f700eb4a8e19e926a259984e066113a27f0482221df5089187f5d"
+      }
+    },
+    "debugger": {
+      "version": "0.1.0",
+      "revision": "e9406b2b178335190d5cb59dff4d6985894497ba",
+      "url": "https://github.com/mindie-agent/debugger/releases/tag/v0.1.0",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "c40dbf97af80b39ab3fc72d717ad29dbffccf271124d1995793596452b0d0ca2",
+        "benchmark-results.json": "5b2544e15d930d6aa4be338461ca9ddf4a6716b02255f8b4914d28bf39175a35",
+        "benchmark-results.md": "417735239006f98b172f4602976e7fc2f7fd43f4e3e5eccfb2724bf78cce9eda",
+        "mindie_debugger-0.1.0-py3-none-any.whl": "05d541824833e44b1dc5546bcb54c0d963749f0548f8fa998ab955a3238f8165",
+        "mindie_debugger-0.1.0.tar.gz": "0522566072d7cbbbc42715f315febda4e3be79cff158c56ffc7d4eeb3d5c817f",
+        "release-notes.md": "ac52467f063cd9292aa6b2eab1e7da2f5ba9a0b4caa34342043204f52e0c5bf0"
+      }
+    }
+  },
+  "additional_verification": {
+    "debugger_runtime_direct_url": {
+      "version": "0.1.0",
+      "revision": "e9406b2b178335190d5cb59dff4d6985894497ba"
+    },
+    "published_remote_wheel_password_schema": true,
+    "codex_update_regressions": {
+      "passed": 72,
+      "skipped": 1,
+      "subtests_passed": 20
+    },
+    "workbuddy_local_contracts": {
+      "passed": 37,
+      "skipped": 3,
+      "npu_deselected": 1
+    },
+    "workbuddy_independent_astra_max": {
+      "passed": 37,
+      "skipped": 3,
+      "npu_deselected": 1
+    },
+    "workbuddy_explicit_tier3": {
+      "passed": 2,
+      "npu_deselected": 1,
+      "seconds": 52.46
+    },
+    "workbuddy_unpublished_failed_tag": {
+      "tag": "v0.1.6",
+      "formal_release_created": false,
+      "workflow": "https://github.com/mindie-agent/mindie-agent-wb/actions/runs/42160239492"
+    }
+  }
+}

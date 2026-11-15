@@ -1,43 +1,25 @@
-# Next steps
+# MindIE Agent 演进路线与下一步计划
 
-Updated 2026-09-29. Follow the [nine design principles](design-principles.md),
-[architecture](architecture.md) and [lifecycle contract](harness-boundary-and-lifecycle.md).
-[Implementation status](implementation-status.md) separates completed evidence
-from work in progress. Earlier release reports retain their historical results.
+[English](next-steps.en.md) · [返回文档中心](README.md)
 
-The [Codex public-transcript acceptance](codex-public-transcript-acceptance-2026-09-29.md)
-records the implemented Windows/WSL work, exact candidate commits and remaining
-limits. Preserve the following existing mechanisms:
+系统整体架构与知识闭环设计请参阅 [系统架构与模块分工](architecture.md) 与 [知识与经验闭环设计](knowledge-system.md)，工程准则请参阅 [工程设计原则与演进准则](design-principles.md)。
 
-1. Keep submitted knowledge authoritative on the remote. Retain only unsent
-   additions locally, apply them to the current own PR or merged main, and never
-   resurrect a Bot-redacted passage or withdrawn entry from an old full draft.
-   Distinguish locally staged material from confirmed remote delivery.
-2. Recover transient publication, feed and plugin-update failures through existing
-   background workers and schedules. Persist backoff and reconcile unknown writes
-   before retrying. Do not require a CLI, another business turn, or another model
-   call. Content rejection remains separate from a recoverable network failure.
-   Stable adapter management commands must select the installed generation.
-3. Let long tasks and growing knowledge continue. Remove cumulative-body and
-   whole-corpus rejection thresholds while bounding individual operations and
-   using incremental processing. Do not introduce user-managed batches,
-   compulsory draft administration or a new scheduling service.
+系统已完成首个正式里程碑版本 **[`v0.1.0`](releases/0.1.0.md)**（[实测报告](releases/0.1.0/value-results.md) · [作者自述](releases/0.1.0/design-philosophy.md)）及 `v0.1.1`–[`v0.1.12`](releases/0.1.12.md) 的持续迭代（版本组合锁定见 [`channels/0.1.json`](../channels/0.1.json)，各版本详情见[版本发布记录](README.md#版本记录与路线图)）。当前已落地的核心能力包括：
+- **知识与经验飞轮**：交付 `knowledge v0.13.14` 的按需信息缺口检索、L1–L4 渐进式披露、Token 预算门控、`G3` C6 经验蒸馏飞轮、`G4` `mode="explore"` 独立探索与构建期 `revision` 自动单调推进，并扩展昇腾公共领域知识库（基线 `450+` 结构化单元）；
+- **机理性能建模与实测映射**：发布具备五层统一因果建模、确定性 Case 合成（`compose`）、`async_scheduling` 显存延迟释放与多维拓扑/PD 分离 Pareto 求解器的 `mindie-sim v0.9.4`，配套支持拓扑引导 Decode/Prefill 自动切分的 `mindie-profiler v0.5.6`（完成跨 A2/A3/A5 三芯片 1,653 份实测 Profile 的 `100.00% <= 10%` 样本内多工况校准、280 例 Decode + 15 例 Prefill 收敛，以及独立 856 例 DSH 集群整体 `841/856 = 98.25%`、其中 561 例独立 Held-out 盲测 `546/561 = 97.33% <= 15%` 的泛化验证）；
+- **远端执行、诊断协调与多端评测**：交付 `remote-dev v0.11.6` 共享 SSH 认证、`diagnostics v0.5.8` CANN/`plog` 确定性分诊、`coordinator v0.7.5` 昇腾 A5 拓扑预检与 Antigravity 原生会话识别，覆盖官方原生客户端插件（含 `Codex v0.1.21`、`Claude Code v0.1.17`、`Kimi v0.1.17`、`DSH v0.1.16`、`Google Antigravity v0.1.8` 等），并完成 `mindie-bench v0.4.6` 20 个任务的真实子进程行为级 Oracle 加固与口语化报障 `G0–G5` 全矩阵基准评测。
 
-Codex body processing now uses deterministic public-message selection and local
-redaction. Do not reintroduce a model into body capture or increase its timeout
-to handle larger transcripts. Optional title/summary generation selects its model
-and effort separately; GPT-6-Luna/low has completed real metadata calls in both
-PowerShell and WSL. Unsupported or failed calls retain labeled source excerpts.
-Real native business tasks use gpt-6-luna/max.
+---
 
-Review and merge the recorded core and Codex candidates before checking ordinary
-main-branch update delivery. The isolated candidate profile deliberately uses a
-manual update schedule, so it does not establish current Windows/WSL OS scheduler
-delivery. Keep native Hook trust, automatic contribution and feed synchronization
-as separately observed boundaries. A historical trusted Hook does not prove a
-changed Hook is trusted.
+## 下一阶段推进重点
 
-Kimi native model acceptance is deferred; Grok has no adapter in this scope.
-Other harnesses need their own transcript projection and native evidence.
-Earlier macOS and Claude results retain their original scope. Old business Skills,
-profiling analysis, automatic Skill extraction and additional domains remain deferred.
+1. **端到端多宿主产品矩阵（`P0–P3`）常态化评测与知识飞轮演进**
+   - 基于加固后的 `mindie-bench` 行为级 Oracle 持续扩展跨模型、跨宿主的端到端研发任务与跨任务经验迁移（`P0–P3`）评测覆盖，跟踪 L1–L4 渐进式披露与子上下文事实包在长周期复杂算子与框架调优任务中的净工程收益。
+2. **昇腾 A5（950）实机通信展开与竞争校准回填**
+   - 按照 [A5 通信展开与竞争校准计划](a5-communication-calibration-todo.md)，在常备 A5 环境上完成 AICPU/AIV 通信展开、资源竞争样本采集与 `mindie-sim` / `mindie-profiler` 参数回填验证。
+3. **7 大昇腾公共知识库与开箱即用 Skills 持续扩充**
+   - 在 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) 与 [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) 中持续沉淀经过真机验证的分级知识单元与专项指南。
+4. **远端环境编排（`coordinator`）、性能组件（`profiler` / `sim`）与宿主插件的深度协同**
+   - 五端宿主插件已通过 `knowledge`、`remote` 与 `components` / `mindie-tools` 统一暴露 `remote-dev`、`coordinator`、`profiler`、`sim` 与 `diagnostics`；后续将围绕高频调优闭环（“Profiling 瓶颈定位 → Sim 候选融合/配比推演 → 远端容器验证”）进一步打磨一键协同体验。
+5. **上游宿主 CLI 问题跟进**
+   - 持续跟踪 OpenAI Codex CLI 在中断子代理（`spawn_agent`）时向在途 MCP 工具调用传递取消信号的上游修复进展；待上游合入发布后及时验证并更新 `harness-compatibility.json` 版本区间。

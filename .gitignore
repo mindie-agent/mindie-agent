@@ -37,3 +37,11 @@ docs/superpowers/
 .cursor/*
 !.cursor/rules/
 !.cursor/skills/
+
+# Local scratch, workstreams, and runtime state directories
+.dinf/
+.mindie-local/
+.workstreams/
+/state/
+/raw/
+/tests/

@@ -1,25 +1,45 @@
 # MindIE Agent
 
-This repository owns architecture, domain boundaries and product entry documentation.
-Native implementations live in `mindie-agent/mindie-agent-codex`,
-`mindie-agent/mindie-agent-kimi` and `mindie-agent/mindie-agent-cc`.
-Shared runtime components live in their own repositories under `mindie-agent`.
+This repository owns product architecture, domain boundaries, and entry documentation (`docs/`).
+Native Harness plugins: `mindie-agent-codex`, `mindie-agent-cc`, `mindie-agent-kimi`, `mindie-agent-dsh`, `mindie-agent-agy`, `mindie-agent-wb`, `mindie-agent-oc`.
+Shared runtime components: `knowledge`, `remote-dev`, `diagnostics`, `debugger`, `profiler`, `sim`, `npu-top`, `coordinator` (plus `mindie-bench`).
 
-Use native local tools for this repository. It has no bootstrap, workspace manager,
-client hook, MCP server, Skill catalogue, dependency lock or business source checkout.
-Use the user's business repository and the selected Harness plugin for actual tasks.
+## 1. Core Operating Rules (Always Active)
 
-Follow [design principles](docs/design-principles.md) and the [architecture](docs/architecture.md).
-MindIE Agent inherits all nine VAWS design principles; retiring the old runtime
-does not retire or replace those principles.
-Keep implementation status distinct from the target design and real acceptance evidence.
-Do not add old VAWS aliases or an alternative legacy installation path.
-Do not alter the user's unrelated skills, plugins or MCP configuration.
+- **Repository & Inner-Loop Boundary (Principle 1)**: This repo holds documentation, channel manifests (`channels/0.1.json`), and CI gates only—no runtime code or legacy VAWS aliases. Edit files directly in the active checkout and verify only the affected scope (no snapshot directories or `readback.json`/`shadow.json` audit ceremonies).
+- **Task Continuity & Native Escape Routes (Principles 1–2)**: Helpers remain optional. When discovery, standard preparation, or a tool is unsuitable, continue within existing user authorization through existing CLIs, native shell/SSH, or task-local scripts. Preserve the original failure, confirmed facts, endpoint/job references, and actual resource ownership; reconcile uncertain external writes before replacement. Pause only dependent actions, not the whole task. See [`docs/source-rebuild-contract.md`](docs/source-rebuild-contract.md).
+- **State Honesty & No Silent Fallbacks (Principle 9 & 14)**:
+  - Distinguish `completed`, `failed`, and `unknown` external effects. Never mask failures as `{}` / `"active"` / `exit 0`, never let `except OSError:` swallow `TimeoutError` (always precede with `except TimeoutError: raise`), and never blindly replay an `unknown` external write.
+  - **Receipt Honesty**: Once a primary remote/component operation succeeds, local receipt/bind accounting errors must keep `isError=False` and attach `receipt_warning` + `receipt_unconfirmed=True`.
+- **Timeout Arithmetic & Anti Over-Defensive Iron Rules (Principle 10 & 15)**:
+  - Enforce `outer_timeout >= sum(inner_budgets) + cleanup_grace` (e.g., MCP `660s >= 600s + 60s`, `STOP_DRAIN >= STOP_GRACE + 3s`), decouple process output buffer limits from MCP response truncation budgets, and never run `timeout N cmd || cmd`.
+  - **Four Iron Rules**: (1) Configure SQLite WAL + `busy_timeout=5000` once in `open_database` (no per-query `.owner` `lstat` or `:memory:` reflection); (2) Reserve `unknown` strictly for irreversible external writes, banning one-way local self-bricking (`fault`/`suppressed`/`TaskRootBusy`); (3) No copy-pasted `*_fallback.py`/`*_bootstrap.py` shadow state machines or Win32 ACL ceremonies (use `os.replace()`); (4) No `inspect.signature` locks or giant inline Python string blobs.
+- **Four-Tier Testing & Zero Host Pollution (Principle 16)**:
+  - No filler/type/prose-grep tests or fabricated `MagicMock` hardware payloads. Isolate `MINDIE_CONFIG_HOME`, `MINDIE_DATA_HOME`, `MINDIE_DIAGNOSTICS_ROOT`, and `$HOME` in all tests.
+  - **Tier 0 (`<5s`)**: Pure in-memory unit tests + Golden Captures; **Tier 1 (`<15s`)**: Local process/SQLite/Git boundary tests; **Tier 2 (`<25s`, `@pytest.mark.live_npu`)**: Non-destructive live A2 (`173.125.1.2`) & A3 (`192.168.13.165`/`.156`/`.154`) NPU integration; **Tier 3 (`<90s`)**: Live host CLI & `mindie-bench` Canary acceptance.
+- **Agent-Native Modules & Bounded Resources (Principle 17 & 18)**:
+  - Keep core modules `< 800` lines with a top-30-line `[Role]` / `[Invariants]` / `[Timeouts & Locks]` / `[Side-Effect Policy]` docstring header; comment *why* & hardware invariants (e.g., A3 dual-Die `Phy-ID 0..15`), never defensive excuses.
+  - Keep working sets $O(\text{Active State})$ (`<= 512 MiB` control-plane peak; `> 1 GiB` is a bug), stream files `> 50 MB`, keep control paths zero-weight/zero-device-context, and place workloads by measured local/remote (`fleet_probe.py`) specs rather than hardcoded `sys.platform`.
 
-## Mandatory design-principles review before PR submission
+## 2. Progressive Disclosure Map (Read Only When Triggered)
 
-All MindIE Agent development tasks MUST read the current [design principles](docs/design-principles.md) and review the final diff and affected behavior against all nine principles before creating any PR, including a draft. This covers code, configuration, dependencies, CI and project documentation. Review subsequent PR changes against the affected principles again.
+Do not preload all docs into context. Read only the reference matching your current task:
 
-Errors MUST remain visible to the caller. Never turn a required-step failure into success, empty data, first use, user disablement or an undocumented fallback. Distinguish completed work, failure and uncertain external effects; do not repeat an uncertain write or hide the original error behind a later failure.
+- **Historical Postmortems & Anti-Regression Guardrails (`P1–P7`)** → [`docs/historical-issues-and-guardrails.md`](docs/historical-issues-and-guardrails.md) *(Consult when touching auto-update, hooks, timeouts, receipts, C6 distillation, benchmarks, or A2/A3/A5 topology)*
+- **Architecture & Domain Boundaries** → [`docs/architecture.md`](docs/architecture.md)
+- **Engineering Principles, Testing & Resource Placement** → [`docs/design-principles.md`](docs/design-principles.md), [`docs/testing-architecture.md`](docs/testing-architecture.md) & [`docs/execution-resource-budget-design.md`](docs/execution-resource-budget-design.md)
+- **Harness Plugin Lifecycle, Knowledge & Component Specs** → [`docs/harness-boundary-and-lifecycle.md`](docs/harness-boundary-and-lifecycle.md), [`docs/knowledge-system.md`](docs/knowledge-system.md), [`docs/diagnostics-and-reporting.md`](docs/diagnostics-and-reporting.md), [`docs/profiler-system.md`](docs/profiler-system.md) & [`docs/simulation-system.md`](docs/simulation-system.md)
+- **Existing Source Development, Native Rebuilds & Artifact Recovery** → [`docs/source-rebuild-contract.md`](docs/source-rebuild-contract.md) *(Read when changing source locations, editable bindings, native build behavior, or baseline backup/restore guidance)*
+- **Gate — Submitting or Updating a Development PR**:
+  - Complete [`docs/design-principles.md#三开发-pr-提交前自查清单pre-pr-review`](docs/design-principles.md#三开发-pr-提交前自查清单pre-pr-review) and [`.github/pull_request_template.md`](.github/pull_request_template.md), and verify Unix `LF` (`\n`) line endings via `python3 .github/scripts/check_lf_eol.py`.
+- **Gate — Publishing a Component, Corpus, or Plugin Release (Mandatory `R1–R6` Checklist)**:
+  - Read [`docs/release-compatibility-and-update.md#组件与插件配套发布`](docs/release-compatibility-and-update.md#组件与插件配套发布) and **mandatorily pass all 6 checklist items (`R1–R6`)** before and after any release or [`channels/0.1.json`](channels/0.1.json) update:
+    ```bash
+    # Independent release: select only the publishing repositories (repeat --release-repo as needed).
+    # R6 checks their own source versions, READMEs and LF; the product channel remains a historical combination.
+    python3 .github/scripts/check_auto_update_readiness.py --release-repo knowledge --require-siblings --verify-local-hosts --verify-github-releases
 
-Fix principle violations before submission. In the PR description, record the reviewed commit and principles revision, concrete conclusions and applicability, findings and fixes, and actual validation or remaining gaps. Tests passing, checkboxes, blanket N/A or “all principles followed” are not a review. If the principles cannot be read or the review is incomplete, report that explicitly and do not create or update the development PR until review is complete. Pure knowledge/feedback contributions follow their content rules; development of those features remains subject to this review.
+    # Product combination release / channels update: explicitly enable full documentation alignment.
+    python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
+    ```
+  - Independent component/corpus/plugin releases do not require a main product version bump, a channel update, or changes to other repositories' READMEs. Only product combination releases run `sync_org_versions.py --release-scope product --write` (optionally with `--org-profile-dir`). `--strict-lockstep` controls dependency pin equality independently of the R6 documentation scope.

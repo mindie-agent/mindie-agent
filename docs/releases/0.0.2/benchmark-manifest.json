@@ -1,0 +1,116 @@
+{
+  "schema_version": "mindie-release-manifest/1",
+  "product_version": "0.0.2",
+  "repositories": [
+    {
+      "repository": "mindie-agent/diagnostics",
+      "revision": "1b5a0eeb79d498c39002fc1853271c17e0f26e66",
+      "version": "0.4.3",
+      "required_cases": [
+        "redaction"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/knowledge",
+      "revision": "4e328305323eafc7fd43ecc0c53eb3cc0541fdef",
+      "version": "0.12.2",
+      "required_cases": [
+        "technical-tokenization"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/remote-dev",
+      "revision": "a6649222aae4851deec5774513f8319aece09051",
+      "version": "0.10.1",
+      "required_cases": [
+        "patch-parser-and-tool-protocol"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/coordinator",
+      "revision": "34812c2d385f3ff112be3a597d27fd3a0c15c104",
+      "version": "0.5.3",
+      "required_cases": [
+        "two-role-placement"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/npu-top",
+      "revision": "9bbf6de590b12fe1109040e0ef86817bd2c5f3e0",
+      "version": "0.1.9",
+      "required_cases": [
+        "a2-a3-parser"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-codex",
+      "revision": "f1acb69ba336f75ae2d909443ca118835b038b9c",
+      "version": "0.0.2",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-cc",
+      "revision": "78f34dd9b09e877298225fa243ea4c28978c9dd6",
+      "version": "0.0.2",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-kimi",
+      "revision": "0e78f0422162a61e8c56850e049f9e5fc4d290b5",
+      "version": "0.0.2",
+      "required_cases": [
+        "public-transcript-parsing"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-dsh",
+      "revision": "d3a1e1282356b65b51fba49072c1842918746f8f",
+      "version": "0.0.2",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-bench",
+      "revision": "68d90d7a689f836c61a64ab054a0282e7361fd16",
+      "version": "0.3.0",
+      "required_cases": [
+        "retrieval-scoring"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    }
+  ]
+}

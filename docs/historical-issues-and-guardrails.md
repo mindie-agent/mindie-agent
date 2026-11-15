@@ -1,0 +1,96 @@
+# 历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）
+
+[English](historical-issues-and-guardrails.en.md) · [返回文档中心](README.md) · [核心设计原则](design-principles.md) · [版本兼容与无感更新](release-compatibility-and-update.md)
+
+本文档系统性归档 MindIE Agent 从 `0.0.1` 到 `0.1.6` 演进过程中暴露过的真实线上/验收缺陷。所有历史问题按**七大根因域（`P1–P7`）**收敛为**“问题现象与版本出处 → 根因剖析 → 刚性工程不变量（禁止项） → 自动化防复发门禁”**四元组。日常开发无需将全部历史细节常驻上下文；当触及对应子系统或发版门禁时，按需查阅本表并通过自动化脚本拦截。
+
+---
+
+## 一、七大历史问题域总览
+
+| 编号 | 问题域 | 覆盖组件 / 仓库 | 关联自动化门禁 |
+| --- | --- | --- | --- |
+| **`P1`** | **自动更新、组件灵活升级与发版漏改/漏检** | `knowledge` · 五大宿主插件 · `channels/0.1.json` | `check_auto_update_readiness.py` (`R1–R6`) · `publication_check.py` |
+| **`P2`** | **原生宿主生命周期、会话门禁与跨平台路径** | `codex` · `cc` · `kimi` · `dsh` · `agy` · `remote-dev` | 各插件 Tier 0/1 生命周期契约测试 · `conftest.py` 沙箱隔离 |
+| **`P3`** | **超时算术、输出截断与流式连接清理竞态** | `remote-dev` · `dsh` · `mindie-bench` · 全宿主 MCP | `outer >= sum(inner) + grace` 契约单测 · 流式中断回归测试 |
+| **`P4`** | **状态诚实性、回执记账与反静默回退** | `remote-dev` · `coordinator` · `diagnostics` · 全宿主插件 | Receipt Honesty 单测 · 反过度防御四大铁律 |
+| **`P5`** | **知识预算、去重交付与 C6 经验蒸馏边界** | `knowledge` · `knowledge-*` 语料仓 · 五大宿主插件 | `WHOLE_DELIVERY_SCOPE` 预算单测 · C6 Strict Schema 校验 |
+| **`P6`** | **评测基准防失真、行为级判分与真机防抢占** | `mindie-bench` (`G0–G5`) · `RemoteSlot` · `WorktreeSlot` | Verifier 四重 Soundness 门禁 · `foreign_pids` 物理观测 |
+| **`P7`** | **内存/显存有界性与昇腾 A2/A3/A5 拓扑建模** | `profiler` · `sim` · `coordinator` · `npu-top` · `remote-dev` | `<= 512 MiB` 峰值红线 · A3 双 Die `Phy-ID 0..15` 实机测试 |
+
+---
+
+## 二、逐域复盘与防复发不变量明细
+
+### `P1`：自动更新、组件独立灵活升级与发版漏改/漏检（`0.1.1 → 0.1.6`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P1.1 知识单元修改正文漏升 `revision`**<br>（`0.1.5 → 0.1.6`，`knowledge-vllm-ascend`） | 修正 `unit-ascend-cann-known-limitations-and-env-toggles.md` 正文后更新了 `routing-manifest.json` 的 `content_sha256`，但漏将 `revision: 1` 递增为 `2`，导致客户端 `GradedRepository.install_feed()` 触发 `unit.revision <= old.revision` 语义版本校验失败并阻塞同步。 | 严禁在修改分级知识单元正文（`content_sha256` 变化）时不递增 `revision`；严禁仅靠人工记忆手改 `revision`。 | 1. `build_routing_index()` 重建索引时自动将内容变化且未升版本的单元推进为 `old_revision + 1`；<br>2. `publication_check.py` 在 `validate(..., base_revision=...)` 拒绝未升 `revision` 的提交；<br>3. `check_auto_update_readiness.py` (`R2`) 扫描全部 7 个语料仓历史通道提交至 `HEAD`。 |
+| **P1.2 宿主 CLI 小版本/预发布版本升级触发单点版本锁死**<br>（`0.1.4` Codex `0.165.0-alpha.1.2`、`0.1.6` Codex `0.166.0-alpha.5.1`、`0.1.6` DSH `0.2.1-rc.2`） | `dsh`/`cc`/`codex`/`kimi` 曾将 `harness-compatibility.json` 的 `supported` / `interface_registry` 或 `package.json` 的 `peerDependencies` 锁死在发布当天的单点版本（`minimum == maximum` 或精确字符串 `"0.2.0-rc.2"`），导致宿主 CLI 升级任意补丁/RC 版本即触发 `incompatible-version` 或 `"no_compatible_release"` 锁死。 | **禁止宿主单点版本锁（Anti Point-Lock Invariant）**：严禁将 `harness-compatibility.json` 最高支持区间写成 `minimum == maximum` 单点锁，严禁在 `package.json` `peerDependencies` 写精确单版本或做字符串相等比较；必须按当前主/次版本族声明前向兼容 SemVer 区间并开启 `include_prerelease: true`。 | 1. `check_auto_update_readiness.py` (`R4`) 强制扫描五端插件并拒绝任何 `minimum == maximum` 顶层区间，同时用合成未来小版本/RC 探针（`FORWARD_HOST_PROBES`）校验 `supports_harness()` 与 `peerDependencies`；<br>2. `--verify-local-hosts` (`R5`) 自动探测本机 `codex`（含 ChatGPT Desktop）、`claude`、`kimi`、`dsh` 实装二进制并校验兼容性。 |
+| **P1.3 插件更新误把已独立升级的组件降级回引导基线**<br>（`0.1.4` Kimi `0.1.8 → 0.1.9`） | 旧更新器把源码中的引导依赖版本当成候选解释器已安装版本，导致正常 launchd 升级将已加载的 `knowledge 0.13.6 / remote-dev 0.11.1` 回退到引导环境的 `0.13.3 / 0.10.6`。 | 组件版本选择必须严格遵守单调不降级：`max(installed, plugin_baseline, latest_formal_release)`；必须通过 `runtime_inventory.py` 实读候选解释器而非信任静态配置声明。 | 五端宿主统一接入 `component_update.py` + `mindie_knowledge.component_runtime.discover/build`；`check_auto_update_readiness.py` (`R4`) 默认校验 `plugin_baseline <= channel_component` 支持单组件独立灵活发版。 |
+| **P1.4 静态 MCP 目录漏重新导出 & Release 漏传资产**<br>（`0.1.6` Codex `mcp_catalog.json`、`mindie-agent-agy v0.1.1`） | 升级 `remote-dev`/`knowledge` 后未跑 `export_catalog.py` 导致发布流水线契约测试失败；手动创建 GitHub Release 时漏传 `mindie-plugin-release.json` 与 `SHA256SUMS`。 | 变更组件依赖后必须同步导出静态目录；任何正式 GitHub Release 必须包含完整校验资产（`SHA256SUMS` 等）。 | `check_auto_update_readiness.py --verify-github-releases` (`R3`) 强制核验远端 GitHub Release 状态、Tag SHA 与 `SHA256SUMS` 资产。 |
+| **P1.5 Windows 自动更新器、Hook 与后台子进程漏设 `windowsHide: true` / `CREATE_NO_WINDOW` 导致控制台弹窗闪现**<br>（`0.1.6` `mindie-agent-dsh` `host3.mjs` / `setup_process.py`、全端 `bounded.py` / `gitread.py` / `release_http.py` / `reporter.py`） | `mindie-agent-dsh` 的 `host3.mjs` 每 5 分钟更新定时器通过 `spawn(python.exe, [updater, 'check'], {detached: true, stdio: 'ignore'})` 启动时漏传 `windowsHide: true`；同时在 Windows 下，无控制台父进程（`pythonw.exe` 或带 `DETACHED_PROCESS` / `CREATE_NO_WINDOW` 的后台更新器、Hook、MCP 进程）调用 `subprocess.Popen` / `subprocess.run` 拉起 `python`/`git`/`gh`/`uv`/`dsh`/`taskkill` 等控制台子进程时若漏设 `CREATE_NO_WINDOW`，Windows 内核（`ConDrv`）会为子进程分配新控制台窗口，导致每隔 5 分钟或每次后台操作闪现黑框弹窗。 | **Windows 零控制台弹窗铁律（Zero Console Popup Invariant）**：<br>1. 所有 Node.js `child_process`（`spawn`/`exec`/`execFile`）调用必须显式设置 `windowsHide: true`；<br>2. 所有 Python 更新器、Hook、MCP 服务、常驻 Worker 及共享组件在 Windows（`os.name == "nt"`）下调用 `subprocess.Popen` / `subprocess.run` 拉起子进程时，必须包含 `subprocess.CREATE_NO_WINDOW`（`0x08000000`）。 | 1. `check_auto_update_readiness.py` (`R4`) 静态扫描六端宿主插件与共享组件的 Node.js `spawn`（强制 `windowsHide: true`）与 Python 子进程封装（强制 `CREATE_NO_WINDOW`）；<br>2. Pre-PR Checklist 第 15 项（自动更新就绪、Windows 零弹窗必检与文件格式规范）强制自查；<br>3. 各仓 Windows 子进程契约单测断言 `windowsHide: true` 与 `CREATE_NO_WINDOW`。 |
+| **P1.6 计划任务直调伪装成 `pythonw.exe` 的控制台启动器导致黑框闪现**<br>（`knowledge #115`，旧现场 `0.11.0`；修复前 `0.13.13` 仍仅检查文件存在） | Windows 计划任务直接拉起注册的可执行文件，绕过了 Python 进程内 `CREATE_NO_WINDOW` 的保护；当虚拟环境中的 `pythonw.exe` 实际是控制台子系统（CUI）启动器时，仅凭文件名或计划任务 `Hidden` 属性均无法阻止系统分配控制台窗口。同步排查还发现 `diagnostics`、Kimi 定时更新任务存在同类入口隐患，且 `knowledge` 实验账本的一处 Git 子进程调用漏设了无窗口标志。 | 在注册 Windows 计划任务前以及恢复旧注册任务并实际拉起进程前，必须直接解析入口二进制的 PE32/PE32+ 头并校验 `Subsystem == 2`（`IMAGE_SUBSYSTEM_WINDOWS_GUI`）；若校验不通过必须显式报错失败，严禁静默回退到控制台 `python.exe` 或擅自覆盖解释器二进制，同时完整保留虚拟环境身份、启动参数、优雅停止与“不重放未知启动”的状态语义。 | 1. 构造真实 CUI `python.exe` 重命名为 `pythonw.exe` 的负对照单测，覆盖新注册拦截与旧注册恢复拦截回归；<br>2. 交互式 Windows 计划任务实机验收，逐项核对服务就绪、`sys.prefix`、命令行参数、桌面可见窗口及进程树（确认零 `conhost.exe`），并在验收后正常停止与清理临时任务；<br>3. 计划任务入口 PE 校验与运行期子进程 `CREATE_NO_WINDOW` 校验分层独立覆盖。 |
+| **P1.7 `R6` 用历史通道版本强绑独立组件 README，倒逼主仓联动发版**<br>（`knowledge 0.13.14` / `diagnostics 0.5.8` 独立发版后被迫额外发布主仓 `0.1.12`） | 客户端运行时早已支持直接拉取各组件最新正式 Release，但 `check_auto_update_readiness.py` 的 `R6` 门禁此前无条件执行全产品组合同步检查，导致独立发版组件的自身版本徽章一旦领先 `channels/0.1.json` 历史组合即判定失败，迫使单组件补丁升级演变为跨仓文档改写与主产品发版，重新引入发布耦合。 | `check_auto_update_readiness.py` 默认采用独立发布范围（必须显式指定 `--release-repo`），`R6` 仅校验所选仓库自身的源码版本、README 徽章/链接与 Unix `LF` 换行，允许独立组件版本领先主仓历史通道；仅在显式传入 `--release-scope product` 时才执行全产品组合文档对齐校验或改写，且周期性遥测严禁改写版本表。 | 基于真实临时 Git 仓库群的回归测试验证：当新版本独立组件、旧版主仓通道组合及无关仓库陈旧 README 共存时，独立发版门禁零写入通过且不触碰无关文件，而目标仓自身的徽章、wheel 链接或 `LF` 漂移仍被精准拦截；显式 `--release-scope product` 继续拦截全组合漂移，缺少 `product` 声明的全量写入调用在落盘前即被拒绝。 |
+
+---
+
+### `P2`：原生宿主生命周期、会话门禁与跨平台路径边界（`0.1.1 → 0.1.5`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P2.1 隐式唤醒与常驻知识工具污染普通会话**<br>（`0.0.2 → 0.1.1`） | 早期默认暴露知识工具或自动注入 Skill 正文，导致非昇腾日常会话被无关上下文干扰并触发非预期后台服务。 | **Passive Default 铁律**：确定性工具（`remote-dev`/`profiler`/`sim`/`coordinator`/`diagnostics`）默认可用；`knowledge_*` 工具与后台采集严格由当前会话显式输入 `/mindie-agent` 门控，新会话/Fork/Subagent 绝不自动继承。 | 五端插件生命周期测试验证未启用会话零租约、零后台服务启动，且 `tools/list` 不泄露私有知识工具。 |
+| **P2.2 Antigravity `hooks.json` 路径层级与 `Stop` 续轮死循环风险**<br>（`0.1.5` `mindie-agent-agy`） | Antigravity 原生插件只识别插件根目录下的 `hooks.json`（不识别 `hooks/hooks.json`）；若 `Stop` Hook 返回 `"decision": "continue"` 会强制模型无限续轮。 | AGY 插件 `hooks.json` 必须位于 `plugins/mindie-agent/hooks.json`；`Stop` Hook 必须返回 `{}`，严禁返回 `"decision": "continue"`。 | `mindie-agent-agy/tests/test_agy_plugin.py::test_plugin_manifest_and_root_hooks_layout` 与 `test_agy_lifecycle.py`。 |
+| **P2.3 Windows Git Bash `ucrt64/bin` 找不到 `ssh.exe` & 探针污染宿主机目录**<br>（`0.1.2` `remote-dev 0.11.1`、`0.1.4` CC 探针） | Git for Windows 2.56.0 下 `PATH` 含 `Git/ucrt64/bin/git.exe`，但 `ssh.exe` 位于 `Git/usr/bin/ssh.exe`；CC 旧迁移探针遗漏隔离环境变量导致在默认目录初始化了新配置。 | 严禁硬编码 `sys.platform` 或假定 `ssh` 与 `git` 同目录；任何测试/探针子进程必须显式绑定隔离的 `MINDIE_CONFIG_HOME` / `MINDIE_DATA_HOME` / `MINDIE_DIAGNOSTICS_ROOT`。 | `remote-dev` Windows PowerShell + Git Bash PATH 真实 SSH 验收套件；各仓 `conftest.py` 强制临时目录沙箱隔离。 |
+| **P2.4 Windows 扩展路径、SQLite URI 与原生启动器长度**<br>（`mindie-agent-codex #113`，`diagnostics 0.5.10`） | 合法的本地 `\\?\C:\...` 被当成 UNC 拒绝；`Path.as_uri()` 把扩展前缀编码为 SQLite 不接受的 `%3F` authority。仅保留前缀仍不能解决 venv 启动器和计划任务工作目录的原生长度限制。 | I/O 保留扩展路径，路径别名共享日志/游标身份，SQLite 使用原生文件名 URI。仅将生成的 Windows venv 放到短的用户级 profile 哈希目录；配置侧指针与锁仍是唯一切换依据，不移动队列或授权。计划任务使用短启动目录。 | 真实长路径 SQLite/游标/代际切换测试；正式 wheel 的中文、空格、`#`、`%` 与长配置目录桌面验收；核对 GUI 子系统、运行时身份、窗口及任务清理。 |
+| **P2.5 企业网络设置在子进程边界丢失或撤销后残留**<br>（2026-11 GitHub API 连接反馈） | 重置 `GIT_CONFIG_COUNT` 丢弃调用方 Git 代理/CA/TLS 选项；后台直接更新环境又保留旧代理。浏览器的 PAC/信任配置与 CLI 不一定相同，TCP 超时不能证明账号失效。 | 自有 Git 选项追加在调用方配置之后；后台沿既有私有上下文只传递 HTTP 传输设置，排除凭据助手和认证头，应用新设置前清理受管旧值。保留系统 TLS 后端，不绕过证书校验或组织策略。 | 实际 `git config` 和跨进程环境测试，同时验证代理与原有 TLS 后端保留；测试显式隔离系统/全局 Git 配置。按 DNS/TCP/代理/TLS/HTTP 阶段定位，现场连通性只由现场请求证明。 |
+
+---
+
+### `P3`：超时算术、输出截断与流式连接清理竞态（`0.1.1 → 0.1.4`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P3.1 响应截断预算误杀仍在运行的子进程**<br>（`0.1.4` DSH `v0.1.8 → v0.1.9`） | 子进程标准输出超过 MCP 响应展示预算时被直接 `SIGKILL`，导致原本正常返回业务退出码 `3` 的命令变成 `-9`。 | 必须将“进程运行期输出缓冲阈值”与“返回给模型的响应截断预算”解耦；未超时前严禁因输出长而强杀正常运行的命令。 | DSH / Kimi / Codex / AGY `bounded_run` 大输出返回非零退出码保留测试。 |
+| **P3.2 外层超时小于内层预算总和导致提前切断或僵尸进程**<br>（`0.1.0 → 0.1.3`） | 外层 MCP 默认超时过短，或内层 `SIGTERM -> SIGKILL` 排水期未计入外层预算；或使用 `timeout N cmd \|\| cmd` 超时后裸跑第二次。 | 严格执行 **`outer_timeout >= sum(inner_budgets) + cleanup_grace`**（如全宿主 MCP `660s >= 600s + 60s`，`STOP_DRAIN >= STOP_GRACE + 3s`）；严禁 `timeout N cmd \|\| cmd`。 | 各组件超时算术不变量测试与 PR Checklist 第 10 项强制核验。 |
+| **P3.3 清理异常掩盖主异常 & 跨线程直接 `close()` 引发 `NoneType` 竞态**<br>（`0.1.1` `remote-dev #43`、`mindie-bench 0.4.4`） | `LocalForward.__exit__` 清理报错覆盖了主操作异常；网关超时结算线程直接调 `HTTPResponse.close()` 清空 `fp`，导致读取线程 `read1()` 抛 `AttributeError: NoneType.close` 丢失 `model_error`。 | 主异常发生时，清理失败只能通过 `record_cleanup_failure` 附注在主异常上；跨线程中断 socket 仅调 `shutdown(SHUT_RDWR)`，由读取线程 `finally` 独占 `close()`；`except OSError:` 必须前置 `except TimeoutError: raise`。 | `remote-dev` 转发清理故障注入单测；`mindie-bench` `HTTP/1.1 chunked` 暂停交错并发关闭回归测试。 |
+| **P3.4 默认预算低于 SQLite 准入阈值导致持续降级**<br>（`mindie-agent-codex #113`，`diagnostics 0.5.10`） | 保留清理默认只有 1 秒，游标快照至少要求 3 秒 SQLite 等待加 50ms 收尾，因此空闲读者也持续未知；升级入口再要求健康，会阻断降级 worker 获取修复。 | 清理默认 5 秒，插件维护内层 15 秒、外层至少 20 秒。显式不足预算仍保留未知游标且不删除未读证据。升级允许新鲜且 PID/身份核验通过的存活降级 worker，新代切换仍要求健康读回。 | 空闲注册读者默认不降级、显式短预算保守保留、队列不丢失与 PID 重用测试；正式旧版 0.5.9 的原生降级 worker 升级至健康 0.5.10，保留授权修订和 pending 队列。 |
+
+---
+
+### `P4`：状态诚实性、回执记账与反静默回退（`0.1.1 → 0.1.5`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P4.1 远端操作成功但本地回执记账超时被反标为失败**<br>（`0.1.2 → 0.1.5`） | 远端命令或组件调用已完成，但本地 SQLite 写入回执时遇锁超时，若把结果改写为 `isError=True`，会诱导 Agent 重复执行已生效的外部写操作。 | **Receipt Honesty Invariant**：主操作一旦成功，本地回执/绑定记账异常必须保持 `isError=False`，仅在 `structuredContent` 附加 `receipt_warning` 与 `receipt_unconfirmed=True`。 | 五端插件 `test_*_receipt_honesty` 故障注入单测。 |
+| **P4.2 本地代码异常误记为 `unknown` 或单向 `fault` 永久自锁死**<br>（`0.1.1` `coordinator #63`） | `service_gang.py` 漏导入 `preparation_control` 把本地 `NameError` 误记为远端 `state="uncertain"`；早期本地状态机设永久 `fault`/`suppressed` 导致环境一次报错后自砖化。 | 反过度防御铁律 (2)：`unknown` 回执严格保留给**已发出且结果未知的不可逆外部写操作**；本地状态严禁设单向永久自锁死。 | `coordinator` 准备作业状态刷新单测与 PR Checklist 第 9、11 项。 |
+| **P4.3 远端调用漏传必填端点参数（如 `port`）被压缩为笼统报错**<br>（`0.1.1 → 0.1.2` `remote-dev 0.10.8`） | 模型调用直接 SSH 工具漏传 `port` 时，旧适配器将错误压缩为通用字符串，模型无法识别缺哪个字段。 | 确认未发出的本地 caller 参数错误必须返回有界 `input_repair.missing/action`，並在工具 Schema 描述中显式写明端点规则。 | `remote-dev` caller input repair 单测与原生客户端自纠正验收。 |
+
+---
+
+### `P5`：知识预算、去重交付与 C6 经验蒸馏边界（`0.1.1 → 0.1.5`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P5.1 插件二次裁剪探索结果 & 导航裁剪删引用破坏分页游标**<br>（`0.1.1` `knowledge #97/#99/#100`） | 插件层二次剥离 L3 或重建事实包导致响应体积与引擎预算脱节；导航视图裁剪时直接删除旧材料行导致 `related_next` 游标不可达。 | 预算与交付记账仅由 `mindie-knowledge` 唯一属主负责（`WHOLE_DELIVERY_SCOPE`），宿主插件原样透传；导航裁剪仅设 `excerpt_omitted=True` 保留引用；交付记账在单事务中按 `(unit_id, revision)` 去重。 | `knowledge` 整包预算、全续页游标可达性与单事务去重记账单测。 |
+| **P5.2 C6 蒸馏关联单元挤占预算、`"unknown"` 假条件与 Strict Schema 400**<br>（`0.1.5`） | 关联单元与候选单元共用小预算把待审正文裁空；C6 给未观测环境字段填 `"unknown"` 导致检索时 `condition_mismatch`；Codex `--output-schema` 漏写嵌套 `additionalProperties: false` 报 HTTP 400。 | 关联单元使用独立 `RELATED_BODY_BUDGET_BYTES = 12_000`；严禁将 `"unknown"`/`"n/a"` 写入 `applicability` 条件；所有发往 OpenAI/Codex 的 JSON Schema 必须递归满足 `additionalProperties: false` 且 `required` 覆盖全部属性。 | `knowledge` C6 关联预算与条件清洗测试；`mindie-agent-codex` Strict Schema 递归校验单测。 |
+
+---
+
+### `P6`：评测基准防失真、行为级判分与真机防抢占（`0.1.0 → 0.1.5`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P6.1 判分器未验证真实行为或合成续跑成本**<br>（`0.1.0 → 0.1.1` `mindie-bench #24/#25/#26`） | 早期 6 个任务的判分器未执行真实代码行为或可被常量返回绕过；策略选择未注入真实执行器时合成了续跑结果。 | 所有任务 Verifier 必须执行被测代码真实行为并通过四重 Soundness 校验（`before_reward=0`、`after_reward=1`、`model_calls=0`、常量负对照必败）；未执行的续跑必须标 `not_executed` 且耗时/成本保持 `None`。 | `mindie-bench` Verifier Soundness 门禁与负对照测试套件。 |
+| **P6.2 `G1` 误挂语料、`WorktreeSlot` 锁重入死锁与题面失真**<br>（`0.1.5`） | `G1`（仅 `remote-dev`）未物理隔离本地知识库导致混入知识单元；`WorktreeSlot.cleanup()` 重复获取自身已持有的 `flock` 死锁；题面含人工步骤提示偏离真实开发者口语报障习惯。 | `G1` 必须物理挂载空语料（`0` units）；Slot `cleanup()` 必须幂等且不重入已持文件锁；基准题面统一采用“一句话报障 + 原始报错堆栈/日志路径”，不靠改题塞提示词凑分。 | `mindie-bench` `G0–G5` 门禁测试与 `WorktreeSlot` 并发回收单测。 |
+| **P6.3 共享昇腾真机被外部进程中途抢占**<br>（`0.1.5` L3 `192.168.13.156`） | 常驻 A3 服务器在评测中途被外部用户的 16-Die `VLLMWorker` 任务占满，导致评测容器报错。 | 发现非本会话租约的 `foreign_pids` 抢占物理 Die 时，必须如实记为 `unknown` 或 `infra_failed`，**严禁强杀外部用户进程**，严禁将受抢占污染的 Trial 记为通过或归因于模型能力。 | `RemoteSlot` 与 `physical_observation` 外部 PID 识别及状态诚实性单测。 |
+
+---
+
+### `P7`：内存/显存有界性与昇腾 A2/A3/A5 硬件拓扑建模（`0.1.1 → 0.1.5`）
+
+| 历史问题与版本 | 现象与根因剖析 | 刚性工程不变量（禁止项） | 自动化防复发门禁 |
+| --- | --- | --- | --- |
+| **P7.1 大文件全量读入内存 & SQLite 连接重复反射自检**<br>（`0.1.3` `profiler 0.5.1`） | 对大型 `.so` 或 `>50 MB` Profiling Trace 直接 `read()`/`json.load()` 导致内存峰值飙升；每次 `SELECT` 跑 `.owner` `lstat` 或 `:memory:` 反射拖慢热路径。 | 大文件（`>50 MB`）强制流式处理（`hashlib.file_digest` / JSONL 迭代 / SQLite 索引），控制面单进程峰值 `<= 512 MiB`（`>1 GiB` 视为 Bug）；SQLite 连接仅在 `open_database` 设置一次 WAL + `busy_timeout=5000`。 | `profiler` 流式摘要测试与 PR Checklist 第 11、14 项。 |
+| **P7.2 昇腾 A3 910C 双 Die `Phy-ID 0..15` 映射与空闲显存误算**<br>（`0.1.1` `remote-dev #44`、`coordinator #64`） | 将 A3 双 Die 卡按单卡覆盖统计，或硬扣 `2–3 GiB` 常数代替实测 `hbm_total_mb - hbm_used_mb`，导致选卡与容量准入失真。 | A3 必须按独立可租约物理执行单元（`8 NPU × 2 Die = Phy-ID 0..15`）及非繁忙单元实测 `hbm_total_mb - hbm_used_mb` 计算空闲容量；控制面保持零权重、零设备上下文。 | 常驻 A2/A3 真机无损集成测试（`@pytest.mark.live_npu`）。 |

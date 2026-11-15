@@ -1,0 +1,177 @@
+{
+  "schema": "mindie-native-update-acceptance/1",
+  "recorded_at": "2026-10-24T12:42:37.857529+00:00",
+  "platform": "macOS arm64",
+  "plugins": {
+    "codex": {
+      "version": "0.1.2",
+      "revision": "0b3c690b95401631782a656d99f2b4487582636a",
+      "host_versions_observed": [
+        "0.164.0-alpha.11.1"
+      ],
+      "install_scope": "existing_user_installation",
+      "passive_session_distinct_from_manual": true,
+      "fresh_session_distinct_from_manual": true,
+      "manual_grants_during_validation": 1,
+      "same_session_resume_verified": true,
+      "fresh_knowledge_query_denied_before_execution": true,
+      "owned_synthetic_grant_revoked": true,
+      "actual_installed_components": {
+        "mindie-knowledge": {
+          "repository": "mindie-agent/knowledge",
+          "version": "0.13.3",
+          "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+        },
+        "remote-dev": {
+          "repository": "mindie-agent/remote-dev",
+          "version": "0.10.6",
+          "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+        },
+        "mindie-diagnostics": {
+          "repository": "mindie-agent/diagnostics",
+          "version": "0.5.2",
+          "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+        }
+      },
+      "ci_platforms": [
+        "ubuntu-latest",
+        "macos-latest",
+        "windows-latest"
+      ]
+    },
+    "cc": {
+      "version": "0.1.2",
+      "revision": "edabca82e02fb313d734c699e75735095effebfd",
+      "host_versions_observed": [
+        "2.1.269"
+      ],
+      "install_scope": "isolated_native_marketplace_profile",
+      "passive_session_distinct_from_manual": true,
+      "fresh_session_distinct_from_manual": true,
+      "manual_grants_during_validation": 1,
+      "same_session_resume_verified": true,
+      "fresh_knowledge_query_denied_before_execution": true,
+      "owned_synthetic_grant_revoked": true,
+      "actual_installed_components": {
+        "mindie-knowledge": {
+          "repository": "mindie-agent/knowledge",
+          "version": "0.13.3",
+          "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+        },
+        "remote-dev": {
+          "repository": "mindie-agent/remote-dev",
+          "version": "0.10.6",
+          "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+        },
+        "mindie-diagnostics": {
+          "repository": "mindie-agent/diagnostics",
+          "version": "0.5.2",
+          "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+        }
+      },
+      "ci_platforms": [
+        "ubuntu-latest",
+        "macos-latest",
+        "windows-latest"
+      ]
+    },
+    "kimi": {
+      "version": "0.1.2",
+      "revision": "7aecfd22857c313b52d6fe5923292f297884fec0",
+      "host_versions_observed": [
+        "2.3.1"
+      ],
+      "install_scope": "existing_user_installation",
+      "passive_session_distinct_from_manual": true,
+      "fresh_session_distinct_from_manual": true,
+      "manual_grants_during_validation": 1,
+      "same_session_resume_verified": true,
+      "fresh_knowledge_query_denied_before_execution": true,
+      "owned_synthetic_grant_revoked": true,
+      "actual_installed_components": {
+        "mindie-knowledge": {
+          "repository": "mindie-agent/knowledge",
+          "version": "0.13.3",
+          "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+        },
+        "remote-dev": {
+          "repository": "mindie-agent/remote-dev",
+          "version": "0.10.6",
+          "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+        },
+        "mindie-diagnostics": {
+          "repository": "mindie-agent/diagnostics",
+          "version": "0.5.2",
+          "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+        }
+      },
+      "ci_platforms": [
+        "ubuntu-latest",
+        "macos-latest",
+        "windows-latest"
+      ]
+    },
+    "dsh": {
+      "version": "0.1.2",
+      "revision": "a38f1cb191f625905aace734e20a2ad196624b60",
+      "host_versions_observed": [
+        "0.2.0-rc.2"
+      ],
+      "install_scope": "existing_user_installation",
+      "passive_session_distinct_from_manual": true,
+      "fresh_session_distinct_from_manual": true,
+      "manual_grants_during_validation": 1,
+      "same_session_resume_verified": true,
+      "fresh_knowledge_query_denied_before_execution": true,
+      "owned_synthetic_grant_revoked": true,
+      "actual_installed_components": {
+        "mindie-knowledge": {
+          "repository": "mindie-agent/knowledge",
+          "version": "0.13.3",
+          "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+        },
+        "remote-dev": {
+          "repository": "mindie-agent/remote-dev",
+          "version": "0.10.6",
+          "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+        },
+        "mindie-diagnostics": {
+          "repository": "mindie-agent/diagnostics",
+          "version": "0.5.2",
+          "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+        }
+      },
+      "ci_platforms": [
+        "ubuntu-latest"
+      ]
+    }
+  },
+  "codex_hook_migration": {
+    "one_time_targeted_migration_performed": true,
+    "native_public_config_api_cas_used": true,
+    "adapter_context_aligned_to_actual_desktop": true,
+    "native_manager_automatic_inheritance_claimed": false,
+    "cli153_trusted_hooks": 5,
+    "desktop164_trusted_hooks": 5,
+    "passive_plugin_skill_catalog_entries": 0,
+    "fresh_plugin_skill_catalog_entries": 0,
+    "preexisting_app_memory_preserved": true
+  },
+  "native_definition_reload": {
+    "new_native_processes_verified": [
+      "codex",
+      "cc",
+      "kimi",
+      "dsh"
+    ],
+    "old_loaded_kimi_dsh_definitions_require_natural_reload": true,
+    "existing_user_active_hosts_terminated": false
+  },
+  "receipt_sha256": {
+    "formal-native-acceptance.json": "c16521f8fa1e29c0c6e004c5033bd13f8504b013bd568a0e2c1358d90f43b1be",
+    "user-formal-installed-readback.json": "3f072817c10f3c7b3305db295b383e414fc4d81f3ac3bc82496c6a68b3d2abcc",
+    "user-codex-desktop-migration.json": "e143c4ba25f914d9ec84fd95235b9f5c86ba8c95a9d8c9416cb8c869d5fbe80a",
+    "user-codex-dual-host-trust.json": "74a0f2bef19e0666a954782dac6da91eb348616f30438918fbb969154cff32f3",
+    "formal-native-test-cleanup.json": "5291e2e8748a91350b9cca8be2269e8c265165bb716a00e7cfbb3eed017452b5"
+  }
+}

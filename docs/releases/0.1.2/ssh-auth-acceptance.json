@@ -1,0 +1,742 @@
+{
+  "schema_version": "mindie-ssh-auth-acceptance/1",
+  "product_version": "0.1.2",
+  "recorded_on": "2026-10-29",
+  "status": "passed",
+  "scope": "Shared SSH authentication; actual installed runtime consumers and separately identified plugin discovery. Not an NPU performance measurement or a claim of automatic upgrades in existing user installations.",
+  "platforms": [
+    {
+      "platform": "macos",
+      "system": "macOS 27.0.1",
+      "architecture": "arm64",
+      "python": "3.12.13",
+      "measured_sources": {
+        "remote-dev": "f3592ffdef033aecb3d24b027dbd889204b65b28",
+        "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+        "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+        "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+      },
+      "execution": "local isolated installed-wheel acceptance using the same GitHub Actions wheel cohort and real disposable sshd",
+      "result": {
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 35.19,
+        "junit_sha256": "886855220a414e2899a82e82455648a7556765433cc50adde198b5a3d0cfe2ef",
+        "cases": [
+          {
+            "name": "test_password_installs_key_and_new_process_reuses_it",
+            "status": "passed",
+            "seconds": 6.385
+          },
+          {
+            "name": "test_password_only_survives_process_chat_and_harness_changes",
+            "status": "passed",
+            "seconds": 3.725
+          },
+          {
+            "name": "test_revoked_public_key_recovers_before_single_business_write",
+            "status": "passed",
+            "seconds": 4.537
+          },
+          {
+            "name": "test_password_profile_supports_all_transport_channels",
+            "status": "passed",
+            "seconds": 4.646
+          },
+          {
+            "name": "test_password_only_profile_is_shared_by_real_consumer_processes",
+            "status": "passed",
+            "seconds": 7.433
+          },
+          {
+            "name": "test_monitor_uses_saved_password_after_key_revocation_without_repair",
+            "status": "passed",
+            "seconds": 3.763
+          },
+          {
+            "name": "test_key_install_preserves_existing_authorized_key_without_final_newline",
+            "status": "passed",
+            "seconds": 4.605
+          }
+        ]
+      },
+      "installed_wheel_source_files_verified": {
+        "remote-dev": 117,
+        "coordinator": 83,
+        "npu-top": 28,
+        "diagnostics": 25
+      },
+      "kimi_adapter": {
+        "working_checkout_head": "586dd9ae0e9b6ab272281345caf4bec354436dcd",
+        "runtime_reference": "2b872a079f8496575614d2b49c4a5c2b3b38f674",
+        "scripts_identical_to_runtime_reference": true,
+        "uncommitted_differences_at_validation": [
+          "docs/releases/mindie-agent-kimi-0.1.7.md",
+          "runtime-active-overrides.txt"
+        ]
+      }
+    },
+    {
+      "platform": "windows-powershell",
+      "execution_profile": "windows",
+      "system": "Windows",
+      "release": "2025Server",
+      "python": "3.12.10",
+      "shell": "PowerShell 7.6.7",
+      "wsl_distribution": null,
+      "ssh_version": "OpenSSH_10.5p1, OpenSSL 3.5.9 29 Sep 2026",
+      "ssh_client": "Git OpenSSH",
+      "git_on_path": "C:\\Program Files\\Git\\bin\\git.EXE",
+      "measured_sources": {
+        "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+        "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+        "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+        "remote-dev": "f3592ffdef033aecb3d24b027dbd889204b65b28",
+        "mindie-agent-kimi": "2b872a079f8496575614d2b49c4a5c2b3b38f674"
+      },
+      "independent_venvs": 2,
+      "execution": "GitHub Actions windows-2025 with actual WSL2 Linux sshd",
+      "result": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 17.503,
+        "junit_sha256": "892889c98160d54d974472785ce29979bf3487af776a30bff9d2e188a2996e67",
+        "cases": [
+          {
+            "name": "test_auto_install_key_then_new_venv_without_password",
+            "status": "passed",
+            "seconds": 3.371
+          },
+          {
+            "name": "test_password_only_server_across_processes_and_profiles",
+            "status": "passed",
+            "seconds": 4.8
+          },
+          {
+            "name": "test_revoked_key_is_repaired_before_exactly_one_business_write",
+            "status": "passed",
+            "seconds": 3.511
+          },
+          {
+            "name": "test_coordinator_kimi_two_chats_and_monitor_share_default_store",
+            "status": "passed",
+            "seconds": 5.761
+          }
+        ]
+      }
+    },
+    {
+      "platform": "windows-powershell",
+      "execution_profile": "windows-git-path",
+      "system": "Windows",
+      "release": "2025Server",
+      "python": "3.12.10",
+      "shell": "PowerShell 7.6.7 with Git Bash PATH",
+      "wsl_distribution": null,
+      "ssh_version": "OpenSSH_10.5p1, OpenSSL 3.5.9 29 Sep 2026",
+      "ssh_client": "Git OpenSSH",
+      "git_on_path": "C:\\Program Files\\Git\\ucrt64\\bin\\git.EXE",
+      "measured_sources": {
+        "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+        "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+        "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+        "remote-dev": "f3592ffdef033aecb3d24b027dbd889204b65b28",
+        "mindie-agent-kimi": "2b872a079f8496575614d2b49c4a5c2b3b38f674"
+      },
+      "independent_venvs": 2,
+      "execution": "GitHub Actions windows-2025 with actual WSL2 Linux sshd",
+      "result": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 16.485,
+        "junit_sha256": "13a7b4b86076b9f1a650c6d9a3974d8790e5f063598ce17347e26c1131892975",
+        "cases": [
+          {
+            "name": "test_auto_install_key_then_new_venv_without_password",
+            "status": "passed",
+            "seconds": 2.454
+          },
+          {
+            "name": "test_password_only_server_across_processes_and_profiles",
+            "status": "passed",
+            "seconds": 4.869
+          },
+          {
+            "name": "test_revoked_key_is_repaired_before_exactly_one_business_write",
+            "status": "passed",
+            "seconds": 3.5
+          },
+          {
+            "name": "test_coordinator_kimi_two_chats_and_monitor_share_default_store",
+            "status": "passed",
+            "seconds": 5.621
+          }
+        ]
+      }
+    },
+    {
+      "platform": "wsl",
+      "execution_profile": "wsl",
+      "system": "Linux",
+      "release": "6.18.54.1-microsoft-standard-WSL2",
+      "python": "3.12.3",
+      "shell": "WSL bash",
+      "wsl_distribution": "Ubuntu-24.04",
+      "ssh_version": "OpenSSH_9.6p1 Ubuntu-3ubuntu13.20, OpenSSL 3.0.13 30 Jan 2024",
+      "ssh_client": "Linux OpenSSH",
+      "git_on_path": "/usr/bin/git",
+      "measured_sources": {
+        "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+        "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+        "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+        "remote-dev": "f3592ffdef033aecb3d24b027dbd889204b65b28",
+        "mindie-agent-kimi": "2b872a079f8496575614d2b49c4a5c2b3b38f674"
+      },
+      "independent_venvs": 2,
+      "execution": "GitHub Actions windows-2025 with actual WSL2 Linux sshd",
+      "result": {
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 17.338,
+        "junit_sha256": "f7a20aedf03d9edb399042e6989b3f3590875a1c82e8b58a9222c92e650ad3d4",
+        "cases": [
+          {
+            "name": "test_auto_install_key_then_new_venv_without_password",
+            "status": "passed",
+            "seconds": 2.644
+          },
+          {
+            "name": "test_password_only_server_across_processes_and_profiles",
+            "status": "passed",
+            "seconds": 4.565
+          },
+          {
+            "name": "test_revoked_key_is_repaired_before_exactly_one_business_write",
+            "status": "passed",
+            "seconds": 3.582
+          },
+          {
+            "name": "test_coordinator_kimi_two_chats_and_monitor_share_default_store",
+            "status": "passed",
+            "seconds": 5.928
+          }
+        ]
+      }
+    }
+  ],
+  "source_equivalence": {
+    "remote-dev": {
+      "pr_head": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+      "tested_pr_merge": "f3592ffdef033aecb3d24b027dbd889204b65b28",
+      "identical_tree": "8443a5d09f2b1a5d6f52d9637251b386af85846e",
+      "release_source": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+      "runtime_code_unchanged": true
+    },
+    "coordinator": {
+      "measured_source": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+      "runtime_directory": "mindie_coordinator",
+      "runtime_directory_diff_empty": true,
+      "changed_files": [
+        "docs/releases/coordinator-0.7.0.en.md",
+        "docs/releases/coordinator-0.7.0.md",
+        "pyproject.toml"
+      ],
+      "release_source": "e4a86c972a99c442c78ad7f7ba627af7da5ef7f2"
+    },
+    "npu-top": {
+      "measured_source": "ad577570a5e02afadf9e4998524fcda408db5b74",
+      "runtime_directory": "npu_top",
+      "runtime_directory_diff_empty": true,
+      "changed_files": [
+        ".github/workflows/ci.yml",
+        "docs/releases/npu-top-0.3.0.en.md",
+        "docs/releases/npu-top-0.3.0.md",
+        "pyproject.toml",
+        "tests/test_shared_auth.py"
+      ],
+      "release_source": "ff78215dbe94bb3bd16abc6897878918748b8aee"
+    }
+  },
+  "core_paths": [
+    "password enrollment installs and independently verifies a public key; a fresh venv reuses it without receiving the password",
+    "server PubkeyAuthentication=no retains password authentication across fresh processes and harness profiles",
+    "revoked key is repaired before exactly one business write; maintenance facts are returned",
+    "installed coordinator, actual Kimi adapter across two chats and venvs, and npu-top database reopen/connect/probe reuse the same credential file"
+  ],
+  "coverage": {
+    "credential_file": "default credentials.json beneath an isolated REMOTE_DEV_AUTH_DIR",
+    "real_consumer_implementations": [
+      "installed coordinator",
+      "actual Kimi adapter",
+      "installed npu-top"
+    ],
+    "profile_coverage": [
+      "codex",
+      "claude",
+      "kimi",
+      "dsh"
+    ],
+    "non_ascii_password": true,
+    "paths_with_spaces": true,
+    "isolated_python_imports": true,
+    "pip_check": true,
+    "actual_wsl2_kernel_verified": true,
+    "read_only_monitor_fallback_without_profile_or_key_mutation": "macos real SSH case",
+    "authorized_keys_without_final_newline_preserved": "macos real SSH case",
+    "no_os_credential_vault_calls_in_final_acceptance": true
+  },
+  "plugin_discovery": {
+    "source_kind": "normal dependency resolution in four independent venvs; isolated Python imports from installed packages",
+    "runtime_version": "0.11.1",
+    "runtime_source": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+    "diagnostics_source": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+    "protocol": "real stdio MCP tools/list",
+    "adapters": {
+      "codex": {
+        "remote_dev_version": "0.11.1",
+        "remote_dev_sha": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+        "tools": 23,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": false,
+        "seconds": 0.056,
+        "native_host_loaded": false,
+        "installed_components": {
+          "remote-dev": {
+            "version": "0.11.1",
+            "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+          },
+          "mindie-knowledge": {
+            "version": "0.13.4",
+            "revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.4",
+            "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+          }
+        }
+      },
+      "claude": {
+        "remote_dev_version": "0.11.1",
+        "remote_dev_sha": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+        "tools": 31,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": false,
+        "seconds": 0.072,
+        "native_host_loaded": false,
+        "installed_components": {
+          "remote-dev": {
+            "version": "0.11.1",
+            "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+          },
+          "mindie-knowledge": {
+            "version": "0.13.4",
+            "revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.4",
+            "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+          }
+        }
+      },
+      "kimi": {
+        "remote_dev_version": "0.11.1",
+        "remote_dev_sha": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+        "tools": 30,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": true,
+        "seconds": 0.132,
+        "native_host_loaded": false,
+        "installed_components": {
+          "remote-dev": {
+            "version": "0.11.1",
+            "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+          },
+          "mindie-knowledge": {
+            "version": "0.13.3",
+            "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.4",
+            "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+          }
+        }
+      },
+      "dsh": {
+        "remote_dev_version": "0.11.1",
+        "remote_dev_sha": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+        "tools": 23,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": false,
+        "seconds": 0.135,
+        "native_host_loaded": false,
+        "installed_components": {
+          "remote-dev": {
+            "version": "0.11.1",
+            "revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+          },
+          "mindie-knowledge": {
+            "version": "0.13.3",
+            "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+          },
+          "mindie-diagnostics": {
+            "version": "0.5.4",
+            "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+          }
+        }
+      }
+    },
+    "loading": {
+      "codex": "installed plugin wheel",
+      "claude": "installed plugin wheel",
+      "kimi": "native plugin source and installed components",
+      "dsh": "shared MCP"
+    },
+    "receipt_sha256": {
+      "source-origins-0.11.1-candidate.json": "5df96611bd136e5293c13c223555c855440cb6dc2d25d83cda302c94c1b6f7dc",
+      "mcp-discovery-0.11.1.json": "e44417101e0546d507909f1ac4d775597ee4a9b53382f64598bc7893e3ce4b12"
+    },
+    "all_existing_native_hosts_loaded_new_catalog": false,
+    "formal_feed_upgrade_observed": true,
+    "existing_updater_evidence": {
+      "kimi": "published 0.1.2 and 0.1.3 controller archives start the candidate runtime",
+      "other_hosts": "updater contract tests",
+      "formal_feed_upgrade": {
+        "status": "passed",
+        "record": "docs/releases/0.1.2/native-update-acceptance.json",
+        "sha256": "04bf96e0ef51006c3b06bf49d92ee6a3b360b0ca15938ee26f19764c31aa4e48",
+        "plugins": {
+          "codex": {
+            "old_version": "0.1.11",
+            "new_version": "0.1.12",
+            "status": "active",
+            "seconds": 20.593
+          },
+          "cc": {
+            "old_version": "0.1.7",
+            "new_version": "0.1.8",
+            "status": "activated",
+            "seconds": 13.343
+          },
+          "kimi": {
+            "old_version": "0.1.6",
+            "new_version": "0.1.7",
+            "status": "switched",
+            "seconds": 32.188
+          },
+          "dsh": {
+            "old_version": "0.1.5",
+            "new_version": "0.1.6",
+            "status": "applied",
+            "seconds": 23.46
+          }
+        },
+        "retained_initial_failures": [
+          "Claude Code temporary-path alias comparison",
+          "DSH pnpm store path alias",
+          "Codex unsupported custom local marketplace fixture"
+        ],
+        "existing_user_installations_modified": false,
+        "all_existing_native_chats_loaded_new_catalog": false,
+        "model_turn_executed": false
+      }
+    },
+    "formal_feed_upgrade_scope": "Previous formal plugins in fresh isolated native profiles on macOS arm64; original ordinary updaters select real published releases, with no force or selection override. Existing user installations are outside this acceptance."
+  },
+  "public_evidence": {
+    "real_ssh_run": "https://github.com/mindie-agent/remote-dev/actions/runs/40777028005",
+    "real_ssh_job": "https://github.com/mindie-agent/remote-dev/actions/runs/40777028005/job/123129060974",
+    "ordinary_contract_ci_run": "https://github.com/mindie-agent/remote-dev/actions/runs/40777027999",
+    "successful_pr_checks": 9,
+    "artifacts": [
+      {
+        "id": 12855552457,
+        "name": "windows-wsl-real-ssh-evidence",
+        "sha256": "070d0f43753144647cff74797b29102ec705a56937881eb018799cfdfefdd654"
+      },
+      {
+        "id": 12855631631,
+        "name": "ssh-auth-wheel-cohort",
+        "sha256": "ebc758182a77649787f37eed6bb857d07b2f475f7f7411c6962e2aafadad16ec"
+      }
+    ]
+  },
+  "boundaries": [
+    "Measured candidate revisions remain recorded separately from later formal release metadata.",
+    "Windows acceptance uses the production-selected Git OpenSSH client, not every Windows inbox OpenSSH version.",
+    "WSL and native Windows use their own user directories; cross-environment secret replication is not implemented.",
+    "The core cross-platform suite uses all four harness profiles but exercises Kimi as the actual plugin adapter.",
+    "No NPU performance, interactive MFA, expired-password change dialog, or existing-user formal-feed activation is claimed."
+  ],
+  "previous_acceptance": {
+    "remote_dev_version": "0.11.0",
+    "platform_results": [
+      {
+        "platform": "macos",
+        "measured_sources": {
+          "remote-dev": "a7564f49b1ff106e59f72961c851b7b11eb81130",
+          "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+          "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+          "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+        },
+        "result": {
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "seconds": 34.566,
+          "junit_sha256": "b80ecc4852beb9dc269e39e7572af35c1b31e09c0a652dc403b32cc27e50b5b8",
+          "cases": [
+            {
+              "name": "test_password_installs_key_and_new_process_reuses_it",
+              "status": "passed",
+              "seconds": 6.236
+            },
+            {
+              "name": "test_password_only_survives_process_chat_and_harness_changes",
+              "status": "passed",
+              "seconds": 3.77
+            },
+            {
+              "name": "test_revoked_public_key_recovers_before_single_business_write",
+              "status": "passed",
+              "seconds": 4.824
+            },
+            {
+              "name": "test_password_profile_supports_all_transport_channels",
+              "status": "passed",
+              "seconds": 4.641
+            },
+            {
+              "name": "test_password_only_profile_is_shared_by_real_consumer_processes",
+              "status": "passed",
+              "seconds": 7.571
+            },
+            {
+              "name": "test_monitor_uses_saved_password_after_key_revocation_without_repair",
+              "status": "passed",
+              "seconds": 3.15
+            },
+            {
+              "name": "test_key_install_preserves_existing_authorized_key_without_final_newline",
+              "status": "passed",
+              "seconds": 4.285
+            }
+          ]
+        }
+      },
+      {
+        "platform": "windows-powershell",
+        "measured_sources": {
+          "remote-dev": "f0523be1b2c817f14dd39dc097e89cb6ff53a98d",
+          "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+          "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+          "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+          "mindie-agent-kimi": "2b872a079f8496575614d2b49c4a5c2b3b38f674"
+        },
+        "result": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "seconds": 14.186,
+          "junit_sha256": "4e5d87a7c5f47bcf74ea57e102387d4f0d21ae6a65c0d65e8fa1dd82e6c20115",
+          "cases": [
+            {
+              "name": "test_auto_install_key_then_new_venv_without_password",
+              "status": "passed",
+              "seconds": 3.031
+            },
+            {
+              "name": "test_password_only_server_across_processes_and_profiles",
+              "status": "passed",
+              "seconds": 3.864
+            },
+            {
+              "name": "test_revoked_key_is_repaired_before_exactly_one_business_write",
+              "status": "passed",
+              "seconds": 2.772
+            },
+            {
+              "name": "test_coordinator_kimi_two_chats_and_monitor_share_default_store",
+              "status": "passed",
+              "seconds": 4.478
+            }
+          ]
+        }
+      },
+      {
+        "platform": "wsl",
+        "measured_sources": {
+          "remote-dev": "f0523be1b2c817f14dd39dc097e89cb6ff53a98d",
+          "coordinator": "ddddb992b71125f772ba150e29564f34df0c3e7c",
+          "npu-top": "ad577570a5e02afadf9e4998524fcda408db5b74",
+          "diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+          "mindie-agent-kimi": "2b872a079f8496575614d2b49c4a5c2b3b38f674"
+        },
+        "result": {
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "seconds": 12.694,
+          "junit_sha256": "684d0f701015d5358d7d869403e59ece42fac9d0f107868db9ca308460ac8e0b",
+          "cases": [
+            {
+              "name": "test_auto_install_key_then_new_venv_without_password",
+              "status": "passed",
+              "seconds": 1.994
+            },
+            {
+              "name": "test_password_only_server_across_processes_and_profiles",
+              "status": "passed",
+              "seconds": 3.431
+            },
+            {
+              "name": "test_revoked_key_is_repaired_before_exactly_one_business_write",
+              "status": "passed",
+              "seconds": 2.683
+            },
+            {
+              "name": "test_coordinator_kimi_two_chats_and_monitor_share_default_store",
+              "status": "passed",
+              "seconds": 4.279
+            }
+          ]
+        }
+      }
+    ],
+    "source_equivalence": {
+      "remote-dev": {
+        "pr_head": "a7564f49b1ff106e59f72961c851b7b11eb81130",
+        "tested_pr_merge": "f0523be1b2c817f14dd39dc097e89cb6ff53a98d",
+        "identical_tree": "5308f61f1bc5c7ab6e380ba15a86eda25e8c5020",
+        "release_source": "153813703a3cc64c695dd8e5f19e8a173e144dda",
+        "release_diff_from_pr_head": [
+          "docs/releases/remote-dev-0.11.0.md",
+          "docs/releases/remote-dev-0.11.0.en.md"
+        ],
+        "runtime_code_unchanged": true
+      }
+    },
+    "public_evidence": {
+      "real_ssh_run": "https://github.com/mindie-agent/remote-dev/actions/runs/40774308378",
+      "real_ssh_job": "https://github.com/mindie-agent/remote-dev/actions/runs/40774308378/job/123119641806",
+      "ordinary_contract_ci_run": "https://github.com/mindie-agent/remote-dev/actions/runs/40774308383",
+      "successful_pr_checks": 9,
+      "artifacts": [
+        {
+          "id": 12853164330,
+          "name": "windows-wsl-real-ssh-evidence",
+          "sha256": "dd899296cc14de59aa4a082dc36f38de0520c85d7e76ce86df835de9eba51d2b"
+        },
+        {
+          "id": 12854516228,
+          "name": "ssh-auth-wheel-cohort",
+          "sha256": "9d7552febec3e1d407c273f2fcdabf4e348e3a64649d772edfea44226286830f"
+        }
+      ]
+    },
+    "subsequent_gap": "Git for Windows 2.56.0 ucrt64/bin discovery failed in downstream Git Bash CI; resolved in 0.11.1 and covered by the current additional real SSH execution profile.",
+    "plugin_discovery": {
+      "source_kind": "candidate runtime with normal dependency resolution in four independent venvs",
+      "runtime_source": "a7564f49b1ff106e59f72961c851b7b11eb81130",
+      "diagnostics_source": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+      "protocol": "real stdio MCP tools/list",
+      "tool_counts": {
+        "codex": 23,
+        "claude": 31,
+        "kimi": 30,
+        "dsh": 23
+      },
+      "remote_auth_visible": true,
+      "password_env_visible": true,
+      "plaintext_password_argument_exposed": false,
+      "loading": {
+        "codex": "installed plugin wheel",
+        "claude": "installed plugin wheel",
+        "kimi": "native plugin source and installed components",
+        "dsh": "shared MCP"
+      },
+      "existing_updater_evidence": {
+        "kimi": "published 0.1.2 and 0.1.3 controller archives start the candidate runtime",
+        "other_hosts": "updater contract tests"
+      },
+      "formal_feed_upgrade_observed": false,
+      "all_existing_native_hosts_loaded_new_catalog": false
+    }
+  },
+  "publication_ci": {
+    "codex": {
+      "source_revision": "46a3401904b736fd7dd10a822b8d883be1252acf",
+      "run": "https://github.com/mindie-agent/mindie-agent-codex/actions/runs/40779583205",
+      "retained_first_attempt": {
+        "windows_job_id": 123137547178,
+        "status": "failed",
+        "failures": [
+          "PowerShell bridge did not start within the first 15-second timing allowance",
+          "missing-configuration invocation took 2.006 seconds against a less-than-2-second assertion"
+        ]
+      },
+      "single_retry": {
+        "windows_job_id": 123152686364,
+        "attempt": 2,
+        "status": "passed",
+        "code_and_tests_changed": false,
+        "passed": 655,
+        "skipped": 31,
+        "subtests_passed": 498,
+        "seconds": 314.02
+      },
+      "scope": "The same failed Windows job was rerun once without code or test changes. This does not establish a Windows hook latency bound. The 19 real SSH acceptance cases passed separately without this retry."
+    }
+  },
+  "native_codex_acceptance": {
+    "source_sha": "46a3401904b736fd7dd10a822b8d883be1252acf",
+    "source_tree": "dd5bb2498941bea876300844a167b3a8886f0d6c",
+    "native_version": "codex-cli 0.153.4",
+    "seconds": 29.654,
+    "returncode": 0,
+    "model_turn": false,
+    "native_thread_mcp_discovery": true,
+    "expected_remote_source": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+    "actual_installed_remote": {
+      "version": "0.11.1",
+      "origin": {
+        "url": "https://github.com/mindie-agent/remote-dev",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+          "requested_revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+        }
+      }
+    },
+    "tests_passed": 12,
+    "pytest_seconds": 28.93,
+    "remote_tools": 23,
+    "component_tools": 5,
+    "platform": {
+      "system": "macOS",
+      "version": "27.0.1",
+      "architecture": "arm64"
+    },
+    "junit_sha256": "929c4680bc997c5ab29f78e2fa79dcda8dc788719b9550cfc69ae27e7da24d09",
+    "verification_sha256": "4608bcdc9f8c0476abbdb8ffb08dd634b5522e6396f051dbf691e8e094ca6e37",
+    "scope": "Isolated actual native marketplace installation, five hooks and trust/explicit-disable behavior, then a fresh native thread MCP catalog discovery. No model turn, four-host remote end-to-end acceptance, or change to an existing user installation is claimed."
+  }
+}

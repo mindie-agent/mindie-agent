@@ -1,61 +1,156 @@
-# 日志、故障定位与自动 Issue
+# 诊断日志与故障上报（Diagnostics & Fault Reporting）
 
-2026-09-22，设计约定。实现与实机验收状态单独记录，不以本文代替通过结论。
+[English](diagnostics-and-reporting.en.md) · [返回文档中心](README.md)
 
-目标是让 Agent 从一个失败结果知道操作进行到哪里、哪些已完成、去哪里看证据，并能继续业务或换一种方法。遵守[九条原则](design-principles.md)：使用者不需要理解日志管线，不增加固定收尾流程、模型分析调用或业务重试。
+本文说明 MindIE Agent 如何记录本地结构化诊断日志、帮助 Agent 在遇到工具报错时快速定位阶段与原因，以及可选的“自动工具故障上报”是如何严格保护用户隐私并防止重复提交的。
 
-## 正常使用
+- 遵循准则：[工程设计原则与演进准则](design-principles.md)
+- 核心组件仓库：[`mindie-agent/diagnostics`](https://github.com/mindie-agent/diagnostics)（MindIE Agent 自身 DFX 与故障上报）· [`mindie-agent/debugger`](https://github.com/mindie-agent/debugger)（目标 NPU 负载故障分诊、三原语精度定位与 `ACLGraph` 调试）
+- 版本与实测记录：[版本发布记录](README.md#版本记录与路线图)
 
-组件在实际操作边界写本地结构化日志。失败结果可附带诊断编号、静态错误类别及恢复提示；原错误、退出状态、取消和清理结果仍保留。编号只用于关联诊断阶段，不是原生任务身份或工具授权。
+---
 
-首次配置提供独立的“自动上报工具故障”选项，推荐说明用途，但不默认替用户同意。它与社区知识贡献分别设置：不开知识贡献仍能使用日志和故障上报；关闭上报仍保留正常本地日志。查询状态不安装服务、不启动模型、不重试失败操作。
+## 1. 核心目标：让报错“说人话、可定位、不泄密”
 
-明确选择开启后，适配器保存设置，并在短时 Hook 之外确保共享上报器可用。配置已开启、服务已安装和实际正在运行分别显示。三个适配器共用一个用户级上报器和设置；remote-dev 独立使用时也接入相同能力。用户关闭后，未发送工作失去发送授权；重新开启不自动恢复先前授权下的待发故障。
+当远端执行或知识整理遇到异常时，最糟糕的体验莫过于只返回一个笼统的 `Error` 或者把堆栈吞掉。MindIE Agent 诊断机制的目标非常简单：
+- **让 Agent 一眼看懂发生了什么**：从一次报错返回中就能明确知道操作停在了哪个阶段、哪些前置动作已经完成、去哪个本地诊断编号查详情，从而决定是修复参数还是换一种排查方式。
+- **不给日常任务添乱**：无需用户理解复杂的日志管线，不增加额外的收尾流程，不调用大模型去“分析日志”，也绝不自作主张重跑业务命令。
 
-## 职责分工
+---
 
-| 所有者 | 职责 |
+## 2. 统一贡献开关与日常使用体验
+
+1. **本地有界结构化日志（默认开启）**：
+   - 各组件在实际操作边界记录结构化本地日志。一旦工具执行失败，返回结果会附带一个随机诊断关联编号（Diagnostic ID）、静态错误类别和恢复提示，同时完整保留原始错误码与清理结果。
+2. **知识共享与故障上报共用唯一贡献开关**：
+   - 首次引导与配置入口同时说明两项出站行为：在已授权项目范围内贡献脱敏知识包，以及向产品仓库自动上报白名单内的工具故障元数据。**该开关默认关闭，仅在用户显式开启后生效**。
+   - 当前安装配置目录中的 `mindie-consent.json` 是贡献授权的唯一权威来源。诊断上报配置文件保存目标仓库、日志根目录及对该授权文件的引用；故障记录、队列消费与最终外发均校验同一选择（`choice`）与授权修订号（`choice_revision`）。
+   - **三态明确区分**：系统严格区分“配置已写入”、“后台 reporter 服务已运行”与“外部 GitHub Issue 已创建”三个状态。显式开启开关时，系统同步准备知识贡献配置与原生后台 reporter 服务，并分别返回两者的就绪状态；后台服务启动异常会直接报告并支持后续自愈。关闭开关后，两条出站链路立即停止发送，本地诊断日志与查询保持可用。
+   - **升级不自动扩大授权**：已有安装中的 `disabled`、`later` 或 `read-only` 状态在升级后保持关闭；旧版仅针对知识贡献开启的 `contribute` 配置若缺少统一授权修订号，在升级后**不会**自动获得故障上报权限，需由用户通过统一贡献入口显式确认开启一次。
+   - **复用已认证的 `gh` 通道**：自动上报复用安装时已验证的 GitHub CLI（`gh`）。插件打包的 `knowledge`、`remote-dev` 与后台 reporter 服务共享同一配置路径下的诊断状态；独立部署的 `remote-dev` 则沿用其显式配置的上报策略。
+
+---
+
+## 3. 模块职责划分
+
+| 模块 / 角色 | 职责范围 |
 | --- | --- |
-| Codex / Kimi / Claude Code 适配器 | 原生入口、Hook、MCP 启动与协议错误，配置入口及可读状态；早期依赖缺失时使用共享的精简日志实现 |
-| knowledge / remote-dev 等组件 | 在真正发生故障的内部边界记录阶段、版本、耗时、退出及清理事实，区分正常业务结果与工具故障 |
-| diagnostics | 日志格式、脱敏和限量保留、诊断查询、独立授权、故障归并、有限队列及 GitHub 发送 |
-| GitHub 维护者 | 判断原因和修复；Issue 只是故障证据，不是自动认定的根因 |
+| **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 全量 7 端覆盖原生入口、Hook、MCP 分发、组件更新器与自有组件 CLI 溯源崩溃网关（`record_component_crash`），自动附带插件源码栈帧（`source_root`）与 40 位精确 Git Commit `revision` |
+| **业务运行时组件**（`knowledge` / `remote-dev` / `coordinator` / `profiler` / `sim` / `debugger` / `npu-top`） | 在内部发生真实故障或权威状态/输出契约损坏（`category="contract_violation"`）边界记录阶段、子阶段、静态原因码（`reason_code`）与自有代码栈帧；严格区分“用户命令业务报错”与“MindIE 工具自身缺陷” |
+| **诊断组件**（`diagnostics`） | **仅负责 MindIE Agent 自身内部 DFX**：日志格式校验、严格字段白名单脱敏、Triage Card v2 精确代码行永久链接渲染、跨版本根因去重与回归追加评论、本地快速导出（`diagnostics_bundle` 免填 `root` + 支持 `incident_id`）及有界外发队列 |
+| **NPU 调试组件**（`debugger` / `mindie_debugger`） | **专门面向被调优的目标 NPU 业务负载**（`vllm-ascend`、`MindIE-SD`、CANN 算子）：提供确定性昇腾 NPU 日志分诊（`npu_fault_triage`）、通用三原语精度/内存踩踏定位（`precision`）与 `ACLGraph` 捕获/重放逐层 Dump 工具（`aclgraph`），与 Agent 自身 DFX 严格职责隔离 |
+| **GitHub 仓库维护者** | 统一在主仓 `mindie-agent/mindie-agent` 接收结构化 Triage Card，一键跳转对应组件/插件仓库精确 Commit 代码行定位根因并发布修复 |
 
-不增加全局工具监听 Hook，不扫描所有任务的历史 transcript，不让每个适配器复制一套上报逻辑。共享组件已经记录的同一错误，通过可信诊断引用传给外层，避免多层各报一次。
+如果底层共享组件已经记录了某次错误，它会把诊断关联编号直接传给上层插件，避免同一故障在底层和外层被重复记录两次。
 
-## 记录与公开边界
+---
 
-本地日志限制单条及分片大小，并通过离线维护控制保留数量、总量和有效期；不声称任意并发写入下存在瞬时全局硬上限。正常记录包含组件和实际加载版本、操作及阶段、单调时钟耗时、状态，以及定位自有代码所需的栈帧信息。写日志失败只返回 `logging_failed` 等简短事实，不覆盖原错误，也不向 MCP stdout 混入非协议内容。
+## 4. 隐私红线：什么能上报，什么绝对不上报？
 
-公开 Issue 使用程序从允许字段构建的事实，不调用模型：组件、版本或 commit、操作、阶段、错误类型或静态错误码、耗时、退出码和清理结果。只允许与业务任务无关的随机诊断关联编号。命令、参数、环境变量、原始输出、自由文本错误、transcript、配置内容、凭据、原生任务 ID、作业 ID、机器路径及地址不进入公开正文。
+公开提交的 GitHub Issue 完全由确定性程序从**白名单字段**拼装生成，全程不调用大模型：
 
-参数错误、缺少配置、用户取消、未启用、权限拒绝、普通网络或认证错误，以及用户命令正常返回非零/超时，均不据此自动创建产品缺陷 Issue。内部异常、自有子进程异常退出或失控、协议破坏、已发布包缺文件可以形成故障记录。尚未执行的未信任 Hook 不能伪造为已经运行失败。
+- **允许包含的公开字段（仅限代码与执行元数据）**：
+  - 组件名称、软件版本号与 40 位精确 Git Commit SHA（`package_revision`）及子组件构建信息（`child_build`）、操作名称、执行阶段（`stage`）/子阶段（`substage`）、同一 `operation_id` 下的前置阶段耗时面包屑（`operation.phase`）、静态错误类别/错误码/原因码（`reason_code`）/契约名（`contract_name`）、异常类名链（`exception_chain`，不含异常消息）、**仅限自有包前缀或 `source_root` 内的代码栈帧（`module` / `function` / `line`）**、宿主标识（`harness`）、运行平台矩阵（`platform` / `arch` / `py_version`）、耗时、退出码和资源清理结果。Triage Card v2 自动将栈帧与 `package_revision` 拼装为指向对应组件/插件仓库精确 Commit 代码行的 GitHub Permalink（`https://github.com/mindie-agent/<repo>/blob/<sha>/<path>#L<line>`）。
+- **严禁进入公开 Issue 的隐私内容**：
+  - **绝不包含**：用户执行的命令、命令参数、环境变量、终端原始 `stdout`/`stderr` 输出、自由文本异常消息（本地事件与公开投影均零自由文本）、对话 Transcript、配置文件内容、密钥凭据、原生任务 ID、远端作业 ID、本机或远端文件路径、以及服务器 IP/主机名。自有组件 CLI 溯源崩溃网关（`record_component_crash`）完全不解析子进程 `stderr` 自由文本或回溯输出：每次调用生成一次性随机令牌（`MINDIE_DIAGNOSTICS_INVOCATION_TOKEN`，仅保留在本地日志、绝不进入导出包或公开 Issue），仅当本地诊断事件库中已存在同一令牌绑定的子组件 `status="error"` 且 `reportable=True` 故障记录时直接复用该可信编号避免重复上报；仅当子进程因致命原生崩溃信号（`SIGSEGV` / `SIGABRT` / `SIGBUS` / `SIGFPE` / `SIGILL`）异常终止且未落盘故障记录时，才以静态白名单子命令阶段（`stage`）、信号原因码（`reason_code`）与可信安装包版本/Commit 元数据记录外层进程崩溃事件（普通非零业务退出码在无令牌核验故障记录时绝不误报），全程绝不采信任何未核实的 `stdout`/`stderr` 输出、异常备注（`__notes__`）或调用参数。
+- **哪些情况不会触发自动提单？**
+  - 参数传错（如 CLI `exit_code == 2` 或 Schema 校验拒绝）、缺少配置、用户主动按了取消（Cancel/Interrupt）、功能未启用、权限不足、普通的网络断开或 SSH 认证失败、以及**用户自己的远端测试命令返回非零退出码或超时**，都属于正常业务反馈，绝不会当成产品 Bug 自动提 Issue。
+  - 只有工具未捕获的内部异常、自有辅助子进程崩溃、协议损坏、安装包文件缺失或权威本地状态/输出契约损坏（`category="contract_violation"`），才会进入故障上报队列。
 
-## 有限发送与恢复
+---
 
-相同组件版本、操作、阶段、错误类别及自有代码位置生成稳定故障指纹。它与本地授权版本分开：换任务、换适配器或重新授权不会成为新 bug。已有 Issue 只返回链接，不自动追加评论、重新开启或关闭。不同用户同时提交仍可能竞争，不承诺跨客户端的严格一次发送。
+## 4.1 更新失败、契约探针与本地快速排障（Fast-Path Triage）
 
-每个候选最多消耗三次持久化自动处理机会，网络读取、发送前的查询、结果核对和崩溃都计入。每次有整体时间、输出和翻页边界；限流遵守响应信息。发送结果不确定时只能核对原结果，不自动再发。预算用尽进入可见终态，状态查询和重启不重置预算。队列有容量、期限和成功后的精简回执，不长期保存重复正文。
+`diagnostics` 为更新器提供统一的 `category="update"` 记录入口，同时支持跨组件 `category="contract_violation"` 确定性契约探针：根据异常类型、结构化 `error_code`/`reason_code`、契约名称（`contract_name`）和保留的异常原因分类，不分析异常自由文本。模块缺失、包内容或协议异常、以及自有权威状态损坏（如 `knowledge` 权威 SQLite 表结构损坏、`coordinator` `machines.json` 契约损坏、`remote-dev` 状态记录损坏、`debugger` 分诊输出契约异常）属于产品故障；网络、凭据、权限、取消和本地前置条件问题保留本地可见。
 
-上报器故障只留在本地，不能为自己的发送错误无限提交 Issue。后台运行不调用模型，不自动重放用户业务；系统不自动重启崩溃进程；状态显示异常后，由明确的 ensure 命令恢复，不能用 KeepAlive 或重启次数绕过处理预算。
+七端插件（`mindie-agent-codex`、`-cc`、`-kimi`、`-dsh`、`-agy`、`-wb`、`-oc`）均已统一接入，覆盖组件继承子进程启动失败、更新子进程崩溃以及自有组件 CLI（`profiler` / `sim` / `coordinator` / `debugger` / `npu-top`）进程级异常退出网关；子组件进程内已记录的故障通过一次性调用令牌核验并直接复用，避免重复记录。
 
-## 日志维护与生命周期
+本地快速排障链路支持一步到位：
+- `diagnostics_status`（及 `mindie-diagnostics reporting status`）的 `local.recent` 视图直接返回近期故障的 `incident_id`、`error_code`、`reason_code`、`contract_name`、`substage`、自有 `stack_frames`、运行环境矩阵与 `reporting_eligibility`。
+- `diagnostics_bundle`（及 `mindie-diagnostics bundle`）默认自动解析当前诊断日志根目录（`root` 为可选参数），并同时支持 `--incident-id` / `incident_id` 与 `--operation-id` / `operation_id`，拿到报错返回中的 `incident_id` 即可一键导出脱敏证据包。
 
-共享服务运行在独立、版本可核对的目录，不借用某个适配器即将清理的临时运行时。安装或升级不静默启用旧 Grok CLI 后台功能；此处与用于知识库审核的 Grok Bot 软件无关。
+只读状态中的近期错误提供 `error_code`、`reason_code` 和 `reporting_eligibility`：
 
-复用现有定时更新机会执行离线维护，即使未开启上报也清理旧日志。只维护明确登记的日志根目录；所有登记的读取者游标和活跃/未知写入者都受到保护。轮转不能覆盖尚未读取的分片。受保护文件占满额度时显示受限或丢弃计数，不能无限增长，也不能阻塞业务。清理、过期、积压和日志写入失败在状态中可查。
+| 资格状态 | 含义 |
+| --- | --- |
+| `local_only` | 已在本地记录，按错误分类或调用边界不进入自动上报 |
+| `not_authorized_at_capture` | 记录时没有上报授权，以后开启也不回补 |
+| `other_profile` | 记录属于其他配置档案，本档案不消费 |
+| `consent_allowed` | 目前有上报资格，实际入队和投递结果仍须查看队列 |
+| `consent_withdrawn` / `consent_unavailable` | 授权已撤回或暂时不可读，分别撤销投递或保留证据等待恢复 |
 
-remote-dev 的用户命令 stdout/stderr 是作业输出证据，归原有作业与制品生命周期管理，不当作诊断日志随意截断。诊断日志保留不改变原工具的输出、取消、授权和执行语义。
+该视图只读取最多八个 16 KiB 日志尾部并返回最近五条失败，`truncated` 表示窗口不完整，不代表全量故障统计。服务心跳健康、诊断组件已升级、事件被记录、事件已入队和 GitHub 已确认发布是独立事实；只有队列的 `published` 回执及对应 Issue 才能证明外部投递成功。新版本不能重建旧插件从未记录的故障。
 
-原生安装回读需要核对目标包完整的 Hook/MCP 声明，不能仅凭版本或 MCP 连通判定成功。
-Claude Code 的旧更新器会按旧声明生成首次升级包；新版更新器在下一次既有检查中
-补齐该包，使用独立包装版本刷新宿主缓存，并保留旧包回滚。刷新只在 Hook 外执行，
-复用原有锁和期限；失败或中断后，同一版本不自动反复安装，需明确恢复。
-包引用和完整内容必须属于已提交版本；清理回执失败也须保留实际安装结果并显示异常。
-Codex 对变更后 Hook 的原生信任要求仍由用户完成，更新器不绕过它。
+---
 
-## 验收边界
+## 5. 主仓统一投放、跨版本根因去重与追加评论（Loop Prevention）
 
-开发检查覆盖分类、脱敏、预算及协议回归；实机验收另行验证真实子进程失败、日志轮转与清理、macOS 服务、三个原生适配器、真实 GitHub Issue 及核对结果。接受一次记录不等于 Issue 已送达，Issue 已创建也不等于 Agent 已能据此恢复。Windows 实机按用户安排后续执行，不用 CI 代替。
+为了防止同一个根因在日常小版本迭代中反复新建重复 Issue，同时不错过新版本中的真实复现或关闭后回归：
 
-真实模型验收沿用 Codex Luna/max、Kimi K3/max、Claude Code 本机 DSV4 配置。测试用隔离配置和明确标记的 Issue，结束后关闭测试发送及测试服务；不因此开启用户生产环境的自动上传。
+1. **主仓统一投放 + 双层指纹去重（`fingerprint` vs `fault_signature`）**：
+   - 所有自动诊断 Issue 统一投放在主仓 **`mindie-agent/mindie-agent`**，并在正文 Triage Card v2 中生成指向所属组件/插件仓库精确 Commit 的源码链接。
+   - **构建级指纹（`fingerprint`）**：包含 `package_version` / `package_revision`，用于在本地 `Outbox` 合并同一构建下的重复触发。
+   - **跨版本根因签名（`fault_signature`，`<!-- mindie-fault:<sha256> -->`）**：与版本号及代码行微调解耦，仅由 `(component, operation, stage, substage, category, error_code, reason_code, contract_name, error_type, 最内层自有栈帧 module + function)` 计算生成。
+   - 当新版本命中已有相同 `fault_signature` 的 Issue 时，上报器**不会重复新建 Issue**：若原 Issue 处于 `OPEN` 状态且尚未记录当前构建指纹，则自动追加一条结构化 **Additional Occurrence** 评论（携带新版本 Commit 代码行链接）；若原 Issue 已 `CLOSED`，则自动追加 **Regression Observed After Issue Closure** 回归评论提醒维护者，并通过评论内 `<!-- mindie-incident:<fingerprint> -->` 标记跨页保留游标核对，相同构建指纹绝不重复刷屏。
+2. **有界请求与可恢复的发送队列**：
+   - 每个处理周期受统一请求超时与字节预算约束；当网络、GitHub 认证暂时不可用或历史 Issue/评论分页扫描尚未完成时，队列保留待发记录与分页游标、显式记录当前错误并延后重试，严格分离全量历史根因发现与近期 `uncertain` 写入对账，绝不因瞬时只读查询失败或分页截断而漏判或丢弃待报故障。
+   - 无论是新建 Issue 还是追加跨版本评论，仅当请求可能已到达 GitHub 但未收到响应时才标记为 `uncertain`，并在后续对账周期中优先通过只读查询（含 Issue 与评论隐藏标记 `<!-- mindie-incident:<fingerprint> -->` 核对）确认远端是否已落盘，绝不盲目重发。
+   - 若 GitHub 已确认创建 Issue 或评论但本地回执落盘失败，系统会单独报告本地写入错误而不反转已完成的外部结果。用户关闭贡献开关后，未发出的队列项立即停止外发；重新开启后仅处理新授权修订下产生的事件。
+3. **上报器自身错误不递归提单**：
+   - 上报器在访问 GitHub 时遇到的错误仅记录在本地状态中，不会触发递归提单。
+
+---
+
+## 6. 本地日志轮转与容量保护
+
+- **有界磁盘占用**：本地日志严格限制单条记录与单个分片文件大小，并在日常周期性维护时自动清理过期分片（即使未开启远程上报也会自动清理旧日志）。
+- **保护活跃读写者**：日志轮转时会自动保护正在写入的进程和已登记的读取游标，绝不覆盖尚未读完的分片。
+- **不截断业务输出**：在 `remote-dev` 中，用户远端命令产生的 `stdout`/`stderr` 属于正式的作业输出产物（Artifacts），由作业生命周期完整保留，绝不会被当成诊断日志截断。
+
+---
+
+## 7. 确定性昇腾 NPU 与 CANN 故障分诊（`mindie_debugger.npu_fault_triage`）
+
+为保持职责唯一性，面向**被调优目标 NPU 业务负载**的日志分诊与精度调试已独立剥离至 [`mindie-agent/debugger`](https://github.com/mindie-agent/debugger)（`mindie-debugger` / `mindie_debugger`）。其中内置吸收自 [CANNBot Skills](https://gitcode.com/cann/cannbot-skills) 的**零模型依赖、确定性昇腾 NPU 运行时故障分诊器（`mindie_debugger.npu_fault_triage.triage_npu_fault`）**，帮助 Agent 从容器或主机的报错日志中直接识别根因分类、提取标准错误码并给出对应的 CANN 原生取证工具命令：
+
+| 故障分类（`category`） | 典型 CANN / 驱动错误码与特征签名 | 关联的 CANN 确定性取证与恢复指引 |
+| --- | --- | --- |
+| **`aicore_exception`** | `EZ9999`、`507015`、`Aicore Error`、`BIU`/`MTE2`/`MTE3`/`VEC`/`CUBE` 异常位图、非法访存或除零越界 | 使用 `asys collect` 收集一键异常快照，调用 `msaicerr -i <dump_dir>` 解码故障寄存器，并结合 `npu-objdump` 映射出错 PC 指令与 UB/GM 32B 对齐边界 |
+| **`ascendc_sync_hazard`** | `SetFlag`/`WaitFlag` 配对失衡、`CrossCoreWaitFlag` 跨核等待挂死、分支内不等价流水屏障导致的 Stream 挂死（`507018`） | 静态执行 `ascendc-sync-audit` 核查分支对称性、循环跨拍双缓冲释放与 `HardEvent`（`MTE2_V` / `V_MTE3` / `MTE1_M` / `M_FIX`）配对完整性 |
+| **`hccl_comm_fault`** | `EI0002`（链路断开）、`EI0004`（拓扑不一致）、`EI0006` / `Notify Wait Timeout`、`HCCL_BUFFSIZE` 溢出或 Idle-DP 空批挂死 | 开启 `HCCL_ENTRY_LOG_ENABLE=1`，使用 `hccn_tool` / `npu-smi info -t topo` 核查 RoCE/HCCS/SIO 链路，或用 `HVM` 独立验证集合通信算子 |
+| **`device_oom`** | `EL0004`、`E80000`、`NPU out of memory`、`ACL_ERROR_RT_MEMORY_ALLOCATION` | 核查各 Rank 的 Workspace 峰值增量（`max_rank_workspace_delta_bytes`）、KV Cache 预分配比例及 GE 图内存复用配置 |
+| **`npugraph_compile_or_capture`** | `torch.npugraph_ex` Guard 失效、静态图 Capture 期间发生 Host-Device 同步或动态 Shape 符号推导失败 | 启用 `npugraph_ex` DFX 二分排查（Compile/Runtime/Perf Triage），固定静态 Bucket Padded Shape 并剥离 Capture 区间的动态流分配 |
+| **`device_hardware_or_driver`** | `507035`、ECC 多比特翻转、设备掉卡或驱动握手异常 | 执行 `asys check` 与 `msnpureport` 导出设备侧固件黑匣子日志，并通过 `coordinator` 隔离故障物理卡/Die |
+| **`vllm_ascend_aclgraph_capture_failure`** | `207008`、`EL0009`、`ACL_ERROR_RT_STREAM_NO_CB_REG`、`update_stream_limit`、`aclmdlRIExecuteAsync` 或 `ACLGraph` 捕获期间触发动态控制流/D2H 同步 | 检查 `additional_config.torchair_graph_config` / `cudagraph_capture_sizes`，剥离图捕获区间内的 `.item()` / `.cpu()` 同步，或回退至 `--enforce-eager` / `PIECEWISE` 图模式 |
+| **`vllm_ascend_idle_dp_collective_hang`** | 多 DP + EP/TP 混合并行下，空闲 DP Rank（`active_batch == 0`）跳过 Dummy Forward 或 `GDN`/`KDA` 状态对齐，引发 `HCCL_E_WAIT_TIMEOUT` | 确保所有 DP Rank 同步进入 `coordinate_batch_across_dp` 空批 Dummy Forward 路径，并开启 `GDN`/`KDA` 零填充 Workspace 对齐 |
+| **`msmodelslim_quant_weight_or_scale_mismatch`** | `quant_model_description.json` 键缺失、`deq_scale`/`quant_bias`/`input_scale` 形状或精度不匹配、`W8A8_DYNAMIC` 与静态配置混用、`MXFP8`/`MXFP4` `group_size != 32` | 核对 `--quantization ascend` 与 `quant_model_description.json` 格式契约，校准异常值抑制（SmoothQuant/QuaRot）并将敏感层回退为 `FLOAT`（BF16/FP16） |
+| **`numerical_nan_inf_or_determinism_drift`** | `msprobe` / `PrecisionDebugger` 余弦相似度跌落、`NaN`/`Inf` 溢出、FP16 累加器下溢或跨 Run 归约非确定性漂移 | 使用 `msprobe` 逐层比对定位首个精度发散算子，开启 `LCCL_DETERMINISTIC=1`、`HCCL_DETERMINISTIC=true`、`CLOSE_MATMUL_K_SHIFT=1` 或 `batch_invariance` 确定性配置 |
+| **`mooncake_or_kv_pool_transfer_fault`** | `MooncakeConnector` / `LMCacheConnector` / `AscendStoreConnector` KV 传输超时、`KVCache register_memory` 失败、或非对称 P/D TP 切分拓扑失配 | 校验 `HCCL_SOCKET_IFNAME` / RoCE 网卡可达性、RDMA 内存注册上限及非对称 TP 整除约束（`tp_p >= tp_d` 且 `tp_p % tp_d == 0`） |
+| **`custom_op_abi_or_symbol_shadowing`** | `161001`（`ACLNN_ERR_PARAM_NULLPTR`）、`561000`/`561103`、`_C_ascend`/`libascend_kernels.so` 未定义符号、`opapi_math` 遮蔽 `libopapi.so`、缺失 `Meta` 算子注册、或 `FIA` `errcode 264`（`tiling offset out of range`） | 用 `ldd`/`nm -D` 核查自定义算子 ABI 与 `libopapi.so` 符号绑定；在 `TORCH_LIBRARY_IMPL` 同步注册 `PrivateUse1` 与 `Meta` 分支；MTP（`step >= 1`）下将 `FIA` `actual_seq_lengths_kv` 计数域与张量维度（3D BSH/BSND vs 4D BNSD）严格对齐 |
+| **`multithread_npu_context_or_rogue_device0`** | `107003`（`ACL_ERROR_RT_CONTEXT_NULL`）、`ThreadPoolExecutor`/ZMQ 异步回调线程丢失 NPU 上下文、或多卡 Worker 异常占用物理 `device 0` 显存 | 在每个后台工作线程显式调用 `torch.npu.set_device(device_id)`；使用 `perf probe -x libascendcl.so 'aclrtSetDevice deviceId=%x0:s32'` 零侵入追踪异常 `device 0` 上下文创建栈 |
+| **`enginecore_shm_or_zmq_frame_corruption`** | `vllm` `EngineCore` `shm_broadcast` / `MessageQueue` 环形缓冲区帧损坏、`multiproc_executor` `EOFError`/`UnpicklingError`，表现为 `/v1/models` 返回 200 但 `/v1/chat/completions` 挂死 | 检查 `EngineCore` 进程存活与 ZMQ `DEALER/ROUTER` 多段消息帧完整性，排查超大 `SchedulerOutput` 分块截断或 Worker 异常退出 |
+
+此外，在任务启动前、集群探针与评测阶段，`coordinator`（[`env_manager.py`](https://github.com/mindie-agent/coordinator)、[`fleet_probe.py`](https://github.com/mindie-agent/coordinator) 与 [`checkpoint_preflight.py`](https://github.com/mindie-agent/coordinator)）、`npu-top`（[`probe.py`](https://github.com/mindie-agent/npu-top)）和 `mindie-bench`（[`cann_sentry_eval.py`](https://github.com/mindie-agent/mindie-bench)）配套提供前置防踩坑门禁：
+- **运行时环境与硬件特性矩阵前置校验**：自动拦截 `ACLGraph` 与 `ASCEND_LAUNCH_BLOCKING=1` 冲突、自定义算子 `op_api/lib` 路径缺失、多机 `HCCL_SOCKET_IFNAME`/`GLOO_SOCKET_IFNAME` 失配、缺失 `expandable_segments:True` 导致的内存碎片风险、跨代 SoC（`310P` / `910B` A2 / `910_93` A3 / `950` A5）不支持特性误用、以及 NUMA/IRQ 绑核争抢。
+- **免上卡 Safetensors 文件头与量化契约预检（`inspect_safetensors_checkpoint`）**：在申请 NPU 租约前，仅读取 `.safetensors` 前 8 字节头部长度与 JSON 元数据（`< 100ms`），自动校验分片完整性、文件截断及各层 Dtype 字节分布，及时拦截“`config.json` 声明 W8A8/W4A8 量化但 `routed_expert` 权重仍为 BF16/F16”引发的隐性显存暴涨，以及 `head_dim` 未对齐昇腾 32B UB 边界的风险。
+- **Linux `/proc/<pid>` 磁盘 I/O `D` 状态（`wchan`）与真 NPU 挂死区分**：`fleet_probe` 与 `npu-top` 同步采集 NPU 进程的 `/proc/<pid>/status`（`State`）与 `/proc/<pid>/wchan`，当 AICore 利用率为 `0%` 但进程处于不可中断磁盘等待（`D` 态，如 `lock_page_killable` / `nfs_*` / `folio_wait*`）时显式标记 `disk_io_wait=True`，防止把冷存储或 NFS 权重加载误判为 HCCL 通信死锁并误杀进程。
+- **推理基准测试有效性审计（`audit_inference_benchmark_validity`）**：自动识别并拦截常见评测失真场景——包括未剔除 Warmup/图编译耗时、使用 `--load-format dummy` 或未校准量化权重报告精度、投机解码（MTP/EAGLE/DSpark）缺失 `acceptance_rate` / `mean_accepted_tokens` 折算、用 `output_len < 32` 短窗口冒充长稳态 TPOT、PD 分离静默回退至本地重算（`transferred_kv_bytes == 0`）、`--enforce-eager` 与 `cudagraph_mode` 配置冲突、C++ 自定义算子重编后未清理 `.torchair_cache`，以及跨 VPN/广域网发起压测导致的网络 RTT 污染。
+
+---
+
+## 8. 通用三原语 NPU 精度、内存踩踏与 `ACLGraph` 调试工具集（`mindie_debugger`）
+
+针对模型长上下文发散、多步投机（MTP/EAGLE）接受率跌落、多 DP 空批状态串味、自定义算子累加漂移以及 `vllm-ascend` / `MindIE-SD` 默认图引擎 **`ACLGraph`（`torch.npu.NPUGraph`）** 的捕获/重放发散，`debugger`（`mindie_debugger.precision` 与 `mindie_debugger.aclgraph`）提供**零业务侵入、仅依赖公开 PyTorch 接口**的定位工具集：
+
+| 故障现象与日志签名（Symptom） | 推荐原语（Primitive） | 核心调用方式与判定输出 |
+| --- | --- | --- |
+| **跨步/跨 Rank 状态修改、共享缓冲覆写、Workspace 切片踩踏**（如 MTP `step 0` 的 `seq_lens`/`cum_query_lens` 在构建 `step 1` 后被原地覆盖、Idle DP `_dummy_run` 污染 `GDN`/`KDA`/`Mamba` 状态缓存、变长 Chunk workspace 越界踩踏） | **`npu-watch`**（`StorageGraph`、`MemoryWatchpoint`、`WatchRingBuffer`） | `StorageGraph(a=t0, b=t1).shares_storage("a", "b")` / `.overlapping_views()` 检测底层 `untyped_storage` 别名与字节区间重叠；`with MemoryWatchpoint(module, must_preserve={"state": t}) as wp:` 在首个修改保护张量的算子/子模块边界精确定位违规写操作（`wp.report()["first_violation"]`）；`WatchRingBuffer` 提供 `NPUGraph` 捕获安全的设备侧零同步环形快照与首个 `NaN`/`Inf` 锁存 |
+| **单算子/归约/量化数值漂移或跨次运行非确定性抖动**（如 BF16/FP16 均值方差累加 `max_abs_err` 超标、W8A8/MXFP8 量化固损 vs 算子核实现 Bug、原子归约跨次抖动） | **`call-repro`**（`capture_call`、`replay_call`、`FakeQuantContract`） | `cap = capture_call(fn_or_mod, *args, **kwargs)` 保存调用前后完整 `StorageGraph` 快照；`replay_call(cap, fn_or_mod, mode="reference_check", reference_atol=..., reference_rtol=...)` 自动提升浮点张量与 `TorchFunctionMode` 归约至 FP32 参照比对，或通过 `repeat=N, det_lock=True` 与 `FakeQuantContract` 区分“非确定性原子抖动 (`nondeterministic_jitter`)”、“量化固损 (`quantization_inherent_loss`)”与“算子实现缺陷 (`real_numerical_bug`)” |
+| **多模块/端到端逐层精度发散（Eager vs `NPUGraph`、多卡 TP/EP/CP vs 单卡、新旧分支对比）** | **`lockstep-diff`**（`LockstepDiffer`、`slim_moe_checkpoint`） | `LockstepDiffer(ref_mod, cand_mod).compare(*args, **kwargs)` 沿模块树锁定**首个超过 ULP/噪声底限的发散层**（`first_divergent_layer`）及发散类型（`nonfinite_overflow` / `storage_stomp` / `layout_or_view_bug` / `accumulation_drift`）；配合 `slim_moe_checkpoint` 将超大 MoE 权重裁剪为单机可跑的确定性小权重进行秒级复现 |
+| **`ACLGraph`（`torch.npu.NPUGraph`）图内中间层逐 Replay 步无同步 Dump、捕获阻塞定位与静态地址追踪** | **`aclgraph`**（`ACLGraphDumper`、`ACLGraphCaptureGuard`、`ACLGraphAddressTracker`） | 解决常规 PyTorch Hook 在 `g.replay()` 期间不触发、或调 `.cpu()` 导致 `207008` 捕获失败的难题：`ACLGraphDumper` 在 `torch.npu.graph(g)` 捕获期间将零分配设备侧 D2D 拷贝（`torch.where(..., out=slot_buf)`）烘焙进静态图，每次 `g.replay()` 配合 `dumper.advance_step()` 自动落盘各层中间张量，并通过 `dumper.compare_with_eager(eager_fn, *args, step_index=k)` 直接锁定图中首个发散层；`ACLGraphCaptureGuard` 精确定位捕获区内的 `.item()`/`.tolist()`/`bool(tensor)`/`.cpu()` 违规代码行；`ACLGraphAddressTracker` 拦截静态输入缓冲 `data_ptr()` 漂移与 `slot_mapping` Padded 尾部未填 `-1` 导致的 KV Cache 脏写 |
+
+### 底层依赖边界说明（公开接口 vs 扩展探测）
+
+- **业务模型层（`vllm-ascend` / `MindIE-SD`）零定制接口**：无需业务代码预埋任何自定义 Hook 或专有协议，完全通过标准 `torch.nn.Module` 公开接口（`register_forward_pre_hook(..., with_kwargs=True)`、`register_forward_hook(..., with_kwargs=True)`、`named_modules()`、`named_parameters()`、`named_buffers()`）及标准 HuggingFace `config.json` / `.safetensors` 文件工作。
+- **PyTorch 公开运行时接口**：存储拓扑与别名检测基于 `tensor.untyped_storage()`、`storage.data_ptr()`（0 字节空存储回退至对象标识）、`storage.nbytes()`、`tensor.as_strided()`、`tensor.view(torch.uint8)`；FP32 参照重放基于公开的 `torch.overrides.TorchFunctionMode` 与 `torch.autocast`；设备侧异步事件与确定性控制基于 `torch.npu.current_stream()`、`torch.npu.Event()` 与 `torch.use_deterministic_algorithms()`。
+- **仅有的两处框架内部/扩展触点**：(1) 在 `FakeQuant` 与 `FP32` 参照重放期间，为避免触发 `nn.Module.__setattr__` 参数类型拦截或重复注册 Hook，在 `try...finally` 块内对 `submodule._parameters` / `submodule._buffers` 字典执行临时原地替换并严格恢复；(2) 通过 `getattr(torch_npu, "get_npu_format", None)` 可选探测昇腾私有 `ACL_FORMAT_FRACTAL_NZ (29)` 格式，避免对非标准排布张量直接切片字节视图。

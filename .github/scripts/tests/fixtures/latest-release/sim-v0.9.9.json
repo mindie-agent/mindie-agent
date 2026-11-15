@@ -1,0 +1,15 @@
+{
+  "tag_name": "v0.9.9",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "mindie-sim-0.9.9.tar.gz",
+      "size": 8554330
+    },
+    {
+      "name": "mindie_sim-0.9.9-py3-none-any.whl",
+      "size": 1493697
+    }
+  ]
+}

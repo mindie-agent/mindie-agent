@@ -1,0 +1,337 @@
+{
+  "schema": "mindie-caller-repair-acceptance/1",
+  "verified_at": "2026-10-27T13:43:30.540644+00:00",
+  "scope": {
+    "release_kind": "independent component and plugin patches",
+    "main_product_version": "0.1.1",
+    "platform": "macOS arm64",
+    "model_weights_loaded": false,
+    "npu_workloads_launched": false,
+    "npu_performance_verified": false,
+    "four_host_automatic_upgrade_acceptance": false
+  },
+  "history": {
+    "catalog_tags_compared": [
+      "v0.1.0",
+      "v0.1.2",
+      "v0.1.8",
+      "v0.1.9",
+      "v0.1.10"
+    ],
+    "installed_remote_versions_compared": [
+      "0.10.6",
+      "0.10.7"
+    ],
+    "both_old_parsers_reject_host_without_port": true,
+    "earlier_same_chat_failure_utc": "2026-10-25T16:11:56.260Z",
+    "earlier_failure_count": 2,
+    "old_caller_text": "Remote caller; submission=not_sent. No automatic retry.",
+    "conclusion": "Host+port and generic caller/not_sent behavior already existed in earlier released versions; the same chat had matching failures on 2026-10-25. No new port requirement was introduced in 0.1.10.",
+    "previous_acceptance_gap": "Successful calls supplied port explicitly and did not exercise agent correction."
+  },
+  "formal_releases": [
+    {
+      "repository": "mindie-agent/remote-dev",
+      "tag": "v0.10.8",
+      "source": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+      "asset_count": 7,
+      "checksum_entries": 6,
+      "benchmark_gate": true,
+      "required_cases": 2,
+      "packaged_files_compared": 104,
+      "verdict": "PASS",
+      "url": "https://github.com/mindie-agent/remote-dev/releases/tag/v0.10.8"
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-codex",
+      "tag": "v0.1.11",
+      "source": "ee9860ffa472599577fa77af9e591d48f663f8fe",
+      "asset_count": 8,
+      "checksum_entries": 7,
+      "benchmark_gate": true,
+      "required_cases": 1,
+      "packaged_files_compared": 52,
+      "verdict": "PASS",
+      "url": "https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.11",
+      "package_resources": {
+        "repository": "mindie-agent/mindie-agent-codex",
+        "source": "ee9860ffa472599577fa77af9e591d48f663f8fe",
+        "tag": "v0.1.11",
+        "all_wheel_package_files": 72,
+        "sdist_source_files": 72,
+        "native_manifests": [
+          "plugins/mindie-agent/.codex-plugin/plugin.json",
+          "plugins/mindie-agent/.mcp.json",
+          "plugins/mindie-agent/hooks/hooks.json",
+          "plugins/mindie-agent/scripts/mcp_catalog.json"
+        ],
+        "verdict": "PASS"
+      }
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-cc",
+      "tag": "v0.1.7",
+      "source": "e1ab115627c632654dc3e9e6db9a056a20280589",
+      "asset_count": 8,
+      "checksum_entries": 7,
+      "benchmark_gate": true,
+      "required_cases": 1,
+      "packaged_files_compared": 34,
+      "verdict": "PASS",
+      "url": "https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.7",
+      "package_resources": {
+        "repository": "mindie-agent/mindie-agent-cc",
+        "source": "e1ab115627c632654dc3e9e6db9a056a20280589",
+        "tag": "v0.1.7",
+        "all_wheel_package_files": 39,
+        "sdist_source_files": 153,
+        "native_manifests": [
+          ".claude-plugin/plugin.json",
+          ".mcp.json",
+          "hooks/hooks.json"
+        ],
+        "verdict": "PASS"
+      }
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-kimi",
+      "tag": "v0.1.6",
+      "source": "3813383c6b100294cb5ea4e9bd9d97a6ecfc1cae",
+      "asset_count": 7,
+      "checksum_entries": 6,
+      "benchmark_gate": true,
+      "required_cases": 1,
+      "packaged_files_compared": 158,
+      "verdict": "PASS",
+      "url": "https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.6"
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-dsh",
+      "tag": "v0.1.5",
+      "source": "670b776b675c0b6dd93faef289e6538135e1f0db",
+      "asset_count": 6,
+      "checksum_entries": 5,
+      "benchmark_gate": true,
+      "required_cases": 1,
+      "packaged_files_compared": 52,
+      "verdict": "PASS",
+      "url": "https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.5"
+    }
+  ],
+  "codex_automatic_upgrade": {
+    "before": "0.1.10",
+    "after": "0.1.11",
+    "forced_update": false,
+    "manual_binding_edit": false,
+    "formal_source_sha": "ee9860ffa472599577fa77af9e591d48f663f8fe",
+    "installed_package_files_compared": 72,
+    "components": {
+      "mindie-agent-codex": {
+        "version": "0.1.11",
+        "commit": null
+      },
+      "remote-dev": {
+        "version": "0.10.8",
+        "commit": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+      },
+      "mindie-diagnostics": {
+        "version": "0.5.4",
+        "commit": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+      },
+      "mindie-knowledge": {
+        "version": "0.13.4",
+        "commit": "6e921b205c00d592c25f849653cbfb72b73fe318"
+      }
+    },
+    "native_install": {
+      "stage": "active",
+      "before_version": "0.1.10",
+      "metadata_source": {
+        "repository": "mindie-agent/mindie-agent-codex",
+        "sha": "ee9860ffa472599577fa77af9e591d48f663f8fe"
+      },
+      "hook_trust": {
+        "status": "complete",
+        "trusted": 5,
+        "user_choices_preserved": 0
+      },
+      "approved_hook_count": 5,
+      "activation": {
+        "status": "active",
+        "unavailable_seconds": 0.004022084001917392,
+        "process": {
+          "cleanup_failed": false,
+          "execution": "completed",
+          "returncode": 0
+        }
+      }
+    },
+    "checks": {
+      "native_0111": true,
+      "exact_release_declaration": true,
+      "exact_remote_commit": true,
+      "all_installed_package_files_match": true,
+      "all_native_payloads_match": true,
+      "community_unchanged": true,
+      "user_fields_unchanged": true
+    },
+    "plugin_provenance": "Installed from a local non-editable build, so direct_url has no VCS commit. All 72 installed package files match the independently verified formal wheel, and the native release declaration matches the formal release asset.",
+    "activation_time_scope": "unavailable_seconds covers binding cutover only, not the complete preparation or update pipeline."
+  },
+  "codex_formal_native_correction": {
+    "host": "Codex CLI 0.164.0-alpha.11.1",
+    "model": "gpt-6.1-sol",
+    "runtime": "Normally upgraded installed binding",
+    "first_error": {
+      "outcome": "failed",
+      "error_details": {
+        "category": "caller",
+        "submission_state": "not_sent",
+        "retryable": false,
+        "input_repair": {
+          "missing": [
+            "port"
+          ],
+          "action": "Retry with host and port together for a direct SSH endpoint (for example host=192.0.2.10 and port=22; port 22 is an example, not an implicit default), or use an alias or a registered resolver selector. To use the configured default endpoint, omit endpoint selectors; a partial host/port selector does not use that default."
+        }
+      },
+      "automatic_retry": false
+    },
+    "first_error_text": "Remote caller; submission=not_sent. No automatic retry. Missing input: port. Retry with host and port together for a direct SSH endpoint (for example host=192.0.2.10 and port=22; port 22 is an example, not an implicit default), or use an alias or a registered resolver selector. To use the configured default endpoint, omit endpoint selectors; a partial host/port selector does not use that default.",
+    "correction": {
+      "only_added": {
+        "port": 22
+      }
+    },
+    "second_result": {
+      "outcome": "success",
+      "state": "succeeded",
+      "exit_code": 0,
+      "preview": {
+        "stdout": "caller-repair-cbb193e2eb\n",
+        "stderr": ""
+      }
+    },
+    "elapsed_seconds": 37.382,
+    "checks": {
+      "two_native_calls": true,
+      "initial_missing_port": true,
+      "only_added_port": true,
+      "not_sent_no_auto_retry": true,
+      "actual_exit_code_zero": true,
+      "actual_stdout_matched": true,
+      "formal_installed_runtime": true
+    },
+    "isolation": "Separate test state, actual native task identity, and read-only printf through real A3 SSH."
+  },
+  "current_desktop_correction": {
+    "first_error_details": {
+      "category": "caller",
+      "submission_state": "not_sent",
+      "retryable": false,
+      "input_repair": {
+        "missing": [
+          "port"
+        ],
+        "action": "Retry with host and port together for a direct SSH endpoint (for example host=192.0.2.10 and port=22; port 22 is an example, not an implicit default), or use an alias or a registered resolver selector. To use the configured default endpoint, omit endpoint selectors; a partial host/port selector does not use that default."
+      }
+    },
+    "correction": {
+      "only_added": {
+        "port": 22
+      }
+    },
+    "second_result": {
+      "outcome": "success",
+      "state": "succeeded",
+      "exit_code": 0,
+      "preview": {
+        "stdout": "desktop-caller-repair-20261027\n",
+        "stderr": ""
+      }
+    },
+    "checks": {
+      "first_missing_port": true,
+      "caller_not_sent": true,
+      "no_automatic_retry": true,
+      "second_added_only_port": true,
+      "actual_exit_zero": true,
+      "actual_stdout_matched": true
+    },
+    "loaded_tool_description": "Existing Desktop catalog still has the older description; the fresh native process uses the updated formal catalog. Current Desktop calls already dispatch through the corrected runtime and return actionable errors."
+  },
+  "dsh_candidate_native_correction": {
+    "host": "DeepSeek Harness",
+    "model": "deepseek-flash",
+    "runtime_scope": "Candidate shared MCP through actual native MCP client; not an installed-plugin lifecycle test.",
+    "elapsed_seconds": 10.323,
+    "correction": {
+      "only_added": {
+        "port": 22
+      }
+    },
+    "job_state": "succeeded",
+    "checks": {
+      "two_native_calls": true,
+      "second_only_added_port": true,
+      "first_rejected": true,
+      "expected_remote_stdout": true
+    },
+    "projection_boundary": "The client exposes the RPC error message and successful stdout, but not error.data or the successful exit code. The model claim of exit code zero was not used as evidence."
+  },
+  "kimi_automatic_upgrade": {
+    "plugin_version": "0.1.6",
+    "source_sha": "3813383c6b100294cb5ea4e9bd9d97a6ecfc1cae",
+    "components": {
+      "remote-dev": {
+        "version": "0.10.8",
+        "commit": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+      },
+      "mindie-diagnostics": {
+        "version": "0.5.4",
+        "commit": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+      },
+      "mindie-knowledge": {
+        "version": "0.13.4",
+        "commit": "6e921b205c00d592c25f849653cbfb72b73fe318"
+      }
+    },
+    "status": "current",
+    "needs_host_reload": true,
+    "host_package_repair": "installed",
+    "mcp_server_matches_formal_source": true,
+    "forced_update": false,
+    "manual_binding_edit": false,
+    "scope": "Active dispatch runtime confirmed; loaded catalog refresh in an existing Kimi process was not observed."
+  },
+  "ci": {
+    "codex_final_run": "https://github.com/mindie-agent/mindie-agent-codex/actions/runs/40511702349",
+    "codex_platforms": [
+      "ubuntu-latest",
+      "macos-latest",
+      "windows-latest"
+    ],
+    "native_cli_versions": [
+      "0.162.1",
+      "0.164.0"
+    ],
+    "release_run": "https://github.com/mindie-agent/mindie-agent-codex/actions/runs/40512808171",
+    "retained_windows_failure": "https://github.com/mindie-agent/mindie-agent-codex/actions/runs/40509538673/job/122207493595",
+    "windows_failure_resolution": "New in-process test left the normal diagnostics recorder open. The test now owns and closes that recorder; production behavior and assertions were unchanged."
+  },
+  "retained_verification_attempt": {
+    "receipt": "user-codex-0111-initial-provenance-check.json",
+    "reason": "The first installed-package check incorrectly required a VCS commit from a local-build direct_url. The successful verification compares installed bytes to the verified formal wheel and checks the native release declaration instead."
+  },
+  "raw_local_receipt_sha256": {
+    "regression-history.json": "ed57c82170c194bb6623af0994eb129c76189e4c93bad5f2b89aa877cbfe4483",
+    "native-caller-50a47a5984/verified.json": "7a2f1f303acb71b91a52dcace938f3b55d9442b8b83dffa1a12e0dc7a3492562",
+    "native-caller-cbb193e2eb/verified.json": "646090448e4c3f9232f02acdf7f1346c239e2e0518fc0db27627031b0b4ef89f",
+    "native-dsh-083ebeb090/verified.json": "45e6dc586bfcf3b7e3af961612a9eb7fd963a0fd83d724f61a8ecdbefbf34706",
+    "desktop-caller-repair.json": "34ee18404033df471f89c46b95b8469e9f509c01be89eea04327904f2e3c0f8f",
+    "user-codex-0111-automatic-update.json": "ef5c1ad80f50414a2332794cd41871b38b345c93aa1595d553a51fe444c428e5",
+    "user-kimi-016-automatic-update.json": "de00dd63bbafe13b1241b228c766eec8efc55b2c80e94e3dfb60296e3f86325b",
+    "user-codex-0111-initial-provenance-check.json": "517104e63c477cf682592422f675c5e0605cdad954aeb01f9ea3d801aec2c92e",
+    "codex-windows-failure-122207493595.log": "b01f5f4543db1c40d4b0831e42fbc81b63f33cbb08f84b294e03c545a72cf078"
+  }
+}

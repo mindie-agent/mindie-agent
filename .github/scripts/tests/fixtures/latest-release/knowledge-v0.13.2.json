@@ -1,0 +1,31 @@
+{
+  "tag_name": "v0.13.2",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "benchmark-results.json",
+      "size": 5392
+    },
+    {
+      "name": "benchmark-results.md",
+      "size": 810
+    },
+    {
+      "name": "benchmark-SHA256SUMS",
+      "size": 176
+    },
+    {
+      "name": "mindie_knowledge-0.13.2-py3-none-any.whl",
+      "size": 476514
+    },
+    {
+      "name": "mindie_knowledge-0.13.2.tar.gz",
+      "size": 866477
+    },
+    {
+      "name": "SHA256SUMS",
+      "size": 467
+    }
+  ]
+}

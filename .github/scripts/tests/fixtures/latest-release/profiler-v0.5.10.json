@@ -1,0 +1,15 @@
+{
+  "tag_name": "v0.5.10",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "mindie_profiler-0.5.10-py3-none-any.whl",
+      "size": 421802
+    },
+    {
+      "name": "mindie_profiler-0.5.10.tar.gz",
+      "size": 5398645
+    }
+  ]
+}

@@ -1,0 +1,492 @@
+{
+  "schema": "mindie-isolated-formal-upgrade-acceptance/1",
+  "platform": {
+    "system": "Darwin",
+    "macos": "27.0.1",
+    "machine": "arm64"
+  },
+  "scope": "Fresh isolated native profiles installed from previous formal source, then original ordinary updaters select published formal releases.",
+  "real_user_installations_modified": false,
+  "all_existing_users_auto_updated": false,
+  "system_password_prompt_used": false,
+  "plugins": {
+    "codex": {
+      "old_plugin": {
+        "version": "0.1.11",
+        "source_sha": "ee9860ffa472599577fa77af9e591d48f663f8fe"
+      },
+      "new_plugin": {
+        "version": "0.1.12",
+        "source_sha": "46a3401904b736fd7dd10a822b8d883be1252acf"
+      },
+      "actual_native_cli_version": "codex-cli 0.153.4",
+      "ordinary_original_updater": true,
+      "formal_release_selection_override": false,
+      "force": false,
+      "normal_dependency_resolver": true,
+      "seconds": 20.593,
+      "process_returncode": 0,
+      "status": "active",
+      "receipt": {},
+      "native_plugin_registration_verified": true,
+      "host_version_compatibility_accepted": true,
+      "installed_components_before": {
+        "remote-dev": {
+          "version": "0.10.8",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+              "requested_revision": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "6e921b205c00d592c25f849653cbfb72b73fe318",
+              "requested_revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "installed_components_after": {
+        "remote-dev": {
+          "version": "0.11.1",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+              "requested_revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "6e921b205c00d592c25f849653cbfb72b73fe318",
+              "requested_revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "upgraded_adapter_discovery": {
+        "tools": 23,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": false,
+        "seconds": 0.081,
+        "scope": "upgraded runtime adapter subprocess tools/list"
+      },
+      "existing_native_chat_loaded_new_catalog": false,
+      "model_turn_executed": false,
+      "old_install_catalog": "Original 0.1.11 catalog renderer used downloaded official old release metadata and the updater's supported selected-release catalog location."
+    },
+    "cc": {
+      "old_plugin": {
+        "version": "0.1.7",
+        "source_sha": "e1ab115627c632654dc3e9e6db9a056a20280589"
+      },
+      "new_plugin": {
+        "version": "0.1.8",
+        "source_sha": "41b57d0bceba5ebcc79e37d8a2f277dcef92eaff"
+      },
+      "actual_native_cli_version": "2.1.269 (Claude Code)",
+      "ordinary_original_updater": true,
+      "formal_release_selection_override": false,
+      "force": false,
+      "normal_dependency_resolver": true,
+      "seconds": 13.343,
+      "process_returncode": 0,
+      "status": "activated",
+      "receipt": {
+        "native_effect": "verified",
+        "activation_effect": "activated",
+        "installation_complete": true,
+        "harness_version": "2.1.269"
+      },
+      "native_plugin_registration_verified": true,
+      "host_version_compatibility_accepted": true,
+      "installed_components_before": {
+        "remote-dev": {
+          "version": "0.10.8",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+              "requested_revision": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "6e921b205c00d592c25f849653cbfb72b73fe318",
+              "requested_revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "installed_components_after": {
+        "remote-dev": {
+          "version": "0.11.1",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+              "requested_revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "6e921b205c00d592c25f849653cbfb72b73fe318",
+              "requested_revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "upgraded_adapter_discovery": {
+        "tools": 31,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": false,
+        "seconds": 0.102,
+        "scope": "upgraded runtime adapter subprocess tools/list"
+      },
+      "existing_native_chat_loaded_new_catalog": false,
+      "model_turn_executed": false
+    },
+    "kimi": {
+      "old_plugin": {
+        "version": "0.1.6",
+        "source_sha": "3813383c6b100294cb5ea4e9bd9d97a6ecfc1cae"
+      },
+      "new_plugin": {
+        "version": "0.1.7",
+        "source_sha": "9fcdc3206e98638bb157a73891558b822aa5ca27"
+      },
+      "actual_native_cli_version": "2.3.1",
+      "ordinary_original_updater": true,
+      "formal_release_selection_override": false,
+      "force": false,
+      "normal_dependency_resolver": true,
+      "seconds": 32.188,
+      "process_returncode": 0,
+      "status": "switched",
+      "receipt": {
+        "needs_host_reload": true
+      },
+      "native_plugin_registration_verified": true,
+      "host_version_compatibility_accepted": true,
+      "installed_components_before": {
+        "remote-dev": {
+          "version": "0.10.8",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+              "requested_revision": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.3",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "38a42f6f778cfa555d8918fdcacd12cee4a181f5",
+              "requested_revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "installed_components_after": {
+        "remote-dev": {
+          "version": "0.11.1",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+              "requested_revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "6e921b205c00d592c25f849653cbfb72b73fe318",
+              "requested_revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "upgraded_adapter_discovery": {
+        "tools": 30,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": true,
+        "seconds": 0.099,
+        "scope": "upgraded runtime adapter subprocess tools/list"
+      },
+      "existing_native_chat_loaded_new_catalog": false,
+      "model_turn_executed": false
+    },
+    "dsh": {
+      "old_plugin": {
+        "version": "0.1.5",
+        "source_sha": "670b776b675c0b6dd93faef289e6538135e1f0db"
+      },
+      "new_plugin": {
+        "version": "0.1.6",
+        "source_sha": "46b68bc1f1c7d04b9f782a774e1407b801204056"
+      },
+      "actual_native_cli_version": "0.2.0-rc.2",
+      "ordinary_original_updater": true,
+      "formal_release_selection_override": false,
+      "force": false,
+      "normal_dependency_resolver": true,
+      "seconds": 23.46,
+      "process_returncode": 0,
+      "status": "applied",
+      "receipt": {
+        "needs_host_reload": true,
+        "native_stage": "verified"
+      },
+      "native_plugin_registration_verified": true,
+      "host_version_compatibility_accepted": true,
+      "installed_components_before": {
+        "remote-dev": {
+          "version": "0.10.8",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+              "requested_revision": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.3",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "38a42f6f778cfa555d8918fdcacd12cee4a181f5",
+              "requested_revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "installed_components_after": {
+        "remote-dev": {
+          "version": "0.11.1",
+          "origin": {
+            "url": "https://github.com/mindie-agent/remote-dev",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+              "requested_revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+            }
+          }
+        },
+        "mindie-knowledge": {
+          "version": "0.13.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/knowledge",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "6e921b205c00d592c25f849653cbfb72b73fe318",
+              "requested_revision": "6e921b205c00d592c25f849653cbfb72b73fe318"
+            }
+          }
+        },
+        "mindie-diagnostics": {
+          "version": "0.5.4",
+          "origin": {
+            "url": "https://github.com/mindie-agent/diagnostics",
+            "vcs_info": {
+              "vcs": "git",
+              "commit_id": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+              "requested_revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e"
+            }
+          }
+        }
+      },
+      "upgraded_adapter_discovery": {
+        "tools": 23,
+        "has_remote_auth": true,
+        "password_env": true,
+        "plaintext_password": false,
+        "request_nonce": false,
+        "seconds": 0.141,
+        "scope": "upgraded runtime adapter subprocess tools/list"
+      },
+      "existing_native_chat_loaded_new_catalog": false,
+      "model_turn_executed": false,
+      "legacy_receipt_note": "Old 0.1.5 setup wrote stale 0.1.4 into its receipt. The original updater read native package 0.1.5; the new active binding correctly records 0.1.6."
+    }
+  },
+  "native_codex_cold_install_and_discovery": {
+    "source_sha": "46a3401904b736fd7dd10a822b8d883be1252acf",
+    "source_tree": "dd5bb2498941bea876300844a167b3a8886f0d6c",
+    "native_version": "codex-cli 0.153.4",
+    "seconds": 29.654,
+    "returncode": 0,
+    "model_turn": false,
+    "native_thread_mcp_discovery": true,
+    "expected_remote_source": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+    "actual_installed_remote": {
+      "version": "0.11.1",
+      "origin": {
+        "url": "https://github.com/mindie-agent/remote-dev",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1",
+          "requested_revision": "2a750ec8c74d7f053410d48dd820aeb542e7d3b1"
+        }
+      }
+    },
+    "tests_passed": 12,
+    "pytest_seconds": 28.93,
+    "remote_tools": 23,
+    "component_tools": 5
+  },
+  "retained_initial_failures": [
+    {
+      "plugin": "cc",
+      "seconds": 14.882,
+      "process_returncode": 0,
+      "semantic_status": "failed",
+      "native_effect": "verified",
+      "activation_effect": "not_started",
+      "active_remote_version": "0.10.8",
+      "cause": "Original controller compared aliased and canonical macOS temporary paths as strings.",
+      "resolution": "A fresh old installation and ordinary check used canonical HOME paths consistently; old code and failure receipt remained unchanged."
+    },
+    {
+      "plugin": "dsh",
+      "seconds": 23.957,
+      "process_returncode": 1,
+      "semantic_status": "failed",
+      "native_effect": "failed",
+      "active_remote_version": "0.10.8",
+      "cause": "Fixture HOME changed from alias to canonical path; pnpm rejected the changed store path with ERR_PNPM_UNEXPECTED_STORE.",
+      "resolution": "A fresh old installation and ordinary check used canonical HOME paths consistently; old code and failure receipt remained unchanged."
+    },
+    {
+      "plugin": "codex",
+      "seconds": 4.017,
+      "process_returncode": 0,
+      "semantic_status": "failed",
+      "stage": "native_install",
+      "active_remote_version": "0.10.8",
+      "cause": "The fixture registered a temporary source checkout as a custom local marketplace. The original updater only accepts the official Git source or its selected-release catalog.",
+      "resolution": "A fresh old installation used the original catalog renderer, downloaded official old release metadata, and native plugin installation from the exact official old source. The ordinary new-release check kept all official source and host-version checks enabled."
+    }
+  ]
+}

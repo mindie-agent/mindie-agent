@@ -1,0 +1,166 @@
+{
+  "schema": "mindie-codex-native-acceptance/1",
+  "verified_at": "2026-10-24T19:45:38.405618+00:00",
+  "plugin": {
+    "version": "0.1.8",
+    "commit": "543fa3014d47c4327be7eff74f89bcc128870666",
+    "release": "https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.8",
+    "formal_release": true,
+    "wheel_files_match_tag_and_installed_runtime": 71,
+    "artifact_digests_match": true,
+    "benchmark_release_gate": true
+  },
+  "host": {
+    "name": "Codex Desktop native CLI",
+    "version": "0.164.0-alpha.11.1",
+    "os": "Darwin",
+    "architecture": "arm64"
+  },
+  "discovery": {
+    "api": "mcpServerStatus/list",
+    "knowledge_server_present": false,
+    "knowledge_tool_descriptor_count": 0,
+    "remote_dev_tool_count": 11,
+    "component_tool_count": 5,
+    "npu_top_tool_count": 0,
+    "knowledge_active_before": false,
+    "knowledge_active_after": false
+  },
+  "update": {
+    "initial_version": "0.1.6",
+    "initial_unassisted_upgrade": "failed",
+    "failure_stage": "hook trust migration before runtime activation",
+    "failure_cause": "old updater hardcoded knowledge/remote interrupt targets",
+    "recovery": "verified formal 0.1.8 updater resumed prepared 0.1.7, then installed and activated 0.1.8",
+    "native_hooks_trusted": 5,
+    "scheduled_check": {
+      "forced": false,
+      "timestamps_modified": false,
+      "checked_at": 1792870589.8523352,
+      "status": "up_to_date",
+      "selected_version": "0.1.8",
+      "components": "up_to_date"
+    }
+  },
+  "native_sessions": [
+    {
+      "sandbox": "workspace-write",
+      "knowledge_active_after": false,
+      "manual_entry_invoked": false,
+      "elapsed_seconds": 83.13219690322876,
+      "reasoning_effort": "low"
+    },
+    {
+      "sandbox": "danger-full-access",
+      "knowledge_active_after": false,
+      "manual_entry_invoked": false,
+      "elapsed_seconds": 36.18683123588562,
+      "reasoning_effort": "low"
+    }
+  ],
+  "successful_mcp_calls": [
+    {
+      "tool": "profiler",
+      "exit_code": 0,
+      "workload": "repository capture inventory fixture",
+      "rank_count": 1,
+      "files": [
+        "kernel_details.csv"
+      ]
+    },
+    {
+      "tool": "sim",
+      "exit_code": 0,
+      "workload": "Ascend910B4.ini hardware metadata",
+      "status": "runtime_unverified",
+      "runtime_hbm_verified": false
+    },
+    {
+      "tool": "coordinator",
+      "exit_code": 0,
+      "workload": "isolated local host inventory",
+      "outcome": "success",
+      "machine_count": 0
+    },
+    {
+      "tool": "diagnostics_status",
+      "exit_code": 0,
+      "status": "configured",
+      "existing_worker_healthy": true
+    },
+    {
+      "tool": "diagnostics_bundle",
+      "exit_code": 0,
+      "workload": "empty owned local input directory",
+      "event_count": 0,
+      "redaction_gaps": [
+        "events_missing"
+      ],
+      "content_sha256": "698d0801019c3b9df9f961c718c2c9987ba27dd9a034c30aca910ea0b1bd860d"
+    },
+    {
+      "tool": "remote_read",
+      "outcome": "success",
+      "status": "ok",
+      "workload": "read /etc/os-release on standing A3 host",
+      "observed_os": "openEuler 22.03 (LTS-SP4)",
+      "file_sha256": "9f351952dd64ac0e618aca1e824fb5e2a16deee3f64efced5e710f6bbed39766"
+    }
+  ],
+  "retained_unsuccessful_attempts": [
+    {
+      "kind": "controller_timeout",
+      "seconds": 90,
+      "outcome": "unknown",
+      "limitation": "controller failed to save partial native stdout; not counted as acceptance"
+    },
+    {
+      "kind": "no_calls",
+      "outcome": "not_validated",
+      "limitation": "over-restrictive test prompt produced only a model summary; not counted as tool evidence"
+    },
+    {
+      "kind": "native_approval_policy",
+      "sandbox": "workspace-write",
+      "outcome": "not_started",
+      "calls": [
+        {
+          "tool": "profiler",
+          "status": "failed",
+          "error": {
+            "message": "MCP tool call requires approval, but approval policy is never"
+          }
+        },
+        {
+          "tool": "sim",
+          "status": "failed",
+          "error": {
+            "message": "MCP tool call requires approval, but approval policy is never"
+          }
+        },
+        {
+          "tool": "coordinator",
+          "status": "failed",
+          "error": {
+            "message": "MCP tool call requires approval, but approval policy is never"
+          }
+        }
+      ],
+      "resolution": "three read-only calls verified in a new native session with the already-authorized danger-full-access policy"
+    }
+  ],
+  "scope": {
+    "knowledge_entry_invoked": false,
+    "model_weights_loaded": false,
+    "npu_workloads_launched": false,
+    "npu_performance_verified": false,
+    "all_component_subcommands_verified": false,
+    "other_harnesses_verified": false
+  },
+  "raw_local_receipt_sha256": {
+    "native-after.json": "0e60f07ceb03b49b247786ecb1d2e5cb2555756df12ad1df11c82a254e38327c",
+    "native-turn-verified.jsonl": "9b8a94b68ef4fef62b4045044226855f62688d9255f3a32ceb837866d711d319",
+    "native-turn-remaining.jsonl": "595f3c2788fe9d7933dfba729d4a88c348ac1cd321bbc16e67ff42ed75ebbba3",
+    "automatic-check.json": "3e1cca5bb097debc91c18e22f59a677996c5abedbf5fea27fa5c8b5a37ad0f83"
+  }
+}

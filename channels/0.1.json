@@ -1,0 +1,444 @@
+{
+  "schema": "mindie-release-channel/1",
+  "schema_version": "mindie-release-channel/1",
+  "track": "0.1",
+  "milestone_version": "0.1.0",
+  "current_patch_version": "0.1.12",
+  "release_notes": "docs/releases/0.1.12.md",
+  "release_notes_en": "docs/releases/0.1.12.en.md",
+  "independent_update_allowed": true,
+  "update_policy": {
+    "independent_update_allowed": true,
+    "require_plugin_republish_on_component_patch": false,
+    "implementation_status": {
+      "verified_mechanism": "channels/0.1.json records the product-verified 15-repository + 9-corpus combination for release pipeline gating and audit provenance; clients do not download channels/0.1.json to select updates. Host plugins select compatible plugin Releases via harness-compatibility.json, and discover formal GitHub Releases across the 9 runtime/evaluation components directly from each official repository using monotonic max(installed, baseline, latest) selection without downgrades, dereferenced tag SHA + pyproject.toml + benchmark-results.json (release_gate) verification, side-by-side uv override runtime builds from exact Git SHAs, model-free API probes, and idle cutover while preserving native host payloads and without activating knowledge or capture (Codex/CC reuse a cancellable 300s check inside the MCP server process; Kimi runs a 300s launchd/schtasks job switching current.json; DSH runs a host-scoped idle timer mounting ./host3.mjs + remote-dev from the canonical adapter binding in config.json, with current.json only as a legacy seed fallback; Antigravity mounts plugins/mindie-agent with stdio MCP servers mindie-remote-dev and mindie-tools plus private knowledge_cli.py; Tencent WorkBuddy mounts plugins/mindie-agent as both a WorkBuddy Connector and a CodeBuddy native plugin).",
+      "known_boundaries": "The 0.1.12 channel pins verified releases across the 9 shared runtime/evaluation components (knowledge 0.13.14, remote-dev 0.11.6, profiler 0.5.6, sim 0.9.4, coordinator 0.7.5, npu-top 0.3.1, diagnostics 0.5.8, debugger 0.1.0, mindie-bench 0.4.6), 6 native host plugins (Codex 0.1.21, Claude Code 0.1.17, Kimi 0.1.17, DSH 0.1.16, Google Antigravity 0.1.8, Tencent WorkBuddy 0.1.8), and 9 public domain corpora. All six host plugins expose the remote NPU and deterministic component/debugging tools (diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top) alongside session-gated knowledge retrieval and unified single-state RSI loop/ledger (rsi_loop / experiment_ledger) and reuse shared user-private SSH authentication from remote-dev. Independent runtime component updates discover newer formal GitHub Releases directly from each official repository; already-loaded tool definitions in running host processes take effect on natural host reload or a fresh session. Installed-state automatic update acceptance is recorded in docs/releases/0.1.4/automatic-update-acceptance.json, cross-platform SSH authentication acceptance in docs/releases/0.1.2/ssh-auth-acceptance.json, and historical 0.1.0 benchmark re-evaluation under hardened behavioral oracles in docs/audits/2026-10-23-mindie-bench-integrity.md. See docs/release-compatibility-and-update.md for full update and reload boundaries."
+    }
+  },
+  "corpora": {
+    "knowledge-infer-core": {
+      "repository": "mindie-agent/knowledge-infer-core",
+      "commit": "f0d8e7cf3edf41399395f41fd5a42e7b37847264",
+      "units": 105
+    },
+    "knowledge-operators": {
+      "repository": "mindie-agent/knowledge-operators",
+      "commit": "0d2aa4b5387cf3f8d5c46a0703b43dd0adda9c4c",
+      "units": 103
+    },
+    "knowledge-vllm-ascend": {
+      "repository": "mindie-agent/knowledge-vllm-ascend",
+      "commit": "911ed567a1011e6ee6578f008c522bde4ac55b4e",
+      "units": 97
+    },
+    "knowledge-xllm": {
+      "repository": "mindie-agent/knowledge-xllm",
+      "commit": "23b7b0636cfb050ee88e339ecd69aea6f95cae30",
+      "units": 24
+    },
+    "knowledge-mindie-sd": {
+      "repository": "mindie-agent/knowledge-mindie-sd",
+      "commit": "c23ba64ab6c210da5ff34d1f5cdb27eb8e81154e",
+      "units": 24
+    },
+    "knowledge-infer-distributed": {
+      "repository": "mindie-agent/knowledge-infer-distributed",
+      "commit": "817d48cbf5dae80d607292d486cc07b30c405aa6",
+      "units": 39
+    },
+    "knowledge-infer-observability": {
+      "repository": "mindie-agent/knowledge-infer-observability",
+      "commit": "4b3dd86b365c9e588a1eb47df7dcc6437fdf8a89",
+      "units": 39
+    },
+    "knowledge-infer-ops-compat": {
+      "repository": "mindie-agent/knowledge-infer-ops-compat",
+      "commit": "c37c9c0f559a27c63948aabc1f5b092de54b8c78",
+      "units": 34
+    },
+    "knowledge-agent-engineering": {
+      "repository": "mindie-agent/knowledge-agent-engineering",
+      "commit": "3cf3f10c2c35b801d06b7f410ce2d105e1f31ff1",
+      "units": 32
+    }
+  },
+  "components": {
+    "diagnostics": {
+      "name": "diagnostics",
+      "role": "shared_component",
+      "repository": "mindie-agent/diagnostics",
+      "package": "mindie-diagnostics",
+      "version": "0.5.8",
+      "tag": "v0.5.8",
+      "commit": "40ce12019354c26ef9006c0d4abc6ffade96afbd",
+      "revision": "40ce12019354c26ef9006c0d4abc6ffade96afbd",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "debugger": {
+      "name": "debugger",
+      "role": "shared_component",
+      "repository": "mindie-agent/debugger",
+      "package": "mindie-debugger",
+      "version": "0.1.0",
+      "tag": "v0.1.0",
+      "commit": "e9406b2b178335190d5cb59dff4d6985894497ba",
+      "revision": "e9406b2b178335190d5cb59dff4d6985894497ba",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "profiler": {
+      "name": "profiler",
+      "role": "shared_component",
+      "repository": "mindie-agent/profiler",
+      "package": "mindie-profiler",
+      "version": "0.5.6",
+      "tag": "v0.5.6",
+      "commit": "79d97e75bff7351b0472b93c03b072c1cf47f5e7",
+      "revision": "79d97e75bff7351b0472b93c03b072c1cf47f5e7",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "sim": {
+      "name": "sim",
+      "role": "shared_component",
+      "repository": "mindie-agent/sim",
+      "package": "mindie-sim",
+      "version": "0.9.4",
+      "tag": "v0.9.4",
+      "commit": "6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66",
+      "revision": "6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "npu-top": {
+      "name": "npu-top",
+      "role": "shared_component",
+      "repository": "mindie-agent/npu-top",
+      "package": "npu-top",
+      "version": "0.3.1",
+      "tag": "v0.3.1",
+      "commit": "8f0cb3ec66393812e90e118cd73704070c6027a2",
+      "revision": "8f0cb3ec66393812e90e118cd73704070c6027a2",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "remote-dev": {
+      "name": "remote-dev",
+      "role": "shared_component",
+      "repository": "mindie-agent/remote-dev",
+      "package": "remote-dev",
+      "version": "0.11.6",
+      "tag": "v0.11.6",
+      "commit": "991ef7863b2b208f94f54a29db4ac5be50884ea3",
+      "revision": "991ef7863b2b208f94f54a29db4ac5be50884ea3",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "knowledge": {
+      "name": "knowledge",
+      "role": "shared_component",
+      "repository": "mindie-agent/knowledge",
+      "package": "mindie-knowledge",
+      "version": "0.13.14",
+      "tag": "v0.13.14",
+      "commit": "ac4a89e993c89deba5a4a629e1cd89d61e57c843",
+      "revision": "ac4a89e993c89deba5a4a629e1cd89d61e57c843",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "coordinator": {
+      "name": "coordinator",
+      "role": "shared_component",
+      "repository": "mindie-agent/coordinator",
+      "package": "mindie-coordinator",
+      "version": "0.7.5",
+      "tag": "v0.7.5",
+      "commit": "819b0deb7bea994d4dff9c009200a48dd9300cc4",
+      "revision": "819b0deb7bea994d4dff9c009200a48dd9300cc4",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-codex": {
+      "name": "mindie-agent-codex",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-codex",
+      "package": "mindie-agent-codex",
+      "version": "0.1.21",
+      "tag": "v0.1.21",
+      "commit": "b77035bdd3ca1de0d7ac41c6a5d654205a3136bd",
+      "revision": "b77035bdd3ca1de0d7ac41c6a5d654205a3136bd",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-cc": {
+      "name": "mindie-agent-cc",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-cc",
+      "package": "mindie-agent-cc",
+      "version": "0.1.17",
+      "tag": "v0.1.17",
+      "commit": "dc2ab3558fee8b22cdc111d8bdebec1472619f9a",
+      "revision": "dc2ab3558fee8b22cdc111d8bdebec1472619f9a",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-kimi": {
+      "name": "mindie-agent-kimi",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-kimi",
+      "package": "mindie-agent-kimi",
+      "version": "0.1.17",
+      "tag": "v0.1.17",
+      "commit": "ce0589d8a6a07cca66a23677b2cd77bb8ee8cb50",
+      "revision": "ce0589d8a6a07cca66a23677b2cd77bb8ee8cb50",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-dsh": {
+      "name": "mindie-agent-dsh",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-dsh",
+      "package": "mindie-agent-dsh",
+      "version": "0.1.16",
+      "tag": "v0.1.16",
+      "commit": "bf02b5938623a00461e2db0c8119b3a95a4be937",
+      "revision": "bf02b5938623a00461e2db0c8119b3a95a4be937",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-agy": {
+      "name": "mindie-agent-agy",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-agy",
+      "package": "mindie-agent-agy",
+      "version": "0.1.8",
+      "tag": "v0.1.8",
+      "commit": "ed3d756e5460b0b57e4d1679c171b3f5f1256230",
+      "revision": "ed3d756e5460b0b57e4d1679c171b3f5f1256230",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-agent-wb": {
+      "name": "mindie-agent-wb",
+      "role": "harness_plugin",
+      "repository": "mindie-agent/mindie-agent-wb",
+      "package": "mindie-agent-wb",
+      "version": "0.1.8",
+      "tag": "v0.1.8",
+      "commit": "4bde6b66c9e490ddcb6add0220b2b8ab9a07ad8e",
+      "revision": "4bde6b66c9e490ddcb6add0220b2b8ab9a07ad8e",
+      "runner_revision": "484b80621aaf9293c559786d0ef2174c79a0dbb4",
+      "independent_update_allowed": true
+    },
+    "mindie-bench": {
+      "name": "mindie-bench",
+      "role": "evaluation_runner",
+      "repository": "mindie-agent/mindie-bench",
+      "package": "mindie-bench",
+      "version": "0.4.6",
+      "tag": "v0.4.6",
+      "commit": "c7d0c8a4969b3816925c0405931ae17e28ce7a34",
+      "revision": "c7d0c8a4969b3816925c0405931ae17e28ce7a34",
+      "runner_revision": "c7d0c8a4969b3816925c0405931ae17e28ce7a34",
+      "component_gate_runner_revision": "c7d0c8a4969b3816925c0405931ae17e28ce7a34",
+      "independent_update_allowed": true
+    }
+  },
+  "patch_releases": [
+    {
+      "patch_version": "0.1.0",
+      "type": "milestone",
+      "updated_components": [
+        "diagnostics",
+        "profiler",
+        "sim",
+        "npu-top",
+        "remote-dev",
+        "knowledge",
+        "coordinator",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-bench"
+      ],
+      "plugin_republish_required": false,
+      "summary": "Initial 0.1.0 milestone baseline and Release Channel Manifest contract (channels/0.1.json). All 4 host plugins (v0.1.0) verify locked plugin-release auto-updates; direct runtime consumption of channels/0.1.json for in-place 0.1.x single-component hotfixes is the 0.1.x target architecture."
+    },
+    {
+      "patch_version": "0.1.1",
+      "type": "hotfix",
+      "updated_components": [
+        "diagnostics",
+        "sim",
+        "remote-dev",
+        "knowledge",
+        "coordinator",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-bench"
+      ],
+      "plugin_republish_required": true,
+      "summary": "0.1.1 maintenance patch: formal component releases for knowledge v0.13.3 (38a42f6f778cfa555d8918fdcacd12cee4a181f5; per-session manual /mindie-agent gate, whole-delivery token budget estimation, deduplicated delivery receipts, and direct GitHub Release component update discovery/runtime build), remote-dev v0.10.6 (0463a13fce9618ec9a51904869d61acb0cdb8538; primary SSH exception preservation with cleanup_error and dual-Die A3 / measured free HBM normalization), diagnostics v0.5.2 (801a01b2789aed7f58e971a909205a7d40b61077; cooperative JSONL record-boundary intake drain and offline stage-admission budget), sim v0.7.1 (15f93f3f0247b2653d0e9441eae56959e4d16d4e; profiled_kernel cost plans with captured median duration floors), coordinator v0.6.3 (0ec71fb947ab24df8e543dcf056f4f06664baad8; preparation job refresh, factual A5/A3 HBM telemetry, and host-capacity placement admission), and mindie-bench v0.4.4 (a36d8a5ae8633e560d19fee231179c3680149109; behavior-executed verifiers for 6 tasks, strategy-selection continuation isolation, release-kind=patch collector gate, and HTTP/1.1 chunked settlement close-race fix), reusing profiler v0.5.0 and npu-top v0.2.1; formal v0.1.2 releases across all four native host plugins (Codex 0b3c690b95401631782a656d99f2b4487582636a, CC edabca82e02fb313d734c699e75735095effebfd, Kimi 7aecfd22857c313b52d6fe5923292f297884fec0, DSH a38f1cb191f625905aace734e20a2ad196624b60) verified on macOS arm64 for exploration pass-through, session gating, and independent component updates (docs/releases/0.1.1/native-update-acceptance.json), plus the offline CPU engineering reproduction and G5 dev pilot report (docs/releases/0.1.1/benchmark-pilot.md)."
+    },
+    {
+      "patch_version": "0.1.2",
+      "type": "hotfix",
+      "updated_components": [
+        "diagnostics",
+        "remote-dev",
+        "coordinator",
+        "npu-top",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh"
+      ],
+      "plugin_republish_required": true,
+      "summary": "Shared SSH authentication in remote-dev 0.11.1 provides one-time password enrollment, public-key installation and recovery, cross-process/chat/plugin reuse, read-only monitor password fallback, and Git for Windows 2.56 SSH discovery. coordinator 0.7.0 and npu-top 0.3.0 reuse the same store. Codex 0.1.12, Claude Code 0.1.8, Kimi 0.1.7 and DSH 0.1.6 expose remote_auth and pin formal remote-dev 0.11.1; diagnostics aligns to existing formal 0.5.4. Nineteen real SSH tests across macOS, native PowerShell and actual WSL2 pass. Formal assets and source-bound benchmarks are verified; plugin initial baselines, isolated previous-formal updater acceptance and native catalog reload boundaries are recorded separately. The remaining component and seven corpus pins are preserved; historical value results are not relabeled."
+    },
+    {
+      "patch_version": "0.1.3",
+      "type": "hotfix",
+      "updated_components": [
+        "profiler",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh"
+      ],
+      "plugin_republish_required": true,
+      "summary": "profiler 0.5.1 (25c789cd42389c893234c5db20eca67e63b8878a) adds streaming native-library SHA256 digest checks, >=3s SQLite busy_timeout alignment, explicit TimeoutError propagation, and root CLI help/unknown-command diagnostics. Claude Code 0.1.9 (4f3450be4af65e0ee755d4d979695f3f6c5bca5e), Kimi 0.1.8 (c33006cc2a89ad0024396cdf838b1bfd6d6b7f35), and DSH 0.1.7 (223eedee381d06cbdbb096dc22e2d79dd5aa0cf2) complete native MCP registration across knowledge, remote, and components / mindie-tools (exposing diagnostics_status, diagnostics_bundle, coordinator, profiler, and sim with 660000ms outer tool timeouts) alongside Codex 0.1.12 and shared SSH authentication from remote-dev 0.11.1."
+    },
+    {
+      "patch_version": "0.1.4",
+      "type": "hotfix",
+      "updated_components": [
+        "knowledge",
+        "mindie-bench",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh"
+      ],
+      "plugin_republish_required": true,
+      "summary": "Knowledge 0.13.7 and four native plugin releases enable information-gap retrieval, shared explanation budgets, exact prerequisite revisions, and updates for managed Python module bindings. Installed-state acceptance exposed and fixed the legacy Kimi bootstrap-baseline regression and a DSH output-budget race. Codex adds verified native CLI 0.165.0-alpha.1.2 compatibility. mindie-bench 0.4.5 preserves missing knowledge observations and fixes native temporary-file placement. Historical simple-task cost signals and failed complex-task non-regression remain separately documented; automatic upgrades, one-time recovery of the damaged Kimi installation, and host reload evidence are recorded in docs/releases/0.1.4/automatic-update-acceptance.json."
+    },
+    {
+      "patch_version": "0.1.5",
+      "type": "hotfix",
+      "updated_components": [
+        "remote-dev",
+        "profiler",
+        "sim",
+        "knowledge",
+        "coordinator",
+        "mindie-agent-agy"
+      ],
+      "plugin_republish_required": false,
+      "summary": "0.1.5 ecosystem expansion and full G0-G5 benchmark verification: introduces mindie-agent-agy v0.1.0 (4f1fb18aeeb264fe1dbcf7342f38c53980438fa7) as the fifth official native host plugin (Google Antigravity), integrating all 7 shared runtime components (mindie-knowledge 0.13.7, remote-dev 0.11.2, mindie-coordinator 0.7.0, mindie-profiler 0.5.3, mindie-sim 0.8.1, npu-top 0.3.0, mindie-diagnostics 0.5.4) with native Antigravity tool aliases, per-conversationId /mindie-agent session leases, AGY_CONVERSATION_ID coordinator propagation, and brain transcript redaction. Synchronizes formal component pins (remote-dev 0.11.2, profiler 0.5.3, sim 0.8.1) and completes the zero-spoiler colloquial-prompt G0-G5 end-to-end benchmark across DSH (deepseek-flash, max) and Codex (gpt-6.1-sol, xhigh): L2 48-trial matrix lifts pass rate 4.0x from 12.5% (2/16, G0/G1) to 50.0% (8/16, G2) with 21.2%-47.1% latency reductions, G3 cross-task flywheel achieves 0.0->1.0 on DSH Partial RoPE and -58.5% to -63.4% tool calls / -19.8% wall time on Codex SFA MTP, G4 RSI exploration achieves 0.0->1.0 (-27.8%) on dsv4-sparse-mla and -30.9% speedup on triton-spatial-norm, and G5 5-episode evolution (82->83->84 units) verifies zero regression with -19.8% faster execution."
+    },
+    {
+      "patch_version": "0.1.6",
+      "type": "hotfix",
+      "updated_components": [
+        "profiler",
+        "sim",
+        "knowledge",
+        "coordinator",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-agent-agy"
+      ],
+      "plugin_republish_required": true,
+      "summary": "0.1.6 automatic-update readiness, Wave 5 multi-chip calibration & 5-host compatibility patch: mindie-knowledge 0.13.8 (9a4325858e6fadb10715275826a7795843cbbdf4) adds automatic unit revision advancement in build_routing_index(), base_revision semantic revision monotonicity enforcement in publication_check.py, monotonic revision repair tolerance in GradedRepository.install_feed(), and antigravity/dsh release-metadata support; mindie-coordinator 0.7.1 (d146c55c414bfb92136cf5fb7fa11ae14c673ef0) adds native Antigravity (agy/antigravity) and AGY_CONVERSATION_ID session discovery; mindie-sim 0.9.1 (0add847c4a2132a7cbdaef9c3de81285568eb92e) adds async_scheduling HBM delayed-release modeling, Case composer, Wave 5 catalog, topology/PD Pareto solvers, and skew barrier mechanics; mindie-profiler 0.5.5 (7cdd56b6cc9e0e7f603368393497487dd2dbfe39) adds AddRmsNormQuant/SparseFlashMla/DP-partner prefill segmentation and 1,653/1,653 <=10% Wave 5 A2/A3/A5 in-sample regime calibration; all 7 graded knowledge-* corpora advance validator.revision to 0.13.8 with monotonic unit revisions; and all 5 host plugins (Codex 0.1.16 with Desktop codex-cli 0.166.0-alpha.5.1 support, Claude Code 0.1.12, Kimi 0.1.12, DSH 0.1.11, Antigravity 0.1.2) synchronize component pins, MCP tool descriptions, enterprise-network/Windows/LF install hardening, and pre-release auto-update readiness gates."
+    },
+    {
+      "patch_version": "0.1.7",
+      "type": "hotfix",
+      "updated_components": [
+        "diagnostics",
+        "debugger",
+        "profiler",
+        "sim",
+        "npu-top",
+        "remote-dev",
+        "knowledge",
+        "coordinator",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-agent-agy",
+        "mindie-agent-wb",
+        "mindie-bench"
+      ],
+      "plugin_republish_required": true,
+      "summary": "0.1.7 ecosystem expansion with Tencent WorkBuddy native plugin, standalone mindie-debugger component, configurable mindie-sim modeling, 9-corpus coverage & V2 34-task 144-trial vllm-ascend G0-G5 benchmark verification: introduces mindie-agent-wb 0.1.2 (0651ff49d42733e3355e3832643c266868ed6f78) as the sixth official native host plugin (Tencent WorkBuddy / CodeBuddy Agent CLI); launches mindie-debugger 0.1.0 (e9406b2b178335190d5cb59dff4d6985894497ba) as the eighth shared runtime component for target Ascend NPU fault triage (npu_fault_triage), 3-primitive precision & memory-stomp localization (precision), and ACLGraph static-graph replay dumping/guards (aclgraph); publishes mindie-knowledge 0.13.10 (7936a4fda67f6808d8fa73824363a4d7345766e5), mindie-coordinator 0.7.3 (79a8b28eef72d57f965a01c6660849f024fbb1c0), mindie-sim 0.9.3 (dbadff04b60937a0722b0a227cdad01beed083cd), mindie-profiler 0.5.6 (79d97e75bff7351b0472b93c03b072c1cf47f5e7), remote-dev 0.11.4 (7c67876d716feb3949e4dbf33eb5e06980ff0d36), npu-top 0.3.1 (8f0cb3ec66393812e90e118cd73704070c6027a2), mindie-diagnostics 0.5.5 (f2f2f946c172afc99342a84c0c1ed244f6d44e01), and mindie-bench 0.4.6 (c7d0c8a4969b3816925c0405931ae17e28ce7a34); updates all six native host plugins (Codex 0.1.17, Claude Code 0.1.13, Kimi 0.1.13, DSH 0.1.12, Antigravity 0.1.3, WorkBuddy 0.1.2) with forward-compatible host intervals; expands public domain knowledge to 9 corpora (adding knowledge-xllm and knowledge-mindie-sd and advancing knowledge-vllm-ascend to 93 units); and archives the V2 100% real vllm-ascend 8-component G0-G5 benchmark across 34 tasks and 144 trials (docs/releases/0.1.7/g0-g5-vllm-ascend-v2-report.md & g0-g5-vllm-ascend-v2-summary.json)."
+    },
+    {
+      "patch_version": "0.1.8",
+      "type": "hotfix",
+      "updated_components": [
+        "knowledge",
+        "sim",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-agent-agy",
+        "mindie-agent-wb"
+      ],
+      "plugin_republish_required": false,
+      "summary": "0.1.8 unified single-state RSI loop/ledger, higher graded retrieval budgets & 6-host verification patch: mindie-knowledge 0.13.13 (3c478a19b5542b38520c7f98b87a07f37e305021) consolidates ExperimentLedger as the single authoritative RSI state store, simplifies RSILoopEngine to the three orient/propose/verdict primitives with superseded-baseline reconciliation and round-order preservation, surfaces active_rsi_session directly in explore responses, raises default graded retrieval token budgets (explore 24000, query 8000, explain 16000, ceiling 64000), and retires stale state=replaced service owners and launch records during service replace (mindie-agent-codex#85); mindie-sim 0.9.4 (6f1d5a871a7b1ef20ff7a8cab33aaf4637fb3f66) completes full-fleet HF native config field coverage (layer_types heterogeneous KV cache sizing, routed_scaling_factor, LongCat/MiniMax-M3/Bailing-V3) and index_pool tail-row calibration; all six native host plugins (Codex 0.1.20, Claude Code 0.1.16, Kimi 0.1.16, DSH 0.1.15, Antigravity 0.1.6, WorkBuddy 0.1.5) unify their RSI loop/ledger MCP/CLI tools onto mindie-knowledge 0.13.11 and pass end-to-end real-task G4 benchmark verification (6/6 hosts reward = 1.0)."
+    },
+    {
+      "patch_version": "0.1.9",
+      "type": "hotfix",
+      "updated_components": [
+        "remote-dev",
+        "coordinator",
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-agent-agy",
+        "mindie-agent-wb"
+      ],
+      "plugin_republish_required": true,
+      "summary": "0.1.9 first-time SSH access and task continuity patch: remote-dev 0.11.6 accepts ephemeral passwords through the public MCP setup contract and preserves verified authentication after local recording errors; coordinator 0.7.5 does not register unsaved authentication profiles; six native plugins preserve independent authorized work, truthful outcomes and MCP connectivity, with Antigravity one-shot task identity enforcement. Two independent Astra max reviews, real isolated SSH acceptance and exact-tag release benchmarks define the validation scope. Product publication failed before creating a formal Release because the benchmark manifest was absent; its immutable tag is retained.",
+      "status": "failed_unpublished"
+    },
+    {
+      "patch_version": "0.1.10",
+      "type": "hotfix",
+      "updated_components": [],
+      "plugin_republish_required": false,
+      "summary": "0.1.10 publishes the already verified SSH authentication and task continuity combination after the unpublished 0.1.9 product candidate. Adds the exact 15-repository benchmark manifest and checks publication inputs before tagging. Runtime releases and their original benchmark identities are reused unchanged."
+    },
+    {
+      "patch_version": "0.1.11",
+      "type": "hotfix",
+      "updated_components": [
+        "mindie-agent-agy",
+        "mindie-agent-wb"
+      ],
+      "plugin_republish_required": true,
+      "summary": "Preserve active interpreter and retained payload pairing during AGY/WB native updates. Prepare compatible components and publish immutable payload generations before activation; failures retain the existing task entry and configuration."
+    },
+    {
+      "patch_version": "0.1.12",
+      "type": "hotfix",
+      "updated_components": [
+        "diagnostics",
+        "knowledge"
+      ],
+      "plugin_republish_required": false,
+      "summary": "Validate real PE GUI launchers before Windows knowledge/diagnostics task registration and recovered starts; preserve venv identity and stop/receipt semantics. Hide experiment-ledger Git subprocesses. Record real interactive Windows service acceptance and exact-source formal component benchmarks."
+    }
+  ]
+}

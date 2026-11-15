@@ -1,0 +1,99 @@
+{
+  "schema": "mindie-task-continuity-release-acceptance/1",
+  "product_version": "0.1.11",
+  "verified_at": "2026-11-06T05:42:37.777165+00:00",
+  "scope": {
+    "public_release_assets": true,
+    "model_requests": 0,
+    "npu_workloads": 0,
+    "user_host_bindings_modified": false,
+    "running_host_catalog_reload_verified": false
+  },
+  "releases": {
+    "mindie-agent-agy": {
+      "version": "0.1.8",
+      "revision": "ed3d756e5460b0b57e4d1679c171b3f5f1256230",
+      "url": "https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.8",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "archive_matches_reviewed_sources": [
+        "pyproject.toml",
+        "uv.lock",
+        "product-contract.json",
+        "plugins/mindie-agent/plugin.json",
+        "plugins/mindie-agent/scripts/mcp_server.py",
+        "plugins/mindie-agent/scripts/mindie_launch.py",
+        "plugins/mindie-agent/scripts/setup.py",
+        "plugins/mindie-agent/scripts/component_update.py"
+      ],
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "71d09eb5e87f35eb8b7766c34d1e62e4dff5de16adc7956d3adb059ec0713c6c",
+        "benchmark-results.json": "893191005a175e74b777285f4e8e6049b64a4fb5a371a99aed2b2f914d05c9c0",
+        "benchmark-results.md": "8d9203ab37990d8ab646f3cbffd51ae55128f71e2aa3af6fe8edf61e00079581",
+        "mindie-agent-agy-0.1.8.tar.gz": "4d508cd13d17a23cf362487da3eb181a985fbd5a7e39b038b14f14db95bb0a33",
+        "release-notes.md": "1dac98d6183a32673438cc3c6ff3c679a3ea80e6df7d3d713988e4b1129f4b6b"
+      }
+    },
+    "mindie-agent-wb": {
+      "version": "0.1.8",
+      "revision": "4bde6b66c9e490ddcb6add0220b2b8ab9a07ad8e",
+      "url": "https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.8",
+      "tag_verified": true,
+      "all_asset_sha256_verified": true,
+      "clean_source_benchmark": true,
+      "archive_matches_reviewed_sources": [
+        "pyproject.toml",
+        "uv.lock",
+        "product-contract.json",
+        "plugins/mindie-agent/plugin.json",
+        "plugins/mindie-agent/scripts/mcp_server.py",
+        "plugins/mindie-agent/scripts/mindie_launch.py",
+        "plugins/mindie-agent/scripts/setup.py",
+        "plugins/mindie-agent/scripts/component_update.py",
+        ".codebuddy-plugin/marketplace.json"
+      ],
+      "asset_sha256": {
+        "benchmark-SHA256SUMS": "b48fb784876cb5441671a67b5378e7243c99199412e70d2954fbcecf68a655d9",
+        "benchmark-results.json": "11a4fda96daf7dab1460a450463715dc86d853544d30618d665cd6b15aa6499e",
+        "benchmark-results.md": "d2b993df6bd0288b58e828ce35062a4b85d5a59db9edcd15b8d3f31e20a366f3",
+        "mindie-agent-wb-0.1.8.tar.gz": "8ee51c2ed15b419123985a69bdb3f068d01214a3c7cbf63d9de98074e0ab3018",
+        "release-notes.md": "ac2b1c34d87877a6fabdeb94b516e22ac579a433e8d652d5f779279713845090"
+      }
+    }
+  },
+  "reused_release_acceptance": "../0.1.10/task-continuity-release-acceptance.json",
+  "independent_review": {
+    "model": "gpt-6-astra",
+    "reasoning_effort": "max",
+    "open_p0_p1": 0,
+    "checks": [
+      "real old setup and native payload replacement",
+      "interrupted copy preserves active pair",
+      "immutable generation reuse",
+      "same old MCP process across profile activation"
+    ]
+  },
+  "real_old_component_upgrade": {
+    "agy": {
+      "passed": 1,
+      "seconds": 55.3
+    },
+    "wb": {
+      "passed": 1,
+      "seconds": 44.92
+    },
+    "old_remote_version": "0.11.5",
+    "new_remote_version": "0.11.6",
+    "isolated": true
+  },
+  "ci": {
+    "agy": "https://github.com/mindie-agent/mindie-agent-agy/actions/runs/42169441633",
+    "wb": "https://github.com/mindie-agent/mindie-agent-wb/actions/runs/42169515249",
+    "platforms": [
+      "linux",
+      "windows"
+    ],
+    "result": "passed"
+  }
+}

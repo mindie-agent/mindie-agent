@@ -1,0 +1,98 @@
+{
+  "comparability": "Repeated component value scenarios executed against exact non-editable 0.1.0 formal releases.",
+  "component_cases": [
+    {
+      "component": "coordinator",
+      "distribution": "mindie-coordinator",
+      "expected_observations": {
+        "baseline": {
+          "bind_conflicts": 1,
+          "duplicate_device_selections": 1,
+          "successful_listeners": 1
+        },
+        "candidate": {
+          "bind_conflicts": 0,
+          "duplicate_device_selections": 0,
+          "successful_listeners": 2
+        }
+      },
+      "id": "coordinator-contention",
+      "repetitions": 3
+    },
+    {
+      "component": "npu-top",
+      "distribution": "npu-top",
+      "expected_observations": {
+        "candidate": {
+          "golden_physical_devices_correct": 24,
+          "golden_process_assignments_correct": 16,
+          "golden_process_assignments_expected": 16,
+          "live_container_owner_correct": true,
+          "live_physical_devices": 8
+        }
+      },
+      "id": "npu-top-physical-owner-query",
+      "repetitions": 3
+    },
+    {
+      "component": "diagnostics",
+      "distribution": "mindie-diagnostics",
+      "expected_observations": {
+        "candidate": {
+          "delivered_reports": 1,
+          "failure_occurrences": 3,
+          "fault_log_redacted": true,
+          "fault_triage_cascading_rank": "7",
+          "fault_triage_cascading_timeout": true,
+          "fault_triage_deterministic": true,
+          "fault_triage_domain": "aicore_memory_or_tiling",
+          "fault_triage_root_cause_rank": "3",
+          "http_posts": 1,
+          "private_fixture_removed": true,
+          "queue_items": 1,
+          "reconciled_without_duplicate": true,
+          "useful_fault_fields_retained": true,
+          "withdrawal_prevented_requests": true
+        }
+      },
+      "id": "diagnostics-fault-delivery",
+      "repetitions": 3
+    },
+    {
+      "component": "profiler",
+      "distribution": "mindie-profiler",
+      "expected_observations": {
+        "candidate": {
+          "db_mutation": false,
+          "memory_target_met": true,
+          "profile_steps_aligned": true,
+          "residual_status": "within_target",
+          "slow_link_dominant_block": "Comm",
+          "slow_rank_dominant_block": "Attention"
+        }
+      },
+      "id": "profiler-rank-link-memory-attribution",
+      "repetitions": 3
+    },
+    {
+      "component": "sim",
+      "distribution": "mindie-sim",
+      "expected_observations": {
+        "candidate": {
+          "qwen_case_deterministic": true,
+          "subgraph_overflow_rejected": true
+        }
+      },
+      "id": "sim-a3-graph-and-boundary-screening",
+      "repetitions": 3
+    }
+  ],
+  "id": "product-value-v0.1.0-components",
+  "instrumentation_components": [
+    "coordinator"
+  ],
+  "native_plugins": {},
+  "purpose": "Component value verification across coordinator, npu-top, diagnostics, profiler, and sim for 0.1.0.",
+  "schema_version": "mindie-value-suite/1",
+  "studies": []
+}

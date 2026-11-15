@@ -1,0 +1,3806 @@
+{
+  "accounting": {
+    "maintenance-codex": {
+      "planned_cells": 9,
+      "manifest_sha256": "d280424ecee885c860cbbf4d8a14e22b176eabaf0260eb8ed20c5af5624f5bdf",
+      "terminal_receipts": 1,
+      "missing_count": 8,
+      "blocked_count": 0,
+      "all_cells_accounted_for": false,
+      "raw_statuses": {
+        "infra_failed": 1
+      }
+    },
+    "maintenance-codex-v2": {
+      "planned_cells": 9,
+      "manifest_sha256": "c6418740eafac8608555f00f437f5dc0c86f025fa6d0e0dc6a935223c0bcda8f",
+      "terminal_receipts": 1,
+      "missing_count": 8,
+      "blocked_count": 0,
+      "all_cells_accounted_for": false,
+      "raw_statuses": {
+        "unknown": 1
+      }
+    },
+    "maintenance-dsh-044": {
+      "planned_cells": 9,
+      "manifest_sha256": "669fa358e4ef4534ba37f03faa1a8d03d9a14cda93b8158f86f0f40eaa1ebdd2",
+      "terminal_receipts": 9,
+      "missing_count": 0,
+      "blocked_count": 0,
+      "all_cells_accounted_for": true,
+      "raw_statuses": {
+        "completed_fail": 6,
+        "infra_failed": 3
+      }
+    },
+    "maintenance-dsh-044-native-path": {
+      "planned_cells": 3,
+      "manifest_sha256": "f4af7c78a676955ab8ab3dd7c2237d13eff8462a2f62d948747096729a5a5587",
+      "terminal_receipts": 3,
+      "missing_count": 0,
+      "blocked_count": 0,
+      "all_cells_accounted_for": true,
+      "raw_statuses": {
+        "completed_pass": 3
+      }
+    }
+  },
+  "posthoc_saved_candidate": {
+    "model_calls": 0,
+    "patch_sha256": "81bf62c3a3a18c0331b7d03ce796388226b2f1f8ef823f76a8cff768fded1381",
+    "reward": 0.0,
+    "oracle_status": "intact",
+    "original_status_preserved": "unknown",
+    "receipt_sha256": "86a64aa02b2c5734976ea8e6376698916f50802b524423baa84a9e975a306503"
+  },
+  "schema": "mindie-patch-dev-pilot-evidence/1",
+  "generated_at": "2026-10-24T12:33:49.766633+00:00",
+  "scope": "exposed_dev_offline_engineering_reproductions",
+  "raw_receipts_retained_locally": true,
+  "independent_heldout": false,
+  "rows": [
+    {
+      "cohort": "maintenance-codex",
+      "stage": null,
+      "trial_id": "npu-top-and-coordinator-multi-die-lease-repair-zh_G0_1_d2c398b602ab",
+      "task": "npu-top-and-coordinator-multi-die-lease-repair-zh",
+      "group": "G0",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 0.060986374999629334,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "3d8d51122a92e35f0c9ed7ef084e4c723960dfa6b65ed1d9db8cccd3af607abf"
+      },
+      "runner_revision": "eb49b2e0a36184c1216b13b7f0a0ba88b8a26ece"
+    },
+    {
+      "cohort": "maintenance-codex-v2",
+      "stage": null,
+      "trial_id": "npu-top-and-coordinator-multi-die-lease-repair-zh_G0_1_7853fadf3bbd",
+      "task": "npu-top-and-coordinator-multi-die-lease-repair-zh",
+      "group": "G0",
+      "status": "unknown",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": 10,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 329600,
+        "input_uncached": 50439,
+        "output": 20604
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 480.0001828749955,
+      "delivery_seconds": 514.0589908330003,
+      "turns": 10,
+      "error_stages": [],
+      "oracle_status": null,
+      "native_tool_call_counts": {
+        "bash": 21,
+        "Edit": 3
+      },
+      "native_session_id": "01a16d8b-8bd5-7f93-b1ce-e575e8e9a138",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "a29ee5a4710545d03ad8b76064667f7bba70e3ebac4552b3ea0f665bf9b8579f",
+        "trajectory.json": "9d27130767ab8b2a20374d6a5f55a4665289dfeb9283973f7baa336845e06634",
+        "trial_receipt.json": "1125e6a0663e5d7141081c65f5e93c1d4668199517b4bd20fa481f25be895bc1",
+        "final_patch.diff": "81bf62c3a3a18c0331b7d03ce796388226b2f1f8ef823f76a8cff768fded1381",
+        "native_events.jsonl": "bc96162acdcd3307edc94bc923f1d6fb3072c3c88eafab27ee0138db3991a122"
+      },
+      "runner_revision": "eb49b2e0a36184c1216b13b7f0a0ba88b8a26ece"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "profiler-msprof-straggler-and-hbm-fix-zh_G2_1_41f6e12ec063",
+      "task": "profiler-msprof-straggler-and-hbm-fix-zh",
+      "group": "G2",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 1.4912830000102986,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "bb54869b40d772a8b9b9f5961bda9525e63f4501794fa4a207a0cde189197290"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "npu-top-and-coordinator-multi-die-lease-repair-zh_G1_1_dc16ab442303",
+      "task": "npu-top-and-coordinator-multi-die-lease-repair-zh",
+      "group": "G1",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 3220864,
+        "input_uncached": 119364,
+        "output": 16111
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 149.98112083302112,
+      "delivery_seconds": 154.74611916698632,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "bash": 40,
+        "Glob": 2,
+        "Read": 20,
+        "Grep": 4,
+        "web_search": 1,
+        "list_mcp_resources": 1,
+        "list_mcp_resource_templates": 1,
+        "read_mcp_resource": 1
+      },
+      "native_session_id": "session-8b762abf-44ed-4eb2-bb70-d7f320da281d",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "bb3af5d8ad2bbd7949ec3263214bb5ba870b27657d22402a8dea1ccc8052d37c",
+        "trajectory.json": "901b8347389cd6c12fb42c4986266efe79f32fa89bfcb6a04f8a930487c4192a",
+        "trial_receipt.json": "252e1d37cba203432508567f29128b3ef6e4fe0cfe232c27a1dbb61d5bd3dbcd",
+        "final_patch.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "native_events.jsonl": "ff307a8945133b469a47e21a52fc069867345e919c485961069a39a68228dc01"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "npu-top-and-coordinator-multi-die-lease-repair-zh_G2_1_25dd5d0b8f67",
+      "task": "npu-top-and-coordinator-multi-die-lease-repair-zh",
+      "group": "G2",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 1.206999584013829,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "42eb34bc0dc19dd07114f1200fa96ddd911c203e9e3cfe49fb35b4f97e8d9122"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "npu-top-and-coordinator-multi-die-lease-repair-zh_G0_1_65a626a5895d",
+      "task": "npu-top-and-coordinator-multi-die-lease-repair-zh",
+      "group": "G0",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 2637952,
+        "input_uncached": 103233,
+        "output": 70062
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 329.7890877079917,
+      "delivery_seconds": 358.99492379202275,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "bash": 36,
+        "Read": 4,
+        "web_search": 2,
+        "Write": 1,
+        "Edit": 5,
+        "subagent_fork": 1
+      },
+      "native_session_id": "session-c72843c6-3829-4e03-b369-24172bf47a04",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "2a41604340ccbf0e22d57f3863b8a315bbcdd6a69140c06eb436aef89710b6ef",
+        "trajectory.json": "26cbd8762ffe592c153fca9b40cc925b3760939f99b248351f5cefaa048b23be",
+        "trial_receipt.json": "59ffd72e1f40f9982b1a400909d1c2dbfc5bf3799a7264a6db1de051c3a5b537",
+        "final_patch.diff": "02ab539b7dd2c378b86e6178042c6fbb8ba083bd4c502c26fbcf4633422f60ca",
+        "native_events.jsonl": "a812f028bf7603d9bd72dde46cba989198e24217eb19b7f11350125e724445ba"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "sim-a3-ub-fusion-and-pipeline-dispatch-zh_G2_1_e70dffc9d28f",
+      "task": "sim-a3-ub-fusion-and-pipeline-dispatch-zh",
+      "group": "G2",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 1.42815024999436,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "aeb9c13b934ef0826c9895005d39c06b0b71e29d8dca2d85c2342f39c6ec283c"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "profiler-msprof-straggler-and-hbm-fix-zh_G0_1_7b2a4f17c541",
+      "task": "profiler-msprof-straggler-and-hbm-fix-zh",
+      "group": "G0",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 3342720,
+        "input_uncached": 64444,
+        "output": 56823
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 385.26358304099995,
+      "delivery_seconds": 391.4582721659972,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "bash": 57,
+        "Read": 5,
+        "web_search": 1,
+        "Edit": 8,
+        "Write": 1
+      },
+      "native_session_id": "session-7f07b413-41fe-4b3f-933a-4c6d28477bf0",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "9f665a18b29515a6342c746375bdeb14bd1236ffb76cc363246a75ff6f5e9dfd",
+        "trajectory.json": "31f562fbed8e357ae3290fc5aa1ca9e25a363c3419842ec7480abf500ba8c2b7",
+        "trial_receipt.json": "2541450b581e0c5fbfbe885f8daf84a9e7d1be4f226eff762e4d2b99b981c7af",
+        "final_patch.diff": "1aba9c2538cf446711043cdd88d0575b996bf887547d61fc9a35ff7315044c6b",
+        "native_events.jsonl": "243a3e494a3b877d82949ca0c9d87b07c0dd285b2ff5a8d0deb74fef8da987d3"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "profiler-msprof-straggler-and-hbm-fix-zh_G1_1_fec9c511ee84",
+      "task": "profiler-msprof-straggler-and-hbm-fix-zh",
+      "group": "G1",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 4861824,
+        "input_uncached": 143383,
+        "output": 48995
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 341.4448281659861,
+      "delivery_seconds": 348.02240091600106,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "bash": 48,
+        "Glob": 1,
+        "Read": 10,
+        "web_search": 1,
+        "web_fetch": 1,
+        "Grep": 1,
+        "Edit": 3
+      },
+      "native_session_id": "session-97490b9e-3194-444a-b957-ca21938debb6",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "fc4badc6b8b9e64e36ef48e443644b673ecab189c0659573c24ed76f72d752c4",
+        "trajectory.json": "cfdceefaed937c42a1ddbbb089b636b96172f6aab651d91cc2ff14729619df2f",
+        "trial_receipt.json": "466edf1b0b2538bc287af364e5dcd3fe4a16a97d36f7cb68c23f51a858ceb54c",
+        "final_patch.diff": "b3dca64c6f58ade84fd047207261aadc729d1891b03577d8471187fa8b46efcd",
+        "native_events.jsonl": "7a08c8fd829483e091faa68b57bfdc8b75b233f1d06db7fb22cad955f800ebdc"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "sim-a3-ub-fusion-and-pipeline-dispatch-zh_G0_1_fe1620c146e3",
+      "task": "sim-a3-ub-fusion-and-pipeline-dispatch-zh",
+      "group": "G0",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 3040000,
+        "input_uncached": 76621,
+        "output": 48017
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 302.8890484159929,
+      "delivery_seconds": 310.73623562499415,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "bash": 56,
+        "Glob": 1,
+        "Grep": 2,
+        "Read": 8,
+        "web_search": 1,
+        "todo_write": 1,
+        "Edit": 3,
+        "web_fetch": 1,
+        "subagent": 1
+      },
+      "native_session_id": "session-3f8992f8-8923-4e9c-92cc-0bfc1d9e4f38",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "f22b4ee76ec34c2cfcbb71532a84202dd0e1c170234672f5031de5d3c4945ab0",
+        "trajectory.json": "3924fc5069f2df5c51856af52092ec82dba051bae3d58f10c7676539d6dad5ff",
+        "trial_receipt.json": "a5a7e0169b3a801c58858a54104e3645ecd1d9cd2c638f83e183849f90e34411",
+        "final_patch.diff": "1279f91b6ef7e8fae85db4a6484cd32549a7ddf238cc47197b6d546f752ce84e",
+        "native_events.jsonl": "0aff3d7031921723fc5f45f67ba668e5b6992a8d0a425999bc851a66fc572708"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044",
+      "stage": null,
+      "trial_id": "sim-a3-ub-fusion-and-pipeline-dispatch-zh_G1_1_177630ae6fce",
+      "task": "sim-a3-ub-fusion-and-pipeline-dispatch-zh",
+      "group": "G1",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 4168448,
+        "input_uncached": 149186,
+        "output": 20391
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 305.26312400001916,
+      "delivery_seconds": 310.50437245800276,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "bash": 67,
+        "Glob": 1,
+        "Read": 11,
+        "web_search": 1,
+        "list_mcp_resources": 1,
+        "list_mcp_resource_templates": 1,
+        "read_mcp_resource": 1,
+        "web_fetch": 1
+      },
+      "native_session_id": "session-b32a857e-6dd3-45dc-992f-c99963db8ce5",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "88d99b1905560082b87d4027a43bfec088b5e3dca916f9d42b042921a9652ea8",
+        "trajectory.json": "1ce08893961c610b693a7cf86aae687c7fe8692bac11a0f1b05f78dfc9ef345f",
+        "trial_receipt.json": "0ebda0bf8f5f1cd088c435db6061214da2823c6f792343de679f27f95802f37d",
+        "final_patch.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "native_events.jsonl": "897ec6f34a84393838cc0567c26668067470e37a28ad8ed0855ed3deaf30e5fc"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044-native-path",
+      "stage": null,
+      "trial_id": "npu-top-and-coordinator-multi-die-lease-repair-zh_G2_1_5cc88a2e761e",
+      "task": "npu-top-and-coordinator-multi-die-lease-repair-zh",
+      "group": "G2",
+      "status": "completed_pass",
+      "reward": 1.0,
+      "resolved": true,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 5195008,
+        "input_uncached": 156193,
+        "output": 33755
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 268.9358048749855,
+      "delivery_seconds": 275.88468300001114,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 58,
+        "Read": 12,
+        "web_search": 1,
+        "knowledge_query": 4,
+        "knowledge_explain": 1,
+        "web_fetch": 1,
+        "Write": 1
+      },
+      "native_session_id": "session-e8303825-f9d4-41ad-bb6e-93a5f83b5fe6",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "7ee390561bbfbb158910f47f44c8fd3414cb4b661d60a9cd43c3fbcfef049dc5",
+        "trajectory.json": "04c115cf4022f073511aa8e8fc23086dc8bc64546adc0de7c38d0012ace4a1bb",
+        "trial_receipt.json": "d47c9632c963bba47db9935ee0cddc270937aa7edd9a9149044b172ebe55ed14",
+        "final_patch.diff": "cad812ef066a4c5e5c646a8960ec1dd6b770348d8a0c1633a8b79a2c7cd8095f",
+        "native_events.jsonl": "41d4dd35319e39882015e1dfe0ec37f64b3165f84b7583bf11c1f2f6646ee467"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044-native-path",
+      "stage": null,
+      "trial_id": "profiler-msprof-straggler-and-hbm-fix-zh_G2_1_e361bd685cef",
+      "task": "profiler-msprof-straggler-and-hbm-fix-zh",
+      "group": "G2",
+      "status": "completed_pass",
+      "reward": 1.0,
+      "resolved": true,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 5481344,
+        "input_uncached": 137423,
+        "output": 52171
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 345.264222415979,
+      "delivery_seconds": 351.99161249998724,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 48,
+        "Read": 9,
+        "web_search": 1,
+        "knowledge_query": 3,
+        "knowledge_explain": 1,
+        "web_fetch": 1,
+        "Write": 1,
+        "Edit": 4
+      },
+      "native_session_id": "session-f9e31362-bada-450d-aba8-6a9fab04f55d",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "9f9099b4cd63c25817573ac9fb334c852ce1fde53bf4da41b08b30ea2f1be076",
+        "trajectory.json": "4f573765665e9337b033b1dc2cc511ae90d76704be3bb3060a1f3b40eed46118",
+        "trial_receipt.json": "79bdb62968796c1b6c03d61573914fdf5a3b3f85dcce3f2ff7944eb61562df2d",
+        "final_patch.diff": "0d55a7da678d67ba754f5466f9a726ac328135fa2861e2b3e5937fcbcb903912",
+        "native_events.jsonl": "48a9bbf07d0d61eadf69ab7ca932d64a925ed3875f29c1e34a2902e406efb368"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "maintenance-dsh-044-native-path",
+      "stage": null,
+      "trial_id": "sim-a3-ub-fusion-and-pipeline-dispatch-zh_G2_1_469e50895a9f",
+      "task": "sim-a3-ub-fusion-and-pipeline-dispatch-zh",
+      "group": "G2",
+      "status": "completed_pass",
+      "reward": 1.0,
+      "resolved": true,
+      "primary_verdict": null,
+      "model_calls": 50,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 4736896,
+        "input_uncached": 149614,
+        "output": 41763
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 352.3794687089976,
+      "delivery_seconds": 358.4578585829877,
+      "turns": 50,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 58,
+        "Grep": 3,
+        "Read": 5,
+        "knowledge_query": 4,
+        "knowledge_explain": 1,
+        "web_fetch": 1,
+        "job_output": 1,
+        "Write": 1
+      },
+      "native_session_id": "session-46094af9-79e0-4f3e-a2f4-79445c20c8a1",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "df146a805b0d74e5ca77975ddb2e6b918d02166985b52fe8eb844d992d0cc5b8",
+        "trajectory.json": "d7f8599fa1f78f685037c597ee7d28282ef609fb865d5d3714d2f61be86238a3",
+        "trial_receipt.json": "74a7b97e777d3e4abc05ef522510cf36077d1060b6abd09b3a3e02d991b43baf",
+        "final_patch.diff": "db265d9e69e40ae08d320e05c42e8b81d7303153e778c6042fe8678df111f74e",
+        "native_events.jsonl": "83a1be342ef4dcfb315ad53f9bdf1768df1de6be2d7e7964ae103d3b6bb589f7"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v2",
+      "stage": "control-B-cold",
+      "trial_id": "sfa-mtp-seq-lens-eval-zh-vague_G2_1_6b641fe7cf81",
+      "task": "sfa-mtp-seq-lens-eval-zh-vague",
+      "group": "G2",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 1.2907730830193032,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "e6c4298afee04c188c8e28d680fb039cd49d651999f387ba768f4c04ad7e083d"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v2",
+      "stage": "control-D-cold",
+      "trial_id": "mtp-draft-slot-mapping-capacity-zh-vague_G2_1_9a0a1f8af376",
+      "task": "mtp-draft-slot-mapping-capacity-zh-vague",
+      "group": "G2",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 0.829230582981836,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "879fac87947725621a41b07a4ec5c4be559e9034d90fb97b2e14337ce2fe8496"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v2",
+      "stage": "A",
+      "trial_id": "sfa-mtp-seq-lens-seed-zh-vague_G3_1_6d7577328e67",
+      "task": "sfa-mtp-seq-lens-seed-zh-vague",
+      "group": "G3",
+      "status": "infra_failed",
+      "reward": null,
+      "resolved": null,
+      "primary_verdict": null,
+      "model_calls": null,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 0,
+        "input_uncached": 0,
+        "output": 0
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 0.0,
+      "delivery_seconds": 0.8549927499843761,
+      "turns": 0,
+      "error_stages": [
+        {
+          "stage": "preflight",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": null,
+      "native_tool_call_counts": {},
+      "native_session_id": null,
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "trajectory.json": "53de6e52becb02eeec1bcd1fb9295c260075aa8c2c477cdd0534973b1c25e5e8",
+        "trial_receipt.json": "9630d58b840ffe0e03f4e13f4f6f09ec0bf174d8e8505ff583db8ab69f753ccd"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v3",
+      "stage": "control-B-cold",
+      "trial_id": "sfa-mtp-seq-lens-eval-zh-vague_G2_1_d7bdc5c24885",
+      "task": "sfa-mtp-seq-lens-eval-zh-vague",
+      "group": "G2",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 80,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 9709824,
+        "input_uncached": 310845,
+        "output": 32152
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 246.45947670799796,
+      "delivery_seconds": 256.62470870799734,
+      "turns": 80,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 68,
+        "Read": 30,
+        "web_fetch": 1,
+        "knowledge_query": 2,
+        "knowledge_explain": 1
+      },
+      "native_session_id": "session-4883e22e-f222-4664-a1fa-b66585189dde",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "760cc68c68f787b7900782a34838d9e9bdfbc9bc7369fdbadffa3059963436d1",
+        "trajectory.json": "0c8b7aaf6470a58292b69068f1d9c1b734c072a8cc3bf5c5608300396543cfd0",
+        "trial_receipt.json": "1c00b45401953b47b685f6508138c525c626f333195baa9f3d4c914399cbf593",
+        "final_patch.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "native_events.jsonl": "86c2bc0da61af821623594495a7870595da56d0c7a112d36c025aec9ee584419"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v3",
+      "stage": "control-D-cold",
+      "trial_id": "mtp-draft-slot-mapping-capacity-zh-vague_G2_1_9ee7dc0d7998",
+      "task": "mtp-draft-slot-mapping-capacity-zh-vague",
+      "group": "G2",
+      "status": "completed_fail",
+      "reward": 0.0,
+      "resolved": false,
+      "primary_verdict": null,
+      "model_calls": 60,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": true,
+        "indexer_small_model_total": 0,
+        "input_cached": 6457728,
+        "input_uncached": 303591,
+        "output": 26276
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 205.28862483298872,
+      "delivery_seconds": 214.3234990000201,
+      "turns": 60,
+      "error_stages": [],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 91,
+        "knowledge_query": 3,
+        "knowledge_explain": 1,
+        "Read": 6,
+        "web_search": 1,
+        "remote_probe": 1
+      },
+      "native_session_id": "session-4ef663d0-ca0e-4cc4-bf58-62e501cbb2e0",
+      "capture": {
+        "status": null,
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "cd936e26f21331c00da977f93fd2417d00c1d62a691ff2831f830787fc4b5e7d",
+        "trajectory.json": "3284093608fe5c831c70da7584f7441e105c536c3fb9f1d54d5c4108c87848a5",
+        "trial_receipt.json": "510d61023826a458ef622fbf6f9ea5b1913916734976ae796a02fb2e1853ad8d",
+        "final_patch.diff": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "native_events.jsonl": "690a27452408239c294c8d79038fc1bc69839dfa95347b4298a9f640a5425c0d"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v3",
+      "stage": "A",
+      "trial_id": "sfa-mtp-seq-lens-seed-zh-vague_G3_1_8b02618500ea",
+      "task": "sfa-mtp-seq-lens-seed-zh-vague",
+      "group": "G3",
+      "status": "completed_pass",
+      "reward": 1.0,
+      "resolved": true,
+      "primary_verdict": null,
+      "model_calls": 80,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 9528320,
+        "input_uncached": 287690,
+        "output": 55243
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 365.4929664579977,
+      "delivery_seconds": 378.1678390419984,
+      "turns": 80,
+      "error_stages": [
+        {
+          "stage": "capture",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 85,
+        "Read": 13,
+        "web_fetch": 1,
+        "knowledge_query": 3,
+        "Edit": 2,
+        "Write": 2
+      },
+      "native_session_id": "session-2746a45d-994f-4e27-b146-f0186ed55a4c",
+      "capture": {
+        "status": "failed",
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "b70c1da3bdba84ff23d40eef3c6b9c0e84268130a9180f8795c99cf010ef0357",
+        "trajectory.json": "05efe261a9cfb361b498e36c214a99bc6f27f58e648c09b3e618a63c5c873826",
+        "trial_receipt.json": "6ac25dfa9bb1d1cec5ae821b6265166c1514a48793354506a781a0f64b9c6162",
+        "final_patch.diff": "50c7eaa0dcbafca7fcb98de258f88164c56f29f72150864a572d4eedcd22dece",
+        "native_events.jsonl": "0c0ef63de924c768fb8c15e6b7d087f05079de2032a04c198db765e744201a60"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    },
+    {
+      "cohort": "g5-dsh-044-v4-long-training",
+      "stage": "A",
+      "trial_id": "sfa-mtp-seq-lens-seed-zh-vague-g5-long_G3_1_91e50697f5a5",
+      "task": "sfa-mtp-seq-lens-seed-zh-vague-g5-long",
+      "group": "G3",
+      "status": "completed_pass",
+      "reward": 1.0,
+      "resolved": true,
+      "primary_verdict": null,
+      "model_calls": 120,
+      "tokens": {
+        "cache_creation": 0,
+        "complete": false,
+        "indexer_small_model_total": 0,
+        "input_cached": 15251584,
+        "input_uncached": 485606,
+        "output": 73934
+      },
+      "cost_complete": false,
+      "estimated_cost_usd": null,
+      "wall_seconds": 523.9818291669944,
+      "delivery_seconds": 535.8847509579791,
+      "turns": 120,
+      "error_stages": [
+        {
+          "stage": "capture",
+          "type": "ValueError"
+        }
+      ],
+      "oracle_status": "intact",
+      "native_tool_call_counts": {
+        "mindie_entry": 1,
+        "bash": 127,
+        "knowledge_query": 2,
+        "Read": 20,
+        "web_search": 1,
+        "web_fetch": 1,
+        "Edit": 4,
+        "knowledge_explain": 2
+      },
+      "native_session_id": "session-63b2a2dd-c400-4bf6-ac60-3f3c724d3517",
+      "capture": {
+        "status": "failed",
+        "protocol": null,
+        "distill": null,
+        "corpus_lint": null,
+        "model_calls": null,
+        "tokens": null,
+        "captured_corpus_sha256": null
+      },
+      "artifact_sha256": {
+        "broker.jsonl": "c4567740aa50c893a7851890a669feaf609f525b3333201389b69b4166bb0c98",
+        "trajectory.json": "c7b97658b803d06640610bd4c92e234cfa07a04326ef62beb30d82b699059568",
+        "trial_receipt.json": "d8162c9acaba4360a54addaab7c53839ee8e8c3aa69d0f89ddeff0512d25a155",
+        "final_patch.diff": "e14a0895638b797635cb467e04bee390a3c3dc28ddd91f6f70bf3aedb5677511",
+        "native_events.jsonl": "62288d958925bd902c2dcd95f72af0511f3c246397ad96a8b622b2f928efe26b"
+      },
+      "runner_revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    }
+  ],
+  "sequences": [
+    {
+      "cohort": "g5-dsh-044",
+      "status": "setup_failed_before_trial_admission",
+      "revision_observed": null,
+      "episodes": []
+    },
+    {
+      "cohort": "g5-dsh-044-v2",
+      "status": "partial_A_has_no_admitted_corpus",
+      "revision_observed": null,
+      "episodes": [
+        {
+          "stage": "control-B-cold",
+          "trial_id": "sfa-mtp-seq-lens-eval-zh-vague_G2_1_6b641fe7cf81",
+          "status": "infra_failed",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        },
+        {
+          "stage": "control-D-cold",
+          "trial_id": "mtp-draft-slot-mapping-capacity-zh-vague_G2_1_9a0a1f8af376",
+          "status": "infra_failed",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        },
+        {
+          "stage": "A",
+          "trial_id": "sfa-mtp-seq-lens-seed-zh-vague_G3_1_6d7577328e67",
+          "status": "infra_failed",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        }
+      ]
+    },
+    {
+      "cohort": "g5-dsh-044-v3",
+      "status": "partial_A_has_no_admitted_corpus",
+      "revision_observed": null,
+      "episodes": [
+        {
+          "stage": "control-B-cold",
+          "trial_id": "sfa-mtp-seq-lens-eval-zh-vague_G2_1_d7bdc5c24885",
+          "status": "completed_fail",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        },
+        {
+          "stage": "control-D-cold",
+          "trial_id": "mtp-draft-slot-mapping-capacity-zh-vague_G2_1_9ee7dc0d7998",
+          "status": "completed_fail",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        },
+        {
+          "stage": "A",
+          "trial_id": "sfa-mtp-seq-lens-seed-zh-vague_G3_1_8b02618500ea",
+          "status": "completed_pass",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        }
+      ]
+    },
+    {
+      "cohort": "g5-dsh-044-v4-long-training",
+      "status": "partial_A_has_no_admitted_corpus",
+      "revision_observed": null,
+      "episodes": [
+        {
+          "stage": "A",
+          "trial_id": "sfa-mtp-seq-lens-seed-zh-vague-g5-long_G3_1_91e50697f5a5",
+          "status": "completed_pass",
+          "new_units": null,
+          "revised_units": null,
+          "units_before": {
+            "unit-vllm-ascend-gdn-idle-dp-zero-pad-workspace-mutator": {
+              "revision": 1,
+              "sha256": "fd93e4c4f1fde950834da4859977e6d1efa870e3e51138baa712e052e3790b2b"
+            },
+            "unit-vllm-ascend-deterministic-batch-invariance-and-eval-axioms": {
+              "revision": 1,
+              "sha256": "1f4685380eadf8c4e9d7b530e94a73160362f2b01f4878fdfcb4ad240a079c84"
+            },
+            "unit-vllm-ascend-hccl-and-dp-collective-invariants": {
+              "revision": 1,
+              "sha256": "00c815e5fcfee57da4aa8e306b3146e9597ba823d237bf79f2447619bf21eeed"
+            },
+            "unit-vllm-ascend-npu-runtime-and-graph-invariants": {
+              "revision": 2,
+              "sha256": "6ffaf98ee1c66e7a052b1276f9ec68c24178df7de2646ca64b54f83abc3609e8"
+            },
+            "unit-vllm-ascend-soc-generation-feature-matrix-and-abi-axioms": {
+              "revision": 1,
+              "sha256": "1a960aac0bdeaa4196def48337226f3346089abb315952f2e10d5a03b7b59c4a"
+            },
+            "unit-vllm-ascend-verification-and-state-parity-gates": {
+              "revision": 2,
+              "sha256": "d8bc17ef85b7cf9ef9cc838082682974dca6ba91348bf084db533f7391d84cec"
+            },
+            "unit-vllm-ascend-custom-op-gates-import-retry-and-nz": {
+              "revision": 3,
+              "sha256": "6b971485eb1a85995b256d43b098bdaef85b73b62c4db5046f3d01469cb65165"
+            },
+            "unit-vllm-ascend-numa-cpu-binding-and-irq-isolation-sop": {
+              "revision": 1,
+              "sha256": "09ffc28ccd78d09d62e232da55c4bced793fff16443228f5c609cc2a7da36171"
+            },
+            "unit-vllm-ascend-patch-hierarchy-and-upstream-migration-sop": {
+              "revision": 1,
+              "sha256": "bb0c5411f3063ce90caf03040877de04805ca8c61b41142f9313ec4dfc5fa3fa"
+            },
+            "unit-vllm-ascend-model-runner-v1-input-prep-and-async-pipeline-sop": {
+              "revision": 1,
+              "sha256": "597e8a1b3ebe09a3c482901dc48cb59f251aee0174c11e0ae767cc2c4dbf0baa"
+            },
+            "unit-vllm-ascend-model-runner-v2-persistent-batch-and-eplb-sop": {
+              "revision": 1,
+              "sha256": "c96343c044b7abc1bd9f02bffc81870f0c88bc4c4de07eb4d07c564fdb6e4ba0"
+            },
+            "unit-vllm-ascend-xlite-lightweight-runtime-and-decode-fastpath-sop": {
+              "revision": 1,
+              "sha256": "3d406428a070324892b020f66c70957022d20f9dbcdbddf572498c56877d46f5"
+            },
+            "unit-vllm-ascend-bailing-linear-and-gdn-metadata-builder-sop": {
+              "revision": 1,
+              "sha256": "6ad5b076508eff78f77606d857407f4d51a8b57129da1e9108b2d27c08e0ec5e"
+            },
+            "unit-vllm-ascend-mm-encoder-attention-and-vit-aclgraph-sop": {
+              "revision": 1,
+              "sha256": "9fad96e36acce01b834e4fda619fa482aac5d89fcda3b055dc0b995509e3d8bf"
+            },
+            "unit-vllm-ascend-sfa-layerwise-and-sparse-kv-offload-workflow": {
+              "revision": 1,
+              "sha256": "51afb0c0290c46867c6c0824318672d67a83e385f51cd0332ae43e4ad53935ca"
+            },
+            "unit-vllm-ascend-attention-v1-mla-dsa-sfa-fa3-routing-sop": {
+              "revision": 1,
+              "sha256": "49da7d73430033838c941b54271aac1e951aad5f5e96ad64e411eae21d000796"
+            },
+            "unit-vllm-ascend-ring-ulysses-dcp-kv-partition-and-lse-workflow": {
+              "revision": 1,
+              "sha256": "7824ff24cfbb215135980ac2310ab24d09d73b5888761a8e81518624423dd0d6"
+            },
+            "unit-vllm-ascend-aclgraph-full-piecewise-bucket-and-mempool-sop": {
+              "revision": 1,
+              "sha256": "36162db8bb74bfd23fbce8fa93cadc40f69cc909970efdb33867ec5e9dd820da"
+            },
+            "unit-vllm-ascend-npugraph-ex-fusion-passes-and-recompilation-workflow": {
+              "revision": 1,
+              "sha256": "ccd74d1859fddd9a60e63598fcd575bc1d5c8349f35ae6b315b277dbc54db301"
+            },
+            "unit-vllm-ascend-custom-aclnn-op-registration-meta-and-abi-sop": {
+              "revision": 1,
+              "sha256": "e52dcf77517c7504e1f11613e623328b5502695268785ff87150ce5ae71f4890"
+            },
+            "unit-vllm-ascend-310p-dedicated-ops-fp16-cast-and-nz-sop": {
+              "revision": 1,
+              "sha256": "7943e215e3b81a2318ff311ff7e111f5ef137759eb8e28a5b931b465dea2239d"
+            },
+            "unit-vllm-ascend-moe-ep-all2all-and-w4a8-w8a8-quantization-workflow": {
+              "revision": 1,
+              "sha256": "9523285b297619aac79d80ebf56608199ae481a6572c774486343b2907bf799d"
+            },
+            "unit-vllm-ascend-pd-disaggregation-mooncake-kv-transfer-and-mc2-sop": {
+              "revision": 1,
+              "sha256": "aa99acefb015fad5e13d6fb892b9606449a0aaab5ac1f6fd71ca7c78923afb73"
+            },
+            "unit-vllm-ascend-multi-tier-and-layerwise-kv-pool-sop": {
+              "revision": 1,
+              "sha256": "88377c4b17aaf9367edcdc5414987f332cea935864f134758af1ec33ab4fc55b"
+            },
+            "unit-vllm-ascend-ucm-and-lmcache-distributed-prefix-sharing-sop": {
+              "revision": 1,
+              "sha256": "45345963792e3d706d6a6a7e8be5478a8bd8e2a848c0f4081c16a401d050dc2f"
+            },
+            "unit-vllm-ascend-kv-cpu-offload-vs-recompute-tradeoff-workflow": {
+              "revision": 1,
+              "sha256": "b566aa1b577f251943cca1e78571eeccac1c55d96f2ab2ed62cc4e36f3f850bd"
+            },
+            "unit-vllm-ascend-epd-three-stage-and-mooncake-disaggregation-workflow": {
+              "revision": 1,
+              "sha256": "a3ecd40d01a3ad511223b14984c59d8ac35d3ac997cd023d441db8bf3192447f"
+            },
+            "unit-vllm-ascend-deepseek-v3-v32-r1-ocr2-deployment-and-tuning-sop": {
+              "revision": 1,
+              "sha256": "6cffc57caa47b49657c9a5c2119c4109e79d5adf0de3a6a60da937f30a70cdb7"
+            },
+            "unit-vllm-ascend-deepseek-v4-flash-pro-hash-topk-and-rope-workflow": {
+              "revision": 1,
+              "sha256": "b5871c3863375806621213efdc01d2aed19bf7add8729b97e4745c0aa4d6ff25"
+            },
+            "unit-vllm-ascend-dsv4-v41-qli-v2-compressor-and-engram-axioms": {
+              "revision": 1,
+              "sha256": "e67a606d389de09630bb93737023bfd003e59a57097eadddd141add850cdf9ef"
+            },
+            "unit-vllm-ascend-dsv4-v41-query-dequant-and-lighting-indexer-fusion-mutator": {
+              "revision": 1,
+              "sha256": "2a0ae79b797f211658ecb07ab06a70c1463f5b38ba67f0df989917574b327f95"
+            },
+            "unit-vllm-ascend-dsv4-v41-sparse-mla-lightning-indexer-and-mtp-sop": {
+              "revision": 1,
+              "sha256": "bb427fedd8b4fa7bb1ffc88fb46d1559a1a2ff9b9427e188fe56089e333225fb"
+            },
+            "unit-vllm-ascend-glm4-glm5-glm52-and-minimax-m2-m3-adaptation-sop": {
+              "revision": 1,
+              "sha256": "f903d1835200577a8af663b52e1c5de97b3c1e98243b8c1acab7483f2c02e9ab"
+            },
+            "unit-vllm-ascend-kimi-k2-k25-k26-k3-mrv2-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "be1b5effb5560a16c3ec9f72aa6181f148951d1cbd47635c1d4bf2660c834c21"
+            },
+            "unit-vllm-ascend-kimi-k3-kda-mamba-hybrid-attention-axioms": {
+              "revision": 1,
+              "sha256": "354c1ddca30dcb22d4d3681079bdbe93fbf78303d17aeaa56a15de976dd43a4c"
+            },
+            "unit-vllm-ascend-kimi-k3-model-bringup-and-hybrid-cache-workflow": {
+              "revision": 1,
+              "sha256": "5e132ba22cfab889387703cc007b9d7a70091d045167eb39882c8a5179b8c664"
+            },
+            "unit-vllm-ascend-kimi-k3-nan-inf-quarot-and-norm-precision-sop": {
+              "revision": 1,
+              "sha256": "db9a4dbb4829cb612c987d71b483472353747e2be0d9f0b094f530f68c2d894d"
+            },
+            "unit-vllm-ascend-gemma4-hunyuan-hy3-internvl35-paddleocr-cohere-sop": {
+              "revision": 1,
+              "sha256": "be4b2276898a4991c9137893402aa421107fd732278a2a6dcebc6a47f76924c4"
+            },
+            "unit-vllm-ascend-embodied-vla-world-models-and-3dgs-spatial-inference-sop": {
+              "revision": 1,
+              "sha256": "4cd166cb142d135990902d4549559eea8ea3dee0b8d7aa22d4e733551ba4cd30"
+            },
+            "unit-vllm-ascend-multimodal-vlm-mrope-and-video-dit-adaptation-workflow": {
+              "revision": 1,
+              "sha256": "ed7e00829037c2d82c80253a4305a767b8585dcdb278f19e1afabff6f7a86905"
+            },
+            "unit-vllm-ascend-qwen3-235b-30b-coder-next-and-dspark-sop": {
+              "revision": 1,
+              "sha256": "4a610c4aa0fe78e5bba7194f61e96fe0c9197bb39d592a12dbaffc4289bed24c"
+            },
+            "unit-vllm-ascend-qwen35-36-38-2p4t-hybrid-gdn-moe-bringup-workflow": {
+              "revision": 1,
+              "sha256": "f3bc8dc1666de7bcd2705315918f61d99c118f153c8c7008f48b49f794bdef52"
+            },
+            "unit-vllm-ascend-qwen3-vl-omni-asr-embedding-reranker-sop": {
+              "revision": 1,
+              "sha256": "0b421c80fbad91621fc6aa32508f4d96e08fcad52682fe1e28c766050248ab06"
+            },
+            "unit-vllm-ascend-perf-measurement-distortion-and-quant-benchmark-sop": {
+              "revision": 1,
+              "sha256": "ac9e3c0a7e67ba991b02b4cd59feeb558ce1a9ece185d58bd02d60259ad83916"
+            },
+            "unit-vllm-ascend-c8-pypto-310p-and-is-cuda-anti-patterns-axiom": {
+              "revision": 1,
+              "sha256": "39c8a41bbbb5b10ccccbebbeed49852a32ddd8a498bab46e5c041f33366d4c4c"
+            },
+            "unit-vllm-ascend-chunked-prefill-cla-and-kv-admission-retraction-workflow": {
+              "revision": 1,
+              "sha256": "887cd234c99aa7b3229b4260cfb488a67636fd73ff112fc513677e2e8ae00e74"
+            },
+            "unit-vllm-ascend-host-scalar-precompute-and-preprocess-elimination-sop": {
+              "revision": 1,
+              "sha256": "42760e41a09cefcf2e03ac192ab9c17a95974aa029d9262d7c95076be00fbc3b"
+            },
+            "unit-vllm-ascend-mla-c8-kv-wiring-and-batch-offload-swap-sop": {
+              "revision": 1,
+              "sha256": "ab299b9e3e8a85021c7946dbe6449642234c478c5b4d8fd1c9c322f41f90b5a8"
+            },
+            "unit-vllm-ascend-pd-hixl-mooncake-layerwise-kv-push-and-release-sop": {
+              "revision": 1,
+              "sha256": "cc275bc2550b06ffcfd29eaff642cb5177ec3820721aa20d602ce9523248b446"
+            },
+            "unit-vllm-ascend-moe-ep-stage-dispatch-mc2-and-double-routing-sop": {
+              "revision": 1,
+              "sha256": "73852501a83aaca9d5cf9e57620baf3cbac2ae5d9b50a7f7d66600be6df13a88"
+            },
+            "unit-vllm-ascend-moe-shared-expert-dual-stream-and-eplb-workflow": {
+              "revision": 1,
+              "sha256": "9897e432d3a8065760d8667ff3f03e9bb0f3fa25fab206d289c5723b8f567161"
+            },
+            "unit-vllm-ascend-quant-weight-loading-scheme-gating-and-li-quant-sop": {
+              "revision": 1,
+              "sha256": "8abb9b377cab75c4896ac1aab52f9b3fc32e846a3129d9d09d2c5c7f9a35dc7e"
+            },
+            "unit-vllm-ascend-w4a8-w8a8-mxfp8-mxfp4-gmm-and-outlier-clip-sop": {
+              "revision": 1,
+              "sha256": "f1182042e6e7b2f8cf0a72f7b784b702004b8caf2e38a8d0f837188fab207928"
+            },
+            "unit-vllm-ascend-mtp-draft-kv-allocation-and-recurrent-state-sop": {
+              "revision": 1,
+              "sha256": "9572f82d0b6846521b1e12873efcce9e89d80c2c78f732bd5bc82f650a36b086"
+            },
+            "unit-vllm-ascend-spec-decode-entropy-threshold-and-step-token-metrics-sop": {
+              "revision": 1,
+              "sha256": "85fda39d0e931c8fc646f9d6504c48e5e7039d170d63bb77e8f41d5e2d8cc3e1"
+            },
+            "unit-vllm-ascend-multi-stream-overlap-and-npu-prefetch-workflow": {
+              "revision": 1,
+              "sha256": "255605889e525a329d2462186dec9ed38154d0946255b333ef03ea229aa89ede"
+            },
+            "unit-vllm-ascend-prefill-decode-bottleneck-convergence-workflow": {
+              "revision": 2,
+              "sha256": "a6eb031f2640109d08dc7dbf8ef8deabfa300fd15068043507fe8c40bb2d8488"
+            },
+            "unit-vllm-ascend-compressed-tensors-quantization-and-step-breakdown-workflow": {
+              "revision": 1,
+              "sha256": "91b907b64f992c887c783889a9ed865cc2d09c4b86050b0aedf56614b561c7e3"
+            },
+            "unit-vllm-ascend-superkernel-scope-and-paged-fa-tnd-sop": {
+              "revision": 1,
+              "sha256": "85a77bb5d3a0ef38722e70c4e57fb2d3768c77f9b719b2a802c8be7b4a0b026e"
+            },
+            "unit-vllm-ascend-modelslim-w8a8-w4a16-w4a8-c8-and-quarot-sop": {
+              "revision": 1,
+              "sha256": "c0e13341491f2452c948690b9b5ce81f8137a63d535cdb706ceca2cfd6b3cb44"
+            },
+            "unit-vllm-ascend-modelopt-mxfp8-mxfp4-and-fp8-dequant-fusion-sop": {
+              "revision": 1,
+              "sha256": "909b2650a30d31497b65a7e65a7e6e73695bc6a6c14c24ca2d567ebf1b80f448"
+            },
+            "unit-vllm-ascend-msprobe-quantization-accuracy-triage-workflow": {
+              "revision": 1,
+              "sha256": "b0bab2cc3ee83fdf0f6ad288ab3833933ee7792c15ed8cfd0492195736f5caa9"
+            },
+            "unit-vllm-ascend-tp-weight-switch-and-multi-lora-punica-sop": {
+              "revision": 1,
+              "sha256": "15179d2928a1dd523a591dd202082e2f24de7707bc2d4703e69c7e27bbbb9722"
+            },
+            "unit-vllm-ascend-compilation-tiling-whitelists-and-peak-memory-oom-sop": {
+              "revision": 1,
+              "sha256": "99d2d066b264fbed8d28f12639333045eec232d10c0bf24d4b562ab0bbd08b2e"
+            },
+            "unit-vllm-ascend-precision-bisect-cp-lse-rope-moe-and-validation-sop": {
+              "revision": 1,
+              "sha256": "2661d93ef22057515d70c85cc32b24dbb2071dcfb5b4e708e9373cb4376e27c5"
+            },
+            "unit-vllm-ascend-hccl-timeout-oom-and-cross-stream-lifetime-triage-sop": {
+              "revision": 1,
+              "sha256": "3e24819efd92a75a49aa6a7ee12a033553be33b4441de4c73da125a0e1e2058d"
+            },
+            "unit-vllm-ascend-operator-contracts-shard-loading-and-platform-fallbacks-sop": {
+              "revision": 1,
+              "sha256": "1a63c62c6e77ec1cbcf6014328d822e7ef1b4b6802b10a7cf93eeb9811210630"
+            },
+            "unit-vllm-ascend-cann-error-code-and-hang-crash-triage-sop": {
+              "revision": 1,
+              "sha256": "e93c71b7791c6bc51663415e63d1eea37ff2fe9bd6bd583d40ea9813be383a30"
+            },
+            "unit-vllm-ascend-torchair-aclgraph-and-c8-kv-cache-execution-sop": {
+              "revision": 1,
+              "sha256": "1e7cd042efaf1c9d8671c670b3ccf7fc3b878396a27e5a96a8d574fba3c6c50d"
+            },
+            "unit-vllm-ascend-aclgraph-capture-invalidation-triage-sop": {
+              "revision": 1,
+              "sha256": "66c6ccf138b6e215b65bc9a9343f3f70b0cc18bd3ecf24ed5230d69ad61042df"
+            },
+            "unit-vllm-ascend-hybrid-recurrent-dp-state-hermes-workflow": {
+              "revision": 2,
+              "sha256": "286d258d585870fbcf3cc08baa70041284172cc7fb2a60c98439d34f0eccd599"
+            },
+            "unit-vllm-ascend-idle-dp-gdn-state": {
+              "revision": 3,
+              "sha256": "2af8f79690dedbbe400123de29e1659c9b368aaea3ab243f7759ad7dabe670cf"
+            },
+            "unit-vllm-ascend-0day-hybrid-model-bringup-hermes-workflow": {
+              "revision": 2,
+              "sha256": "8333a9c0505b08bf4d36a0ea5075bdd506cbdfa30aca97857e43c1ec25963391"
+            },
+            "unit-vllm-ascend-qwen35-gated-deltanet-decode-adaptation": {
+              "revision": 3,
+              "sha256": "470ef43e6a40e7dc981f9ebcc92ca550f7a1bca76242821305f335efbc9fecc2"
+            },
+            "unit-vllm-ascend-large-scale-ep-fine-grained-tp-and-dcpp-workflow": {
+              "revision": 1,
+              "sha256": "676b9fc54fb2572e4ef55cf0968f34154f6277e5c38e94f3373f143409124d0e"
+            },
+            "unit-vllm-ascend-eplb-swift-balancer-and-dyntra-lb-workflow": {
+              "revision": 1,
+              "sha256": "be3b816e2838f3fbbd02bfc832f883d6e9808ce169d3fc859deb952d94aa80ea"
+            },
+            "unit-vllm-ascend-netloader-rfork-and-sleep-mode-hbm-sop": {
+              "revision": 1,
+              "sha256": "73d44410deb08a8df2820f5c59ac244a153d42acc8fe14a7b4fe948b2ed7638d"
+            },
+            "unit-vllm-ascend-batch-job-srf-ai-qos-and-structured-output-sop": {
+              "revision": 1,
+              "sha256": "35d3be19eaa8a2235e078c3a1ea4d81f9ff733f2289031044f69cdf66a4ac0a8"
+            },
+            "unit-vllm-ascend-llm-base-dspark-and-dflash-proposer-sop": {
+              "revision": 1,
+              "sha256": "6541afdbc6a30a5b6a444cb81db8accc0d4db3a21947b4dc9892d1cb88694b7b"
+            },
+            "unit-vllm-ascend-eagle-medusa-suffix-and-ngram-proposer-sop": {
+              "revision": 1,
+              "sha256": "88f59c8777433642fbd4916da1bbb0fa0f0b99902606ad94a188411d1f74a722"
+            },
+            "unit-vllm-ascend-step3p5-and-hybrid-mtp-cache-rollback-workflow": {
+              "revision": 1,
+              "sha256": "214ccb9a2f2d5cdff683d78155c150648bddbf3d4c73d59ca7d149deed79c7b8"
+            },
+            "unit-vllm-ascend-dspark-mtp-aclgraph-d2h-elimination-mutator": {
+              "revision": 2,
+              "sha256": "b8f7e201bfcda40a6b2cb1e77818afc2a968177e1afcee887816d183e254224b"
+            }
+          },
+          "units_after": null
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "g5-dsh-044-v2": {
+      "infra_failed": 3
+    },
+    "g5-dsh-044-v3": {
+      "completed_fail": 2,
+      "completed_pass": 1
+    },
+    "g5-dsh-044-v4-long-training": {
+      "completed_pass": 1
+    },
+    "maintenance-codex": {
+      "infra_failed": 1
+    },
+    "maintenance-codex-v2": {
+      "unknown": 1
+    },
+    "maintenance-dsh-044": {
+      "infra_failed": 3,
+      "completed_fail": 6
+    },
+    "maintenance-dsh-044-native-path": {
+      "completed_pass": 3
+    }
+  },
+  "installed_inventory": {
+    "mindie-knowledge": {
+      "repository": "mindie-agent/knowledge",
+      "version": "0.13.3",
+      "revision": "38a42f6f778cfa555d8918fdcacd12cee4a181f5"
+    },
+    "remote-dev": {
+      "repository": "mindie-agent/remote-dev",
+      "version": "0.10.6",
+      "revision": "0463a13fce9618ec9a51904869d61acb0cdb8538"
+    },
+    "mindie-diagnostics": {
+      "repository": "mindie-agent/diagnostics",
+      "version": "0.5.2",
+      "revision": "801a01b2789aed7f58e971a909205a7d40b61077"
+    },
+    "mindie-profiler": {
+      "repository": "mindie-agent/profiler",
+      "version": "0.5.0",
+      "revision": "4010d72f0b6950caf1425e3b683d495a6c76016a"
+    },
+    "mindie-sim": {
+      "repository": "mindie-agent/sim",
+      "version": "0.7.1",
+      "revision": "15f93f3f0247b2653d0e9441eae56959e4d16d4e"
+    },
+    "npu-top": {
+      "repository": "mindie-agent/npu-top",
+      "version": "0.2.1",
+      "revision": "6737925d0ebb39c1aefda2c933eae0486169333c"
+    },
+    "mindie-coordinator": {
+      "repository": "mindie-agent/coordinator",
+      "version": "0.6.3",
+      "revision": "0ec71fb947ab24df8e543dcf056f4f06664baad8"
+    },
+    "mindie-bench": {
+      "repository": "mindie-agent/mindie-bench",
+      "version": "0.4.4",
+      "revision": "a36d8a5ae8633e560d19fee231179c3680149109"
+    }
+  },
+  "study_corpora": {
+    "maintenance": {
+      "ascend": {
+        "commit": "335c393336ef5b389a163404985d69f68e9c13e7"
+      },
+      "operators": {
+        "commit": "6f083f810c0d8eb77b9d7992ba96b19c51dfaf74"
+      }
+    },
+    "g5": {
+      "ascend": {
+        "commit": "25b06b94867dcb952064d6a986cc8c6793e0cd6c"
+      },
+      "operators": {
+        "commit": "6f083f810c0d8eb77b9d7992ba96b19c51dfaf74"
+      }
+    }
+  },
+  "runtime_lock_sha256": "a466c9669adf0d56c4c0245706b1aec777e08a580ac919c7d170b9a09391df78",
+  "tasks": {
+    "mtp-draft-slot-mapping-capacity-zh-vague": {
+      "prompt": "把 MTP 投机步数调到 5 之后，预热直接报越界崩了，帮忙查下代码并修好。",
+      "budget": {
+        "max_turns": 60,
+        "max_npu_runs": 12,
+        "timeout_sec": 600,
+        "verifier_timeout_sec": 180
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "0aa1b486c0e6d3fb457822da2b9b49ede2578562",
+        "issue": "14024",
+        "validation_scope": "multi-file historical vllm-ascend regression check without workspace test spoilers"
+      },
+      "source_class": "historical_source_regression",
+      "base_commit": "63bd2c418c8914201981f1150fc0e0ae5724896e",
+      "role": "eval",
+      "prompt_sha256": "3a5c9d7a8991fdfb5707356011975add3de101b94e8e3a10ee439a3ab468e172"
+    },
+    "mtp-draft-slot-mapping-capacity-zh-vague-g5-long": {
+      "prompt": "把 MTP 投机步数调到 5 之后，预热直接报越界崩了，帮忙查下代码并修好。",
+      "budget": {
+        "max_turns": 60,
+        "max_npu_runs": 12,
+        "timeout_sec": 900,
+        "verifier_timeout_sec": 180
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "0aa1b486c0e6d3fb457822da2b9b49ede2578562",
+        "issue": "14024",
+        "validation_scope": "multi-file historical vllm-ascend regression check without workspace test spoilers"
+      },
+      "source_class": "historical_source_regression",
+      "base_commit": "63bd2c418c8914201981f1150fc0e0ae5724896e",
+      "role": "eval",
+      "prompt_sha256": "3a5c9d7a8991fdfb5707356011975add3de101b94e8e3a10ee439a3ab468e172"
+    },
+    "npu-top-and-coordinator-multi-die-lease-repair-zh": {
+      "prompt": "工作区里多 Die 观测和租约分配脚本跑出来跟样例对不上，帮忙定位并把脚本修通。",
+      "budget": {
+        "max_turns": 50,
+        "max_npu_runs": 6,
+        "timeout_sec": 480,
+        "verifier_timeout_sec": 120
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "8c5ce76d9afb36205b8e59adb7b2d4b2ad89a85c",
+        "issue": "component-value-0.1.0",
+        "validation_scope": "Ascend A2/A3 dual-Die Phy-ID npu-smi parsing, sibling-pair S1 gang lease allocation, distinct-host placement, and DCMI cause mask decoding"
+      },
+      "source_class": "seeded_local_engineering_fixture",
+      "base_commit": "f752d0215c2e13b44ac472caa14c02b6749762e3",
+      "role": "eval",
+      "prompt_sha256": "2e1a6b062a46244cf1782170f0ab2365f3b0f3350a519ec56cfbaa0550add289"
+    },
+    "profiler-msprof-straggler-and-hbm-fix-zh": {
+      "prompt": "工作区里的性能与显存归因脚本跑出来的统计结果不对，帮忙对着样例数据把脚本修好。",
+      "budget": {
+        "max_turns": 50,
+        "max_npu_runs": 6,
+        "timeout_sec": 480,
+        "verifier_timeout_sec": 120
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "8c5ce76d9afb36205b8e59adb7b2d4b2ad89a85c",
+        "issue": "component-value-0.1.0",
+        "validation_scope": "torch_npu 1.2.0 multi-stream C7 interval-union step accounting, exposed communication straggler attribution, and P0-P4 non-additive HBM reconciliation"
+      },
+      "source_class": "seeded_local_engineering_fixture",
+      "base_commit": "f752d0215c2e13b44ac472caa14c02b6749762e3",
+      "role": "eval",
+      "prompt_sha256": "2b97b8704245cdaee25ff1474bfbe24c07ff40d5b3b6238075b25bdef6ad040b"
+    },
+    "sfa-mtp-seq-lens-eval-zh-vague": {
+      "prompt": "这边用 SFA 跑多步投机解码结果还是不对，帮忙排查下当前工作区代码并修干净。",
+      "budget": {
+        "max_turns": 80,
+        "max_npu_runs": 12,
+        "timeout_sec": 600,
+        "verifier_timeout_sec": 180
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "035b8d40718dc097e159e3590975d712535e4245",
+        "issue": "14236",
+        "validation_scope": "multi-file historical vllm-ascend regression check without workspace test spoilers"
+      },
+      "source_class": "historical_source_regression",
+      "base_commit": "b9c58e8d7073bdda448c49bc6239778c0e6a6960",
+      "role": "eval",
+      "prompt_sha256": "a22e13b360eeee8a28427a2368f5e01432d16c9a293cca2895a9cf7c2ef7b034"
+    },
+    "sfa-mtp-seq-lens-seed-zh-vague": {
+      "prompt": "开 SFA 跑多步 MTP 时投机接受率低得反常，帮忙看下工作区源码哪里不对并修好。",
+      "budget": {
+        "max_turns": 80,
+        "max_npu_runs": 12,
+        "timeout_sec": 600,
+        "verifier_timeout_sec": 180
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "035b8d40718dc097e159e3590975d712535e4245",
+        "issue": "14236",
+        "validation_scope": "multi-file historical vllm-ascend regression check without workspace test spoilers"
+      },
+      "source_class": "historical_source_regression",
+      "base_commit": "b9c58e8d7073bdda448c49bc6239778c0e6a6960",
+      "role": "seed",
+      "prompt_sha256": "62d837dc493c195b42f5cd9d41ada7ca7c575f3e0892f0c342609aca3dd0a761"
+    },
+    "sfa-mtp-seq-lens-seed-zh-vague-g5-long": {
+      "prompt": "开 SFA 跑多步 MTP 时投机接受率低得反常，帮忙看下工作区源码哪里不对并修好。",
+      "budget": {
+        "max_turns": 120,
+        "max_npu_runs": 12,
+        "timeout_sec": 900,
+        "verifier_timeout_sec": 180
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "035b8d40718dc097e159e3590975d712535e4245",
+        "issue": "14236",
+        "validation_scope": "multi-file historical vllm-ascend regression check without workspace test spoilers"
+      },
+      "source_class": "historical_source_regression",
+      "base_commit": "b9c58e8d7073bdda448c49bc6239778c0e6a6960",
+      "role": "seed",
+      "prompt_sha256": "62d837dc493c195b42f5cd9d41ada7ca7c575f3e0892f0c342609aca3dd0a761"
+    },
+    "sim-a3-ub-fusion-and-pipeline-dispatch-zh": {
+      "prompt": "当前目录里的 A3 性能仿真脚本预测结果跟样例对不上，帮忙检查下代码并修好。",
+      "budget": {
+        "max_turns": 50,
+        "max_npu_runs": 6,
+        "timeout_sec": 480,
+        "verifier_timeout_sec": 120
+      },
+      "declared_source": {
+        "repository": "vllm-project/vllm-ascend",
+        "fix_commit": "8c5ce76d9afb36205b8e59adb7b2d4b2ad89a85c",
+        "issue": "component-value-0.1.0",
+        "validation_scope": "Ascend A3 (Ascend910_9362) four-layer roofline/pipeline/UB-fusion solver, Qwen2.5-7B PhysicalCalibration TTFT/TPOT, and finite Vector/Cube operator DAG estimation"
+      },
+      "source_class": "seeded_local_engineering_fixture",
+      "base_commit": "f752d0215c2e13b44ac472caa14c02b6749762e3",
+      "role": "eval",
+      "prompt_sha256": "9837ffb9e31e64fbc2060ab94ac49e0a34b63a8a33c54bcc2ef95bf389f23263"
+    }
+  },
+  "prompt_provenance": {
+    "schema": "mindie-vague-task-provenance/1",
+    "prompt_file_sha256": "d1895e5b047e5a2e91e104683bcc6d28403b0f455d067c32febcbaf96ee66fd1"
+  }
+}

@@ -1,0 +1,16 @@
+name: product-release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    uses: mindie-agent/mindie-bench/.github/workflows/publish-product.yml@c7d0c8a4969b3816925c0405931ae17e28ce7a34
+    with:
+      benchmark-ref: c7d0c8a4969b3816925c0405931ae17e28ce7a34
+      release-kind: patch

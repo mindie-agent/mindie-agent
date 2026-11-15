@@ -1,156 +1,100 @@
-# MindIE Agent architecture
+# MindIE Agent 系统架构与模块分工
 
-Current design, revised 2026-10-04. This replaces the earlier implementation plan from Issue #195; history remains in Git. The [nine inherited VAWS principles](design-principles.md) govern every adapter. [Implementation status](implementation-status.md) records evidence separately; the simplifications below are requirements, not claims of completed acceptance.
+[English](architecture.en.md) · [返回文档中心](README.md)
 
-The [complete-material design](transcript-reuse-architecture-2026-10-04.md) defines the current transcript package, ReMe/LangMem boundaries and explicit history import. The implementation is merged; formal installation, public-feed consumption and native acceptance are recorded separately. The earlier native test retains its local-only boundary. A [later authorized synthetic sample](knowledge-review-2026-10-04/evidence/stage5/review.md) separately completed normal Stop, automatic public PR, the existing Grok review/merge and independent HTTPS consumption.
+MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy、OpenCode）提供昇腾领域知识检索、远端容器开发、多卡资源协调、目标负载调试与性能剖析能力。当前版本覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 框架开发与昇腾算子开发**，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查与精度调试**三类日常研发场景。
 
-## Product and normal use
+本文介绍各组件的职责边界与协同方式。正式发布版本与实测数据见[版本发布记录](README.md)，知识组织与检索机制见[知识与经验系统](knowledge-system.md)，宿主会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，工程准则见[设计原则](design-principles.md)。
 
-MindIE Agent enhances an existing Harness for NPU and infrastructure work. It does not supply its own foundation model, conversation harness, transcript hosting service or online knowledge API. Users work in their own business repositories and native tasks.
-
-A user explicitly invokes the plugin in a task. The first use fills only missing public destination, account and scope information, reusing prior approval. The configured experience loop runs automatically. Missing configuration, explicit disable and component failures are reported distinctly; none is an alternative read-only product tier. Legacy declined settings remain disabled until explicitly changed. General remote-dev tools work without activating knowledge.
-
-Knowledge is optional reference material. Agents choose whether to query, read or give a thumbs-up/down after actual use. There is no mandatory retrieval, report, vote or model-driven closing ceremony.
-
-The current domain is vLLM / vLLM-Ascend. A task uses its selected domain's knowledge and resources; additional domains retain independent content and indexes. Cross-domain assistance uses native tasks with bounded handoff when needed, without a mandatory router, global knowledge index or new conversation framework. Business source and native worktrees remain owned by the user and Harness.
-
-## Repositories and ownership
-
-| Component | Owns |
-| --- | --- |
-| This architecture repository | Product semantics, domain boundaries, design decisions and cross-adapter delivery status |
-| Codex, Kimi and Claude Code adapter repositories | Native task identity, explicit entry, onboarding, Hook translation, public transcript parsing, native model invocation, plugin installation and update |
-| Shared knowledge runtime | Admission, bounded increments, redaction and organization coordination, retrieval, optional feedback, publication receipts and cleanup |
-| Public domain knowledge repository | Reviewed Markdown content, versions and distribution through GitHub |
-| Existing Grok Bot application | Review proposed public content for sensitive or impermissible material and trigger appropriate merges, corrections or removal |
-| remote-dev | Remote files, commands, jobs, cancellation and artifacts, independent of knowledge activation |
-| diagnostics | Bounded local logs, actionable fault references and independently authorized, finite GitHub Issue reporting; shared by all adapters |
-| coordinator and other existing tools | Their own bounded execution or diagnostic duties, only when the actual task needs them |
-
-Adapters reuse the same knowledge and remote-dev implementations. Native identity and transcript formats stay in adapters. A shared runtime must not import a host-specific lease table or guess a task from the latest session or working directory. Adapter separation does not justify a second knowledge database or publishing protocol.
-
-Grok Bot means the installed bot application, not Grok CLI. There is no routine-wide one-merge quota, arbitrary candidate count or mandatory twenty-minute review window.
-
-## Contribution and reuse loop
+## 1. 原生宿主插件与共享运行时组件
 
 ```mermaid
-flowchart LR
-    A["Native task<br/>explicit plugin activation"] --> C{"Destination and task scope configured?"}
-    C -->|Missing| R["Report missing configuration<br/>reuse approved values"]
-    R --> C
-    C -->|Configured and enabled| H["Bounded Stop notification<br/>public task increment only"]
-    H --> L["Harness parser selects public messages<br/>local rules redact and save the body"]
-    L --> M["LangMem through the native small model<br/>index complete new blocks and short navigation"]
-    M --> P["Complete indexed package<br/>automatically propose a GitHub PR"]
-    P --> B["Existing Grok Bot reviews and merges"]
-    B --> K["Public Markdown domain repository"]
-    K --> S["Local synchronization and rebuildable index"]
-    S --> N["A new task optionally reads and uses experience"]
-    N -.-> F["Optional helpful / unhelpful feedback"]
-    F -.-> B
+flowchart TB
+    H["Codex / Claude Code / Kimi Code / DSH / Antigravity / WorkBuddy / OpenCode"] --> P["各自的轻量原生插件"]
+    P --> K["knowledge：领域路由、条件检索与经验沉淀"]
+    P --> R["remote-dev：远端文件编辑、命令与后台作业"]
+    P --> D["diagnostics：Agent 自身本地故障日志与可选 Issue 上报"]
+    P --> DB["debugger：目标 NPU 负载故障分诊、三原语精度定位与 ACLGraph 调试"]
+    P --> PR["profiler：昇腾 Profiling 采集、解析与跨轮次对比"]
+    P --> S["sim：通用资源、算子族、图与服务约束建模"]
+    K <--> F["vLLM-Ascend / xLLM / MindIE-SD / operators 等 9 大领域知识库"]
+    T["按需安装的 TaskClient / coordinator"] --> Q["机器台账、容器绑定、NPU 与端口租约"]
+    Q --> R
+    R --> N["远端昇腾主机与 Docker 容器"]
+    M["按需安装的 npu-top"] -.-> N
+    B["mindie-bench 端到端评测"] --> T
+    B --> H
 ```
 
-Missing configuration, explicit disable, scope mismatch and a component fault are distinct states, not successful alternative product modes. Explicit disable and legacy declined settings stop new collection; migration must not silently enable them. Task binding alone never establishes that capture or contribution completed. Retrieval and remote tools remain independently usable.
+七个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
+- **领域知识按需激活**：输入 `/mindie-agent`（在 Codex 中也可使用 `$mindie-agent`）即可按当前任务加载昇腾领域知识与工作流引导。
+- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试，以及 `diagnostics` 本地诊断通过 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在七端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
+- **经验沉淀按授权运行**：仅当当前会话显式调用 `/mindie-agent` 且满足用户保存的本地授权与项目范围时，宿主生命周期事件才会触发脱敏会话采集与经验提炼。
 
-When enabled, only the explicitly admitted native task and authorized project scope can contribute. Forks and new tasks have separate identities. Disable cancels unsent work; re-enable admits subsequent material, not an automatic replay of old history. Raw transcripts remain local and never become GitHub content.
+默认插件依赖 `knowledge`、`remote-dev`、`diagnostics` 与 `debugger`；`coordinator`、`profiler`、`sim` 与 `npu-top` 可按团队环境独立安装或组合使用。
 
-The Hook only admits a bounded notification and exits normally. It must not require the business model to continue its turn. Parsing and model work happen outside the short Hook budget. Every operation has its own time/output boundary; failed model input is not automatically retried. Unknown publication results are reconciled against the original remote branch/PR before another write.
+## 2. 仓库职责划分
 
-Task length, accumulated experience body size and total corpus size are not admission limits. Long tasks use incremental reads, saved progress and bounded individual model calls; the component must continue through all admitted material without truncating the remainder or requiring a new user task. Bound the memory, concurrency and time of each operation, not the lifetime of useful work. Internal processing chunks and submission coalescing are implementation details, not user-managed batches or fixed experience counts.
+| 仓库 | 负责内容 |
+| --- | --- |
+| [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品架构、领域边界、入口文档、跨仓规范与发布记录；不包含运行时代码或 MCP 服务 |
+| [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)、[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)、[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | 各宿主客户端的原生插件：会话识别、生命周期 Hook、脱敏会话记录提取、MCP 桥接与组件版本锁定 |
+| [`knowledge`](https://github.com/mindie-agent/knowledge) | 知识检索引擎：适用条件匹配、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、脱敏任务切片、经验提炼校验与社区 PR 投递 |
+| [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、`xLLM`、`MindIE-SD`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 9 大结构化分级知识库（`L1–L4`） |
+| [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
+| [`coordinator`](https://github.com/mindie-agent/coordinator) | 远端昇腾环境与多卡租约管家：机器与容器台账、NPU 拓扑探测（含 A2/A3 双 Die/A5 映射）、HCCL/RoCE 预检、单 Die 显存租约预算与并发编译槽位控制、NPU 卡与端口防冲突租约、受管任务清理 |
+| [`npu-top`](https://github.com/mindie-agent/npu-top) | 面向开发者的 NPU 集群监控看板：支持 A2/A3/A5 集群监控、共享读取 `coordinator` 的 `machines.json` 与 `~/.mindie/ssh` 凭据回退，提供本地回环实时 Web 界面（`127.0.0.1:8788`）、TUI、CLI/MCP 与 90 天利用率历史 |
+| [`diagnostics`](https://github.com/mindie-agent/diagnostics) | **仅面向 MindIE Agent 自身内部 DFX**：本地结构化故障日志（4×1 MiB 自动轮转）、离线脱敏诊断包导出与带 2 次有界外发对账重试（bounded 2-attempt outbound reconciliation）的可选 GitHub Issue 上报（`mindie_diagnostics`） |
+| [`debugger`](https://github.com/mindie-agent/debugger) | **专门面向被调优的目标 NPU 业务负载**（`vllm-ascend`、`MindIE-SD`、CANN 算子）：确定性昇腾 NPU 日志分诊（`npu_fault_triage`）、通用三原语精度/内存踩踏定位（`precision`）与 `ACLGraph` 图内逐 Replay 步无同步 Dump / 捕获守卫 / 静态指针追踪（`aclgraph`，包名 `mindie_debugger`） |
+| [`profiler`](https://github.com/mindie-agent/profiler) | 昇腾 Profiling 采集与原地解析工具：支持 `inventory / analyze / correlate / compare / capture / sql`，提供 Host-Device 关联、`analyze_profiling --structure` 基于 `mindie-model-structure/1` 的三态拓扑对齐（`aligned / declared_only / unattributed_observed`）、`auto_segment_decode_forwards` Decode 自动切分、显存拆解与跨轮次耗时对比（`mindie_profiler`） |
+| [`sim`](https://github.com/mindie-agent/sim) | 硬件无关的五层因果性能建模组件（`mindie_sim`）：统一组合物理资源、算子族、子图、纯模型成本与服务约束（覆盖 `DP × TP × EP × PP × DCP / DSA-CP / PCP` 与 PD 分离），支持 4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、30ms SLA 硬件缩放求解、模型结构导出及 856 用例跨集群校准（见[建模系统](simulation-system.md)） |
+| [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | 昇腾真机端到端评测套件：覆盖 20 个行为级验证任务（109 项三态与辅助变体对照）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、跨任务经验复用评测及版本基准报告 |
+| [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)、[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace) | 昇腾 AI Infra 开源 Skills 目录，以及支持 Git Worktree 多任务隔离的 `vLLM` + `vLLM-Ascend` 本地开发工作区 |
 
-The body is the ordered, locally redacted public conversation. Codex implements
-this first: user input, public assistant progress and final answers survive;
-tool calls/results, hidden reasoning, injected instructions and native duplicate
-wrappers do not. Compaction uses no model and does not shorten public messages.
-Body and cursor commit together. Gitleaks plus explicit privacy rules run before
-storage, model input or publication; repository review cannot undo a secret
-uploaded in an earlier commit. Rule scanning cannot establish the publicness of
-proprietary meaning, so existing project authorization remains necessary.
+### 跨组件核心协作边界
 
-Only block retrieval headers and short task navigation may come from the
-adapter-owned model. LangMem processes each complete new batch plus the previous
-short navigation through the existing native Harness; it never rewrites the
-body or rereads all prior material for a final merge. The merged Codex implementation
-uses `gpt-5.6-luna` with low effort independently of the business model.
-Required indexing failure does not prevent local capture, but the incomplete
-package cannot publish. There is no source-excerpt or first/last fallback.
-Known usage and failed or uncertain outcomes remain recorded; a saved returned
-response resumes local application without another call. Failed or uncertain
-native calls require explicit retry.
+- **共享 SSH 认证底座（`remote_dev.auth`）**：SSH 认证与密钥维护由 `remote-dev` 统一实现，`coordinator` 与 `npu-top` 仅保存端点配置与 `auth_ref` 引用。同一操作系统用户下的不同进程、会话与宿主插件共享 `~/.mindie/ssh/credentials.json`（由用户目录权限保护，不依赖系统钥匙串或系统登录密码；Windows 与 WSL 各自使用所在环境的用户目录）。普通开发调用在业务命令提交前自动完成密码回退与公钥修复，已提交的业务命令绝不盲目重放；只读诊断与监控探针可在握手阶段回退密码认证而不修改远端公钥。
+  - **首次接入由 Agent 无感完成**：当用户在对话中提供了远端机器的 SSH 密码时，Agent 直接调用 `remote_auth(action="setup", password=...)` 将其写入共享认证底座，自动完成密码核验、Ed25519 公钥下发与独立免密复验，随后无缝继续原任务——本地尚未登记 `auth_ref` 不代表用户未提供凭据。其中 `password_env` 仅读取 MCP 服务进程启动时已继承的环境变量；旧版工具目录也可通过本地子进程标准输入调用 `remote-dev auth setup --password-stdin` 完成导入。各端插件适配器完整透传共享层的安全恢复提示、业务命令是否已提交以及公钥安装状态，绝不将其笼统压缩成“请用户手动配置凭据”（详见 [SSH 认证契约审计](audits/2026-11-06-ssh-auth-contract.md)）。
+- **`sim` 与 `profiler` 的结构与实测协同**：`mindie-sim` 负责声明模型与算子拓扑结构（Case 前端与 `OpSpec` DAG 统一导出 `mindie-model-structure/1`），并由单一五层因果执行引擎完成资源、算子族、子图、纯模型与服务约束的机理预测、4D 效率拆解（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）及 SLA 硬件配比求解；`mindie-profiler` 负责原始 `msprof` CSV/SQLite 解析、张量形状提取以及基于 `mindie-model-structure/1` 的拓扑引导 Decode 步切分（`auto_segment_decode_forwards`）与事件归因。两者通过结构导出与实测 Cohort / Decode Body 统计解耦协同，详见[性能建模系统](simulation-system.md)、[Profiler 系统设计](profiler-system.md)与[结构复用与实测映射](profiler-sim-structure.md)。
 
-Live Stop intake and explicit historical import share the same projection,
-redaction, incremental queue and package logic. History import requires an
-explicitly selected source and reuses existing contribution scope; it does not
-activate historical sessions or discover unrelated history. Consumers reuse
-producer headers and build only local ReMe indexes, without another model call.
-Claims remain attributed and uncertain. Other Harnesses require their own
-adapter update and acceptance; this Codex implementation does not establish that evidence.
+## 3. 远端 NPU 任务的执行与资源回收
 
-Publishing uses the already prepared public body. Creating or updating the PR is mechanical and does not need another model rewriting pass. The existing Bot reviews content rather than manufacturing a second corpus-processing pipeline.
+远端源码开发始终以用户选定的源码目录与业务 Python 解释器为准；用户未显式指定时，默认原地沿用目标环境现有的源码检出与兼容运行环境，不会因为切换或修改源码就自动新建虚拟环境。`remote-dev` 提供免导入的多解释器依赖与 editable 路径探测，`coordinator` 直接复用该实现并保留各 `venv` 的独立 `sys.prefix` 身份：其中受管 `mindie.run` 用于将本地快照物化为独立远端执行目录，而在指定的远端目录中开发时则直接组合使用 `remote-dev` 原地操作与 `coordinator` 设备租约。触发 C++/AscendC 原生重编译前必须先备份受影响的基线二进制，构建完成后在新进程中核验实际加载路径与数值正确性（详见[源码开发、重编译与产物恢复契约](source-rebuild-contract.md)）。
 
-## Public records and lightweight local state
+当标准探测或辅助准备流程不适用于当前非标环境时，Agent 可在会话已有授权内直接改用现有 CLI、宿主原生 SSH 或任务级临时脚本继续推进。失败响应完整保留已确认的环境事实与作业引用，并通过 `next` 给出可执行入口，绝不让自动探测成为阻断全任务的硬门禁；切换执行工具时依然严格遵守物理设备租约归属，任何状态为 `unknown` 的外部写入均须先只读对账再做后续操作。
 
-Public entries are complete ordinary Markdown task packages: one navigation manifest binds ordered stable material blocks, their hashes and fallible retrieval headers. Keep a clear title, retrieval summary and the knowledge/experience distinction. Optional `conditions` holds relevant software versions or source commits; absent values are allowed. Device choices, shapes, seeds, tolerances and command details belong in the body.
+在远端昇腾服务器上跑编译、测试或压测时，各组件按以下流程协同：
+1. **环境探测与租约申请**：通过 `coordinator` 检查目标主机与容器状态，按实际物理拓扑申请空闲 NPU 卡与端口租约（例如在昇腾 A3 910C 上显式区分单卡双 Die 的 `Phy-ID` 映射，避免两个任务误绑同一物理卡的相邻 Die）。
+2. **远端执行与后台托管**：通过 `remote-dev` 在目标容器中修改代码并拉起测试或压测作业；耗时较长的编译和基准测试自动转为受管后台任务，支持随时增量拉取日志。
+3. **断线重连与状态保护**：网络抖动或客户端重连时，先查询原任务 ID 并恢复跟踪，避免重复拉起仍在运行的远端进程。任务结束或取消时，依次确认子进程树退出、NPU 租约释放与端口回收。外部操作严格区分已完成（`completed`）、已失败（`failed`）与结果未知（`unknown`），本地记账超时不会覆盖已成功的远端执行结果。
 
-Local ownership, session provenance, retry bookkeeping, authorization and receipts remain local. Do not expose internal producer IDs, empty source arrays or routine lifecycle fields as public content. An entry's identity must support reference and feedback, but its exact storage belongs to the knowledge component contract; changing a title is not a required lifecycle step.
+## 4. 四类知识协同与双模式工作流（经验复用 + 独立探索）
 
-A submission receipt records the exact PR head and complete package. Current
-local material remains available until the confirmed public feed supplies that
-revision; resolved frozen-send payloads can then be retired without another
-publication. Later additions use the current valid feed package and append only
-new admitted material. Independent remote changes are checked at the exact
-head; conflicting packages require review and are never silently rewritten or
-merged by a second model. Keep current authority files and necessary unresolved
-send payloads, not a per-revision body archive. Withdrawn material is unavailable
-and superseded fixed references expire explicitly.
-Unknown write outcomes retain the minimum reconciliation material and are checked before another write. Transient network and local staging failures resume quietly through the existing background worker with durable backoff, per-attempt timeouts and stable operation identities. A local export reservation is not a sent receipt and must not permanently consume material before an outbox exists. Neither recovery nor plugin update resets the capture boundary or permits replay of failed model work. Content rejection and deliberate remote removal are not transient failures: do not reopen or republish the rejected content automatically.
+本节所述的知识上下文挂载与经验沉淀闭环仅在用户显式输入 `/mindie-agent` 唤醒的会话中运行；`profiler`、`sim`、`coordinator`、`debugger` 等确定性工具无需唤醒知识会话即可随时独立调用。
 
-Contribution remains a persistent opt-in choice. Routine work needs no per-entry approval, discard decision or batch management. Confirmed submission cleanup and minimum duplicate-prevention receipts are internal responsibilities.
+在解决复杂的昇腾推理适配与性能优化问题时，MindIE Agent 将领域知识按工程用途分为四个层级（对应知识库 Schema 中的 `category` 与兼容字段 `tier: L1..L4`），并支持**常规经验复用**与**跳出既有思路的独立探索（`mode="explore"`）**两种工作方式：
 
-Markdown files are the body authority. SQLite holds small cursor, queue and outcome transactions; ReMe owns derived file/chunk/BM25 retrieval in the same process. Derived caches may contain material text and are rebuildable; no raw Harness transcript archive or second body database is introduced. LangMem is used as a function, without another graph store or background service.
+| 知识层级与类别 | 工程用途 | 运行时协同方式 |
+| --- | --- | --- |
+| **`L1` · 硬件约束与测量基线**<br/>（`axiom` / `measurement`） | 提供昇腾 910B / A3 / A5 硬件规格、内存对齐要求、`ACLGraph` 静态图捕获约束以及标准计时/精度验证准则，避免低级硬件违规和伪性能收益 | 按当前任务的芯片型号与仓库条件自动挂载（`foundation_baseline`），或作为上层规程的前置依赖（`inherits_from`）完整注入 |
+| **`L2` · 诊断与操作规程**<br/>（`sop`） | 提供具体场景下的定位步骤、Profiling 采集分析方法与模块适配操作指南，先用确定性工具定界瓶颈再改代码 | 配合 `mindie-profiler`（实测 trace 分析）、`mindie-sim`（Roofline 与流水线建模）和 `diagnostics` 定位具体根因 |
+| **`L3` · 排障与调优工作流**<br/>（`workflow`） | 面向 80% 常见的新模型适配、精度排障与常规性能调优：提供带有观测分支和判断条件的排障决策流，帮助 Agent 快速收敛问题 | 默认检索模式（`mode="standard"`）直接返回匹配的工作流；任务验证通过后，可将新发现的排查分支经 `knowledge_distill` 沉淀回知识库 |
+| **`L4` · 代码优化变换与独立探索**<br/>（`mutator`） | 记录经过验证的算子向量化、流水排布、通信融合与图捕获优化方案；当常规排障/调优连续受阻且距离硬件 Roofline 仍有明显空间时，可切换至**独立探索模式（`mode="explore"`）** | 调用 `knowledge_query(..., mode="explore")` 时，系统自动**屏蔽 `L3` 常规工作流**以打破思维定势，仅挂载 `L1` 硬件约束、`L2` 实测瓶颈、`L4` 可选代码变换及已证实无效的避坑条件（`conditional_avoid`），供独立子会话在隔离环境中并行编译、串行上卡实测，并通过“编译 → 精度 → 性能 → 留一法消融”四步验证 |
 
-## Feedback and maintenance
+> [!NOTE]
+> **术语约定说明**：
+> - 知识库中的 `tier: L1..L4` 与 `category`（`axiom`/`measurement`、`sop`、`workflow`、`mutator`）一一对应，仅用于区分知识条目的工程角色，不代表结论的置信度；证据可靠程度由 `evidence_strength`（`hardware_spec`、`reproduced_empirical`、`single_observation`、`hypothesis`）独立标记。
+> - `mindie-sim` 按**物理资源 → 算子族 → 结构/子图 → 纯模型 → 服务约束**组合，建模精度和实测校准是独立维度；旧四层 CLI 不再是新版接口。昇腾片上存储统一写全称 **`L1 Buffer` / `L0A` / `L0B` / `L0C` / `UB` / `L2 Cache`**；工程测试分级统一使用 **`Tier 0 – Tier 3`**。
 
-Thumbs-up/down is a loose, optional usefulness signal, not truth certification. Missing feedback is not a negative vote. A consumer can explain whether an entry helped or misled it; the producer's self-assessment is not independent reuse evidence.
+## 5. 三类核心研发场景的验证标准
 
-Negative feedback gives an unhelpful entry an exit path. Maintenance can correct or remove it from the distributed corpus; Git retains normal history. No public `retired` record or empty retirement reason is required after removal.
+| 研发场景 | 验收要求 |
+| --- | --- |
+| **新模型适配（0-day Bring-up）** | 固定起始代码、模型配置与权重版本，跑通完整推理链路，并与独立数值参考（Golden Reference）完成精度比对；CPU 跑通不能替代 NPU 实机验证 |
+| **模型与算子性能调优** | 固定输入 Shape、数据类型与软硬件环境，同时给出精度对齐证明与基线/优化后实测耗时对比；多处改动组合优化需完成留一法消融（Ablation）确认每一项均贡献正收益 |
+| **运行时故障排查** | 记录可复现的故障现象、根因定位依据、修复前后实机运行结果以及 NPU/端口资源清理情况；源码静态分析与真机复现结果需明确区分 |
 
-Repeated useful experience may suggest a Skill, but automatic Skill extraction is a future capability requiring a concrete useful example. Do not prebuild confidence ladders, promotion thresholds, compulsory judging calls or a second evaluation service. Skills mainly explain capabilities and methods; knowledge stays advisory.
+## 6. 版本发布、无感更新与隐私保护
 
-## Activation, execution and updates
-
-Native task identity, authorization, an in-flight operation, an MCP connection and a remote job have different lifetimes. Explicit authorization persists until disabled or changed in scope. It does not expire merely because time passes or the runtime directory changes.
-
-Adapters track remote `main` commits now; release tracking is a later change. An update stages the complete adapter, Skills, Hooks and pinned runtime, verifies the selected native package and actually loaded resources, and atomically commits one generation. Every operation uses a coherent scripts/interpreter/configuration tuple.
-
-Actual in-flight work blocks switching. An idle authorized task or an old unknown PR receipt does not. The runtime's idle decision and admission freeze must be atomic. The original task must still control its existing remote job after an update.
-
-When switching requires stopping a live local knowledge service, the updater preserves that fact and restores service under the selected generation if valid explicit task authorization remains. Restoration binds the selected Harness profile and its existing model configuration; process readiness alone does not establish that later organization can use that model. A durable admitted Stop notification can request a bounded wake outside the Hook; it does not start a business turn or replay a missing event. Query and wake paths reconcile the actual endpoint and generation before starting one owned service. An interrupted handoff remains observable and may resume through these existing paths after rechecking authorization and process ownership; it must not require the user to discover a CLI command.
-
-Plugin and feed updates classify failures. Temporary connectivity, rate limits and interrupted IO back off through the existing scheduler, honoring server retry guidance; three such failures must not permanently exclude an otherwise valid commit. Invalid content or incompatible generations remain isolated while the last working version stays available. Each attempt stays bounded; a later background network attempt is not another model attempt. Status records the last success, fault category and next recovery time. Authentication or native trust failures request the one necessary external action; routine connectivity failures do not wake the user or business model. Stable management entrypoints dispatch to the selected generation rather than an outdated installer copy.
-
-Keep necessary old entrypoints and rollback data while a host may still use them. Installed files, definitions loaded into a live task, and Hook trust are separate facts. A host-required trust review is never bypassed or silently granted by an updater.
-
-Native identity binding must use verified host evidence. Missing metadata can be bridged by an exact one-shot native tool event binding, never by guessing from content, timestamps or the latest task. A remote tool's job `session_id` alias is not a native task credential.
-
-Detailed lifecycle semantics are in [Harness boundaries and lifecycle](harness-boundary-and-lifecycle.md).
-
-## Diagnostics and fault reporting
-
-Original component failures carry a local diagnostic reference and useful recovery facts. Logging has byte, count and age limits; offline maintenance protects live writers and every registered reader. Logging or reporting failure never changes the original business outcome or replays the operation.
-
-Automatic tool-fault reporting is an independent optional user choice, separate from knowledge contribution. One shared reporter publishes only allowlisted code and execution facts, without transcripts, command arguments, raw output or model analysis. Expected caller, configuration, cancellation, connectivity and ordinary remote command failures do not automatically become product bug Issues. Stable fingerprints deduplicate across tasks; finite persisted processing budgets also cover readback and crashes. Unknown writes reconcile without automatic reposting.
-
-The native adapters expose configuration and status; service installation runs outside short Hooks. They do not add a global all-task failure Hook or separate reporter per host. See [diagnostics and reporting](diagnostics-and-reporting.md) for the implementation contract and acceptance boundaries.
-
-## Delivery and acceptance
-
-Codex, Kimi and Claude Code have independent repositories and native acceptance. Current Codex business tests use gpt-6-luna / max in Windows PowerShell and WSL. This business setting never selects metadata effort: Codex body capture calls no model, and optional title/summary generation uses the adapter's internal GPT-6-Luna / low policy, with no user configuration. This metadata policy has completed real calls on both platforms. Kimi model acceptance is currently deferred; Claude Code's configured model must be named accurately in its own evidence.
-
-Windows hardware is available for current PowerShell and WSL acceptance. Earlier macOS evidence remains scoped to its recorded versions and behavior. Windows CI does not prove native Stop delivery, actual NPU execution or public contribution: those boundaries require the controlled native run.
-
-Development checks, native installation, real Hook delivery, a real public PR/Bot merge, and usefulness in a new task are recorded separately. A registry success, connected MCP panel or old revision's evidence cannot stand for the final implementation.
-
-The current work prioritizes the lifecycle and knowledge loop across these three adapters. Old business Skills, profiling analysis, automatic Skill extraction and further domain/Harness expansion remain deferred. Cross-domain work may reuse native tasks and existing tools when needed; there is no compulsory domain router or new conversation framework.
-
-The old VAWS bootstrap, source/worktree manager and legacy installation path remain retired. This permission to rewrite product internals does not authorize deletion of unrelated user repositories, private material or running resources.
+- **版本锁定与后台更新**：各宿主插件锁定经过配套验证的运行时组件基线版本（主仓 [`channels/0.1.json`](../channels/0.1.json) 记录经验证的产品版本组合）；运行时组件更新直接从各官方组件仓库发现正式 GitHub Release（按 `max(已安装版本, 插件基线版本, 正式 Release 版本)` 防止降级，校验不可变 Tag、`pyproject.toml`、构建资产存在性与 `benchmark-results.json` 后从精确 Git SHA 构建隔离 `uv.lock` 环境并通过原生探针），在后台服务空闲时完成原子切换，不影响正在运行的研发会话。详见[版本兼容与无感更新](release-compatibility-and-update.md)。
+- **隐私脱敏与可控共享**：会话记录提取、经验沉淀与故障上报均遵循严格的本地脱敏规则（确定性正则 + Gitleaks 扫描），自动剔除内网 IP、机器路径、密钥凭据与命令敏感参数。关闭社区共享开关不影响本地知识检索、故障诊断与远端开发功能。详见[诊断日志与故障上报](diagnostics-and-reporting.md)。

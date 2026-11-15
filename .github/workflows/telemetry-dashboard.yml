@@ -1,0 +1,64 @@
+name: telemetry-dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'channels/**'
+      - '.github/scripts/update_telemetry_dashboard.py'
+      - '.github/scripts/sync_org_versions.py'
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: telemetry-dashboard
+  cancel-in-progress: false
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository scripts
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Prepare telemetry-data branch worktree
+        run: |
+          DATA_DIR="$RUNNER_TEMP/telemetry-data"
+          rm -rf "$DATA_DIR"
+          if git ls-remote --exit-code --heads origin telemetry-data >/dev/null 2>&1; then
+            git clone --depth 1 --branch telemetry-data "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$DATA_DIR"
+          else
+            mkdir -p "$DATA_DIR"
+            git -C "$DATA_DIR" init
+            git -C "$DATA_DIR" checkout --orphan telemetry-data
+            git -C "$DATA_DIR" remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect org telemetry and render SVG dashboards
+        env:
+          TELEMETRY_TOKEN: ${{ secrets.TELEMETRY_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          python3 .github/scripts/update_telemetry_dashboard.py --output-dir "$RUNNER_TEMP/telemetry-data"
+
+      - name: Commit and push updated telemetry artifacts
+        run: |
+          DATA_DIR="$RUNNER_TEMP/telemetry-data"
+          git -C "$DATA_DIR" config user.name "github-actions[bot]"
+          git -C "$DATA_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$DATA_DIR" add README.md dashboard.zh.svg dashboard.en.svg telemetry-history.json
+          if git -C "$DATA_DIR" diff --cached --quiet; then
+            echo "No telemetry changes to commit."
+          else
+            git -C "$DATA_DIR" commit -m "chore(telemetry): refresh 12h ecosystem dashboard [skip ci]"
+            git -C "$DATA_DIR" push origin HEAD:refs/heads/telemetry-data
+          fi
+
+      # Product README/profile synchronization is an explicit release operation.
+      # Periodic telemetry must not rewrite version documentation across repos.

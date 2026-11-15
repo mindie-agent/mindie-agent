@@ -1,0 +1,2918 @@
+{
+  "blocking_reasons": [],
+  "generated_at": "2026-10-21T10:39:29.854474+00:00",
+  "manifest_sha256": "ebb5f3147176c3d2d34c048c0c649f7f8aa2d83f1b86447df8867ee98f61a7e2",
+  "product_version": "0.1.0",
+  "release_gate": true,
+  "reports": [
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "174e2dbd5eb77a344e7e1d43919ea2a4dd2e056c2ef98a1855ef6ebefa25e9f3",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "redact_8k_latency",
+                  "unit": "us/op",
+                  "value": 8715.872659999775
+                }
+              ],
+              "process_seconds": 1.0169455070000026,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "703f9417e543334d3422de2669c043265ed261d061a3b2795574de77532adace",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "redact_8k_latency",
+                  "unit": "us/op",
+                  "value": 8787.880179999944
+                }
+              ],
+              "process_seconds": 1.0172385409999833,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "294715eaf1ccbccb4b8a4ac8b991a64245a5ea64becf13143b2d123a6d6b9600",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "redact_8k_latency",
+                  "unit": "us/op",
+                  "value": 8581.966799999918
+                }
+              ],
+              "process_seconds": 1.0172919409999963,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "d41ebacd4019e4e868e294172fb583255123c8b3409cc4492e7fe4db646a8314",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "redact_8k_latency",
+                  "unit": "us/op",
+                  "value": 8635.391610000055
+                }
+              ],
+              "process_seconds": 1.0172761190000017,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "bac12223e282a12d5af119ab9feb692af711126e2dce7528ec91f541a6a0b1ba",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "redact_8k_latency",
+                  "unit": "us/op",
+                  "value": 8633.45554999995
+                }
+              ],
+              "process_seconds": 1.0172693730000049,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "redaction",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                100,
+                100,
+                100,
+                100,
+                100
+              ],
+              "max": 8787.880179999944,
+              "mean": 8670.913359999928,
+              "median": 8635.391610000055,
+              "min": 8581.966799999918,
+              "name": "redact_8k_latency",
+              "samples": [
+                8715.872659999775,
+                8787.880179999944,
+                8581.966799999918,
+                8635.391610000055,
+                8633.45554999995
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "2772d30e5609059e09cf6d887d860e27cc53a290b3ac4fe4ac6e03b170bf791e",
+              "metrics": [
+                {
+                  "iterations": 500,
+                  "name": "npu_fault_triage_latency",
+                  "unit": "us/op",
+                  "value": 1501.2613920000035
+                }
+              ],
+              "process_seconds": 0.866722880999987,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "95b07fe3a1399b9a790f9ba8d935487c50d53c3318524452843deefa57b184be",
+              "metrics": [
+                {
+                  "iterations": 500,
+                  "name": "npu_fault_triage_latency",
+                  "unit": "us/op",
+                  "value": 1469.443482000031
+                }
+              ],
+              "process_seconds": 0.8668992470000205,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "04c0c47183354623f05ed470a1ba0e6373b81edbed0c1d4cbbbbeb5328b77aab",
+              "metrics": [
+                {
+                  "iterations": 500,
+                  "name": "npu_fault_triage_latency",
+                  "unit": "us/op",
+                  "value": 1403.0115659999751
+                }
+              ],
+              "process_seconds": 0.8168830329999821,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "911e36d8c18e7b3a31a25ac77a20584f8b23812b27deb2308491892527e626b7",
+              "metrics": [
+                {
+                  "iterations": 500,
+                  "name": "npu_fault_triage_latency",
+                  "unit": "us/op",
+                  "value": 1483.0127840000387
+                }
+              ],
+              "process_seconds": 0.866790266999999,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "0339045b600624fe4aec8429aa3814ff29e07e5ccc7a9919f1cb6611a90254da",
+              "metrics": [
+                {
+                  "iterations": 500,
+                  "name": "npu_fault_triage_latency",
+                  "unit": "us/op",
+                  "value": 1416.2449620000075
+                }
+              ],
+              "process_seconds": 0.8164943740000012,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "npu-fault-triage",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                500,
+                500,
+                500,
+                500,
+                500
+              ],
+              "max": 1501.2613920000035,
+              "mean": 1454.5948372000112,
+              "median": 1469.443482000031,
+              "min": 1403.0115659999751,
+              "name": "npu_fault_triage_latency",
+              "samples": [
+                1501.2613920000035,
+                1469.443482000031,
+                1403.0115659999751,
+                1483.0127840000387,
+                1416.2449620000075
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T07:06:36.301400+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "7.0.0-1017-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/diagnostics",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "fba07e8607ddadde14cea315c9dbda23726c1c79"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "fba07e8607ddadde14cea315c9dbda23726c1c79"
+      },
+      "started_at": "2026-10-21T07:06:26.949580+00:00",
+      "suite": "core",
+      "suite_sha256": "9c20463ef6470ba5c9affcf64a8350b29ade38a658c1222fbde898f1f0f7af77",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "f8651e2b5a940a49eb703a9d48ed496a07dccbe8"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "f8651e2b5a940a49eb703a9d48ed496a07dccbe8"
+        },
+        "version": "0.4.1"
+      },
+      "version": "0.5.1"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "2bc066e1c88fbf710b1e48f053e7d85e8bc3bdf47f825f71f49e5bbf0209faf4",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "c7_two_rank_two_step_analysis",
+                  "unit": "us/op",
+                  "value": 7889.165199999581
+                },
+                {
+                  "iterations": 50,
+                  "name": "c7_two_rank_comparison",
+                  "unit": "us/op",
+                  "value": 283.9385599999389
+                },
+                {
+                  "iterations": 200,
+                  "name": "c7_memory_non_additive_attribution",
+                  "unit": "us/op",
+                  "value": 138.2929500000074
+                },
+                {
+                  "iterations": 1000,
+                  "name": "c7_local_ideal_roofline",
+                  "unit": "us/op",
+                  "value": 9.242884000002505
+                }
+              ],
+              "process_seconds": 0.7156116560000001,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "994994c50bcf04bc2b55532d02881e9651e06f0bc54a233de92b84e4b5e570ae",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "c7_two_rank_two_step_analysis",
+                  "unit": "us/op",
+                  "value": 7667.325600000651
+                },
+                {
+                  "iterations": 50,
+                  "name": "c7_two_rank_comparison",
+                  "unit": "us/op",
+                  "value": 286.632400000002
+                },
+                {
+                  "iterations": 200,
+                  "name": "c7_memory_non_additive_attribution",
+                  "unit": "us/op",
+                  "value": 136.90649999997362
+                },
+                {
+                  "iterations": 1000,
+                  "name": "c7_local_ideal_roofline",
+                  "unit": "us/op",
+                  "value": 9.326800000003743
+                }
+              ],
+              "process_seconds": 0.31487771399999787,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "741c9758bcc05dcf2fb2bf63e1a4b4dafcaa8bb059cd65d9eadfc5db52200e7f",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "c7_two_rank_two_step_analysis",
+                  "unit": "us/op",
+                  "value": 7712.3020000001925
+                },
+                {
+                  "iterations": 50,
+                  "name": "c7_two_rank_comparison",
+                  "unit": "us/op",
+                  "value": 276.05540000010365
+                },
+                {
+                  "iterations": 200,
+                  "name": "c7_memory_non_additive_attribution",
+                  "unit": "us/op",
+                  "value": 135.50196999997155
+                },
+                {
+                  "iterations": 1000,
+                  "name": "c7_local_ideal_roofline",
+                  "unit": "us/op",
+                  "value": 9.552212999999199
+                }
+              ],
+              "process_seconds": 0.31488108300000306,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "7348bd68acb373f14ebdabc08fb196aac0baec9aba758f5b824bf21aad0d4790",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "c7_two_rank_two_step_analysis",
+                  "unit": "us/op",
+                  "value": 7646.180600001174
+                },
+                {
+                  "iterations": 50,
+                  "name": "c7_two_rank_comparison",
+                  "unit": "us/op",
+                  "value": 274.61410000000797
+                },
+                {
+                  "iterations": 200,
+                  "name": "c7_memory_non_additive_attribution",
+                  "unit": "us/op",
+                  "value": 134.69782000001373
+                },
+                {
+                  "iterations": 1000,
+                  "name": "c7_local_ideal_roofline",
+                  "unit": "us/op",
+                  "value": 9.31340599999686
+                }
+              ],
+              "process_seconds": 0.3147703500000034,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "55dc3d10d304db22bd0dfa41ce3a8912df9f45481b3bce2c3187782ba2dc8a36",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "c7_two_rank_two_step_analysis",
+                  "unit": "us/op",
+                  "value": 7564.114800000255
+                },
+                {
+                  "iterations": 50,
+                  "name": "c7_two_rank_comparison",
+                  "unit": "us/op",
+                  "value": 272.5504400000034
+                },
+                {
+                  "iterations": 200,
+                  "name": "c7_memory_non_additive_attribution",
+                  "unit": "us/op",
+                  "value": 132.22333499999905
+                },
+                {
+                  "iterations": 1000,
+                  "name": "c7_local_ideal_roofline",
+                  "unit": "us/op",
+                  "value": 9.417410000004622
+                }
+              ],
+              "process_seconds": 0.31478569800000145,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "profiler-analysis-and-attribution",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                1000,
+                1000,
+                1000,
+                1000,
+                1000
+              ],
+              "max": 9.552212999999199,
+              "mean": 9.370542600001386,
+              "median": 9.326800000003743,
+              "min": 9.242884000002505,
+              "name": "c7_local_ideal_roofline",
+              "samples": [
+                9.242884000002505,
+                9.326800000003743,
+                9.552212999999199,
+                9.31340599999686,
+                9.417410000004622
+              ],
+              "unit": "us/op"
+            },
+            {
+              "iterations": [
+                200,
+                200,
+                200,
+                200,
+                200
+              ],
+              "max": 138.2929500000074,
+              "mean": 135.52451499999307,
+              "median": 135.50196999997155,
+              "min": 132.22333499999905,
+              "name": "c7_memory_non_additive_attribution",
+              "samples": [
+                138.2929500000074,
+                136.90649999997362,
+                135.50196999997155,
+                134.69782000001373,
+                132.22333499999905
+              ],
+              "unit": "us/op"
+            },
+            {
+              "iterations": [
+                50,
+                50,
+                50,
+                50,
+                50
+              ],
+              "max": 286.632400000002,
+              "mean": 278.7581800000112,
+              "median": 276.05540000010365,
+              "min": 272.5504400000034,
+              "name": "c7_two_rank_comparison",
+              "samples": [
+                283.9385599999389,
+                286.632400000002,
+                276.05540000010365,
+                274.61410000000797,
+                272.5504400000034
+              ],
+              "unit": "us/op"
+            },
+            {
+              "iterations": [
+                5,
+                5,
+                5,
+                5,
+                5
+              ],
+              "max": 7889.165199999581,
+              "mean": 7695.81764000037,
+              "median": 7667.325600000651,
+              "min": 7564.114800000255,
+              "name": "c7_two_rank_two_step_analysis",
+              "samples": [
+                7889.165199999581,
+                7667.325600000651,
+                7712.3020000001925,
+                7646.180600001174,
+                7564.114800000255
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T07:06:34.964611+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/profiler",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "4010d72f0b6950caf1425e3b683d495a6c76016a"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "4010d72f0b6950caf1425e3b683d495a6c76016a"
+      },
+      "started_at": "2026-10-21T07:06:32.963561+00:00",
+      "suite": "core",
+      "suite_sha256": "e560acdf03b60084e2417db90cb0b173cb1086ece7bb5a93d3c6161a35689f46",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "version": "0.3.0"
+      },
+      "version": "0.5.0"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "0b6bfad7120589ecb742e860c503a2bd87834a5eea723ed7bb6d67dc0c6db44f",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "four_layer_roofline_boundary_subgraph",
+                  "unit": "us/op",
+                  "value": 295.68902
+                }
+              ],
+              "process_seconds": 0.36432860500000075,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "c2a6f872a3994c96db4b5e6e6a7dda85c720eca6a05265518b1b00056fc905bd",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "four_layer_roofline_boundary_subgraph",
+                  "unit": "us/op",
+                  "value": 295.38812
+                }
+              ],
+              "process_seconds": 0.21427794299999903,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "6646d8a1759651b34ebfdd304b74f2c4d2dd7447dc64d17cfcd07c7115a50d14",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "four_layer_roofline_boundary_subgraph",
+                  "unit": "us/op",
+                  "value": 291.77706
+                }
+              ],
+              "process_seconds": 0.21426551199999722,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "43c8a3126e38bd16d7d0533345065b0660ee4b439e23023e02aa3e72c9f9e719",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "four_layer_roofline_boundary_subgraph",
+                  "unit": "us/op",
+                  "value": 289.548505
+                }
+              ],
+              "process_seconds": 0.21423155300000118,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "7053e634418f853977dcf9782c9cf50185811721c5fac9556de6d5d3cfedb5b0",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "four_layer_roofline_boundary_subgraph",
+                  "unit": "us/op",
+                  "value": 288.7037
+                }
+              ],
+              "process_seconds": 0.2149959079999988,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "four-layer-roofline-boundary-subgraph",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                200,
+                200,
+                200,
+                200,
+                200
+              ],
+              "max": 295.68902,
+              "mean": 292.22128100000003,
+              "median": 291.77706,
+              "min": 288.7037,
+              "name": "four_layer_roofline_boundary_subgraph",
+              "samples": [
+                295.68902,
+                295.38812,
+                291.77706,
+                289.548505,
+                288.7037
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "4983d34b08e576ac5a882d252567ae4c99c7000d7f868be2230dfd979b9e4e90",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "a3_qwen25_7b_physical_whole_network_ttft_tpot",
+                  "unit": "us/op",
+                  "value": 120722.982
+                }
+              ],
+              "process_seconds": 0.8655498790000031,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "9b2038604aed70d2aa62d6e972cf6c117e516794de80d8b17bb0d19479da222c",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "a3_qwen25_7b_physical_whole_network_ttft_tpot",
+                  "unit": "us/op",
+                  "value": 122124.654
+                }
+              ],
+              "process_seconds": 0.8658806589999983,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "5f151a364c0b8c54b098fbb4ce5df6777b9e1c287e2cb0f544422dd71bc7d618",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "a3_qwen25_7b_physical_whole_network_ttft_tpot",
+                  "unit": "us/op",
+                  "value": 124243.1988
+                }
+              ],
+              "process_seconds": 0.8661946339999957,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "13d757e1c2e1bfbf5df65e20e0441e2a7351ab9da89d1202a88cdf670706ab0c",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "a3_qwen25_7b_physical_whole_network_ttft_tpot",
+                  "unit": "us/op",
+                  "value": 122397.9682
+                }
+              ],
+              "process_seconds": 0.8656830339999999,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "923f65aa188e90676fd1b7a2814f3f87be393b2a836aed57bc5d35b9decc7294",
+              "metrics": [
+                {
+                  "iterations": 5,
+                  "name": "a3_qwen25_7b_physical_whole_network_ttft_tpot",
+                  "unit": "us/op",
+                  "value": 119991.3802
+                }
+              ],
+              "process_seconds": 0.8656962469999954,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "a3-qwen25-7b-physical-whole-network",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                5,
+                5,
+                5,
+                5,
+                5
+              ],
+              "max": 124243.1988,
+              "mean": 121896.03664,
+              "median": 122124.654,
+              "min": 119991.3802,
+              "name": "a3_qwen25_7b_physical_whole_network_ttft_tpot",
+              "samples": [
+                120722.982,
+                122124.654,
+                124243.1988,
+                122397.9682,
+                119991.3802
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "6eff6cc09fc76b8e3cf5598f5f1f96bfcd97255fe37c201533a14854ffa335b6",
+              "metrics": [
+                {
+                  "iterations": 20,
+                  "name": "operator_plan_vector_gemm_estimation",
+                  "unit": "us/op",
+                  "value": 5094.9028499999995
+                }
+              ],
+              "process_seconds": 0.2643698180000058,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "2e48083fb605fd11f0883bd0813d53e6b510577964a5646d068fe741cd2e4694",
+              "metrics": [
+                {
+                  "iterations": 20,
+                  "name": "operator_plan_vector_gemm_estimation",
+                  "unit": "us/op",
+                  "value": 5101.8782
+                }
+              ],
+              "process_seconds": 0.26444857499999586,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "9125ae415ce50686bced67624eca0110a3ea01519896fd5dc9b524d394db8587",
+              "metrics": [
+                {
+                  "iterations": 20,
+                  "name": "operator_plan_vector_gemm_estimation",
+                  "unit": "us/op",
+                  "value": 5178.7688
+                }
+              ],
+              "process_seconds": 0.264397369000001,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "615f2f9de325dde107bf4d3dd4cf777ea8c0ea8196e25cf461d388675505fb43",
+              "metrics": [
+                {
+                  "iterations": 20,
+                  "name": "operator_plan_vector_gemm_estimation",
+                  "unit": "us/op",
+                  "value": 5184.06515
+                }
+              ],
+              "process_seconds": 0.26446411700000283,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "2289ef2fc438ef66feb755d1af380d76fa8314f7f14c268113fdbdaa48d1d602",
+              "metrics": [
+                {
+                  "iterations": 20,
+                  "name": "operator_plan_vector_gemm_estimation",
+                  "unit": "us/op",
+                  "value": 5226.77655
+                }
+              ],
+              "process_seconds": 0.26440413999999635,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "operator-plan-vector-gemm",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                20,
+                20,
+                20,
+                20,
+                20
+              ],
+              "max": 5226.77655,
+              "mean": 5157.27831,
+              "median": 5178.7688,
+              "min": 5094.9028499999995,
+              "name": "operator_plan_vector_gemm_estimation",
+              "samples": [
+                5094.9028499999995,
+                5101.8782,
+                5178.7688,
+                5184.06515,
+                5226.77655
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:30:11.046592+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "7.0.0-1017-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/sim",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "4040f078c19487c019c87466a0d128821289ccc2"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "4040f078c19487c019c87466a0d128821289ccc2"
+      },
+      "started_at": "2026-10-21T10:30:04.146426+00:00",
+      "suite": "core",
+      "suite_sha256": "98001362d62e9f3083a78448a463577a28883dbde7f0fe811ad6493c93668f57",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "version": "0.3.0"
+      },
+      "version": "0.7.0"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "33e96636381768e0bd1f623da107a05d4fed9a8e1a885241130f369fc31e02b1",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "a2_a3_pair_parse_latency",
+                  "unit": "us/op",
+                  "value": 33.58995499999651
+                }
+              ],
+              "process_seconds": 0.11379184700000167,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "9ce0a9cf0f5706dacbc5898170f11babad1631fb5483a5196af32a1bf5cec1ab",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "a2_a3_pair_parse_latency",
+                  "unit": "us/op",
+                  "value": 33.6670820000009
+                }
+              ],
+              "process_seconds": 0.11390088699999978,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "c514ff439263f7978a72eb7543bf5a258439aa48ea38c4a54a7c16c939b9ae2d",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "a2_a3_pair_parse_latency",
+                  "unit": "us/op",
+                  "value": 34.19117899999691
+                }
+              ],
+              "process_seconds": 0.11398307199999635,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "1d41b73f62fb628387b830229d9d1146e1b60eef26e115c1df651e1f19f407cd",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "a2_a3_pair_parse_latency",
+                  "unit": "us/op",
+                  "value": 45.984128000000624
+                }
+              ],
+              "process_seconds": 0.11399867600000135,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "6358098273e4aca11e635b7d1968965b1f74ba432988257c2d3efd69fc89fefa",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "a2_a3_pair_parse_latency",
+                  "unit": "us/op",
+                  "value": 33.85019899999975
+                }
+              ],
+              "process_seconds": 0.11402380700000236,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "a2-a3-parser",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                1000,
+                1000,
+                1000,
+                1000,
+                1000
+              ],
+              "max": 45.984128000000624,
+              "mean": 36.25650859999894,
+              "median": 33.85019899999975,
+              "min": 33.58995499999651,
+              "name": "a2_a3_pair_parse_latency",
+              "samples": [
+                33.58995499999651,
+                33.6670820000009,
+                34.19117899999691,
+                45.984128000000624,
+                33.85019899999975
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "09f1b2260e1e06345e082e5766cd3c45c018dd05144819095bddcd5824d559d6",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "dcmi_cause_decode_latency",
+                  "unit": "us/op",
+                  "value": 3.0204071
+                }
+              ],
+              "process_seconds": 0.1139986499999992,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "f8a2a7a56d2f38a36a08db334e15b5a50787921960ecead1840da566eb820559",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "dcmi_cause_decode_latency",
+                  "unit": "us/op",
+                  "value": 3.0087746999996057
+                }
+              ],
+              "process_seconds": 0.1140020439999958,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "468916396224bd580ed3efe9bd05496ea9cebaba3b1be0ff6174087559009c8a",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "dcmi_cause_decode_latency",
+                  "unit": "us/op",
+                  "value": 3.008089600000119
+                }
+              ],
+              "process_seconds": 0.11402698100000208,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "e17addccc5ceb1890e975a40394c7c7dc7fc497d1748b0c1b65ee781788dd01c",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "dcmi_cause_decode_latency",
+                  "unit": "us/op",
+                  "value": 3.0694812000000127
+                }
+              ],
+              "process_seconds": 0.11395244199999865,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "3b9a98e808c28e27df1eead3900dcc8f3ecc1128b8db7451a2544b1399281165",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "dcmi_cause_decode_latency",
+                  "unit": "us/op",
+                  "value": 3.024081599999562
+                }
+              ],
+              "process_seconds": 0.11404155700000018,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "dcmi-cause-decoding",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                10000,
+                10000,
+                10000,
+                10000,
+                10000
+              ],
+              "max": 3.0694812000000127,
+              "mean": 3.02616683999986,
+              "median": 3.0204071,
+              "min": 3.008089600000119,
+              "name": "dcmi_cause_decode_latency",
+              "samples": [
+                3.0204071,
+                3.0087746999996057,
+                3.008089600000119,
+                3.0694812000000127,
+                3.024081599999562
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "9cc65d3aed778194e42da5c45461fb8c97a63723ca5358c663019a9c58b237a7",
+              "metrics": [
+                {
+                  "iterations": 1,
+                  "name": "dcmi_500_sample_ingest_latency",
+                  "unit": "ms/op",
+                  "value": 19.749011000001815
+                },
+                {
+                  "iterations": 100,
+                  "name": "fractional_54_sample_window_latency",
+                  "unit": "us/op",
+                  "value": 1048.7131699999707
+                }
+              ],
+              "process_seconds": 0.26425627799999774,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "eb16ab0699965c19177ce459b69c8e1cd6fc30eae9c2857f2ba9303037e6ce9c",
+              "metrics": [
+                {
+                  "iterations": 1,
+                  "name": "dcmi_500_sample_ingest_latency",
+                  "unit": "ms/op",
+                  "value": 20.45718900000537
+                },
+                {
+                  "iterations": 100,
+                  "name": "fractional_54_sample_window_latency",
+                  "unit": "us/op",
+                  "value": 1056.839310000015
+                }
+              ],
+              "process_seconds": 0.26435661099999663,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "cd7eeb5240898c1effbfcb77c819bd4b3e0665c8f38ea23e3b5c584006bd1372",
+              "metrics": [
+                {
+                  "iterations": 1,
+                  "name": "dcmi_500_sample_ingest_latency",
+                  "unit": "ms/op",
+                  "value": 19.39534899999984
+                },
+                {
+                  "iterations": 100,
+                  "name": "fractional_54_sample_window_latency",
+                  "unit": "us/op",
+                  "value": 1047.3741500000244
+                }
+              ],
+              "process_seconds": 0.2642615219999982,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "cc28424a6112b4b7b7f08d41f802c5706a9e4b7bad98f766b61322dd158742b8",
+              "metrics": [
+                {
+                  "iterations": 1,
+                  "name": "dcmi_500_sample_ingest_latency",
+                  "unit": "ms/op",
+                  "value": 19.331174000001283
+                },
+                {
+                  "iterations": 100,
+                  "name": "fractional_54_sample_window_latency",
+                  "unit": "us/op",
+                  "value": 1049.994469999973
+                }
+              ],
+              "process_seconds": 0.26426254300000096,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "0fb3ee20a669dd24757abc6008272bafa9526fe6a1d23b9cb94ebd84c31950d6",
+              "metrics": [
+                {
+                  "iterations": 1,
+                  "name": "dcmi_500_sample_ingest_latency",
+                  "unit": "ms/op",
+                  "value": 19.18146999999948
+                },
+                {
+                  "iterations": 100,
+                  "name": "fractional_54_sample_window_latency",
+                  "unit": "us/op",
+                  "value": 1050.5008300000184
+                }
+              ],
+              "process_seconds": 0.26423302900000323,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "dcmi-persisted-fractional-window",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "max": 20.45718900000537,
+              "mean": 19.622838600001558,
+              "median": 19.39534899999984,
+              "min": 19.18146999999948,
+              "name": "dcmi_500_sample_ingest_latency",
+              "samples": [
+                19.749011000001815,
+                20.45718900000537,
+                19.39534899999984,
+                19.331174000001283,
+                19.18146999999948
+              ],
+              "unit": "ms/op"
+            },
+            {
+              "iterations": [
+                100,
+                100,
+                100,
+                100,
+                100
+              ],
+              "max": 1056.839310000015,
+              "mean": 1050.6843860000004,
+              "median": 1049.994469999973,
+              "min": 1047.3741500000244,
+              "name": "fractional_54_sample_window_latency",
+              "samples": [
+                1048.7131699999707,
+                1056.839310000015,
+                1047.3741500000244,
+                1049.994469999973,
+                1050.5008300000184
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T07:13:38.383079+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/npu-top",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "6737925d0ebb39c1aefda2c933eae0486169333c"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "6737925d0ebb39c1aefda2c933eae0486169333c"
+      },
+      "started_at": "2026-10-21T07:13:35.897661+00:00",
+      "suite": "core",
+      "suite_sha256": "607528a3bdd4e6ec18f944d2cd3822dbefa0fe30708f992afe747b1c6e858a05",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "version": "0.3.0"
+      },
+      "version": "0.2.1"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "33f66eba6d22ff34d7a08710bb3a0f2c3acb1110efe6f0c2bd726e55136774e1",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "two_file_patch_parse_and_shell_normalization",
+                  "unit": "us/op",
+                  "value": 8.297759
+                }
+              ],
+              "process_seconds": 0.2645034960000032,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "c065a013632214ff0194e61e8380cd19f4aadb4b1a3715708e607cc0d2b30e2a",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "two_file_patch_parse_and_shell_normalization",
+                  "unit": "us/op",
+                  "value": 7.4928542
+                }
+              ],
+              "process_seconds": 0.21457153600000112,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "7b99ae0bee9d3f4d9b3d22e130259432701568c7606044445b001fcb08ea4b6c",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "two_file_patch_parse_and_shell_normalization",
+                  "unit": "us/op",
+                  "value": 7.9952531
+                }
+              ],
+              "process_seconds": 0.2146769420000041,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "fa407ea8a2ab3423a910880b08950b74e6f028db6dbedb72d27a576a116fffaf",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "two_file_patch_parse_and_shell_normalization",
+                  "unit": "us/op",
+                  "value": 8.0382997
+                }
+              ],
+              "process_seconds": 0.21449035599999888,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "9f0b94d16292f93cede552c7f2efda2ac8bcbb6c302404b37cf3b2528f88ba83",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "two_file_patch_parse_and_shell_normalization",
+                  "unit": "us/op",
+                  "value": 7.687767300000001
+                }
+              ],
+              "process_seconds": 0.2144584199999997,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "patch-parser-and-tool-protocol",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                10000,
+                10000,
+                10000,
+                10000,
+                10000
+              ],
+              "max": 8.297759,
+              "mean": 7.90238666,
+              "median": 7.9952531,
+              "min": 7.4928542,
+              "name": "two_file_patch_parse_and_shell_normalization",
+              "samples": [
+                8.297759,
+                7.4928542,
+                7.9952531,
+                8.0382997,
+                7.687767300000001
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "de5d755dfee48a8d0eef6abe518b47634140b9f3ff2171b2ed187b445ff30a1d",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "two_thread_record_increment_latency",
+                  "unit": "us/op",
+                  "value": 446.772425000006
+                }
+              ],
+              "process_seconds": 0.21447477600000298,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "19ec69d56dbaa410dd73e86514959221683937165ae79988940561617c372087",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "two_thread_record_increment_latency",
+                  "unit": "us/op",
+                  "value": 456.1082749999912
+                }
+              ],
+              "process_seconds": 0.21452734199999668,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "65d4807aef2d2fd6e9594b281d2157d3edd8dd5dfcf45a226968e934426cc153",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "two_thread_record_increment_latency",
+                  "unit": "us/op",
+                  "value": 445.295124999987
+                }
+              ],
+              "process_seconds": 0.2144868279999983,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "6cbe1421ab7f860192b1dd34608b43000996f891ea387e52eebdf6ef36e37164",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "two_thread_record_increment_latency",
+                  "unit": "us/op",
+                  "value": 444.81068999999707
+                }
+              ],
+              "process_seconds": 0.21446592299999878,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "1b63c4381784450e6844eb99292369db6667d18e1c3cacb7d1e7a2f5ed20701a",
+              "metrics": [
+                {
+                  "iterations": 200,
+                  "name": "two_thread_record_increment_latency",
+                  "unit": "us/op",
+                  "value": 455.3939150000019
+                }
+              ],
+              "process_seconds": 0.2145122340000043,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "record-serialization",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                200,
+                200,
+                200,
+                200,
+                200
+              ],
+              "max": 456.1082749999912,
+              "mean": 449.67608599999664,
+              "median": 446.772425000006,
+              "min": 444.81068999999707,
+              "name": "two_thread_record_increment_latency",
+              "samples": [
+                446.772425000006,
+                456.1082749999912,
+                445.295124999987,
+                444.81068999999707,
+                455.3939150000019
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T07:21:30.711264+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/remote-dev",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "6bd1a15380195a95d450458e7c1856905d95bf73"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "6bd1a15380195a95d450458e7c1856905d95bf73"
+      },
+      "started_at": "2026-10-21T07:21:28.486232+00:00",
+      "suite": "core",
+      "suite_sha256": "c1be71cd9a01fa4aeeed32f9acda8c5e51710c6bb3ef812fa68da744b18931dd",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "version": "0.3.0"
+      },
+      "version": "0.10.4"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "9b70be9e486c22a340126231d257f7205a5f7e57b6299a6cc1c9899c37af19bf",
+              "metrics": [
+                {
+                  "iterations": 1,
+                  "name": "graded_feed_lifecycle",
+                  "unit": "ms/run",
+                  "value": 239.28407599999701
+                }
+              ],
+              "process_seconds": 0.5145420879999989,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "graded-feed-lifecycle",
+          "kind": "functional",
+          "metrics": [
+            {
+              "iterations": [
+                1
+              ],
+              "max": 239.28407599999701,
+              "mean": 239.28407599999701,
+              "median": 239.28407599999701,
+              "min": 239.28407599999701,
+              "name": "graded_feed_lifecycle",
+              "samples": [
+                239.28407599999701
+              ],
+              "unit": "ms/run"
+            }
+          ],
+          "repetitions_completed": 1,
+          "repetitions_planned": 1,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "66c3ee5cf43463ec6fc19ea1c3fbeb63b1a61db1bfb3c6d891895b25bf2128c1",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "technical_tokenization",
+                  "unit": "us/op",
+                  "value": 65.7293005
+                }
+              ],
+              "process_seconds": 0.7151899610000001,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "703b7dbc7220331cb57448142633e08f7cf134554e8cc9a4a574505d89647e48",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "technical_tokenization",
+                  "unit": "us/op",
+                  "value": 65.6313579
+                }
+              ],
+              "process_seconds": 0.7151979949999969,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "e7073af58c3c0d8b1953e30c05698b4b5317d7e3298c6c3cbe238d5a809660ba",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "technical_tokenization",
+                  "unit": "us/op",
+                  "value": 65.5315117
+                }
+              ],
+              "process_seconds": 0.7153135970000051,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "60ac7769692c86dd00883eec2d84c8aa056cb937d13f0cfba3d34c188268a9d0",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "technical_tokenization",
+                  "unit": "us/op",
+                  "value": 65.9130045
+                }
+              ],
+              "process_seconds": 0.7154542460000002,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "8e8b6e771a4f7a2474ba935639d7c79a2f89185e6ad2566c4390faad41dc1799",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "technical_tokenization",
+                  "unit": "us/op",
+                  "value": 65.6421558
+                }
+              ],
+              "process_seconds": 0.7152744400000017,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "technical-tokenization",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                10000,
+                10000,
+                10000,
+                10000,
+                10000
+              ],
+              "max": 65.9130045,
+              "mean": 65.68946608,
+              "median": 65.6421558,
+              "min": 65.5315117,
+              "name": "technical_tokenization",
+              "samples": [
+                65.7293005,
+                65.6313579,
+                65.5315117,
+                65.9130045,
+                65.6421558
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T07:30:06.002279+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/knowledge",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "10ee85606aa43de7975e3c4542013be4c177730a"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "10ee85606aa43de7975e3c4542013be4c177730a"
+      },
+      "started_at": "2026-10-21T07:30:01.888081+00:00",
+      "suite": "core",
+      "suite_sha256": "8a617ef086eb82401037985a853837bfd6a055db26177cd1bd71283fd8303ca3",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "version": "0.4.0"
+      },
+      "version": "0.13.0"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "bd92268e31a6bccb0138998631c95beb5c78c3ca0ae6fd29f403bea716476491",
+              "metrics": [
+                {
+                  "iterations": 5000,
+                  "name": "placement_success_and_capacity_rejection",
+                  "unit": "us/op",
+                  "value": 110.3151988
+                }
+              ],
+              "process_seconds": 0.7655267469999956,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "3911bb6e22a3742f549753dd95ef12a4b7e0e16892460385819d0736c29e0144",
+              "metrics": [
+                {
+                  "iterations": 5000,
+                  "name": "placement_success_and_capacity_rejection",
+                  "unit": "us/op",
+                  "value": 104.820182
+                }
+              ],
+              "process_seconds": 0.665726657999997,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "ca56962aab210554db2d014ecbd3acaf31d51cb9215f13b263243e855f4635c2",
+              "metrics": [
+                {
+                  "iterations": 5000,
+                  "name": "placement_success_and_capacity_rejection",
+                  "unit": "us/op",
+                  "value": 103.0620028
+                }
+              ],
+              "process_seconds": 0.6158218550000072,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "efd0a4ecd861dee4dd379ebd0a0f7635d5d18714199090922869ad1304341a52",
+              "metrics": [
+                {
+                  "iterations": 5000,
+                  "name": "placement_success_and_capacity_rejection",
+                  "unit": "us/op",
+                  "value": 102.6983982
+                }
+              ],
+              "process_seconds": 0.6153353309999972,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "6691f6a0cd80c9fb0b361f3e7f6aea0613b40faaa2a4358ceddeaba29a636a01",
+              "metrics": [
+                {
+                  "iterations": 5000,
+                  "name": "placement_success_and_capacity_rejection",
+                  "unit": "us/op",
+                  "value": 103.8817832
+                }
+              ],
+              "process_seconds": 0.6154709959999991,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "two-role-placement",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                5000,
+                5000,
+                5000,
+                5000,
+                5000
+              ],
+              "max": 110.3151988,
+              "mean": 104.955513,
+              "median": 103.8817832,
+              "min": 102.6983982,
+              "name": "placement_success_and_capacity_rejection",
+              "samples": [
+                110.3151988,
+                104.820182,
+                103.0620028,
+                102.6983982,
+                103.8817832
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        },
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "d770ff01bc3ca5a39c87421b768bd430fd311d152226d6727a089dd10750e14c",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "canonical_run_manifest_and_bench_projection",
+                  "unit": "us/op",
+                  "value": 193.5046170000021
+                }
+              ],
+              "process_seconds": 0.4649528900000064,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "4abf6c331b3c55360e1c4167ad8c9c24836dd678f15c104ce4948322b04f1efd",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "canonical_run_manifest_and_bench_projection",
+                  "unit": "us/op",
+                  "value": 200.93905900000664
+                }
+              ],
+              "process_seconds": 0.36475956199998905,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "bfc62658a6fab7670dad1c84652e84a57bbaf1cf85ff4c2162d912c0646d74bf",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "canonical_run_manifest_and_bench_projection",
+                  "unit": "us/op",
+                  "value": 202.99071600000218
+                }
+              ],
+              "process_seconds": 0.36489347199999145,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "d25b48a657b566e3b3fd052afe4f05ec97b1df6a08e37541719fcce37c92b136",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "canonical_run_manifest_and_bench_projection",
+                  "unit": "us/op",
+                  "value": 204.44150699999852
+                }
+              ],
+              "process_seconds": 0.36492281299999263,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "ea426ff39e3c51b9204c07ca75d0540d653e1f29171cc0fd3871037c54bc48b9",
+              "metrics": [
+                {
+                  "iterations": 1000,
+                  "name": "canonical_run_manifest_and_bench_projection",
+                  "unit": "us/op",
+                  "value": 202.45268300000419
+                }
+              ],
+              "process_seconds": 0.36490300199999126,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "canonical-run-manifest",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                1000,
+                1000,
+                1000,
+                1000,
+                1000
+              ],
+              "max": 204.44150699999852,
+              "mean": 200.86571640000273,
+              "median": 202.45268300000419,
+              "min": 193.5046170000021,
+              "name": "canonical_run_manifest_and_bench_projection",
+              "samples": [
+                193.5046170000021,
+                200.93905900000664,
+                202.99071600000218,
+                204.44150699999852,
+                202.45268300000419
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:32:55.960522+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/coordinator",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "bdead0ac37cc4cee34a1736edc776b48ea823542"
+      },
+      "started_at": "2026-10-21T10:32:50.729418+00:00",
+      "suite": "core",
+      "suite_sha256": "bd30615b36089673c021598e2bddf120abae048d94d6647921bb4f3eb13d2aba",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "0a3c9fd81fb37a1b4a52807d35509daca777ebf2"
+        },
+        "version": "0.3.0"
+      },
+      "version": "0.6.2"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "d99b51b5b09ab1919d62c3dcc72b4e837ce1ff61923cbc844d6f2070808c350f",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 1033.10687000004
+                }
+              ],
+              "process_seconds": 0.16419105600000705,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "94c05cfe8582d613c1b9c7de29b6c4140692539084669e2c2629045c0aa9676f",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 1009.4724999999016
+                }
+              ],
+              "process_seconds": 0.16447531800000093,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "20c97a33c9ade637113bc54b38c129e38d18ada8d4444454bb7b74e482233f6d",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 1013.0937600000321
+                }
+              ],
+              "process_seconds": 0.16445285600001114,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "6b74c7c3970cf883f07f9fe27d77d7af89b3e69172f06d8440395a9024da3355",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 1047.6152700000796
+                }
+              ],
+              "process_seconds": 0.16443632499999694,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "c77613929e3d6c62bde6e534c8cdfde365fbcc8dfdac612284944f8b085fd04b",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 1027.368029999991
+                }
+              ],
+              "process_seconds": 0.16439453699999262,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "public-transcript",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                100,
+                100,
+                100,
+                100,
+                100
+              ],
+              "max": 1047.6152700000796,
+              "mean": 1026.131286000009,
+              "median": 1027.368029999991,
+              "min": 1009.4724999999016,
+              "name": "public_100_message_parse_latency",
+              "samples": [
+                1033.10687000004,
+                1009.4724999999016,
+                1013.0937600000321,
+                1047.6152700000796,
+                1027.368029999991
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:27:06.835092+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "7.0.0-1017-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/mindie-agent-codex",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "f0b2669e12e48342d680abb3fff6a4177be39fa4"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "f0b2669e12e48342d680abb3fff6a4177be39fa4"
+      },
+      "started_at": "2026-10-21T10:27:05.986715+00:00",
+      "suite": "core",
+      "suite_sha256": "f88b2edc020b03d636a7e3116627baa9816ce3ddab4a89d17d9c24de8bd24a97",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "version": "0.4.0"
+      },
+      "version": "0.0.3"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "ab0cb9de26e2c420ee0d871b650166c0bbabe01933c9a68c168d7c304fe53325",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 823.4069699999934
+                }
+              ],
+              "process_seconds": 0.16427795500000286,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "d5b7113f9697322899fc254acbca0197ac6546bcc7e1f1d64c4f6bc65a4b890d",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 808.5311800000028
+                }
+              ],
+              "process_seconds": 0.16437714699999617,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "b6b950d4aa0a7e881d9b230c3d1786acc510be8a98c463e0edcd38e0ddc64e4a",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 806.0058600000275
+                }
+              ],
+              "process_seconds": 0.16456966500000192,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "38909643d1d2aa87e51c5a8bc06035771454ae402c737d6fe0123fe8f9274644",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 871.1834399999674
+                }
+              ],
+              "process_seconds": 0.16438994100000315,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "d52eda739c4f91fcbffd745e6bac95cda5ca75a755b1c227ad3640206b16db91",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 794.1381900000266
+                }
+              ],
+              "process_seconds": 0.1643158729999996,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "public-transcript",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                100,
+                100,
+                100,
+                100,
+                100
+              ],
+              "max": 871.1834399999674,
+              "mean": 820.6531280000036,
+              "median": 808.5311800000028,
+              "min": 794.1381900000266,
+              "name": "public_100_message_parse_latency",
+              "samples": [
+                823.4069699999934,
+                808.5311800000028,
+                806.0058600000275,
+                871.1834399999674,
+                794.1381900000266
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:26:18.825755+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/mindie-agent-cc",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "128517d8d74e829fd750a2b31c1093e6d59eddd4"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "128517d8d74e829fd750a2b31c1093e6d59eddd4"
+      },
+      "started_at": "2026-10-21T10:26:17.956696+00:00",
+      "suite": "core",
+      "suite_sha256": "f88b2edc020b03d636a7e3116627baa9816ce3ddab4a89d17d9c24de8bd24a97",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "version": "0.4.0"
+      },
+      "version": "0.0.3"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "44205dcb8137d2c74e2bf62c58c8ca9576d94bcf1c7c010421b12e21d7d681cf",
+              "metrics": [
+                {
+                  "iterations": 300,
+                  "name": "public_transcript_parse",
+                  "unit": "us/op",
+                  "value": 928.9436733333333
+                }
+              ],
+              "process_seconds": 0.3646580859999915,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "5f4e87599a143e172874deec174ca830ec2b0ff49660b95a4a343267584896c4",
+              "metrics": [
+                {
+                  "iterations": 300,
+                  "name": "public_transcript_parse",
+                  "unit": "us/op",
+                  "value": 936.6741766666667
+                }
+              ],
+              "process_seconds": 0.36488291699998854,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "73ef4edde0037cbaebe730596f034608d9502e15718234e8b4c0571204f436e9",
+              "metrics": [
+                {
+                  "iterations": 300,
+                  "name": "public_transcript_parse",
+                  "unit": "us/op",
+                  "value": 942.28305
+                }
+              ],
+              "process_seconds": 0.3648597189999805,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "1dd5a8a97b6c193293dc8eb989e2bc996427d742613a54e3968e2fbbb9305bb5",
+              "metrics": [
+                {
+                  "iterations": 300,
+                  "name": "public_transcript_parse",
+                  "unit": "us/op",
+                  "value": 946.3691533333333
+                }
+              ],
+              "process_seconds": 0.36497060599998576,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "b5acd344cac6735894421283d6446a1c6ad7457ab8b3708527dc2ac28c5e8c5b",
+              "metrics": [
+                {
+                  "iterations": 300,
+                  "name": "public_transcript_parse",
+                  "unit": "us/op",
+                  "value": 937.3501166666667
+                }
+              ],
+              "process_seconds": 0.36500498999998854,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "public-transcript-parsing",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                300,
+                300,
+                300,
+                300,
+                300
+              ],
+              "max": 946.3691533333333,
+              "mean": 938.324034,
+              "median": 937.3501166666667,
+              "min": 928.9436733333333,
+              "name": "public_transcript_parse",
+              "samples": [
+                928.9436733333333,
+                936.6741766666667,
+                942.28305,
+                946.3691533333333,
+                937.3501166666667
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:27:17.587238+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/mindie-agent-kimi",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "eb79012094ff73c3f11d6d2ac5365f3558714b7c"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "eb79012094ff73c3f11d6d2ac5365f3558714b7c"
+      },
+      "started_at": "2026-10-21T10:27:15.718603+00:00",
+      "suite": "core",
+      "suite_sha256": "593963fab55d651108f1b62eb6d4666fea2dbf547506174304f067897ecaf879",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "version": "0.4.0"
+      },
+      "version": "0.0.3"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "5f04471cd26fd14f93074feb8cedaf22b975f50325a5410599ee1ca6223b8982",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 518.1000400000357
+                }
+              ],
+              "process_seconds": 0.11387349199999619,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "1024323900d0958736ee3fdb1107cccff9b86da3eef8d8005b45217080ec06b4",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 504.0784199999848
+                }
+              ],
+              "process_seconds": 0.1139653480000078,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "c4b91abc996fba315d73664d20421e41bf5ec69f71057aa31573d7c7e567ed72",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 485.98854000005076
+                }
+              ],
+              "process_seconds": 0.11395214399999531,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "9adcf1a4750da0a82a9a42af3bea24aa50862ff04d9182f8ed3a0ad16a9e626d",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 510.92335000006983
+                }
+              ],
+              "process_seconds": 0.11395989000000384,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "e94eb1791da9671c617f6f26573f5174fd39fbedd29ff22ebf09b4a8fe96c231",
+              "metrics": [
+                {
+                  "iterations": 100,
+                  "name": "public_100_message_parse_latency",
+                  "unit": "us/op",
+                  "value": 485.5163800000639
+                }
+              ],
+              "process_seconds": 0.11389566300000808,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "public-transcript",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                100,
+                100,
+                100,
+                100,
+                100
+              ],
+              "max": 518.1000400000357,
+              "mean": 500.921346000041,
+              "median": 504.0784199999848,
+              "min": 485.5163800000639,
+              "name": "public_100_message_parse_latency",
+              "samples": [
+                518.1000400000357,
+                504.0784199999848,
+                485.98854000005076,
+                510.92335000006983,
+                485.5163800000639
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:25:44.171332+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "7.0.0-1017-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/mindie-agent-dsh",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "c9f62cb000a7d3ce1c11d201c998f9200946820b"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "c9f62cb000a7d3ce1c11d201c998f9200946820b"
+      },
+      "started_at": "2026-10-21T10:25:43.564559+00:00",
+      "suite": "core",
+      "suite_sha256": "f88b2edc020b03d636a7e3116627baa9816ce3ddab4a89d17d9c24de8bd24a97",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+        },
+        "version": "0.4.0"
+      },
+      "version": "0.0.3"
+    },
+    {
+      "blocking_reasons": [],
+      "cases": [
+        {
+          "attempts": [
+            {
+              "evidence_sha256": "49229a8e32a6f4805014a04e05cb41363bbf425aaf271478dc9dc117c6ac0071",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "retrieval_score_latency",
+                  "unit": "us/op",
+                  "value": 3.8404077
+                }
+              ],
+              "process_seconds": 0.4148448329999965,
+              "reason_code": null,
+              "repetition": 1,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "40694661467eefcabcc13dedad7f516f9db20cbf82c70212c08eee8d0dfdf5cd",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "retrieval_score_latency",
+                  "unit": "us/op",
+                  "value": 3.7369862
+                }
+              ],
+              "process_seconds": 0.2143332679999972,
+              "reason_code": null,
+              "repetition": 2,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "bacec8f7247c67ec428563883d90f879eedf7d629d7158563307f8fbbb283e39",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "retrieval_score_latency",
+                  "unit": "us/op",
+                  "value": 3.7166664000000003
+                }
+              ],
+              "process_seconds": 0.21446827900000187,
+              "reason_code": null,
+              "repetition": 3,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "689c2bef491cfc084115c5c0ec15dde040f4fd3c4273445e6f9a1182ddc694f7",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "retrieval_score_latency",
+                  "unit": "us/op",
+                  "value": 4.20975
+                }
+              ],
+              "process_seconds": 0.21437345100000016,
+              "reason_code": null,
+              "repetition": 4,
+              "returncode": 0,
+              "status": "pass"
+            },
+            {
+              "evidence_sha256": "f334ab2edf66c76abedfd5d674f1d67ae2971898633d5e97bb5a5f09c1b366eb",
+              "metrics": [
+                {
+                  "iterations": 10000,
+                  "name": "retrieval_score_latency",
+                  "unit": "us/op",
+                  "value": 3.7680711000000002
+                }
+              ],
+              "process_seconds": 0.2144252779999931,
+              "reason_code": null,
+              "repetition": 5,
+              "returncode": 0,
+              "status": "pass"
+            }
+          ],
+          "id": "retrieval-scoring",
+          "kind": "microbenchmark",
+          "metrics": [
+            {
+              "iterations": [
+                10000,
+                10000,
+                10000,
+                10000,
+                10000
+              ],
+              "max": 4.20975,
+              "mean": 3.85437628,
+              "median": 3.7680711000000002,
+              "min": 3.7166664000000003,
+              "name": "retrieval_score_latency",
+              "samples": [
+                3.8404077,
+                3.7369862,
+                3.7166664000000003,
+                4.20975,
+                3.7680711000000002
+              ],
+              "unit": "us/op"
+            }
+          ],
+          "repetitions_completed": 5,
+          "repetitions_planned": 5,
+          "required": true,
+          "status": "pass"
+        }
+      ],
+      "completed_at": "2026-10-21T10:10:15.191165+00:00",
+      "environment": {
+        "cpu_count": 4,
+        "machine": "x86_64",
+        "os_release": "6.17.0-1022-azure",
+        "platform": "linux",
+        "runner_python": "3.13.16",
+        "workload_python": "Python 3.13.16"
+      },
+      "release_gate": true,
+      "repository": "mindie-agent/mindie-bench",
+      "schema_version": "mindie-release-benchmark/2",
+      "source": {
+        "dirty": false,
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2"
+      },
+      "source_after": {
+        "dirty": false,
+        "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2"
+      },
+      "started_at": "2026-10-21T10:10:13.873169+00:00",
+      "suite": "scoring-core",
+      "suite_sha256": "93df615ff6c2d94c96d3f1c2d5bfd0213d12eb21685712d2d90a749bc7f6c228",
+      "tool": {
+        "name": "mindie-bench",
+        "source": {
+          "dirty": false,
+          "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2"
+        },
+        "source_after": {
+          "dirty": false,
+          "revision": "994b48e410f8dec989e26130b6e52fc5a6b569d2"
+        },
+        "version": "0.4.1"
+      },
+      "version": "0.4.1"
+    }
+  ],
+  "schema_version": "mindie-release-benchmark-collection/1"
+}

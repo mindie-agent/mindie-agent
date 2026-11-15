@@ -1,0 +1,25 @@
+# MindIE Agent Roadmap & Next Steps
+
+[中文](next-steps.md) · [Back to Documentation Center](README.en.md)
+
+For the system architecture and knowledge loop design, see [Architecture & Module Boundaries](architecture.en.md) and [Knowledge & Experience System](knowledge-system.en.md). Engineering guidelines are documented in [Engineering Design Principles](design-principles.en.md).
+
+The ecosystem has completed the **[`v0.1.0`](releases/0.1.0.en.md)** milestone release ([18-Task Benchmark Report](releases/0.1.0/value-results.md) · [Author's Note](releases/0.1.0/design-philosophy.en.md)) and subsequent `v0.1.1`–[`v0.1.12`](releases/0.1.12.en.md) updates (pinned in [`channels/0.1.json`](../channels/0.1.json); see [Release Records & Roadmap](README.en.md#release-records--roadmap)). Key delivered capabilities include:
+- **Knowledge & Experience Flywheel**: Information-gap retrieval, L1–L4 progressive disclosure, token-budget gating, the `G3` C6 experience distillation flywheel, `G4` `mode="explore"` exploration, and automatic unit `revision` monotonicity in `knowledge v0.13.14` across public Ascend domain corpora (`450+` graded units);
+- **Mechanism-First Performance Modeling & Profiling**: A unified 5-layer causal engine, deterministic Case composer (`compose`), `async_scheduling` delayed KV release model, and topology/PD Pareto solvers in `mindie-sim v0.9.4` paired with topology-guided Decode/Prefill segmentation in `mindie-profiler v0.5.6` (achieving `1,653 / 1,653 = 100.00% <= 10%` in-sample multi-regime calibration across A2/A3/A5 captures, converging across 280 Decode + 15 Prefill cases, and reaching `841/856 = 98.25% <= 15%` overall and `546/561 = 97.33% <= 15%` independent held-out accuracy on the 856-case DSH fleet benchmark);
+- **Remote Execution, Diagnostics & Multi-Host Evaluation**: Shared SSH authentication in `remote-dev v0.11.6`, deterministic CANN/`plog` fault triage in `diagnostics v0.5.8`, Ascend A5 topology/HCCL preflight and native Antigravity session discovery in `coordinator v0.7.5`, native host plugins (including `Codex v0.1.21`, `Claude Code v0.1.17`, `Kimi v0.1.17`, `DSH v0.1.16`, and `Google Antigravity v0.1.8`), and subprocess behavioral oracle hardening plus colloquial-prompt `G0–G5` full-matrix evaluation in `mindie-bench v0.4.6`.
+
+---
+
+## Upcoming Priorities
+
+1. **End-to-End Multi-Host Product Matrix (`P0–P3`) & Knowledge Flywheel Evolution**
+   - Expand cross-model, cross-host end-to-end engineering task and experience-transfer (`P0–P3`) evaluations on `mindie-bench` under hardened behavioral oracles, tracking net engineering gains from L1–L4 progressive disclosure and subcontext fact packs on complex kernel and serving workloads.
+2. **Ascend A5 (950) Live Communication Expansion & Contention Calibration**
+   - Execute the [A5 Communication & Contention Calibration Plan](a5-communication-calibration-todo.md) on live A5 hardware to calibrate AICPU/AIV collective expansion and contention parameters in `mindie-sim` and `mindie-profiler`.
+3. **Expanding the 7 Public Domain Knowledge Corpora & `awesome-mindie-skills`**
+   - Continuously grow verified `L1–L4` units and practical guides across [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend), [`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators), [`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core), [`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed), [`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability), [`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat), [`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering), and [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills).
+4. **Streamlined Workflows Across `coordinator`, `profiler`, `sim`, and Host Plugins**
+   - All five host plugins now expose `remote-dev`, `coordinator`, `profiler`, `sim`, and `diagnostics` through the MCP surface (`knowledge`, `remote`, `components` / `mindie-tools`); upcoming work focuses on streamlining closed-loop workflows ("Profiling bottleneck attribution → Sim candidate fusion & SLA scaling → Remote container verification").
+5. **Upstream Host CLI Tracking**
+   - Track upstream fixes in OpenAI Codex CLI for forwarding cancellation signals to in-flight MCP tool calls when a child agent (`spawn_agent`) is interrupted, and update `harness-compatibility.json` once upstream ships the fix.

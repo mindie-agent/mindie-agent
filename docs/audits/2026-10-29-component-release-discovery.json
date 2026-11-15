@@ -1,0 +1,117 @@
+{
+  "baseline": {
+    "runtime": {
+      "mindie-diagnostics": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+      "mindie-knowledge": "6e921b205c00d592c25f849653cbfb72b73fe318",
+      "remote-dev": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72"
+    },
+    "source_sha256": "d1383a7ef80988dc42246ec71657db6334e9e1e2ecac1cf07b1b48a9c338b08b"
+  },
+  "build_performed": false,
+  "catalog_budget_seconds": 120,
+  "catalog_reads": {
+    "asset": 12,
+    "failed": 0,
+    "metadata": 21
+  },
+  "discovery_source_sha256": {
+    "component_releases.py": "2e9c25f440e7908e971ac16bd3f2c7653c5cb656f1cf1b3b3ced1f78c45b091a",
+    "component_runtime.py": "bc1bef03960fc46460dac3ed2bbe27222a87aa0649fd1e7263f9d4749091298c",
+    "runtime_inventory.py": "76941dee2205bf63e2fc29a7af67e1c2f5529362f90555428b4ef14957a0a88b"
+  },
+  "elapsed_seconds": 28.794,
+  "external_version_floors": {
+    "mindie-coordinator": "0.6.3",
+    "mindie-profiler": "0.5.0",
+    "mindie-sim": "0.7.1"
+  },
+  "installation_modified": false,
+  "latest_release_reads_forced": true,
+  "managed_native_version": "0.1.11",
+  "managed_python": "/Users/maoxx241/.codex/plugins/data/mindie-agent-mindie-agent/runtimes/6c45a334df8cd4895d4ef62968e2acacf1f019751638576ad7099b7726d320be/bin/python",
+  "profile_unchanged": true,
+  "schema": "mindie-component-release-discovery-evidence/1",
+  "selection": {
+    "changed": true,
+    "installed": {
+      "mindie-diagnostics": {
+        "repository": "mindie-agent/diagnostics",
+        "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+        "version": "0.5.4"
+      },
+      "mindie-knowledge": {
+        "repository": "mindie-agent/knowledge",
+        "revision": "6e921b205c00d592c25f849653cbfb72b73fe318",
+        "version": "0.13.4"
+      },
+      "remote-dev": {
+        "repository": "mindie-agent/remote-dev",
+        "revision": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+        "version": "0.10.8"
+      }
+    },
+    "runtime": {
+      "mindie-coordinator": {
+        "repository": "mindie-agent/coordinator",
+        "revision": "0ec71fb947ab24df8e543dcf056f4f06664baad8",
+        "version": "0.6.3"
+      },
+      "mindie-diagnostics": {
+        "repository": "mindie-agent/diagnostics",
+        "revision": "5ae643e19223f2181ecdbaa3edaf464137c4805e",
+        "version": "0.5.4"
+      },
+      "mindie-knowledge": {
+        "repository": "mindie-agent/knowledge",
+        "revision": "6e921b205c00d592c25f849653cbfb72b73fe318",
+        "version": "0.13.4"
+      },
+      "mindie-profiler": {
+        "repository": "mindie-agent/profiler",
+        "revision": "4010d72f0b6950caf1425e3b683d495a6c76016a",
+        "version": "0.5.0"
+      },
+      "mindie-sim": {
+        "repository": "mindie-agent/sim",
+        "revision": "15f93f3f0247b2653d0e9441eae56959e4d16d4e",
+        "version": "0.7.1"
+      },
+      "remote-dev": {
+        "repository": "mindie-agent/remote-dev",
+        "revision": "4b1c5cab5d36cdaff79d27e4288c6d5f60667c72",
+        "version": "0.10.8"
+      }
+    }
+  },
+  "source_base_revision": "6e921b205c00d592c25f849653cbfb72b73fe318",
+  "source_includes_unreleased_required_components_api": true,
+  "started_at": "2026-10-28T21:17:50.998991+00:00",
+  "status": "completed",
+  "verification_scope": "Formal latest release; complete artifact metadata; immutable tag and matching package source; checksummed benchmark evidence for each selected component. No package build or combination smoke test.",
+  "verified_release_assets": {
+    "mindie-coordinator": {
+      "SHA256SUMS": "98e33b9701a8131b1ae817c82bcc123c24c8e3b6e336c88ba2962645cbfc4e81",
+      "benchmark-results.json": "d98e47ad33f475b9b0fea84d3c894161cf522da2b29238452654ddb004867ba7"
+    },
+    "mindie-diagnostics": {
+      "SHA256SUMS": "dc0269133779eaac960edcf838363e90a51bd580be49f908de15389d17d88dce",
+      "benchmark-results.json": "47dad7d202f29de6a084c1a7113d8a1aa372b59dddb223df168dd0c1874a6123"
+    },
+    "mindie-knowledge": {
+      "SHA256SUMS": "28e9749b92f45671dec44301b3df6aee610a8f09ee4c4df141ac97efe66eb61e",
+      "benchmark-results.json": "6b62c47e1a6f49088c9062503fbca9adcbbfbd767474e545ee91071be7631f8f"
+    },
+    "mindie-profiler": {
+      "SHA256SUMS": "e7a0a13fcb6d9f01805b706686deee7b85dea18b519b3ca73dd1ee2db4ea3985",
+      "benchmark-results.json": "1877ae1df5799af4eb58596d892778bb3239c463be72f9c92f080b45ff9befb0"
+    },
+    "mindie-sim": {
+      "SHA256SUMS": "5c5db8d992c3ff4cb49d28cb1c550131aa4593abd4202ece9d5cf41526908d75",
+      "benchmark-results.json": "15110b9c7cfbf3d8c9a37efd51a54f1eb33866581c3df38434590f4d5d1b7af8"
+    },
+    "remote-dev": {
+      "SHA256SUMS": "284218358ff0dfade0771713bbbbc57b32b60619179a44164dfb7e7ce078d666",
+      "benchmark-results.json": "dfddc90af6c00ce7746a56c01d71dd03dcd38513f325094d9287efc3105d443f"
+    }
+  }
+}

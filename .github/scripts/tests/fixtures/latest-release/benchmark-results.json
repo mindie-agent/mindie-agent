@@ -1,0 +1,197 @@
+{
+  "blocking_reasons": [],
+  "cases": [
+    {
+      "attempts": [
+        {
+          "evidence_sha256": "1d114ab3d2dd48c4e560a118b0ce8d3dd1e04b53a338576a4226a5e99cf0e78a",
+          "metrics": [
+            {
+              "iterations": 1,
+              "name": "graded_feed_lifecycle",
+              "unit": "ms/run",
+              "value": 368.7664319999726
+            }
+          ],
+          "process_seconds": 0.6651795660000062,
+          "reason_code": null,
+          "repetition": 1,
+          "returncode": 0,
+          "status": "pass"
+        }
+      ],
+      "id": "graded-feed-lifecycle",
+      "kind": "functional",
+      "metrics": [
+        {
+          "iterations": [
+            1
+          ],
+          "max": 368.7664319999726,
+          "mean": 368.7664319999726,
+          "median": 368.7664319999726,
+          "min": 368.7664319999726,
+          "name": "graded_feed_lifecycle",
+          "samples": [
+            368.7664319999726
+          ],
+          "unit": "ms/run"
+        }
+      ],
+      "repetitions_completed": 1,
+      "repetitions_planned": 1,
+      "required": true,
+      "status": "pass"
+    },
+    {
+      "attempts": [
+        {
+          "evidence_sha256": "5bfc9b199fe75ba985fd165b3021a0528dc4397320fef7a16f2415878bdb71ec",
+          "metrics": [
+            {
+              "iterations": 10000,
+              "name": "technical_tokenization",
+              "unit": "us/op",
+              "value": 69.2268468
+            }
+          ],
+          "process_seconds": 0.7660807419999855,
+          "reason_code": null,
+          "repetition": 1,
+          "returncode": 0,
+          "status": "pass"
+        },
+        {
+          "evidence_sha256": "c0470c865ae5296c6775422e79d303be591f0f4f85e889d390495b975876b949",
+          "metrics": [
+            {
+              "iterations": 10000,
+              "name": "technical_tokenization",
+              "unit": "us/op",
+              "value": 69.8096479
+            }
+          ],
+          "process_seconds": 0.7663512029999993,
+          "reason_code": null,
+          "repetition": 2,
+          "returncode": 0,
+          "status": "pass"
+        },
+        {
+          "evidence_sha256": "4fae7a40b6666f37f0701a867a6ac8c84aa1e503657fdb2fbda800f43f8f8e49",
+          "metrics": [
+            {
+              "iterations": 10000,
+              "name": "technical_tokenization",
+              "unit": "us/op",
+              "value": 69.0373088
+            }
+          ],
+          "process_seconds": 0.7661897650000355,
+          "reason_code": null,
+          "repetition": 3,
+          "returncode": 0,
+          "status": "pass"
+        },
+        {
+          "evidence_sha256": "e33e9e5fbd288100c4f73852e112d9edc35c4369bba06b249c44f5e53015f236",
+          "metrics": [
+            {
+              "iterations": 10000,
+              "name": "technical_tokenization",
+              "unit": "us/op",
+              "value": 69.2042589
+            }
+          ],
+          "process_seconds": 0.766232776000038,
+          "reason_code": null,
+          "repetition": 4,
+          "returncode": 0,
+          "status": "pass"
+        },
+        {
+          "evidence_sha256": "d7c5b2c97424bb97049c9abb42b6d86ca51c767dc0ec722a4ba7bb2c8d35141e",
+          "metrics": [
+            {
+              "iterations": 10000,
+              "name": "technical_tokenization",
+              "unit": "us/op",
+              "value": 69.0565015
+            }
+          ],
+          "process_seconds": 0.7661876910000274,
+          "reason_code": null,
+          "repetition": 5,
+          "returncode": 0,
+          "status": "pass"
+        }
+      ],
+      "id": "technical-tokenization",
+      "kind": "microbenchmark",
+      "metrics": [
+        {
+          "iterations": [
+            10000,
+            10000,
+            10000,
+            10000,
+            10000
+          ],
+          "max": 69.8096479,
+          "mean": 69.26691278,
+          "median": 69.2042589,
+          "min": 69.0373088,
+          "name": "technical_tokenization",
+          "samples": [
+            69.2268468,
+            69.8096479,
+            69.0373088,
+            69.2042589,
+            69.0565015
+          ],
+          "unit": "us/op"
+        }
+      ],
+      "repetitions_completed": 5,
+      "repetitions_planned": 5,
+      "required": true,
+      "status": "pass"
+    }
+  ],
+  "completed_at": "2026-10-24T06:49:51.097844+00:00",
+  "environment": {
+    "cpu_count": 4,
+    "machine": "x86_64",
+    "os_release": "6.17.0-1022-azure",
+    "platform": "linux",
+    "runner_python": "3.13.17",
+    "workload_python": "Python 3.13.17"
+  },
+  "release_gate": true,
+  "repository": "mindie-agent/knowledge",
+  "schema_version": "mindie-release-benchmark/2",
+  "source": {
+    "dirty": false,
+    "revision": "b616a38f77ca17573e4ed22ee23c08c09adefac7"
+  },
+  "source_after": {
+    "dirty": false,
+    "revision": "b616a38f77ca17573e4ed22ee23c08c09adefac7"
+  },
+  "started_at": "2026-10-24T06:49:46.573144+00:00",
+  "suite": "core",
+  "suite_sha256": "8a617ef086eb82401037985a853837bfd6a055db26177cd1bd71283fd8303ca3",
+  "tool": {
+    "name": "mindie-bench",
+    "source": {
+      "dirty": false,
+      "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+    },
+    "source_after": {
+      "dirty": false,
+      "revision": "3bf7fa6efc111876cc31c602f11dcd0c029769d7"
+    },
+    "version": "0.4.0"
+  },
+  "version": "0.13.2"
+}

@@ -1,0 +1,435 @@
+{
+  "comparability": "Report each model and task family separately. Shared provider concurrency affects observed delivery time.",
+  "component_cases": [
+    {
+      "component": "coordinator",
+      "distribution": "mindie-coordinator",
+      "expected_observations": {
+        "baseline": {
+          "bind_conflicts": 1,
+          "duplicate_device_selections": 1,
+          "successful_listeners": 1
+        },
+        "candidate": {
+          "bind_conflicts": 0,
+          "duplicate_device_selections": 0,
+          "successful_listeners": 2
+        }
+      },
+      "id": "coordinator-contention",
+      "repetitions": 3
+    },
+    {
+      "component": "npu-top",
+      "distribution": "npu-top",
+      "expected_observations": {
+        "candidate": {
+          "golden_physical_devices_correct": 24,
+          "golden_process_assignments_correct": 16,
+          "golden_process_assignments_expected": 16,
+          "live_container_owner_correct": true,
+          "live_physical_devices": 8
+        }
+      },
+      "id": "npu-top-physical-owner-query",
+      "repetitions": 3
+    },
+    {
+      "component": "diagnostics",
+      "distribution": "mindie-diagnostics",
+      "expected_observations": {
+        "candidate": {
+          "delivered_reports": 1,
+          "failure_occurrences": 3,
+          "http_posts": 1,
+          "private_fixture_removed": true,
+          "queue_items": 1,
+          "reconciled_without_duplicate": true,
+          "useful_fault_fields_retained": true,
+          "withdrawal_prevented_requests": true
+        }
+      },
+      "id": "diagnostics-fault-delivery",
+      "repetitions": 3
+    }
+  ],
+  "id": "product-value-v1",
+  "instrumentation_components": [
+    "coordinator"
+  ],
+  "native_plugins": {
+    "claude-code": [
+      "released native plugin mounted",
+      "native MCP servers and tools registered",
+      "native SessionStart and Stop hooks processed",
+      "production maintenance receipt with contribution disabled"
+    ],
+    "codex": [
+      "exact native plugin mounted",
+      "native MCP catalogue matches shipped plugin",
+      "native SessionStart and Stop hooks completed",
+      "unified contribution disabled in isolated profile",
+      "exact noneditable shared runtime"
+    ],
+    "dsh": [
+      "released Host plugin mounted and tools registered",
+      "native tool call reaches pinned production Python sidecar",
+      "released turn-stopping callback processes actual native event"
+    ],
+    "kimi": [
+      "native_install",
+      "registered_tools",
+      "production_entry_authorization_guard",
+      "native_hooks"
+    ]
+  },
+  "purpose": "Release-to-release task completion, measured delivery cost, cross-task reuse and component behavior.",
+  "schema_version": "mindie-value-suite/1",
+  "studies": [
+    {
+      "budget": {
+        "max_npu_runs": 8,
+        "max_output_bytes": 33554432,
+        "max_turns": 40,
+        "timeout_sec": 1200.0,
+        "verifier_timeout_sec": 240.0
+      },
+      "comparisons": [
+        [
+          "G0",
+          "G2"
+        ],
+        [
+          "G0",
+          "G1"
+        ],
+        [
+          "G1",
+          "G2"
+        ]
+      ],
+      "group_components": {
+        "G0": [],
+        "G1": [
+          "remote-dev"
+        ],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G0",
+        "G1",
+        "G2"
+      ],
+      "harness": "codex",
+      "id": "dp2",
+      "model": "home/codex/gpt-6.1-sol",
+      "reasoning_effort": "xhigh",
+      "repetitions": 3,
+      "scope": "Real historical task under the native Codex host with controlled MindIE MCP and shipped Skills.",
+      "task_base_commits": {
+        "k3-gdn-idle-dp-state": "c3394206bdd00b132580ae439555b4f1a70d5bf6"
+      },
+      "task_digests": {
+        "k3-gdn-idle-dp-state": "82c87325874bd0923f83f1b9a4da2f9d52bfa52ab7cc62558c7f100b5301c342"
+      },
+      "tasks": {
+        "k3-gdn-idle-dp-state": "eval"
+      },
+      "tier": "l3"
+    },
+    {
+      "budget": {
+        "max_npu_runs": 8,
+        "max_output_bytes": 33554432,
+        "max_turns": 40,
+        "timeout_sec": 1200.0,
+        "verifier_timeout_sec": 400.0
+      },
+      "comparisons": [
+        [
+          "G1",
+          "G2"
+        ]
+      ],
+      "group_components": {
+        "G1": [
+          "remote-dev"
+        ],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G1",
+        "G2"
+      ],
+      "harness": "codex",
+      "id": "stale",
+      "model": "home/codex/gpt-6.1-sol",
+      "reasoning_effort": "xhigh",
+      "repetitions": 3,
+      "scope": "Real historical task under the native Codex host with controlled MindIE MCP and shipped Skills.",
+      "task_base_commits": {
+        "stale-fused-mc2-deployment": "c3394206bdd00b132580ae439555b4f1a70d5bf6"
+      },
+      "task_digests": {
+        "stale-fused-mc2-deployment": "c53b8f34747b80b71d064a7d747f98c8a26f14b1f8bf7e5f0f879f96eba53d8e"
+      },
+      "tasks": {
+        "stale-fused-mc2-deployment": "eval"
+      },
+      "tier": "l3"
+    },
+    {
+      "budget": {
+        "max_npu_runs": 8,
+        "max_output_bytes": 33554432,
+        "max_turns": 30,
+        "timeout_sec": 600.0,
+        "verifier_timeout_sec": 45.0
+      },
+      "comparisons": [
+        [
+          "G0",
+          "G2"
+        ],
+        [
+          "G0",
+          "G1"
+        ],
+        [
+          "G1",
+          "G2"
+        ]
+      ],
+      "group_components": {
+        "G0": [],
+        "G1": [
+          "remote-dev"
+        ],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G0",
+        "G1",
+        "G2"
+      ],
+      "harness": "codex",
+      "id": "quarot",
+      "model": "home/codex/gpt-6.1-sol",
+      "reasoning_effort": "xhigh",
+      "repetitions": 3,
+      "scope": "Real historical task under the native Codex host with controlled MindIE MCP and shipped Skills.",
+      "task_base_commits": {
+        "l2-quarot-draft-dispatch": "eabfc727b58ca57f2fa65db7d0324ea5df31d7a3"
+      },
+      "task_digests": {
+        "l2-quarot-draft-dispatch": "9f0cc0a570a87d32c66bcef19e7f1ae23916c23d6bdfead01ed1a71e2847c952"
+      },
+      "tasks": {
+        "l2-quarot-draft-dispatch": "eval"
+      },
+      "tier": "l2"
+    },
+    {
+      "budget": {
+        "max_npu_runs": 8,
+        "max_output_bytes": 33554432,
+        "max_turns": 30,
+        "timeout_sec": 600.0,
+        "verifier_timeout_sec": 45.0
+      },
+      "comparisons": [
+        [
+          "G0",
+          "G2"
+        ]
+      ],
+      "group_components": {
+        "G0": [],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G0",
+        "G2"
+      ],
+      "harness": "claude-code",
+      "id": "claude-code",
+      "model": "deepseek-flash",
+      "reasoning_effort": null,
+      "repetitions": 3,
+      "scope": "Native host with controlled MCP and the released plugin Skills. Full plugin loading is verified separately.",
+      "task_base_commits": {
+        "l2-quarot-draft-dispatch": "eabfc727b58ca57f2fa65db7d0324ea5df31d7a3"
+      },
+      "task_digests": {
+        "l2-quarot-draft-dispatch": "9f0cc0a570a87d32c66bcef19e7f1ae23916c23d6bdfead01ed1a71e2847c952"
+      },
+      "tasks": {
+        "l2-quarot-draft-dispatch": "eval"
+      },
+      "tier": "l2"
+    },
+    {
+      "budget": {
+        "max_npu_runs": 8,
+        "max_output_bytes": 33554432,
+        "max_turns": 30,
+        "timeout_sec": 600.0,
+        "verifier_timeout_sec": 45.0
+      },
+      "comparisons": [
+        [
+          "G0",
+          "G2"
+        ]
+      ],
+      "group_components": {
+        "G0": [],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G0",
+        "G2"
+      ],
+      "harness": "dsh",
+      "id": "dsh",
+      "model": "deepseek-flash",
+      "reasoning_effort": null,
+      "repetitions": 3,
+      "scope": "Native host with controlled MCP and the released plugin Skills. Full plugin loading is verified separately.",
+      "task_base_commits": {
+        "l2-quarot-draft-dispatch": "eabfc727b58ca57f2fa65db7d0324ea5df31d7a3"
+      },
+      "task_digests": {
+        "l2-quarot-draft-dispatch": "9f0cc0a570a87d32c66bcef19e7f1ae23916c23d6bdfead01ed1a71e2847c952"
+      },
+      "tasks": {
+        "l2-quarot-draft-dispatch": "eval"
+      },
+      "tier": "l2"
+    },
+    {
+      "budget": {
+        "max_npu_runs": 8,
+        "max_output_bytes": 33554432,
+        "max_turns": 30,
+        "timeout_sec": 600.0,
+        "verifier_timeout_sec": 45.0
+      },
+      "comparisons": [
+        [
+          "G0",
+          "G2"
+        ]
+      ],
+      "group_components": {
+        "G0": [],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G0",
+        "G2"
+      ],
+      "harness": "kimi",
+      "id": "kimi",
+      "model": "k3",
+      "reasoning_effort": "max",
+      "repetitions": 3,
+      "scope": "Native host with controlled MCP and the released plugin Skills. Full plugin loading is verified separately.",
+      "task_base_commits": {
+        "l2-quarot-draft-dispatch": "eabfc727b58ca57f2fa65db7d0324ea5df31d7a3"
+      },
+      "task_digests": {
+        "l2-quarot-draft-dispatch": "9f0cc0a570a87d32c66bcef19e7f1ae23916c23d6bdfead01ed1a71e2847c952"
+      },
+      "tasks": {
+        "l2-quarot-draft-dispatch": "eval"
+      },
+      "tier": "l2"
+    },
+    {
+      "budget": {
+        "max_npu_runs": 12,
+        "max_output_bytes": 33554432,
+        "max_turns": 35,
+        "timeout_sec": 600.0,
+        "verifier_timeout_sec": 90.0
+      },
+      "comparisons": [
+        [
+          "G1",
+          "G2"
+        ],
+        [
+          "G2",
+          "G3"
+        ]
+      ],
+      "group_components": {
+        "G1": [
+          "remote-dev"
+        ],
+        "G2": [
+          "knowledge",
+          "remote-dev"
+        ],
+        "G3": [
+          "knowledge",
+          "remote-dev"
+        ]
+      },
+      "groups": [
+        "G1",
+        "G2",
+        "G3"
+      ],
+      "harness": "codex",
+      "id": "knowledge-transfer",
+      "model": "home/codex/gpt-6.1-sol",
+      "reasoning_effort": "xhigh",
+      "repetitions": 3,
+      "scope": "One historical publication task seeds two distinct later publication tasks. Seed execution and capture are included in total workflow costs. This is within-project transfer, not evidence of cross-project generalization.",
+      "task_base_commits": {
+        "publication-export-seed-v2": "e65b05c795e2c6e7073f331565df712c853d761f",
+        "publication-flush-eval": "23b1516907edfcccf55243f141f414f1d4b8d535",
+        "publication-submit-eval": "23b1516907edfcccf55243f141f414f1d4b8d535"
+      },
+      "task_digests": {
+        "publication-export-seed-v2": "7450c53778025245d282ab2bddc5b968a247dfda704695346afeed5f104d9d07",
+        "publication-flush-eval": "241a993ebfcbfe1f9275a009edc7fc4f860e9aac825b6125e84174e1215d516b",
+        "publication-submit-eval": "6cdb7c3ebd8ec0792c3af39e234a6a460093a3263df2b4665cdd1b50fe888043"
+      },
+      "tasks": {
+        "publication-export-seed-v2": "seed",
+        "publication-flush-eval": "eval",
+        "publication-submit-eval": "eval"
+      },
+      "tier": "l2",
+      "transfer": {
+        "eval_tasks": [
+          "publication-flush-eval",
+          "publication-submit-eval"
+        ],
+        "group": "G3",
+        "seed_task": "publication-export-seed-v2"
+      }
+    }
+  ]
+}

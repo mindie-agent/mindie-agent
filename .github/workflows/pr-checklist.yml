@@ -1,0 +1,112 @@
+name: PR Checklist & LF Line-Ending Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  script-tests:
+    name: Script & Gate Contracts (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enforce Unix LF Line Endings (Reject Windows CRLF)
+        run: python -X utf8 .github/scripts/check_lf_eol.py
+      - name: Read the recorded compatibility validator revision
+        id: knowledge
+        run: |
+          python -X utf8 -c 'import json,os; value=json.load(open("channels/0.1.json", encoding="utf-8"))["components"]["knowledge"]["commit"]; open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8").write("commit="+value+"\n")'
+      - name: Checkout the recorded compatibility validator
+        uses: actions/checkout@v4
+        with:
+          repository: mindie-agent/knowledge
+          ref: ${{ steps.knowledge.outputs.commit }}
+          path: .ci/knowledge
+          persist-credentials: false
+      - name: Install compatibility validator dependencies
+        run: python -m pip install "semantic-version==2.10.0" "PyYAML>=6.0" "packaging>=24"
+      - name: Verify release scope, host compatibility, and publication contracts
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci/knowledge
+          PYTHONUTF8: '1'
+        run: python -X utf8 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
+      - name: Enforce R4 Host Compatibility & Windows Zero-Popup Gate
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci/knowledge
+          PYTHONUTF8: '1'
+        run: python -X utf8 .github/scripts/host_compatibility_gate.py --main-repo . --siblings-root .ci
+
+  pr-checklist:
+    name: Verify LF Line Endings & Pre-PR Design Principles Checklist
+    needs: script-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Enforce Unix LF Line Endings (Reject Windows CRLF)
+        run: python -X utf8 .github/scripts/check_lf_eol.py
+      - name: Identify product combination input changes
+        id: product
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          python -X utf8 .github/scripts/release_doc_hygiene.py --product-inputs-changed "$BASE_SHA" >> "$GITHUB_OUTPUT"
+      - name: Read the recorded compatibility validator revision
+        if: steps.product.outputs.changed == 'true'
+        id: knowledge
+        run: |
+          python -X utf8 -c 'import json,os; value=json.load(open("channels/0.1.json", encoding="utf-8"))["components"]["knowledge"]["commit"]; open(os.environ["GITHUB_OUTPUT"],"a",encoding="utf-8").write("commit="+value+"\n")'
+      - name: Checkout the recorded compatibility validator
+        if: steps.product.outputs.changed == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: mindie-agent/knowledge
+          ref: ${{ steps.knowledge.outputs.commit }}
+          path: .ci/knowledge
+          persist-credentials: false
+      - name: Install compatibility validator dependencies
+        if: steps.product.outputs.changed == 'true'
+        run: python -m pip install "semantic-version==2.10.0" "PyYAML>=6.0" "packaging>=24"
+      - name: Prepare isolated siblings directory
+        if: steps.product.outputs.changed == 'true'
+        run: mkdir -p "$RUNNER_TEMP/empty-siblings"
+      - name: Verify Channel Version Sync in READMEs
+        if: steps.product.outputs.changed == 'true'
+        run: python -X utf8 .github/scripts/sync_org_versions.py --release-scope product --check --offline --siblings-root "$RUNNER_TEMP/empty-siblings"
+      - name: Verify Automatic-Update Readiness Manifest & Schema
+        if: steps.product.outputs.changed == 'true'
+        env:
+          PYTHONPATH: ${{ github.workspace }}/.ci/knowledge
+          PYTHONUTF8: '1'
+        run: python -X utf8 .github/scripts/check_auto_update_readiness.py --release-scope product --siblings-root "$RUNNER_TEMP/empty-siblings"
+      - name: Validate PR Checklist and Review Evidence
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python -X utf8 .github/scripts/check_pr_checklist.py
