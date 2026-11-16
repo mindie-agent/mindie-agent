@@ -45,19 +45,48 @@ _LOCAL_STORAGE_MODULES = frozenset({
     "lifecycle", "loop.locks", "mindie_knowledge", "mindie_knowledge.filesystem", "mindie_knowledge.state_layout",
     "mindie_knowledge.storage", "mindie_knowledge.storage.legacy_roots", "mindie_knowledge.storage.lifecycle",
     "mindie_paths", "paths", "product_contract", "remote_state_guard", "storage", "storage_common", "storage_gc",
-    "storage_leases", "storage_lifecycle", "storage_reclaim", "storage_releases", "storage_spool", "storage_support", "uv_cache",
+    "storage_leases", "storage_lifecycle", "storage_pid_ast", "storage_reclaim", "storage_releases", "storage_spool", "storage_support", "storage_temp_ast", "uv_cache",
 })
-_ALLOWED_EXACT_IMPORTS = (_LOCAL_STORAGE_MODULES - set(_RESTRICTED_HELPER_IMPORTS)) | {
-    "_winapi", "argparse", "ast", "contextlib", "ctypes", "errno", "fcntl", "hashlib", "json", "msvcrt", "ntpath",
-    "os", "os.path", "pathlib", "plistlib", "re", "select", "shlex", "shutil", "sqlite3", "stat", "subprocess",
-    "sys", "tempfile", "threading", "time", "tomllib", "uuid",
+_ALLOWED_EXACT_IMPORTS = {
+    "_winapi", "argparse", "ast", "contextlib", "ctypes", "errno", "fcntl", "hashlib", "json", "mindie_paths",
+    "msvcrt", "ntpath", "os", "os.path", "pathlib", "plistlib", "re", "select", "shlex", "shutil", "sqlite3",
+    "stat", "storage_support", "subprocess", "sys", "tempfile", "threading", "time", "tomllib", "uuid",
 }
+_ALLOWED_LOCAL_FROM_SYMBOLS = frozenset({
+    "BUILDER_LOCK_NAMES", "DATABASE", "MAINTENANCE_INTERVAL_SECONDS", "MARKER_NAME", "MARKER_SCHEMA",
+    "MAX_ENDPOINT_ROOTS", "MAX_JSON_BYTES", "MAX_SESSION_ENTRIES", "MAX_SESSION_ROOTS", "MAX_WALK_FILES",
+    "MAX_WARNINGS", "PENDING_BIND_STATUSES", "RELEASE_BUDGET_SECONDS", "RESOLVED_SUBMISSION_STATES",
+    "RuntimeLease", "SCHEMA", "SESSION_BUDGET_SECONDS", "SESSION_RETENTION_SECONDS", "SPOOL_BUDGET_SECONDS",
+    "SPOOL_BUNDLE_MIN_AGE_SECONDS", "SPOOL_MAX_AGE_SECONDS", "SPOOL_SESSION_LIMIT", "SWEEP_BUDGET_SECONDS",
+    "TERMINAL_BIND_STATUSES", "UV_CACHE_DIRECTORY", "_TRASH_PREFIX", "_VERSION", "_binding", "_bounded_deadline",
+    "_builder_locked", "_check", "_config_documents", "_config_homes", "_data_homes", "_device",
+    "_discover_targets", "_entries", "_env", "_expired", "_held_spool_lock", "_home", "_identity", "_json_safe",
+    "_read_json", "_recent_marker", "_remaining", "_roots", "_state_dir", "_strings", "_warn",
+    "_write_json_atomic", "account", "acquire_retirement_locks", "acquire_runtime_lease", "active_version",
+    "atomic_write_json", "attach_cleanup", "budget", "cleanup_fields", "collect_global_protected_roots",
+    "config_path", "configure_same_volume_uv_cache", "data_home", "expired", "filesystem_path", "fs_path",
+    "guarded_endpoint_retention", "guarded_session_retention", "has_git_ancestor", "has_unresolved_state",
+    "inspect_python_temp_hygiene", "inspect_storage_module_windows_pid_safety", "installed_version",
+    "is_absolute", "is_junction", "is_lease_held", "is_own_runtime_path", "is_path_used_by_live_process",
+    "is_protected_path", "is_within_roots", "iter_direct_nodes", "launch_dir", "legacy_roots",
+    "live_process_prefixes", "load_adapter_config", "lock_file", "lock_held", "lock_inode_matches", "merge",
+    "non_import_bound_names", "normalize_windows_path", "note", "owning_dir", "path_aliases", "path_identity",
+    "path_key", "path_text", "protected_source_roots", "prune_component_runtimes", "prune_release_entries",
+    "prune_sessions", "prune_spool_transcripts", "read_current", "read_json", "receipts_dir",
+    "refresh_release_entry", "render_entry", "retire_directory", "same_volume_cache_dir", "scheduled_pins",
+    "spool_maintenance_due", "state_dir", "state_root", "storage", "sweep_installations",
+    "sweep_legacy_installations", "sweep_trash", "unlink_file", "unlock_file", "unresolved_state", "update_dir",
+    "which_native", "windows_lease_present", "workbuddy_config_dir", "write_spool_maintenance_marker",
+})
 _ALLOWED_STDLIB_FROM_PAIRS = frozenset({
     ("__future__", "annotations"), ("collections.abc", "Iterator"), ("contextlib", "ExitStack"),
     ("contextlib", "contextmanager"), ("contextlib", "suppress"), ("ctypes", "wintypes"),
     ("os", "kill"), ("pathlib", "Path"), ("urllib.parse", "quote"), ("xml.etree", "ElementTree"),
 })
-_STDLIB_SUBMODULE_IMPORTS: dict[tuple[str, str], str] = {("ctypes", "wintypes"): "wintypes", ("xml.etree", "ElementTree"): "ElementTree"}
+_STDLIB_SUBMODULE_IMPORTS: dict[tuple[str, str], str] = {
+    ("ctypes", "wintypes"): "wintypes", ("xml.etree", "ElementTree"): "ElementTree",
+    ("mindie_knowledge", "storage"): "storage", ("mindie_knowledge.storage", "legacy_roots"): "legacy_roots",
+}
 _ALLOWED_TYPING_NAMES = frozenset({
     "Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator", "IO", "Iterable", "Iterator", "List",
     "Literal", "Mapping", "MutableMapping", "NamedTuple", "NoReturn", "Optional", "Protocol", "Sequence", "Set",
@@ -74,6 +103,8 @@ _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
     "fcntl": frozenset({"LOCK_EX", "LOCK_NB", "LOCK_SH", "LOCK_UN", "flock"}),
     "hashlib": frozenset({"sha256"}),
     "json": frozenset({"JSONDecodeError", "dump", "dumps", "load", "loads"}),
+    "legacy_roots": frozenset({"_config_homes"}),
+    "mindie_paths": frozenset({"config_file", "config_home", "data_home"}),
     "msvcrt": frozenset({"LK_LOCK", "LK_NBLCK", "LK_UNLCK", "locking"}),
     "ntpath": frozenset({"abspath", "normcase", "normpath"}),
     "os": frozenset({"O_APPEND", "O_CREAT", "O_EXCL", "O_RDONLY", "O_RDWR", "O_WRONLY", "PathLike", "SEEK_SET", "W_OK", "X_OK", "access", "chmod", "close", "environ", "fdopen", "fsdecode", "fsencode", "fspath", "fstat", "fsync", "getpid", "kill", "listdir", "lseek", "lstat", "makedirs", "mkdir", "name", "open", "path", "pathsep", "read", "readlink", "remove", "rename", "replace", "rmdir", "scandir", "sep", "stat", "unlink", "utime", "walk", "write"}),
@@ -85,6 +116,8 @@ _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
     "shutil": frozenset({"copy2", "copytree", "move", "rmtree", "which"}),
     "sqlite3": frozenset({"Error", "OperationalError", "connect"}),
     "stat": frozenset({"FILE_ATTRIBUTE_REPARSE_POINT", "S_IREAD", "S_IRUSR", "S_ISDIR", "S_ISLNK", "S_ISREG", "S_IWRITE", "S_IWUSR"}),
+    "storage": frozenset({"acquire_runtime_lease", "is_path_used_by_live_process", "live_process_prefixes", "owning_dir", "prune_component_runtimes", "retire_directory", "sweep_legacy_installations"}),
+    "storage_support": frozenset({"MAX_CONFIG_DOCUMENTS", "config_documents", "config_homes", "config_pins", "default_config_homes", "forbidden_roots", "has_git_ancestor", "is_absolute", "link_free", "path_key", "path_text", "referenced_json_paths"}),
     "subprocess": frozenset({"CalledProcessError", "CREATE_NO_WINDOW", "DEVNULL", "PIPE", "Popen", "SubprocessError", "TimeoutExpired"}),
     "sys": frozenset({"argv", "executable", "implementation", "path", "platform", "prefix", "stderr", "stdin", "stdout", "version_info"}),
     "tempfile": frozenset({"NamedTemporaryFile", "TemporaryDirectory", "gettempdir", "mkdtemp", "mkstemp"}),
@@ -97,30 +130,21 @@ _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
 _ALLOWED_KERNEL32_FNS = frozenset({"CloseHandle", "CreateToolhelp32Snapshot", "OpenProcess", "Process32FirstW", "Process32NextW", "QueryFullProcessImageNameW"})
 _SCALAR_TYPE_NAMES = frozenset({"int", "bool", "str", "float", "bytes", "dict", "list", "tuple", "set"})
 _ALLOWED_OS_PATH_ATTRS = frozenset({"abspath", "basename", "commonpath", "dirname", "exists", "expanduser", "isabs", "isdir", "isfile", "isjunction", "islink", "join", "lexists", "normcase", "normpath", "realpath", "relpath", "samefile", "split", "splitdrive"})
-_ALLOWED_CLASS_BASE_NAMES = frozenset(
-    {"Exception", "RuntimeError", "ValueError", "OSError", "dict", "set", "object", "NamedTuple"}
-)
+_ALLOWED_CLASS_BASE_NAMES = frozenset({"Exception", "RuntimeError", "ValueError", "OSError", "dict", "set", "object", "NamedTuple"})
 _ALLOWED_FROM_MODULES = _LOCAL_STORAGE_MODULES | {m for m, _ in _ALLOWED_STDLIB_FROM_PAIRS} | {"typing"}
-_ALLOWED_GETATTR_NAMES = frozenset(
-    {
-        "CREATE_NO_WINDOW", "ERROR_ACCESS_DENIED", "ERROR_INVALID_PARAMETER",
-        "O_BINARY", "O_NOFOLLOW", "PROCESS_ALL_ACCESS", "PROCESS_QUERY_INFORMATION",
-        "PROCESS_QUERY_LIMITED_INFORMATION", "base_prefix", "commands", "depths",
-        "errno", "isjunction", "returncode", "st_file_attributes", "st_reparse_tag",
-        "winerror",
-    }
-)
-_BANNED_ATTR_NAMES = frozenset(
-    {
-        "modules", "_getframe", "_current_frames", "_current_exceptions",
-        "f_builtins", "f_globals", "f_locals", "f_back", "f_code",
-        "gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code",
-        "tb_frame", "tb_next", "pythonapi", "cdll", "pydll", "oledll", "windll",
-        "CDLL", "PyDLL", "OleDLL", "LoadLibrary", "_dlopen", "CFUNCTYPE",
-        "WINFUNCTYPE", "PYFUNCTYPE", "get_type_hints", "_eval_type",
-        "enable_load_extension", "load_extension",
-    }
-)
+_ALLOWED_GETATTR_NAMES = frozenset({
+    "CREATE_NO_WINDOW", "ERROR_ACCESS_DENIED", "ERROR_INVALID_PARAMETER", "O_BINARY", "O_NOFOLLOW",
+    "PROCESS_ALL_ACCESS", "PROCESS_QUERY_INFORMATION", "PROCESS_QUERY_LIMITED_INFORMATION", "base_prefix",
+    "commands", "depths", "errno", "isjunction", "returncode", "st_file_attributes", "st_reparse_tag", "winerror",
+})
+_BANNED_ATTR_NAMES = frozenset({
+    "modules", "_getframe", "_current_frames", "_current_exceptions", "f_builtins", "f_globals", "f_locals",
+    "f_back", "f_code", "gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code", "tb_frame", "tb_next",
+    "pythonapi", "cdll", "pydll", "oledll", "windll", "CDLL", "PyDLL", "OleDLL", "LoadLibrary", "_dlopen",
+    "CFUNCTYPE", "WINFUNCTYPE", "PYFUNCTYPE", "get_type_hints", "_eval_type", "enable_load_extension", "load_extension",
+    "leases", "lifecycle", "legacy", "subprocess", "ctypes", "_winapi", "ntpath", "shutil", "sys", "os", "re",
+    "tempfile", "msvcrt", "fcntl", "sqlite3",
+})
 _SAFE_READ_DUNDERS = frozenset({"__init__", "__name__"})
 _ALLOWED_SELF_PRIVATE_ATTRS = frozenset({"_descriptor", "_descriptors", "_lease_file"})
 _ALLOWED_LOCAL_PRIVATE_ATTRS = frozenset({"_config_homes"})
@@ -128,13 +152,10 @@ _ALLOWED_LOCAL_PRIVATE_ATTRS = frozenset({"_config_homes"})
 
 def _stmts_always_exit(stmts: list[ast.stmt], *, in_loop: bool) -> bool:
     for stmt in stmts:
-        if isinstance(stmt, (ast.Return, ast.Raise)):
+        if isinstance(stmt, (ast.Return, ast.Raise)) or (in_loop and isinstance(stmt, (ast.Break, ast.Continue))):
             return True
-        if in_loop and isinstance(stmt, (ast.Break, ast.Continue)):
+        if isinstance(stmt, ast.If) and stmt.orelse and _stmts_always_exit(stmt.body, in_loop=in_loop) and _stmts_always_exit(stmt.orelse, in_loop=in_loop):
             return True
-        if isinstance(stmt, ast.If) and stmt.orelse:
-            if _stmts_always_exit(stmt.body, in_loop=in_loop) and _stmts_always_exit(stmt.orelse, in_loop=in_loop):
-                return True
     return False
 
 
@@ -147,46 +168,26 @@ def _guard_implications(expr: ast.AST, os_aliases: frozenset[str], sys_aliases: 
         parts = [_guard_implications(v, os_aliases, sys_aliases) for v in expr.values]
         if isinstance(expr.op, ast.And):
             return any(t for t, _ in parts), all(f for _, f in parts)
-        if isinstance(expr.op, ast.Or):
-            return all(t for t, _ in parts), any(f for _, f in parts)
-        return False, False
+        return (all(t for t, _ in parts), any(f for _, f in parts)) if isinstance(expr.op, ast.Or) else (False, False)
     if isinstance(expr, ast.Call) and isinstance(expr.func, ast.Attribute):
         recv = expr.func.value
         if (
-            isinstance(recv, ast.Attribute)
-            and isinstance(recv.value, ast.Name)
-            and recv.value.id in sys_aliases
-            and recv.attr == "platform"
-            and expr.func.attr == "startswith"
-            and len(expr.args) == 1
-            and not expr.keywords
-            and isinstance(expr.args[0], ast.Constant)
-            and isinstance(expr.args[0].value, str)
-            and expr.args[0].value in {"win", "win32"}
+            isinstance(recv, ast.Attribute) and isinstance(recv.value, ast.Name) and recv.value.id in sys_aliases
+            and recv.attr == "platform" and expr.func.attr == "startswith" and len(expr.args) == 1 and not expr.keywords
+            and isinstance(expr.args[0], ast.Constant) and isinstance(expr.args[0].value, str) and expr.args[0].value in {"win", "win32"}
         ):
             return False, True
     if isinstance(expr, ast.Compare) and len(expr.ops) == 1 and len(expr.comparators) == 1:
         left, op, right = expr.left, expr.ops[0], expr.comparators[0]
-        if not (
-            isinstance(left, ast.Attribute)
-            and isinstance(left.value, ast.Name)
-            and isinstance(right, ast.Constant)
-            and isinstance(right.value, str)
-        ):
+        if not (isinstance(left, ast.Attribute) and isinstance(left.value, ast.Name) and isinstance(right, ast.Constant) and isinstance(right.value, str)):
             return False, False
         if left.value.id in os_aliases and left.attr == "name":
             if right.value == "nt":
-                if isinstance(op, ast.Eq):
-                    return False, True
-                if isinstance(op, ast.NotEq):
-                    return True, False
-            elif right.value == "posix" and isinstance(op, ast.Eq):
+                return (False, True) if isinstance(op, ast.Eq) else ((True, False) if isinstance(op, ast.NotEq) else (False, False))
+            if right.value == "posix" and isinstance(op, ast.Eq):
                 return True, False
         if left.value.id in sys_aliases and left.attr == "platform" and right.value == "win32":
-            if isinstance(op, ast.Eq):
-                return False, True
-            if isinstance(op, ast.NotEq):
-                return True, False
+            return (False, True) if isinstance(op, ast.Eq) else ((True, False) if isinstance(op, ast.NotEq) else (False, False))
     return False, False
 
 
@@ -197,16 +198,20 @@ def _is_exempt_direct_kill_call(call: ast.Call, imported_kill_names: frozenset[s
     )
     if not is_imported_kill and not call.args and not call.keywords:
         return True
-    if (
-        len(call.args) == 2
-        and not call.keywords
-        and not isinstance(call.args[0], ast.Starred)
-        and isinstance(call.args[1], ast.Constant)
-        and type(call.args[1].value) is int
-        and call.args[1].value != 0
-    ):
-        return True
-    return False
+    return (
+        len(call.args) == 2 and not call.keywords and not isinstance(call.args[0], ast.Starred)
+        and isinstance(call.args[1], ast.Constant) and type(call.args[1].value) is int and call.args[1].value != 0
+    )
+
+
+def _is_long_flag(expr: ast.AST, opt_vars: set[str]) -> bool:
+    return (isinstance(expr, ast.Constant) and isinstance(expr.value, str) and expr.value.startswith("--")) or (
+        isinstance(expr, ast.Name) and expr.id in opt_vars
+    )
+
+
+def _is_str_call(expr: ast.AST) -> bool:
+    return isinstance(expr, ast.Call) and isinstance(expr.func, ast.Name) and expr.func.id == "str" and len(expr.args) == 1 and not expr.keywords
 
 
 def _is_self_dispatch_bounded_run(call: ast.Call, fn_scope: ast.AST | None, global_rebound: set[str]) -> bool:
@@ -217,36 +222,61 @@ def _is_self_dispatch_bounded_run(call: ast.Call, fn_scope: ast.AST | None, glob
     if any(kw.arg in {"shell", "executable"} or kw.arg is None for kw in call.keywords):
         return False
     argv_var = call.args[0].id
-    stores: dict[str, list[ast.expr]] = {}
+    pmap = {child: parent for parent in ast.walk(fn_scope) for child in ast.iter_child_nodes(parent)}
+    assigns: dict[str, list[ast.Assign]] = {}
+    opt_vars: set[str] = set()
     for sub in ast.walk(fn_scope):
         if isinstance(sub, ast.Constant) and sub.value in {"-c", "-m"}:
             return False
         if isinstance(sub, ast.Assign) and len(sub.targets) == 1 and isinstance(sub.targets[0], ast.Name):
-            stores.setdefault(sub.targets[0].id, []).append(sub.value)
-        elif isinstance(sub, ast.Name) and isinstance(sub.ctx, (ast.Store, ast.Del)) and sub.id in {argv_var, "__file__", "Path", "str"}:
-            stores.setdefault(sub.id, [])
-    if "__file__" in global_rebound or "Path" in stores or "str" in stores or len(stores.get(argv_var, ())) != 1:
+            assigns.setdefault(sub.targets[0].id, []).append(sub)
+        elif isinstance(sub, ast.For) and isinstance(sub.target, ast.Tuple) and len(sub.target.elts) == 2 and isinstance(sub.target.elts[0], ast.Name):
+            if isinstance(sub.iter, ast.Tuple) and sub.iter.elts and all(
+                isinstance(p, ast.Tuple) and len(p.elts) == 2 and isinstance(p.elts[0], ast.Constant) and isinstance(p.elts[0].value, str) and p.elts[0].value.startswith("--")
+                for p in sub.iter.elts
+            ):
+                opt_vars.add(sub.target.elts[0].id)
+        elif isinstance(sub, ast.Name) and isinstance(sub.ctx, (ast.Store, ast.Del)) and sub.id in {"__file__", "Path", "str"}:
+            return False
+    if "__file__" in global_rebound or len(assigns.get(argv_var, ())) != 1:
         return False
-    init = stores[argv_var][0]
-    if not (isinstance(init, ast.List) and len(init.elts) >= 4):
+    init_assign = assigns[argv_var][0]
+    init = init_assign.value
+    if not (isinstance(init, ast.List) and len(init.elts) >= 4 and len(init.elts) % 2 == 0):
         return False
     if not (
-        isinstance(init.elts[1], ast.Constant) and init.elts[1].value == "-I"
+        _is_str_call(init.elts[0]) and isinstance(init.elts[1], ast.Constant) and init.elts[1].value == "-I"
         and isinstance(init.elts[2], ast.Constant) and init.elts[2].value == "-B"
-        and isinstance(init.elts[3], ast.Call) and isinstance(init.elts[3].func, ast.Name) and init.elts[3].func.id == "str"
-        and len(init.elts[3].args) == 1 and isinstance(init.elts[3].args[0], ast.Name)
+        and _is_str_call(init.elts[3]) and isinstance(init.elts[3].args[0], ast.Name)
+        and all(_is_long_flag(init.elts[i], set()) and _is_str_call(init.elts[i + 1]) for i in range(4, len(init.elts), 2))
     ):
         return False
-    script_inits = stores.get(init.elts[3].args[0].id, [])
-    if len(script_inits) != 1 or not isinstance(script_inits[0], ast.Call):
+    script_var = init.elts[3].args[0].id
+    if len(assigns.get(script_var, ())) != 1:
         return False
-    sc = script_inits[0]
-    return (
-        not sc.args and not sc.keywords and isinstance(sc.func, ast.Attribute) and sc.func.attr == "resolve"
-        and isinstance(sc.func.value, ast.Call) and isinstance(sc.func.value.func, ast.Name)
-        and sc.func.value.func.id == "Path" and len(sc.func.value.args) == 1
-        and isinstance(sc.func.value.args[0], ast.Name) and sc.func.value.args[0].id == "__file__"
-    )
+    sc_assign = assigns[script_var][0]
+    sc = sc_assign.value
+    if not (
+        isinstance(sc, ast.Call) and not sc.args and not sc.keywords and isinstance(sc.func, ast.Attribute) and sc.func.attr == "resolve"
+        and isinstance(sc.func.value, ast.Call) and isinstance(sc.func.value.func, ast.Name) and sc.func.value.func.id == "Path"
+        and len(sc.func.value.args) == 1 and isinstance(sc.func.value.args[0], ast.Name) and sc.func.value.args[0].id == "__file__"
+    ):
+        return False
+    for sub in ast.walk(fn_scope):
+        if isinstance(sub, ast.Name) and sub.id == script_var and sub not in (sc_assign.targets[0], init.elts[3].args[0]):
+            return False
+        if isinstance(sub, ast.Name) and sub.id == argv_var and sub not in (init_assign.targets[0], call.args[0]):
+            par = pmap.get(sub)
+            cpar = pmap.get(par) if par is not None else None
+            if not (isinstance(sub.ctx, ast.Load) and isinstance(par, ast.Attribute) and par.value is sub and isinstance(cpar, ast.Call) and cpar.func is par and len(cpar.args) == 1 and not cpar.keywords):
+                return False
+            arg0 = cpar.args[0]
+            ok_mut = (par.attr == "append" and _is_long_flag(arg0, set())) or (
+                par.attr == "extend" and isinstance(arg0, ast.Tuple) and len(arg0.elts) == 2 and _is_long_flag(arg0.elts[0], opt_vars) and _is_str_call(arg0.elts[1])
+            )
+            if not ok_mut:
+                return False
+    return True
 
 
 def _collect_tree_facts(
@@ -332,16 +362,13 @@ def _collect_tree_facts(
                 all_module_aliases.add(bound)
                 if alias.name in _LOCAL_STORAGE_MODULES:
                     local_module_aliases.add(bound)
+                    stdlib_alias_roots.setdefault(bound, set()).add(alias.name)
                 else:
                     mod_key = "ntpath" if alias.name == "os.path" and alias.asname else top_pkg
                     stdlib_alias_roots.setdefault(bound, set()).add(mod_key)
                 if alias.name == "ctypes":
                     ctypes_aliases.add(bound)
-                src = (
-                    "os"
-                    if (alias.name == "os" or (alias.asname is None and alias.name == "os.path"))
-                    else ("sys" if alias.name == "sys" else ("re" if alias.name == "re" else "other"))
-                )
+                src = "os" if (alias.name == "os" or (alias.asname is None and alias.name == "os.path")) else ("sys" if alias.name == "sys" else ("re" if alias.name == "re" else "other"))
                 import_sources.setdefault(bound, []).append((src, in_top))
         elif isinstance(node, ast.ImportFrom):
             mod = node.module or ""
@@ -360,29 +387,22 @@ def _collect_tree_facts(
                         )
                 elif mod in _RESTRICTED_HELPER_IMPORTS:
                     if alias.name not in _RESTRICTED_HELPER_IMPORTS[mod]:
-                        cap_errors.append(
-                            f"line {node.lineno} `from {mod} import {alias.name}` is banned in storage modules"
-                        )
-                elif (node.level or 0) == 0 and mod not in _LOCAL_STORAGE_MODULES:
-                    if (mod, alias.name) not in _ALLOWED_STDLIB_FROM_PAIRS:
-                        cap_errors.append(
-                            f"line {node.lineno} `from {mod} import {alias.name}` is not in storage module allowlist"
-                        )
-                if (
-                    alias.name in _REFLECTIVE_FNS
-                    or alias.name in _BANNED_ATTR_NAMES
-                    or (alias.name.startswith("__") and alias.name.endswith("__"))
-                ):
-                    cap_errors.append(
-                        f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules"
-                    )
+                        cap_errors.append(f"line {node.lineno} `from {mod} import {alias.name}` is banned in storage modules")
+                elif (node.level or 0) > 0 or mod in _LOCAL_STORAGE_MODULES:
+                    if alias.name not in _ALLOWED_LOCAL_FROM_SYMBOLS:
+                        cap_errors.append(f"line {node.lineno} `from {mod or '.'} import {alias.name}` is not in local storage symbol allowlist")
+                elif (mod, alias.name) not in _ALLOWED_STDLIB_FROM_PAIRS:
+                    cap_errors.append(f"line {node.lineno} `from {mod} import {alias.name}` is not in storage module allowlist")
+                if alias.name in _REFLECTIVE_FNS or alias.name in _BANNED_ATTR_NAMES or (alias.name.startswith("__") and alias.name.endswith("__")):
+                    cap_errors.append(f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules")
                 bound = alias.asname or alias.name
                 non_import_bound.add(bound)
                 if mod == "bounded_process" and alias.name == "run":
                     bounded_run_names.add(bound)
-                if (node.level or 0) == 0 and (mod, alias.name) in _STDLIB_SUBMODULE_IMPORTS:
+                if ((node.level or 0) == 0 and (mod, alias.name) in _STDLIB_SUBMODULE_IMPORTS) or alias.name in {"storage", "legacy_roots"}:
+                    sub_root = _STDLIB_SUBMODULE_IMPORTS.get((mod, alias.name), alias.name)
                     all_module_aliases.add(bound)
-                    stdlib_alias_roots.setdefault(bound, set()).add(_STDLIB_SUBMODULE_IMPORTS[(mod, alias.name)])
+                    stdlib_alias_roots.setdefault(bound, set()).add(sub_root)
                 if (node.level or 0) > 0 or mod in _LOCAL_STORAGE_MODULES:
                     local_module_aliases.add(bound)
                 if alias.name == "kill":
@@ -503,7 +523,15 @@ def _collect_tree_facts(
                 cap_errors.append(f"line {node.lineno} first-class `type` reference is banned in storage modules")
             elif node.id in (ctypes_aliases | windll_vars) and id(node) not in attr_value_ids:
                 cap_errors.append(f"line {node.lineno} first-class `ctypes`/`WinDLL` reference `{node.id}` is banned in storage modules")
-            elif node.id in all_module_aliases and id(node) not in attr_value_ids and id(node) not in getattr_obj_ids:
+            elif (
+                node.id in all_module_aliases and id(node) not in attr_value_ids and id(node) not in getattr_obj_ids
+                and not (
+                    node.id == "storage" and stdlib_alias_roots.get(node.id) == {"storage"}
+                    and isinstance(parent_map.get(node), ast.Return) and parent_map[node].value is node
+                    and (enc_s := enclosing_fn.get(id(node))) is not None and not enc_s.args.args
+                    and not any(isinstance(s, ast.Name) and isinstance(s.ctx, (ast.Store, ast.Del)) and s.id == "storage" for s in ast.walk(enc_s))
+                )
+            ):
                 cap_errors.append(f"line {node.lineno} first-class module alias `{node.id}` reference is banned in storage modules")
             elif node.id in (imported_kills | bounded_run_names) and id(node) not in call_func_ids:
                 cap_errors.append(f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules")

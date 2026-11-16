@@ -396,7 +396,7 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import os, argparse\nprobe = dict(argparse.Namespace._get_kwargs(os.path.os))['kill']\nprobe(1, 0)\n", "banned in storage modules"),
             ("import ctypes\ndict = ctypes.WinDLL('kernel32').__class__\nclass Loader(dict):\n    pass\n", "banned in storage modules"),
             ("import ctypes\ncls = type(ctypes.WinDLL('kernel32'))\ncls('python311.dll')\n", "banned in storage modules"),
-            ("from ctypes import wintypes\nwintypes.ctypes.WinDLL('python311.dll')\n", "outside allowlisted stdlib storage APIs"),
+            ("from ctypes import wintypes\nwintypes.ctypes.WinDLL('python311.dll')\n", "banned in storage modules"),
             ("import ctypes\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\nk32.WinExec(b'cmd', 0)\n", "outside allowlisted or direct kernel32 API calls"),
             ("class Backend:\n    from os import kill as probe\nBackend.probe(1, 0)\n", "banned in storage modules"),
             ("import ctypes\nself = ctypes.WinDLL('kernel32').OpenProcess\napi = self._objects['0']\n", "banned in storage modules"),
@@ -404,6 +404,8 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import subprocess, sys\nsubprocess.Popen([sys.executable, '-c', 'import os; os.kill(1, 0)'])\n", "banned in storage modules"),
             ("import subprocess\ndef probe():\n    subprocess.Popen(['ps'])\n", "outside proven POSIX branch"),
             ("import sys\nfrom bounded_process import run\nrun([sys.executable, '-c', 'import os; os.kill(1, 0)'], '')\n", "outside `__file__` self-dispatch"),
+            ("from pathlib import Path\nfrom bounded_process import run\ndef d(py, cmd):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    argv[:] = cmd\n    run(argv, '')\n", "outside `__file__` self-dispatch"),
+            ("import sys\nfrom .leases import subprocess\nsubprocess.run([sys.executable, '-c', 'import os; os.kill(1, 0)'])\n", "not in local storage symbol allowlist"),
             ("from _host_exec import bounded_run\nbounded_run(['ps'], '')\n", "banned in storage modules"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
