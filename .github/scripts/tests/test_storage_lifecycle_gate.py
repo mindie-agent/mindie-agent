@@ -397,7 +397,9 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import ctypes\ndict = ctypes.WinDLL('kernel32').__class__\nclass Loader(dict):\n    pass\n", "banned in storage modules"),
             ("import ctypes\ncls = type(ctypes.WinDLL('kernel32'))\ncls('python311.dll')\n", "banned in storage modules"),
             ("from ctypes import wintypes\nwintypes.ctypes.WinDLL('python311.dll')\n", "outside allowlisted stdlib storage APIs"),
-            ("import ctypes\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\nk32.WinExec(b'cmd', 0)\n", "outside allowlisted kernel32 APIs"),
+            ("import ctypes\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\nk32.WinExec(b'cmd', 0)\n", "outside allowlisted or direct kernel32 API calls"),
+            ("class Backend:\n    from os import kill as probe\nBackend.probe(1, 0)\n", "banned in storage modules"),
+            ("import ctypes\nself = ctypes.WinDLL('kernel32').OpenProcess\napi = self._objects['0']\n", "banned in storage modules"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
