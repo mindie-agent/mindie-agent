@@ -32,85 +32,51 @@ import ast
 from pathlib import Path
 
 _COMPREHENSION_TYPES = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
-_REFLECTIVE_FNS = frozenset(
-    {
-        "getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals",
-        "locals", "attrgetter", "methodcaller", "__import__", "breakpoint",
-    }
-)
-_LOCAL_STORAGE_MODULES = frozenset(
-    {
-        "_host_exec", "bounded_process", "filesystem", "genstate", "host_pin_refresh",
-        "leases", "legacy", "legacy_roots", "lifecycle", "loop.locks", "mindie_knowledge",
-        "mindie_knowledge.filesystem", "mindie_knowledge.state_layout",
-        "mindie_knowledge.storage", "mindie_knowledge.storage.legacy_roots",
-        "mindie_knowledge.storage.lifecycle", "mindie_paths", "paths", "product_contract",
-        "remote_state_guard", "storage", "storage_common", "storage_gc", "storage_leases",
-        "storage_lifecycle", "storage_reclaim", "storage_releases", "storage_spool",
-        "storage_support", "uv_cache",
-    }
-)
-_ALLOWED_EXACT_IMPORTS = _LOCAL_STORAGE_MODULES | {
-    "_winapi", "argparse", "ast", "contextlib", "ctypes", "errno",
-    "fcntl", "hashlib", "json", "msvcrt", "ntpath", "os", "os.path", "pathlib",
-    "plistlib", "re", "select", "shlex", "shutil", "sqlite3", "stat", "subprocess",
+_REFLECTIVE_FNS = frozenset({"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__", "breakpoint"})
+_RESTRICTED_HELPER_IMPORTS: dict[str, frozenset[str]] = {
+    "_host_exec": frozenset({"which_native"}),
+    "bounded_process": frozenset({"run"}),
+    "loop.locks": frozenset({"lock_file", "lock_held", "unlock_file"}),
+    "mindie_knowledge": frozenset({"storage"}),
+    "product_contract": frozenset({"installed_version"}),
+}
+_LOCAL_STORAGE_MODULES = frozenset({
+    "_host_exec", "bounded_process", "filesystem", "genstate", "host_pin_refresh", "leases", "legacy", "legacy_roots",
+    "lifecycle", "loop.locks", "mindie_knowledge", "mindie_knowledge.filesystem", "mindie_knowledge.state_layout",
+    "mindie_knowledge.storage", "mindie_knowledge.storage.legacy_roots", "mindie_knowledge.storage.lifecycle",
+    "mindie_paths", "paths", "product_contract", "remote_state_guard", "storage", "storage_common", "storage_gc",
+    "storage_leases", "storage_lifecycle", "storage_reclaim", "storage_releases", "storage_spool", "storage_support", "uv_cache",
+})
+_ALLOWED_EXACT_IMPORTS = (_LOCAL_STORAGE_MODULES - set(_RESTRICTED_HELPER_IMPORTS)) | {
+    "_winapi", "argparse", "ast", "contextlib", "ctypes", "errno", "fcntl", "hashlib", "json", "msvcrt", "ntpath",
+    "os", "os.path", "pathlib", "plistlib", "re", "select", "shlex", "shutil", "sqlite3", "stat", "subprocess",
     "sys", "tempfile", "threading", "time", "tomllib", "uuid",
 }
-_ALLOWED_STDLIB_FROM_PAIRS = frozenset(
-    {
-        ("__future__", "annotations"),
-        ("collections.abc", "Iterator"),
-        ("contextlib", "ExitStack"),
-        ("contextlib", "contextmanager"),
-        ("contextlib", "suppress"),
-        ("ctypes", "wintypes"),
-        ("os", "kill"),
-        ("pathlib", "Path"),
-        ("urllib.parse", "quote"),
-        ("xml.etree", "ElementTree"),
-    }
-)
-_STDLIB_SUBMODULE_IMPORTS: dict[tuple[str, str], str] = {
-    ("ctypes", "wintypes"): "wintypes",
-    ("xml.etree", "ElementTree"): "ElementTree",
-}
-_ALLOWED_TYPING_NAMES = frozenset(
-    {
-        "Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator",
-        "IO", "Iterable", "Iterator", "List", "Literal", "Mapping", "MutableMapping",
-        "NamedTuple", "NoReturn", "Optional", "Protocol", "Sequence", "Set", "TextIO",
-        "Tuple", "TYPE_CHECKING", "TypeAlias", "TypedDict", "Union", "cast", "overload",
-    }
-)
+_ALLOWED_STDLIB_FROM_PAIRS = frozenset({
+    ("__future__", "annotations"), ("collections.abc", "Iterator"), ("contextlib", "ExitStack"),
+    ("contextlib", "contextmanager"), ("contextlib", "suppress"), ("ctypes", "wintypes"),
+    ("os", "kill"), ("pathlib", "Path"), ("urllib.parse", "quote"), ("xml.etree", "ElementTree"),
+})
+_STDLIB_SUBMODULE_IMPORTS: dict[tuple[str, str], str] = {("ctypes", "wintypes"): "wintypes", ("xml.etree", "ElementTree"): "ElementTree"}
+_ALLOWED_TYPING_NAMES = frozenset({
+    "Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator", "IO", "Iterable", "Iterator", "List",
+    "Literal", "Mapping", "MutableMapping", "NamedTuple", "NoReturn", "Optional", "Protocol", "Sequence", "Set",
+    "TextIO", "Tuple", "TYPE_CHECKING", "TypeAlias", "TypedDict", "Union", "cast", "overload",
+})
 _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
     "_winapi": frozenset({"CloseHandle", "GetExitCodeProcess", "OpenProcess", "STILL_ACTIVE"}),
     "ElementTree": frozenset({"ParseError", "fromstring"}),
     "argparse": frozenset({"ArgumentParser"}),
     "ast": frozenset({"Constant", "parse", "walk"}),
     "contextlib": frozenset({"ExitStack", "contextmanager", "suppress"}),
-    "ctypes": frozenset(
-        {
-            "POINTER", "Structure", "WinDLL", "byref", "c_bool", "c_int", "c_long",
-            "c_size_t", "c_uint32", "c_uint64", "c_ulong", "c_void_p", "c_wchar",
-            "c_wchar_p", "create_unicode_buffer", "get_last_error", "sizeof",
-        }
-    ),
+    "ctypes": frozenset({"POINTER", "Structure", "WinDLL", "byref", "c_bool", "c_int", "c_long", "c_size_t", "c_uint32", "c_uint64", "c_ulong", "c_void_p", "c_wchar", "c_wchar_p", "create_unicode_buffer", "get_last_error", "sizeof"}),
     "errno": frozenset({"EACCES", "EDEADLK", "EEXIST", "EINVAL", "ENOENT", "EPERM", "ESRCH"}),
     "fcntl": frozenset({"LOCK_EX", "LOCK_NB", "LOCK_SH", "LOCK_UN", "flock"}),
     "hashlib": frozenset({"sha256"}),
     "json": frozenset({"JSONDecodeError", "dump", "dumps", "load", "loads"}),
     "msvcrt": frozenset({"LK_LOCK", "LK_NBLCK", "LK_UNLCK", "locking"}),
     "ntpath": frozenset({"abspath", "normcase", "normpath"}),
-    "os": frozenset(
-        {
-            "O_APPEND", "O_CREAT", "O_EXCL", "O_RDONLY", "O_RDWR", "O_WRONLY",
-            "PathLike", "SEEK_SET", "W_OK", "X_OK", "access", "chmod", "close",
-            "environ", "fdopen", "fsdecode", "fsencode", "fspath", "fstat", "fsync",
-            "getpid", "kill", "listdir", "lseek", "lstat", "makedirs", "mkdir",
-            "name", "open", "path", "pathsep", "read", "readlink", "remove", "rename",
-            "replace", "rmdir", "scandir", "sep", "stat", "unlink", "utime", "walk", "write",
-        }
-    ),
+    "os": frozenset({"O_APPEND", "O_CREAT", "O_EXCL", "O_RDONLY", "O_RDWR", "O_WRONLY", "PathLike", "SEEK_SET", "W_OK", "X_OK", "access", "chmod", "close", "environ", "fdopen", "fsdecode", "fsencode", "fspath", "fstat", "fsync", "getpid", "kill", "listdir", "lseek", "lstat", "makedirs", "mkdir", "name", "open", "path", "pathsep", "read", "readlink", "remove", "rename", "replace", "rmdir", "scandir", "sep", "stat", "unlink", "utime", "walk", "write"}),
     "pathlib": frozenset({"Path", "PurePath", "PosixPath", "WindowsPath"}),
     "plistlib": frozenset({"loads"}),
     "re": frozenset({"IGNORECASE", "compile", "escape", "findall", "fullmatch", "match", "search", "split", "sub"}),
@@ -119,7 +85,7 @@ _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
     "shutil": frozenset({"copy2", "copytree", "move", "rmtree", "which"}),
     "sqlite3": frozenset({"Error", "OperationalError", "connect"}),
     "stat": frozenset({"FILE_ATTRIBUTE_REPARSE_POINT", "S_IREAD", "S_IRUSR", "S_ISDIR", "S_ISLNK", "S_ISREG", "S_IWRITE", "S_IWUSR"}),
-    "subprocess": frozenset({"CalledProcessError", "CREATE_NO_WINDOW", "DEVNULL", "PIPE", "Popen", "SubprocessError", "TimeoutExpired", "run"}),
+    "subprocess": frozenset({"CalledProcessError", "CREATE_NO_WINDOW", "DEVNULL", "PIPE", "Popen", "SubprocessError", "TimeoutExpired"}),
     "sys": frozenset({"argv", "executable", "implementation", "path", "platform", "prefix", "stderr", "stdin", "stdout", "version_info"}),
     "tempfile": frozenset({"NamedTemporaryFile", "TemporaryDirectory", "gettempdir", "mkdtemp", "mkstemp"}),
     "threading": frozenset({"Event", "Lock", "RLock", "Thread", "local"}),
@@ -128,20 +94,9 @@ _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
     "uuid": frozenset({"uuid4"}),
     "wintypes": frozenset({"BOOL", "DWORD", "HANDLE", "LPCWSTR", "LPWSTR", "WCHAR"}),
 }
-_ALLOWED_KERNEL32_FNS = frozenset(
-    {
-        "CloseHandle", "CreateToolhelp32Snapshot", "OpenProcess",
-        "Process32FirstW", "Process32NextW", "QueryFullProcessImageNameW",
-    }
-)
+_ALLOWED_KERNEL32_FNS = frozenset({"CloseHandle", "CreateToolhelp32Snapshot", "OpenProcess", "Process32FirstW", "Process32NextW", "QueryFullProcessImageNameW"})
 _SCALAR_TYPE_NAMES = frozenset({"int", "bool", "str", "float", "bytes", "dict", "list", "tuple", "set"})
-_ALLOWED_OS_PATH_ATTRS = frozenset(
-    {
-        "abspath", "basename", "commonpath", "dirname", "exists", "expanduser",
-        "isabs", "isdir", "isfile", "isjunction", "islink", "join", "lexists",
-        "normcase", "normpath", "realpath", "relpath", "samefile", "split", "splitdrive",
-    }
-)
+_ALLOWED_OS_PATH_ATTRS = frozenset({"abspath", "basename", "commonpath", "dirname", "exists", "expanduser", "isabs", "isdir", "isfile", "isjunction", "islink", "join", "lexists", "normcase", "normpath", "realpath", "relpath", "samefile", "split", "splitdrive"})
 _ALLOWED_CLASS_BASE_NAMES = frozenset(
     {"Exception", "RuntimeError", "ValueError", "OSError", "dict", "set", "object", "NamedTuple"}
 )
@@ -254,10 +209,50 @@ def _is_exempt_direct_kill_call(call: ast.Call, imported_kill_names: frozenset[s
     return False
 
 
+def _is_self_dispatch_bounded_run(call: ast.Call, fn_scope: ast.AST | None, global_rebound: set[str]) -> bool:
+    if not isinstance(fn_scope, ast.FunctionDef) or len(call.args) < 2:
+        return False
+    if not (isinstance(call.args[0], ast.Name) and isinstance(call.args[1], ast.Constant) and call.args[1].value == ""):
+        return False
+    if any(kw.arg in {"shell", "executable"} or kw.arg is None for kw in call.keywords):
+        return False
+    argv_var = call.args[0].id
+    stores: dict[str, list[ast.expr]] = {}
+    for sub in ast.walk(fn_scope):
+        if isinstance(sub, ast.Constant) and sub.value in {"-c", "-m"}:
+            return False
+        if isinstance(sub, ast.Assign) and len(sub.targets) == 1 and isinstance(sub.targets[0], ast.Name):
+            stores.setdefault(sub.targets[0].id, []).append(sub.value)
+        elif isinstance(sub, ast.Name) and isinstance(sub.ctx, (ast.Store, ast.Del)) and sub.id in {argv_var, "__file__", "Path", "str"}:
+            stores.setdefault(sub.id, [])
+    if "__file__" in global_rebound or "Path" in stores or "str" in stores or len(stores.get(argv_var, ())) != 1:
+        return False
+    init = stores[argv_var][0]
+    if not (isinstance(init, ast.List) and len(init.elts) >= 4):
+        return False
+    if not (
+        isinstance(init.elts[1], ast.Constant) and init.elts[1].value == "-I"
+        and isinstance(init.elts[2], ast.Constant) and init.elts[2].value == "-B"
+        and isinstance(init.elts[3], ast.Call) and isinstance(init.elts[3].func, ast.Name) and init.elts[3].func.id == "str"
+        and len(init.elts[3].args) == 1 and isinstance(init.elts[3].args[0], ast.Name)
+    ):
+        return False
+    script_inits = stores.get(init.elts[3].args[0].id, [])
+    if len(script_inits) != 1 or not isinstance(script_inits[0], ast.Call):
+        return False
+    sc = script_inits[0]
+    return (
+        not sc.args and not sc.keywords and isinstance(sc.func, ast.Attribute) and sc.func.attr == "resolve"
+        and isinstance(sc.func.value, ast.Call) and isinstance(sc.func.value.func, ast.Name)
+        and sc.func.value.func.id == "Path" and len(sc.func.value.args) == 1
+        and isinstance(sc.func.value.args[0], ast.Name) and sc.func.value.args[0].id == "__file__"
+    )
+
+
 def _collect_tree_facts(
     tree: ast.Module,
-) -> tuple[frozenset[str], frozenset[str], frozenset[str], list[str]]:
-    """Collect `(imported_kill_names, impure_os_sys_names, pure_re_names, capability_errors)`."""
+) -> tuple[frozenset[str], frozenset[str], frozenset[str], frozenset[str], list[str]]:
+    """Collect `(imported_kill_names, impure_os_sys_names, pure_re_names, private_helpers, capability_errors)`."""
     parent_map = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     call_func_ids = {id(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)}
     attr_value_ids = {id(n.value) for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
@@ -267,8 +262,10 @@ def _collect_tree_facts(
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "getattr" and len(n.args) >= 2
     }
     imported_kills: set[str] = set()
+    bounded_run_names: set[str] = set()
     non_import_bound: set[str] = set()
     store_or_del_names: set[str] = set()
+    name_store_counts: dict[str, int] = {}
     self_method_node_ids: set[int] = set()
     windll_vars: set[str] = set()
     cap_errors: list[str] = []
@@ -276,27 +273,22 @@ def _collect_tree_facts(
 
     class_first_self_arg_ids: set[int] = {
         id(stmt.args.args[0])
-        for cls in ast.walk(tree)
-        if isinstance(cls, ast.ClassDef)
+        for cls in ast.walk(tree) if isinstance(cls, ast.ClassDef)
         for stmt in cls.body
-        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef))
-        and stmt.args.args
-        and stmt.args.args[0].arg == "self"
+        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.args.args and stmt.args.args[0].arg == "self"
     }
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             non_import_bound.add(node.name)
             store_or_del_names.add(node.name)
+            name_store_counts[node.name] = name_store_counts.get(node.name, 0) + 1
             scope_top_stmts.update(id(s) for s in node.body)
         elif isinstance(node, ast.ClassDef):
             non_import_bound.add(node.name)
             store_or_del_names.add(node.name)
+            name_store_counts[node.name] = name_store_counts.get(node.name, 0) + 1
             for stmt in node.body:
-                if (
-                    isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    and stmt.args.args
-                    and stmt.args.args[0].arg == "self"
-                ):
+                if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.args.args and stmt.args.args[0].arg == "self":
                     self_method_node_ids.update(id(sub) for sub in ast.walk(stmt))
         elif isinstance(node, ast.arg):
             non_import_bound.add(node.arg)
@@ -305,28 +297,22 @@ def _collect_tree_facts(
         elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
             non_import_bound.add(node.id)
             store_or_del_names.add(node.id)
+            name_store_counts[node.id] = name_store_counts.get(node.id, 0) + 1
         elif isinstance(node, (ast.Global, ast.Nonlocal)):
             non_import_bound.update(node.names)
             store_or_del_names.update(node.names)
         elif isinstance(node, ast.ExceptHandler) and node.name:
             non_import_bound.add(node.name)
             store_or_del_names.add(node.name)
-        elif isinstance(node, ast.MatchAs) and node.name:
-            non_import_bound.add(node.name)
-            store_or_del_names.add(node.name)
-        elif isinstance(node, ast.MatchStar) and node.name:
+        elif isinstance(node, (ast.MatchAs, ast.MatchStar)) and node.name:
             non_import_bound.add(node.name)
             store_or_del_names.add(node.name)
         elif isinstance(node, ast.MatchMapping) and node.rest:
             non_import_bound.add(node.rest)
             store_or_del_names.add(node.rest)
         elif (
-            isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Name)
-            and isinstance(node.value, ast.Call)
-            and isinstance(node.value.func, ast.Attribute)
-            and node.value.func.attr == "WinDLL"
+            isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
+            and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "WinDLL"
         ):
             windll_vars.add(node.targets[0].id)
 
@@ -372,6 +358,11 @@ def _collect_tree_facts(
                         cap_errors.append(
                             f"line {node.lineno} `from typing import {alias.name}` is banned in storage modules"
                         )
+                elif mod in _RESTRICTED_HELPER_IMPORTS:
+                    if alias.name not in _RESTRICTED_HELPER_IMPORTS[mod]:
+                        cap_errors.append(
+                            f"line {node.lineno} `from {mod} import {alias.name}` is banned in storage modules"
+                        )
                 elif (node.level or 0) == 0 and mod not in _LOCAL_STORAGE_MODULES:
                     if (mod, alias.name) not in _ALLOWED_STDLIB_FROM_PAIRS:
                         cap_errors.append(
@@ -387,6 +378,8 @@ def _collect_tree_facts(
                     )
                 bound = alias.asname or alias.name
                 non_import_bound.add(bound)
+                if mod == "bounded_process" and alias.name == "run":
+                    bounded_run_names.add(bound)
                 if (node.level or 0) == 0 and (mod, alias.name) in _STDLIB_SUBMODULE_IMPORTS:
                     all_module_aliases.add(bound)
                     stdlib_alias_roots.setdefault(bound, set()).add(_STDLIB_SUBMODULE_IMPORTS[(mod, alias.name)])
@@ -405,6 +398,26 @@ def _collect_tree_facts(
         if bound not in non_import_bound and len(entries) == 1 and entries[0] == ("re", True):
             pure_re.add(bound)
 
+    enclosing_fn: dict[int, ast.FunctionDef] = {}
+    for stmt in tree.body:
+        if isinstance(stmt, ast.FunctionDef):
+            for sub in ast.walk(stmt):
+                enclosing_fn[id(sub)] = stmt
+    explicit_all: set[str] | None = None
+    for stmt in tree.body:
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name) and stmt.targets[0].id == "__all__":
+            if isinstance(stmt.value, (ast.List, ast.Tuple)):
+                explicit_all = {e.value for e in stmt.value.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)}
+    private_helpers: set[str] = set()
+    if explicit_all is not None:
+        for stmt in tree.body:
+            if (
+                isinstance(stmt, ast.FunctionDef) and stmt.name.startswith("_") and not stmt.name.startswith("__")
+                and stmt.name not in explicit_all and name_store_counts.get(stmt.name) == 1
+                and not stmt.decorator_list and not stmt.args.defaults and not any(stmt.args.kw_defaults)
+            ):
+                private_helpers.add(stmt.name)
+
     for node in ast.walk(tree):
         if isinstance(node, ast.MatchClass):
             cap_errors.append(f"line {node.lineno} class pattern matching is banned in storage modules")
@@ -415,21 +428,14 @@ def _collect_tree_facts(
                 cap_errors.append(f"line {node.lineno} class `{node.name}` metaclass/keywords are banned in storage modules")
             for base in node.bases:
                 ok_base = (
-                    isinstance(base, ast.Name)
-                    and base.id in _ALLOWED_CLASS_BASE_NAMES
-                    and base.id not in non_import_bound
-                    and base.id not in all_module_aliases
+                    isinstance(base, ast.Name) and base.id in _ALLOWED_CLASS_BASE_NAMES
+                    and base.id not in non_import_bound and base.id not in all_module_aliases
                 ) or (
-                    isinstance(base, ast.Attribute)
-                    and isinstance(base.value, ast.Name)
-                    and base.value.id in ctypes_aliases
-                    and base.value.id not in non_import_bound
-                    and base.attr == "Structure"
+                    isinstance(base, ast.Attribute) and isinstance(base.value, ast.Name)
+                    and base.value.id in ctypes_aliases and base.value.id not in non_import_bound and base.attr == "Structure"
                 )
                 if not ok_base:
-                    cap_errors.append(
-                        f"line {node.lineno} class `{node.name}` inherits disallowed or shadowed base in storage modules"
-                    )
+                    cap_errors.append(f"line {node.lineno} class `{node.name}` inherits disallowed or shadowed base in storage modules")
         elif isinstance(node, ast.Attribute):
             is_dunder = node.attr.startswith("__") and node.attr.endswith("__")
             is_private = node.attr.startswith("_") and not is_dunder
@@ -438,135 +444,95 @@ def _collect_tree_facts(
                 cap_errors.append(f"line {node.lineno} `.{node.attr}` access is banned in storage modules")
             elif is_private:
                 ok_self_priv = (
-                    isinstance(node.value, ast.Name)
-                    and node.value.id == "self"
-                    and node.attr in _ALLOWED_SELF_PRIVATE_ATTRS
-                    and "self" not in store_or_del_names
-                    and "self" not in all_module_aliases
-                    and "self" not in imported_kills
-                    and id(node) in self_method_node_ids
+                    isinstance(node.value, ast.Name) and node.value.id == "self" and node.attr in _ALLOWED_SELF_PRIVATE_ATTRS
+                    and "self" not in store_or_del_names and "self" not in all_module_aliases
+                    and "self" not in imported_kills and id(node) in self_method_node_ids
                 )
                 ok_mod_priv = (
-                    isinstance(node.value, ast.Name)
-                    and node.value.id in local_module_aliases
-                    and node.value.id not in store_or_del_names
-                    and node.attr in _ALLOWED_LOCAL_PRIVATE_ATTRS
+                    isinstance(node.value, ast.Name) and node.value.id in local_module_aliases
+                    and node.value.id not in store_or_del_names and node.attr in _ALLOWED_LOCAL_PRIVATE_ATTRS
                 )
                 if not (ok_self_priv or ok_mod_priv):
-                    cap_errors.append(
-                        f"line {node.lineno} private attribute `.{node.attr}` access on external object is banned in storage modules"
-                    )
+                    cap_errors.append(f"line {node.lineno} private attribute `.{node.attr}` access on external object is banned in storage modules")
             elif isinstance(node.ctx, (ast.Store, ast.Del)) and (
-                node.attr in {"name", "platform", "kill", "compile"}
-                or is_dunder
+                node.attr in {"name", "platform", "kill", "compile"} or is_dunder
                 or (isinstance(node.value, ast.Name) and node.value.id in (all_module_aliases | windll_vars))
             ):
-                cap_errors.append(
-                    f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules")
             elif is_dunder and (
                 node.attr not in _SAFE_READ_DUNDERS
                 or (
                     node.attr == "__init__"
                     and not (
-                        id(node) in call_func_ids
-                        and isinstance(node.value, ast.Call)
-                        and isinstance(node.value.func, ast.Name)
-                        and node.value.func.id == "super"
-                        and "super" not in non_import_bound
+                        id(node) in call_func_ids and isinstance(node.value, ast.Call)
+                        and isinstance(node.value.func, ast.Name) and node.value.func.id == "super" and "super" not in non_import_bound
                     )
                 )
             ):
-                cap_errors.append(
-                    f"line {node.lineno} reflective dunder `.{node.attr}` access is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} reflective dunder `.{node.attr}` access is banned in storage modules")
             elif (isinstance(node.value, ast.Name) and node.value.id in windll_vars) or (
-                isinstance(node.value, ast.Call)
-                and isinstance(node.value.func, ast.Attribute)
-                and node.value.func.attr == "WinDLL"
+                isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "WinDLL"
             ):
                 ok_k32_use = id(node) in call_func_ids or (
-                    isinstance(par, ast.Attribute)
-                    and par.value is node
-                    and par.attr in {"argtypes", "restype"}
-                    and isinstance(par.ctx, ast.Store)
+                    isinstance(par, ast.Attribute) and par.value is node and par.attr in {"argtypes", "restype"} and isinstance(par.ctx, ast.Store)
                 )
                 if node.attr not in _ALLOWED_KERNEL32_FNS or not ok_k32_use:
-                    cap_errors.append(
-                        f"line {node.lineno} WinDLL `.{node.attr}` is outside allowlisted or direct kernel32 API calls"
-                    )
+                    cap_errors.append(f"line {node.lineno} WinDLL `.{node.attr}` is outside allowlisted or direct kernel32 API calls")
             elif isinstance(node.value, ast.Name) and node.value.id in stdlib_alias_roots:
                 roots = stdlib_alias_roots[node.value.id]
                 if len(roots) != 1 or node.attr not in _ALLOWED_STDLIB_MOD_ATTRS.get(next(iter(roots)), frozenset()):
-                    cap_errors.append(
-                        f"line {node.lineno} `{node.value.id}.{node.attr}` is outside allowlisted stdlib storage APIs"
-                    )
+                    cap_errors.append(f"line {node.lineno} `{node.value.id}.{node.attr}` is outside allowlisted stdlib storage APIs")
                 if node.attr == "path" and "os" in roots and id(node) not in attr_value_ids and id(node) not in getattr_obj_ids:
-                    cap_errors.append(
-                        f"line {node.lineno} first-class `os.path` module reference is banned in storage modules"
-                    )
+                    cap_errors.append(f"line {node.lineno} first-class `os.path` module reference is banned in storage modules")
             elif (
-                isinstance(node.value, ast.Attribute)
-                and isinstance(node.value.value, ast.Name)
-                and "os" in stdlib_alias_roots.get(node.value.value.id, ())
-                and node.value.attr == "path"
+                isinstance(node.value, ast.Attribute) and isinstance(node.value.value, ast.Name)
+                and "os" in stdlib_alias_roots.get(node.value.value.id, ()) and node.value.attr == "path"
                 and node.attr not in _ALLOWED_OS_PATH_ATTRS
             ):
-                cap_errors.append(
-                    f"line {node.lineno} `os.path.{node.attr}` is outside allowlisted path APIs"
-                )
-            if isinstance(node.ctx, ast.Load) and node.attr in {"kill", "WinDLL"} and id(node) not in call_func_ids:
-                cap_errors.append(
-                    f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} `os.path.{node.attr}` is outside allowlisted path APIs")
+            if isinstance(node.ctx, ast.Load) and node.attr in {"kill", "WinDLL", "Popen"} and id(node) not in call_func_ids:
+                cap_errors.append(f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules")
             elif isinstance(node.ctx, ast.Load) and node.attr in _REFLECTIVE_FNS and id(node) not in call_func_ids:
-                cap_errors.append(
-                    f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules")
         elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+            if node.id in private_helpers and id(node) not in call_func_ids:
+                private_helpers.discard(node.id)
             if node.id == "__builtins__":
                 cap_errors.append(f"line {node.lineno} `__builtins__` access is banned in storage modules")
             elif node.id == "type" and id(node) not in call_func_ids:
                 cap_errors.append(f"line {node.lineno} first-class `type` reference is banned in storage modules")
             elif node.id in (ctypes_aliases | windll_vars) and id(node) not in attr_value_ids:
-                cap_errors.append(
-                    f"line {node.lineno} first-class `ctypes`/`WinDLL` reference `{node.id}` is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} first-class `ctypes`/`WinDLL` reference `{node.id}` is banned in storage modules")
             elif node.id in all_module_aliases and id(node) not in attr_value_ids and id(node) not in getattr_obj_ids:
-                cap_errors.append(
-                    f"line {node.lineno} first-class module alias `{node.id}` reference is banned in storage modules"
-                )
-            elif node.id in imported_kills and id(node) not in call_func_ids:
-                cap_errors.append(
-                    f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} first-class module alias `{node.id}` reference is banned in storage modules")
+            elif node.id in (imported_kills | bounded_run_names) and id(node) not in call_func_ids:
+                cap_errors.append(f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules")
             elif node.id in _REFLECTIVE_FNS and id(node) not in call_func_ids:
-                cap_errors.append(
-                    f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules")
         elif isinstance(node, ast.Call):
             fn = node.func
             if not isinstance(fn, (ast.Name, ast.Attribute)):
-                cap_errors.append(
-                    f"line {node.lineno} indirect/chained callee expression is banned in storage modules"
-                )
+                cap_errors.append(f"line {node.lineno} indirect/chained callee expression is banned in storage modules")
                 continue
             is_bare_name = isinstance(fn, ast.Name)
             fn_name = fn.id if is_bare_name else fn.attr
-            if is_bare_name and fn_name == "type":
+            if is_bare_name and fn_name in bounded_run_names:
+                if not _is_self_dispatch_bounded_run(node, enclosing_fn.get(id(node)), store_or_del_names):
+                    cap_errors.append(f"line {node.lineno} `bounded_process.run(...)` outside `__file__` self-dispatch is banned in storage modules")
+            elif fn_name == "Popen":
+                enc = enclosing_fn.get(id(node))
+                has_inline_code = enc is not None and any(isinstance(s, ast.Constant) and s.value in {"-c", "-m"} for s in ast.walk(enc))
+                bad_kw = any(kw.arg in {"shell", "executable"} for kw in node.keywords)
+                if has_inline_code or bad_kw:
+                    cap_errors.append(f"line {node.lineno} `Popen(...)` with shell/inline interpreter flags is banned in storage modules")
+            elif is_bare_name and fn_name == "type":
                 par = parent_map.get(node)
                 ok_type_use = (
-                    "type" not in non_import_bound
-                    and len(node.args) == 1
-                    and not isinstance(node.args[0], ast.Starred)
-                    and not node.keywords
+                    "type" not in non_import_bound and len(node.args) == 1 and not isinstance(node.args[0], ast.Starred) and not node.keywords
                     and (
                         (isinstance(par, ast.Attribute) and par.value is node and par.attr == "__name__")
                         or (
-                            isinstance(par, ast.Compare)
-                            and len(par.ops) == 1
-                            and len(par.comparators) == 1
-                            and isinstance(par.ops[0], (ast.Is, ast.IsNot))
+                            isinstance(par, ast.Compare) and len(par.ops) == 1 and len(par.comparators) == 1 and isinstance(par.ops[0], (ast.Is, ast.IsNot))
                             and (
                                 (par.left is node and isinstance(par.comparators[0], ast.Name) and par.comparators[0].id in _SCALAR_TYPE_NAMES and par.comparators[0].id not in non_import_bound)
                                 or (par.comparators[0] is node and isinstance(par.left, ast.Name) and par.left.id in _SCALAR_TYPE_NAMES and par.left.id not in non_import_bound)
@@ -575,27 +541,16 @@ def _collect_tree_facts(
                     )
                 )
                 if not ok_type_use:
-                    cap_errors.append(
-                        f"line {node.lineno} first-class or dynamic `type(...)` is banned in storage modules"
-                    )
+                    cap_errors.append(f"line {node.lineno} first-class or dynamic `type(...)` is banned in storage modules")
             elif fn_name in (_REFLECTIVE_FNS - {"getattr", "compile"}):
                 cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
             elif fn_name == "WinDLL":
                 par = parent_map.get(node)
                 ok_windll = (
-                    isinstance(fn, ast.Attribute)
-                    and isinstance(fn.value, ast.Name)
-                    and fn.value.id in ctypes_aliases
-                    and fn.value.id not in non_import_bound
-                    and len(node.args) == 1
-                    and not isinstance(node.args[0], ast.Starred)
-                    and isinstance(node.args[0], ast.Constant)
-                    and isinstance(node.args[0].value, str)
-                    and node.args[0].value.lower() in {"kernel32", "kernel32.dll"}
-                    and all(
-                        kw.arg == "use_last_error" and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, bool)
-                        for kw in node.keywords
-                    )
+                    isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in ctypes_aliases and fn.value.id not in non_import_bound
+                    and len(node.args) == 1 and not isinstance(node.args[0], ast.Starred) and isinstance(node.args[0], ast.Constant)
+                    and isinstance(node.args[0].value, str) and node.args[0].value.lower() in {"kernel32", "kernel32.dll"}
+                    and all(kw.arg == "use_last_error" and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, bool) for kw in node.keywords)
                     and (
                         (isinstance(par, ast.Assign) and len(par.targets) == 1 and isinstance(par.targets[0], ast.Name) and par.value is node)
                         or (isinstance(par, ast.Attribute) and par.value is node and par.attr in _ALLOWED_KERNEL32_FNS)
@@ -605,27 +560,22 @@ def _collect_tree_facts(
                     cap_errors.append(f"line {node.lineno} non-kernel32 or unbound `WinDLL(...)` is banned in storage modules")
             elif fn_name == "getattr":
                 if (
-                    not is_bare_name
-                    or "getattr" in non_import_bound
-                    or len(node.args) < 2
-                    or len(node.args) > 3
-                    or node.keywords
-                    or not isinstance(node.args[1], ast.Constant)
-                    or not isinstance(node.args[1].value, str)
-                    or node.args[1].value not in _ALLOWED_GETATTR_NAMES
+                    not is_bare_name or "getattr" in non_import_bound or len(node.args) < 2 or len(node.args) > 3 or node.keywords
+                    or not isinstance(node.args[1], ast.Constant) or not isinstance(node.args[1].value, str) or node.args[1].value not in _ALLOWED_GETATTR_NAMES
                 ):
-                    cap_errors.append(
-                        f"line {node.lineno} `getattr(...)` outside allowlisted OS/stat attributes is banned in storage modules"
-                    )
+                    cap_errors.append(f"line {node.lineno} `getattr(...)` outside allowlisted OS/stat attributes is banned in storage modules")
 
-    return frozenset(imported_kills), frozenset(impure_os_sys), frozenset(pure_re), cap_errors
+    return frozenset(imported_kills), frozenset(impure_os_sys), frozenset(pure_re), frozenset(private_helpers), cap_errors
 
 
 def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
     """Verify storage module `path` never calls `os.kill(pid, 0)` outside proven POSIX branches."""
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
-    imported_kills, impure, pure_re_global, errors = _collect_tree_facts(tree)
+    imported_kills, impure, pure_re_global, private_helpers, errors = _collect_tree_facts(tree)
+    proven_posix_helpers: set[str] = set()
+    call_sites: dict[str, list[bool]] = {}
+    emit_errors = False
 
     def _visit_expr(
         node: ast.AST,
@@ -662,19 +612,22 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
             return
         if isinstance(node, ast.Call):
             fn = node.func
-            if (isinstance(fn, ast.Name) and fn.id == "compile") or (
-                isinstance(fn, ast.Attribute) and fn.attr == "compile"
-            ):
-                if not (isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in m_re):
-                    errors.append(f"line {node.lineno} non-regex `compile(...)` is banned in storage modules")
-            is_kill_call = (isinstance(fn, ast.Attribute) and (fn.attr == "kill" or fn.attr in imported_kills)) or (
-                isinstance(fn, ast.Name) and fn.id in imported_kills
-            )
-            if is_kill_call and not _is_exempt_direct_kill_call(node, imported_kills) and not posix_proven:
-                errors.append(
-                    f"line {node.lineno} `{scope_name}` calls unguarded `os.kill(pid, 0)` "
-                    "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
+            if not emit_errors and isinstance(fn, ast.Name) and fn.id in private_helpers:
+                call_sites.setdefault(fn.id, []).append(posix_proven)
+            if emit_errors:
+                if (isinstance(fn, ast.Name) and fn.id == "compile") or (isinstance(fn, ast.Attribute) and fn.attr == "compile"):
+                    if not (isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in m_re):
+                        errors.append(f"line {node.lineno} non-regex `compile(...)` is banned in storage modules")
+                if isinstance(fn, ast.Attribute) and fn.attr == "Popen" and not posix_proven:
+                    errors.append(f"line {node.lineno} `{scope_name}` calls `Popen(...)` outside proven POSIX branch in storage modules")
+                is_kill_call = (isinstance(fn, ast.Attribute) and (fn.attr == "kill" or fn.attr in imported_kills)) or (
+                    isinstance(fn, ast.Name) and fn.id in imported_kills
                 )
+                if is_kill_call and not _is_exempt_direct_kill_call(node, imported_kills) and not posix_proven:
+                    errors.append(
+                        f"line {node.lineno} `{scope_name}` calls unguarded `os.kill(pid, 0)` "
+                        "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
+                    )
         for child in ast.iter_child_nodes(node):
             _visit_expr(child, posix_proven, scope_name, m_os, m_sys, m_re)
 
@@ -712,7 +665,8 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                     _visit_expr(stmt.returns, cur_pos, scope_name, fo, fs, fr)
                 for dflt in (*stmt.args.defaults, *(d for d in stmt.args.kw_defaults if d is not None)):
                     _visit_expr(dflt, cur_pos, scope_name, fo, fs, fr)
-                _walk_block(stmt.body, cur_pos, stmt.name, child_o, child_s, child_r, top_block=True, in_loop=False)
+                fn_pos = cur_pos or (scope_name == "<module>" and stmt.name in proven_posix_helpers)
+                _walk_block(stmt.body, fn_pos, stmt.name, child_o, child_s, child_r, top_block=True, in_loop=False)
             elif isinstance(stmt, ast.ClassDef):
                 for dec in stmt.decorator_list:
                     _visit_expr(dec, cur_pos, scope_name, fo, fs, fr)
@@ -785,5 +739,10 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                     elif alias.name == "sys":
                         cur_s.add(bound)
 
+    for _ in range(3 if private_helpers else 0):
+        call_sites.clear()
+        _walk_block(tree.body, False, "<module>", frozenset(), frozenset(), frozenset(), top_block=True)
+        proven_posix_helpers = {fn for fn in private_helpers if call_sites.get(fn) and all(call_sites[fn])}
+    emit_errors = True
     _walk_block(tree.body, False, "<module>", frozenset(), frozenset(), frozenset(), top_block=True)
     return errors
