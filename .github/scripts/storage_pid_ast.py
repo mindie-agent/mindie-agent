@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
-"""Capability-restricted Windows PID safety AST verifier for storage modules (Guardrail P8).
+"""Closed-allowlist Windows PID safety AST verifier for storage modules (Guardrail P8).
 
 [Role]
 Verifies via Python stdlib `ast` that storage lifecycle/lease/GC modules never invoke
-`os.kill(pid, 0)` (or any aliased, reflective, or wildcard-imported equivalent) unless guarded
-by a proven literal POSIX branch.
+`os.kill(pid, 0)` (or any aliased, reflective, frame-introspected, or module-registry equivalent)
+unless guarded by a proven literal POSIX branch.
 
 [Invariants]
-- Enforces a syntactic capability allowlist rather than heuristic alias taint:
-  1. Bans wildcard imports (`from ... import *`), reflective/dynamic attribute access to `"kill"`
-     (non-literal `getattr`, `getattr(..., 'kill')`, `__getattribute__`, `__dict__`, `attrgetter`,
-     `methodcaller`, `eval`, `exec`, non-call references to `getattr`/`setattr`/`delattr`), and
-     any mutation/deletion of `.name`, `.platform`, or `.kill` attributes.
-  2. Bans first-class value references to `.kill` or imported `kill` (`check=os.kill`, `[os.kill]`,
-     `f = os.kill`, `match os.kill:`): `.kill` / `kill` may ONLY appear directly as `Call.func`.
-  3. Requires every direct `<expr>.kill(...)` / `kill(...)` call (except 0-arg `proc.kill()` or
-     explicit 2-arg non-zero `int` signal literal) to execute at a proven literal POSIX point.
-  4. Trusts `os`/`sys` in `_guard_implications` ONLY via `==`/`!=` (never `is`/`is not`) and 1-arg
-     `startswith('win'|'win32')` when the identifier is top-of-scope imported and globally unmutated.
+- Enforces closed syntactic allowlists verified across all 15 repositories:
+  1. Closed import allowlist (`_ALLOWED_IMPORT_ROOTS`), banning wildcard imports, `builtins`,
+     `operator`, `importlib`, `types`, `inspect`, `gc`, `traceback`, `runpy`, `code`, etc.
+  2. Closed `getattr` constant allowlist (`_ALLOWED_GETATTR_NAMES`), banning frame/registry/dunder
+     introspection (`modules`, `_getframe`, `f_builtins`, `f_globals`, `f_locals`, `gi_frame`,
+     `cr_frame`, `ag_frame`, `tb_frame`, `pythonapi`, `CDLL`, `cdll`, `MatchClass`, etc.).
+  3. Restricts `.compile(...)` strictly to unmutated top-imported `re` aliases, bans indirect
+     non-`(Name | Attribute)` callees, bans first-class `.kill`/`kill` references, and requires
+     every non-exempt `<expr>.kill(...)` / `kill(...)` call to sit inside a proven POSIX branch.
 
 [Timeouts & Locks]
 - Pure in-memory AST traversal; acquires no locks and spawns no subprocesses.
@@ -33,10 +31,45 @@ from pathlib import Path
 
 _COMPREHENSION_TYPES = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 _REFLECTIVE_FNS = frozenset(
-    {"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__"}
+    {"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__", "breakpoint"}
 )
-_BANNED_MODULES = frozenset({"builtins", "operator", "importlib"})
-_SAFE_READ_DUNDERS = frozenset({"__init__", "__name__", "__enter__", "__exit__", "__file__", "__module__", "__class__", "__cause__"})
+_ALLOWED_IMPORT_ROOTS = frozenset(
+    {
+        "__future__", "_host_exec", "_winapi", "argparse", "ast", "bounded_process",
+        "collections", "contextlib", "ctypes", "dataclasses", "datetime", "errno",
+        "fcntl", "filesystem", "fnmatch", "functools", "genstate", "glob", "hashlib",
+        "host_pin_refresh", "io", "itertools", "json", "leases", "legacy",
+        "legacy_roots", "lifecycle", "logging", "loop", "math", "mindie_knowledge",
+        "mindie_paths", "msvcrt", "ntpath", "os", "pathlib", "paths", "platform",
+        "plistlib", "posixpath", "product_contract", "re", "remote_state_guard",
+        "select", "shlex", "shutil", "signal", "sqlite3", "stat", "storage",
+        "storage_common", "storage_gc", "storage_leases", "storage_lifecycle",
+        "storage_reclaim", "storage_releases", "storage_spool", "storage_support",
+        "string", "struct", "subprocess", "sys", "tempfile", "threading", "time",
+        "tomllib", "typing", "urllib", "uuid", "uv_cache", "warnings", "xml",
+    }
+)
+_ALLOWED_GETATTR_NAMES = frozenset(
+    {
+        "CREATE_NO_WINDOW", "ERROR_ACCESS_DENIED", "ERROR_INVALID_PARAMETER",
+        "O_BINARY", "O_NOFOLLOW", "PROCESS_ALL_ACCESS", "PROCESS_QUERY_INFORMATION",
+        "PROCESS_QUERY_LIMITED_INFORMATION", "base_prefix", "commands", "depths",
+        "errno", "isjunction", "returncode", "st_file_attributes", "st_reparse_tag",
+        "winerror",
+    }
+)
+_BANNED_ATTR_NAMES = frozenset(
+    {
+        "modules", "_getframe", "_current_frames", "_current_exceptions",
+        "f_builtins", "f_globals", "f_locals", "f_back", "f_code",
+        "gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code",
+        "tb_frame", "tb_next", "pythonapi", "cdll", "CDLL", "PyDLL", "OleDLL",
+        "CFUNCTYPE", "WINFUNCTYPE", "PYFUNCTYPE",
+    }
+)
+_SAFE_READ_DUNDERS = frozenset(
+    {"__init__", "__name__", "__enter__", "__exit__", "__file__", "__module__", "__class__", "__cause__"}
+)
 
 
 def _stmts_always_exit(stmts: list[ast.stmt], *, in_loop: bool) -> bool:
@@ -161,31 +194,43 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
             impure.add(node.rest)
 
     import_sources: dict[str, set[str]] = {}
+    re_candidates: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             in_top = id(node) in scope_top_stmts
             for alias in node.names:
                 top_pkg = alias.name.split(".", 1)[0]
-                if top_pkg in _BANNED_MODULES:
-                    cap_errors.append(f"line {node.lineno} `import {alias.name}` is banned in storage modules")
+                if top_pkg not in _ALLOWED_IMPORT_ROOTS:
+                    cap_errors.append(f"line {node.lineno} `import {alias.name}` is not in storage module allowlist")
                 bound = alias.asname or top_pkg
-                src = "os" if (alias.name == "os" or (alias.asname is None and alias.name.startswith("os."))) else (
-                    "sys" if alias.name == "sys" else "other"
+                src = (
+                    "os"
+                    if (alias.name == "os" or (alias.asname is None and alias.name.startswith("os.")))
+                    else ("sys" if alias.name == "sys" else ("re" if alias.name == "re" else "other"))
                 )
-                if not in_top or src == "other":
+                if in_top and src == "re":
+                    re_candidates.add(bound)
+                if not in_top or src not in {"os", "sys"}:
                     impure.add(bound)
                 import_sources.setdefault(bound, set()).add(src)
         elif isinstance(node, ast.ImportFrom):
-            top_mod = (node.module or "").split(".", 1)[0]
-            if top_mod in _BANNED_MODULES:
-                cap_errors.append(f"line {node.lineno} `from {node.module} import ...` is banned in storage modules")
+            if (node.level or 0) == 0:
+                top_mod = (node.module or "").split(".", 1)[0]
+                if top_mod not in _ALLOWED_IMPORT_ROOTS:
+                    cap_errors.append(
+                        f"line {node.lineno} `from {node.module} import ...` is not in storage module allowlist"
+                    )
             for alias in node.names:
                 if alias.name == "*":
                     cap_errors.append(
                         f"line {node.lineno} wildcard `from {node.module or '.'} import *` is banned in storage modules"
                     )
                 else:
-                    if alias.name in _REFLECTIVE_FNS or (alias.name.startswith("__") and alias.name.endswith("__")):
+                    if (
+                        alias.name in _REFLECTIVE_FNS
+                        or alias.name in _BANNED_ATTR_NAMES
+                        or (alias.name.startswith("__") and alias.name.endswith("__"))
+                    ):
                         cap_errors.append(
                             f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules"
                         )
@@ -197,11 +242,28 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
     for bound, srcs in import_sources.items():
         if len(srcs) > 1:
             impure.add(bound)
+            re_candidates.discard(bound)
+    pure_re_aliases = {b for b in re_candidates if b not in (impure - re_candidates)}
+    # Ensure any store/param/handler/importfrom binding removes from `pure_re_aliases`.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            pure_re_aliases.discard(node.id)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            pure_re_aliases.discard(node.name)
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                pure_re_aliases.discard(alias.asname or alias.name)
+        elif isinstance(node, ast.arg):
+            pure_re_aliases.discard(node.arg)
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Attribute):
+        if isinstance(node, ast.MatchClass):
+            cap_errors.append(f"line {node.lineno} class pattern matching is banned in storage modules")
+        elif isinstance(node, ast.Attribute):
             is_dunder = node.attr.startswith("__") and node.attr.endswith("__")
-            if isinstance(node.ctx, (ast.Store, ast.Del)) and (node.attr in {"name", "platform", "kill"} or is_dunder):
+            if node.attr in _BANNED_ATTR_NAMES:
+                cap_errors.append(f"line {node.lineno} `.{node.attr}` access is banned in storage modules")
+            elif isinstance(node.ctx, (ast.Store, ast.Del)) and (node.attr in {"name", "platform", "kill"} or is_dunder):
                 cap_errors.append(
                     f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules"
                 )
@@ -213,7 +275,7 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                 cap_errors.append(
                     f"line {node.lineno} first-class/aliased `.kill` reference is banned in storage modules"
                 )
-            elif isinstance(node.ctx, ast.Load) and node.attr in (_REFLECTIVE_FNS - {"compile"}) and id(node) not in call_func_ids:
+            elif isinstance(node.ctx, ast.Load) and node.attr in _REFLECTIVE_FNS and id(node) not in call_func_ids:
                 cap_errors.append(
                     f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules"
                 )
@@ -237,22 +299,34 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                 continue
             is_bare_name = isinstance(fn, ast.Name)
             fn_name = fn.id if is_bare_name else fn.attr
-            if fn_name in {"setattr", "delattr", "eval", "exec", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__"} or (
-                is_bare_name and fn_name == "compile"
-            ):
+            if fn_name == "compile":
+                is_valid_re_compile = (
+                    isinstance(fn, ast.Attribute)
+                    and isinstance(fn.value, ast.Name)
+                    and fn.value.id in pure_re_aliases
+                )
+                if not is_valid_re_compile:
+                    cap_errors.append(f"line {node.lineno} non-regex `compile(...)` is banned in storage modules")
+            elif fn_name in (_REFLECTIVE_FNS - {"getattr", "compile"}):
                 cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
+            elif fn_name == "WinDLL":
+                if not (fn.attr == "WinDLL" if isinstance(fn, ast.Attribute) else True) or not (
+                    node.args and isinstance(node.args[0], ast.Constant) and str(node.args[0].value).lower() in {"kernel32", "kernel32.dll"}
+                ):
+                    cap_errors.append(f"line {node.lineno} non-kernel32 `WinDLL(...)` is banned in storage modules")
             elif fn_name == "getattr":
                 if (
-                    len(node.args) < 2
+                    not is_bare_name
+                    or "getattr" in impure
+                    or len(node.args) < 2
                     or len(node.args) > 3
                     or node.keywords
                     or not isinstance(node.args[1], ast.Constant)
                     or not isinstance(node.args[1].value, str)
-                    or node.args[1].value in (_REFLECTIVE_FNS | {"kill", "name", "platform", "__builtins__"})
-                    or node.args[1].value.startswith("__")
+                    or node.args[1].value not in _ALLOWED_GETATTR_NAMES
                 ):
                     cap_errors.append(
-                        f"line {node.lineno} dynamic or sensitive `getattr(...)` is banned in storage modules"
+                        f"line {node.lineno} `getattr(...)` outside allowlisted OS/stat attributes is banned in storage modules"
                     )
 
     return frozenset(imported_kills), frozenset(impure), cap_errors

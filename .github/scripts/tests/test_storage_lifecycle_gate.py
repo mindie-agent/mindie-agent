@@ -382,6 +382,10 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import os\nfrom builtins import getattr as lookup\nlookup(os, 'kill')(1, 0)\n", "banned in storage modules"),
             ("import os, builtins\ngetattr(builtins, 'getattr')(os, 'kill')(1, 0)\n", "banned in storage modules"),
             ("import os\nos.__setattr__('name', 'posix')\nif os.name != 'nt':\n    os.kill(1, 0)\n", "__setattr__"),
+            ("import sys, types\ncode = sys.modules['builtins'].compile('1', '<x>', 'exec')\n", "banned in storage modules"),
+            ("import os, sys\nlk = sys._getframe().f_builtins['getattr']\nlk(os, 'kill')(1, 0)\n", "banned in storage modules"),
+            ("import os\nmatch os:\n    case object(kill=probe):\n        probe(1, 0)\n", "class pattern matching is banned"),
+            ("import os, sys\nsys.modules['sys'] = object()\nimport sys as fake_sys\nif fake_sys.platform != 'win32':\n    os.kill(1, 0)\n", "`.modules` access is banned"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
