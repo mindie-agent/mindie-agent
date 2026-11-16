@@ -3,19 +3,20 @@
 
 [Role]
 Verifies via Python stdlib `ast` that storage lifecycle/lease/GC modules never invoke
-`os.kill(pid, 0)` (or any aliased, reflective, frame-introspected, or module-registry equivalent)
-unless guarded by a proven literal POSIX branch.
+`os.kill(pid, 0)` (or any aliased, reflective, frame-introspected, `ctypes.pydll`, `typing`,
+or module-registry equivalent) unless guarded by a proven literal POSIX branch.
 
 [Invariants]
-- Enforces closed syntactic allowlists verified across all 15 repositories:
-  1. Closed import allowlist (`_ALLOWED_IMPORT_ROOTS`), banning wildcard imports, `builtins`,
-     `operator`, `importlib`, `types`, `inspect`, `gc`, `traceback`, `runpy`, `code`, etc.
+- Enforces exact, closed syntactic allowlists verified across all 15 repositories:
+  1. Exact module-name allowlist (`_ALLOWED_EXACT_IMPORTS` & `_ALLOWED_FROM_MODULES`), banning
+     wildcard imports, `logging.config`, `builtins`, `operator`, `importlib`, `types`, `inspect`,
+     `gc`, `import typing` (only static `_ALLOWED_TYPING_NAMES` via `from typing import ...`),
+     and restricting `ctypes` strictly to `wintypes` + `_ALLOWED_CTYPES_ATTRS` + `WinDLL('kernel32')`.
   2. Closed `getattr` constant allowlist (`_ALLOWED_GETATTR_NAMES`), banning frame/registry/dunder
-     introspection (`modules`, `_getframe`, `f_builtins`, `f_globals`, `f_locals`, `gi_frame`,
-     `cr_frame`, `ag_frame`, `tb_frame`, `pythonapi`, `CDLL`, `cdll`, `MatchClass`, etc.).
-  3. Restricts `.compile(...)` strictly to unmutated top-imported `re` aliases, bans indirect
-     non-`(Name | Attribute)` callees, bans first-class `.kill`/`kill` references, and requires
-     every non-exempt `<expr>.kill(...)` / `kill(...)` call to sit inside a proven POSIX branch.
+     introspection, `MatchClass`, indirect callees, and attribute writes on module aliases / `.compile`.
+  3. Restricts `.compile(...)` strictly to unshadowed, unmutated top-imported `re` aliases in scope,
+     bans first-class `.kill`/`kill` references, and requires every non-exempt `<expr>.kill(...)`
+     / `kill(...)` call to sit inside a proven literal POSIX branch.
 
 [Timeouts & Locks]
 - Pure in-memory AST traversal; acquires no locks and spawns no subprocesses.
@@ -31,22 +32,42 @@ from pathlib import Path
 
 _COMPREHENSION_TYPES = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 _REFLECTIVE_FNS = frozenset(
-    {"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__", "breakpoint"}
-)
-_ALLOWED_IMPORT_ROOTS = frozenset(
     {
-        "__future__", "_host_exec", "_winapi", "argparse", "ast", "bounded_process",
-        "collections", "contextlib", "ctypes", "dataclasses", "datetime", "errno",
-        "fcntl", "filesystem", "fnmatch", "functools", "genstate", "glob", "hashlib",
-        "host_pin_refresh", "io", "itertools", "json", "leases", "legacy",
-        "legacy_roots", "lifecycle", "logging", "loop", "math", "mindie_knowledge",
-        "mindie_paths", "msvcrt", "ntpath", "os", "pathlib", "paths", "platform",
-        "plistlib", "posixpath", "product_contract", "re", "remote_state_guard",
-        "select", "shlex", "shutil", "signal", "sqlite3", "stat", "storage",
-        "storage_common", "storage_gc", "storage_leases", "storage_lifecycle",
+        "getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals",
+        "locals", "attrgetter", "methodcaller", "__import__", "breakpoint",
+    }
+)
+_ALLOWED_EXACT_IMPORTS = frozenset(
+    {
+        "_host_exec", "_winapi", "argparse", "ast", "bounded_process", "collections.abc",
+        "contextlib", "ctypes", "errno", "fcntl", "filesystem", "fnmatch", "genstate",
+        "glob", "hashlib", "host_pin_refresh", "io", "json", "leases", "legacy",
+        "legacy_roots", "lifecycle", "loop.locks", "math", "mindie_knowledge",
+        "mindie_knowledge.filesystem", "mindie_knowledge.state_layout",
+        "mindie_knowledge.storage", "mindie_knowledge.storage.legacy_roots",
+        "mindie_knowledge.storage.lifecycle", "mindie_paths", "msvcrt", "ntpath",
+        "os", "os.path", "pathlib", "paths", "plistlib", "posixpath", "product_contract",
+        "re", "remote_state_guard", "select", "shlex", "shutil", "sqlite3", "stat",
+        "storage", "storage_common", "storage_gc", "storage_leases", "storage_lifecycle",
         "storage_reclaim", "storage_releases", "storage_spool", "storage_support",
         "string", "struct", "subprocess", "sys", "tempfile", "threading", "time",
-        "tomllib", "typing", "urllib", "uuid", "uv_cache", "warnings", "xml",
+        "tomllib", "urllib.parse", "uuid", "uv_cache", "xml.etree", "xml.etree.ElementTree",
+    }
+)
+_ALLOWED_FROM_MODULES = _ALLOWED_EXACT_IMPORTS | {"__future__", "typing"}
+_ALLOWED_TYPING_NAMES = frozenset(
+    {
+        "Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator",
+        "IO", "Iterable", "Iterator", "List", "Literal", "Mapping", "MutableMapping",
+        "NamedTuple", "NoReturn", "Optional", "Protocol", "Sequence", "Set", "TextIO",
+        "Tuple", "TYPE_CHECKING", "TypeAlias", "TypedDict", "Union", "cast", "overload",
+    }
+)
+_ALLOWED_CTYPES_ATTRS = frozenset(
+    {
+        "POINTER", "Structure", "WinDLL", "byref", "c_bool", "c_int", "c_long",
+        "c_size_t", "c_uint32", "c_uint64", "c_ulong", "c_void_p", "c_wchar",
+        "c_wchar_p", "create_unicode_buffer", "get_last_error", "sizeof", "wintypes",
     }
 )
 _ALLOWED_GETATTR_NAMES = frozenset(
@@ -63,8 +84,10 @@ _BANNED_ATTR_NAMES = frozenset(
         "modules", "_getframe", "_current_frames", "_current_exceptions",
         "f_builtins", "f_globals", "f_locals", "f_back", "f_code",
         "gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code",
-        "tb_frame", "tb_next", "pythonapi", "cdll", "CDLL", "PyDLL", "OleDLL",
-        "CFUNCTYPE", "WINFUNCTYPE", "PYFUNCTYPE",
+        "tb_frame", "tb_next", "pythonapi", "cdll", "pydll", "oledll", "windll",
+        "CDLL", "PyDLL", "OleDLL", "LoadLibrary", "_dlopen", "CFUNCTYPE",
+        "WINFUNCTYPE", "PYFUNCTYPE", "get_type_hints", "_eval_type",
+        "enable_load_extension", "load_extension",
     }
 )
 _SAFE_READ_DUNDERS = frozenset(
@@ -153,108 +176,97 @@ def _is_exempt_direct_kill_call(call: ast.Call, imported_kill_names: frozenset[s
     return False
 
 
-def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str], list[str]]:
-    """Collect `(imported_kill_names, impure_guard_names, capability_errors)` across `tree`."""
+def _collect_tree_facts(
+    tree: ast.Module,
+) -> tuple[frozenset[str], frozenset[str], frozenset[str], list[str]]:
+    """Collect `(imported_kill_names, impure_os_sys_names, pure_re_names, capability_errors)`."""
     call_func_ids = {id(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)}
+    attr_value_ids = {id(n.value) for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
     imported_kills: set[str] = set()
-    impure: set[str] = set()
+    non_import_bound: set[str] = set()
     cap_errors: list[str] = []
     scope_top_stmts: set[int] = {id(s) for s in tree.body}
 
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            impure.add(node.name)
+            non_import_bound.add(node.name)
             scope_top_stmts.update(id(s) for s in node.body)
-            for a in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs):
-                impure.add(a.arg)
-            if node.args.vararg:
-                impure.add(node.args.vararg.arg)
-            if node.args.kwarg:
-                impure.add(node.args.kwarg.arg)
-        elif isinstance(node, ast.Lambda):
-            for a in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs):
-                impure.add(a.arg)
-            if node.args.vararg:
-                impure.add(node.args.vararg.arg)
-            if node.args.kwarg:
-                impure.add(node.args.kwarg.arg)
         elif isinstance(node, ast.ClassDef):
-            impure.add(node.name)
+            non_import_bound.add(node.name)
+        elif isinstance(node, ast.arg):
+            non_import_bound.add(node.arg)
         elif isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
-            impure.add(node.id)
+            non_import_bound.add(node.id)
         elif isinstance(node, (ast.Global, ast.Nonlocal)):
-            impure.update(node.names)
+            non_import_bound.update(node.names)
         elif isinstance(node, ast.ExceptHandler) and node.name:
-            impure.add(node.name)
+            non_import_bound.add(node.name)
         elif isinstance(node, ast.MatchAs) and node.name:
-            impure.add(node.name)
+            non_import_bound.add(node.name)
         elif isinstance(node, ast.MatchStar) and node.name:
-            impure.add(node.name)
+            non_import_bound.add(node.name)
         elif isinstance(node, ast.MatchMapping) and node.rest:
-            impure.add(node.rest)
+            non_import_bound.add(node.rest)
 
-    import_sources: dict[str, set[str]] = {}
-    re_candidates: set[str] = set()
+    import_sources: dict[str, list[tuple[str, bool]]] = {}
+    all_module_aliases: set[str] = set()
+    ctypes_aliases: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             in_top = id(node) in scope_top_stmts
             for alias in node.names:
-                top_pkg = alias.name.split(".", 1)[0]
-                if top_pkg not in _ALLOWED_IMPORT_ROOTS:
+                if alias.name not in _ALLOWED_EXACT_IMPORTS:
                     cap_errors.append(f"line {node.lineno} `import {alias.name}` is not in storage module allowlist")
-                bound = alias.asname or top_pkg
+                bound = alias.asname or alias.name.split(".", 1)[0]
+                all_module_aliases.add(bound)
+                if alias.name == "ctypes":
+                    ctypes_aliases.add(bound)
                 src = (
                     "os"
-                    if (alias.name == "os" or (alias.asname is None and alias.name.startswith("os.")))
+                    if (alias.name == "os" or (alias.asname is None and alias.name == "os.path"))
                     else ("sys" if alias.name == "sys" else ("re" if alias.name == "re" else "other"))
                 )
-                if in_top and src == "re":
-                    re_candidates.add(bound)
-                if not in_top or src not in {"os", "sys"}:
-                    impure.add(bound)
-                import_sources.setdefault(bound, set()).add(src)
+                import_sources.setdefault(bound, []).append((src, in_top))
         elif isinstance(node, ast.ImportFrom):
-            if (node.level or 0) == 0:
-                top_mod = (node.module or "").split(".", 1)[0]
-                if top_mod not in _ALLOWED_IMPORT_ROOTS:
-                    cap_errors.append(
-                        f"line {node.lineno} `from {node.module} import ...` is not in storage module allowlist"
-                    )
+            mod = node.module or ""
+            if (node.level or 0) == 0 and mod not in _ALLOWED_FROM_MODULES:
+                cap_errors.append(f"line {node.lineno} `from {mod} import ...` is not in storage module allowlist")
             for alias in node.names:
                 if alias.name == "*":
                     cap_errors.append(
-                        f"line {node.lineno} wildcard `from {node.module or '.'} import *` is banned in storage modules"
+                        f"line {node.lineno} wildcard `from {mod or '.'} import *` is banned in storage modules"
                     )
-                else:
-                    if (
-                        alias.name in _REFLECTIVE_FNS
-                        or alias.name in _BANNED_ATTR_NAMES
-                        or (alias.name.startswith("__") and alias.name.endswith("__"))
-                    ):
-                        cap_errors.append(
-                            f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules"
-                        )
-                    bound = alias.asname or alias.name
-                    impure.add(bound)
-                    if alias.name == "kill":
-                        imported_kills.add(bound)
+                    continue
+                if mod == "typing" and alias.name not in _ALLOWED_TYPING_NAMES:
+                    cap_errors.append(
+                        f"line {node.lineno} `from typing import {alias.name}` is banned in storage modules"
+                    )
+                if mod == "ctypes" and alias.name != "wintypes":
+                    cap_errors.append(
+                        f"line {node.lineno} `from ctypes import {alias.name}` is banned in storage modules"
+                    )
+                if (
+                    alias.name in _REFLECTIVE_FNS
+                    or alias.name in _BANNED_ATTR_NAMES
+                    or (alias.name.startswith("__") and alias.name.endswith("__"))
+                ):
+                    cap_errors.append(
+                        f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules"
+                    )
+                bound = alias.asname or alias.name
+                non_import_bound.add(bound)
+                if alias.name == "kill":
+                    imported_kills.add(bound)
 
-    for bound, srcs in import_sources.items():
-        if len(srcs) > 1:
-            impure.add(bound)
-            re_candidates.discard(bound)
-    pure_re_aliases = {b for b in re_candidates if b not in (impure - re_candidates)}
-    # Ensure any store/param/handler/importfrom binding removes from `pure_re_aliases`.
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
-            pure_re_aliases.discard(node.id)
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            pure_re_aliases.discard(node.name)
-        elif isinstance(node, ast.ImportFrom):
-            for alias in node.names:
-                pure_re_aliases.discard(alias.asname or alias.name)
-        elif isinstance(node, ast.arg):
-            pure_re_aliases.discard(node.arg)
+    impure_os_sys = set(non_import_bound)
+    pure_re: set[str] = set()
+    for bound, entries in import_sources.items():
+        srcs = {s for s, _ in entries}
+        all_top = all(t for _, t in entries)
+        if not all_top or len(srcs) > 1 or srcs not in ({"os"}, {"sys"}):
+            impure_os_sys.add(bound)
+        if bound not in non_import_bound and len(entries) == 1 and entries[0] == ("re", True):
+            pure_re.add(bound)
 
     for node in ast.walk(tree):
         if isinstance(node, ast.MatchClass):
@@ -263,9 +275,17 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
             is_dunder = node.attr.startswith("__") and node.attr.endswith("__")
             if node.attr in _BANNED_ATTR_NAMES:
                 cap_errors.append(f"line {node.lineno} `.{node.attr}` access is banned in storage modules")
-            elif isinstance(node.ctx, (ast.Store, ast.Del)) and (node.attr in {"name", "platform", "kill"} or is_dunder):
+            elif isinstance(node.ctx, (ast.Store, ast.Del)) and (
+                node.attr in {"name", "platform", "kill", "compile"}
+                or is_dunder
+                or (isinstance(node.value, ast.Name) and node.value.id in all_module_aliases)
+            ):
                 cap_errors.append(
                     f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules"
+                )
+            elif isinstance(node.value, ast.Name) and node.value.id in ctypes_aliases and node.attr not in _ALLOWED_CTYPES_ATTRS:
+                cap_errors.append(
+                    f"line {node.lineno} `ctypes.{node.attr}` is outside allowlisted Win32 storage APIs"
                 )
             elif is_dunder and node.attr not in _SAFE_READ_DUNDERS:
                 cap_errors.append(
@@ -282,6 +302,10 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
         elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
             if node.id == "__builtins__":
                 cap_errors.append(f"line {node.lineno} `__builtins__` access is banned in storage modules")
+            elif node.id in ctypes_aliases and id(node) not in attr_value_ids:
+                cap_errors.append(
+                    f"line {node.lineno} first-class `ctypes` module reference is banned in storage modules"
+                )
             elif node.id in imported_kills and id(node) not in call_func_ids:
                 cap_errors.append(
                     f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules"
@@ -299,25 +323,17 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                 continue
             is_bare_name = isinstance(fn, ast.Name)
             fn_name = fn.id if is_bare_name else fn.attr
-            if fn_name == "compile":
-                is_valid_re_compile = (
-                    isinstance(fn, ast.Attribute)
-                    and isinstance(fn.value, ast.Name)
-                    and fn.value.id in pure_re_aliases
-                )
-                if not is_valid_re_compile:
-                    cap_errors.append(f"line {node.lineno} non-regex `compile(...)` is banned in storage modules")
-            elif fn_name in (_REFLECTIVE_FNS - {"getattr", "compile"}):
+            if fn_name in (_REFLECTIVE_FNS - {"getattr", "compile"}):
                 cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
             elif fn_name == "WinDLL":
-                if not (fn.attr == "WinDLL" if isinstance(fn, ast.Attribute) else True) or not (
+                if not (isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in ctypes_aliases) or not (
                     node.args and isinstance(node.args[0], ast.Constant) and str(node.args[0].value).lower() in {"kernel32", "kernel32.dll"}
                 ):
                     cap_errors.append(f"line {node.lineno} non-kernel32 `WinDLL(...)` is banned in storage modules")
             elif fn_name == "getattr":
                 if (
                     not is_bare_name
-                    or "getattr" in impure
+                    or "getattr" in non_import_bound
                     or len(node.args) < 2
                     or len(node.args) > 3
                     or node.keywords
@@ -329,43 +345,55 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                         f"line {node.lineno} `getattr(...)` outside allowlisted OS/stat attributes is banned in storage modules"
                     )
 
-    return frozenset(imported_kills), frozenset(impure), cap_errors
+    return frozenset(imported_kills), frozenset(impure_os_sys), frozenset(pure_re), cap_errors
 
 
 def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
     """Verify storage module `path` never calls `os.kill(pid, 0)` outside proven POSIX branches."""
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
-    imported_kills, impure, errors = _collect_tree_facts(tree)
+    imported_kills, impure, pure_re_global, errors = _collect_tree_facts(tree)
 
-    def _visit_expr(node: ast.AST, posix_proven: bool, scope_name: str, m_os: frozenset[str], m_sys: frozenset[str]) -> None:
+    def _visit_expr(
+        node: ast.AST,
+        posix_proven: bool,
+        scope_name: str,
+        m_os: frozenset[str],
+        m_sys: frozenset[str],
+        m_re: frozenset[str],
+    ) -> None:
         if isinstance(node, ast.Lambda):
             for dflt in (*node.args.defaults, *(d for d in node.args.kw_defaults if d is not None)):
-                _visit_expr(dflt, posix_proven, scope_name, m_os, m_sys)
-            _visit_expr(node.body, posix_proven, scope_name, m_os, m_sys)
+                _visit_expr(dflt, posix_proven, scope_name, m_os, m_sys, m_re)
+            _visit_expr(node.body, posix_proven, scope_name, m_os, m_sys, m_re)
             return
         if isinstance(node, _COMPREHENSION_TYPES):
             for gen in node.generators:
-                _visit_expr(gen.iter, posix_proven, scope_name, m_os, m_sys)
-                _visit_expr(gen.target, posix_proven, scope_name, m_os, m_sys)
+                _visit_expr(gen.iter, posix_proven, scope_name, m_os, m_sys, m_re)
+                _visit_expr(gen.target, posix_proven, scope_name, m_os, m_sys, m_re)
                 for cond in gen.ifs:
-                    _visit_expr(cond, posix_proven, scope_name, m_os, m_sys)
+                    _visit_expr(cond, posix_proven, scope_name, m_os, m_sys, m_re)
                     t_pos, _ = _guard_implications(cond, m_os, m_sys)
                     posix_proven = posix_proven or t_pos
             if isinstance(node, ast.DictComp):
-                _visit_expr(node.key, posix_proven, scope_name, m_os, m_sys)
-                _visit_expr(node.value, posix_proven, scope_name, m_os, m_sys)
+                _visit_expr(node.key, posix_proven, scope_name, m_os, m_sys, m_re)
+                _visit_expr(node.value, posix_proven, scope_name, m_os, m_sys, m_re)
             else:
-                _visit_expr(node.elt, posix_proven, scope_name, m_os, m_sys)
+                _visit_expr(node.elt, posix_proven, scope_name, m_os, m_sys, m_re)
             return
         if isinstance(node, ast.IfExp):
-            _visit_expr(node.test, posix_proven, scope_name, m_os, m_sys)
+            _visit_expr(node.test, posix_proven, scope_name, m_os, m_sys, m_re)
             t_pos, f_pos = _guard_implications(node.test, m_os, m_sys)
-            _visit_expr(node.body, posix_proven or t_pos, scope_name, m_os, m_sys)
-            _visit_expr(node.orelse, posix_proven or f_pos, scope_name, m_os, m_sys)
+            _visit_expr(node.body, posix_proven or t_pos, scope_name, m_os, m_sys, m_re)
+            _visit_expr(node.orelse, posix_proven or f_pos, scope_name, m_os, m_sys, m_re)
             return
         if isinstance(node, ast.Call):
             fn = node.func
+            if (isinstance(fn, ast.Name) and fn.id == "compile") or (
+                isinstance(fn, ast.Attribute) and fn.attr == "compile"
+            ):
+                if not (isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in m_re):
+                    errors.append(f"line {node.lineno} non-regex `compile(...)` is banned in storage modules")
             is_kill_call = (isinstance(fn, ast.Attribute) and fn.attr == "kill") or (
                 isinstance(fn, ast.Name) and fn.id in imported_kills
             )
@@ -375,7 +403,7 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                     "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
                 )
         for child in ast.iter_child_nodes(node):
-            _visit_expr(child, posix_proven, scope_name, m_os, m_sys)
+            _visit_expr(child, posix_proven, scope_name, m_os, m_sys, m_re)
 
     def _walk_block(
         block: list[ast.stmt],
@@ -383,100 +411,106 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
         scope_name: str,
         m_os: frozenset[str],
         m_sys: frozenset[str],
+        m_re: frozenset[str],
         *,
         top_block: bool,
         in_loop: bool = False,
         is_class_body: bool = False,
         lex_os: frozenset[str] = frozenset(),
         lex_sys: frozenset[str] = frozenset(),
+        lex_re: frozenset[str] = frozenset(),
     ) -> None:
         cur_pos = blk_posix
-        cur_o, cur_s = set(m_os), set(m_sys)
+        cur_o, cur_s, cur_r = set(m_os), set(m_sys), set(m_re)
         for stmt in block:
-            fo, fs = frozenset(cur_o), frozenset(cur_s)
+            fo, fs, fr = frozenset(cur_o), frozenset(cur_s), frozenset(cur_r)
             child_o = lex_os if is_class_body else fo
             child_s = lex_sys if is_class_body else fs
+            child_r = lex_re if is_class_body else fr
             if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 for dec in stmt.decorator_list:
-                    _visit_expr(dec, cur_pos, scope_name, fo, fs)
+                    _visit_expr(dec, cur_pos, scope_name, fo, fs, fr)
                 for tp in getattr(stmt, "type_params", ()):
-                    _visit_expr(tp, cur_pos, scope_name, fo, fs)
+                    _visit_expr(tp, cur_pos, scope_name, fo, fs, fr)
                 for arg in (*stmt.args.posonlyargs, *stmt.args.args, *stmt.args.kwonlyargs, stmt.args.vararg, stmt.args.kwarg):
                     if arg is not None and arg.annotation is not None:
-                        _visit_expr(arg.annotation, cur_pos, scope_name, fo, fs)
+                        _visit_expr(arg.annotation, cur_pos, scope_name, fo, fs, fr)
                 if stmt.returns is not None:
-                    _visit_expr(stmt.returns, cur_pos, scope_name, fo, fs)
+                    _visit_expr(stmt.returns, cur_pos, scope_name, fo, fs, fr)
                 for dflt in (*stmt.args.defaults, *(d for d in stmt.args.kw_defaults if d is not None)):
-                    _visit_expr(dflt, cur_pos, scope_name, fo, fs)
-                _walk_block(stmt.body, cur_pos, stmt.name, child_o, child_s, top_block=True, in_loop=False)
+                    _visit_expr(dflt, cur_pos, scope_name, fo, fs, fr)
+                _walk_block(stmt.body, cur_pos, stmt.name, child_o, child_s, child_r, top_block=True, in_loop=False)
             elif isinstance(stmt, ast.ClassDef):
                 for dec in stmt.decorator_list:
-                    _visit_expr(dec, cur_pos, scope_name, fo, fs)
+                    _visit_expr(dec, cur_pos, scope_name, fo, fs, fr)
                 for tp in getattr(stmt, "type_params", ()):
-                    _visit_expr(tp, cur_pos, scope_name, fo, fs)
+                    _visit_expr(tp, cur_pos, scope_name, fo, fs, fr)
                 for b in stmt.bases:
-                    _visit_expr(b, cur_pos, scope_name, fo, fs)
+                    _visit_expr(b, cur_pos, scope_name, fo, fs, fr)
                 for kw in stmt.keywords:
-                    _visit_expr(kw.value, cur_pos, scope_name, fo, fs)
+                    _visit_expr(kw.value, cur_pos, scope_name, fo, fs, fr)
                 _walk_block(
-                    stmt.body, cur_pos, stmt.name, child_o, child_s,
-                    top_block=False, in_loop=False, is_class_body=True, lex_os=child_o, lex_sys=child_s,
+                    stmt.body, cur_pos, stmt.name, child_o, child_s, child_r,
+                    top_block=False, in_loop=False, is_class_body=True,
+                    lex_os=child_o, lex_sys=child_s, lex_re=child_r,
                 )
             elif isinstance(stmt, ast.If):
-                _visit_expr(stmt.test, cur_pos, scope_name, fo, fs)
+                _visit_expr(stmt.test, cur_pos, scope_name, fo, fs, fr)
                 t_pos, f_pos = _guard_implications(stmt.test, fo, fs)
-                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
-                _walk_block(stmt.orelse, cur_pos or f_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.orelse, cur_pos or f_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
                 if not stmt.orelse and f_pos and _stmts_always_exit(stmt.body, in_loop=in_loop):
                     cur_pos = True
             elif isinstance(stmt, (ast.For, ast.AsyncFor)):
-                _visit_expr(stmt.iter, cur_pos, scope_name, fo, fs)
-                _visit_expr(stmt.target, cur_pos, scope_name, fo, fs)
-                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, top_block=False, in_loop=True)
-                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                _visit_expr(stmt.iter, cur_pos, scope_name, fo, fs, fr)
+                _visit_expr(stmt.target, cur_pos, scope_name, fo, fs, fr)
+                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=True)
+                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
             elif isinstance(stmt, ast.While):
-                _visit_expr(stmt.test, cur_pos, scope_name, fo, fs)
+                _visit_expr(stmt.test, cur_pos, scope_name, fo, fs, fr)
                 t_pos, _ = _guard_implications(stmt.test, fo, fs)
-                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, top_block=False, in_loop=True)
-                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, fr, top_block=False, in_loop=True)
+                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
             elif isinstance(stmt, (ast.Try, getattr(ast, "TryStar", ast.Try))):
-                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, top_block=False, in_loop=False)
-                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=False)
+                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
                 for h in stmt.handlers:
                     if h.type is not None:
-                        _visit_expr(h.type, cur_pos, scope_name, fo, fs)
-                    _walk_block(h.body, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
-                _walk_block(stmt.finalbody, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                        _visit_expr(h.type, cur_pos, scope_name, fo, fs, fr)
+                    _walk_block(h.body, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.finalbody, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
             elif isinstance(stmt, ast.Match):
-                _visit_expr(stmt.subject, cur_pos, scope_name, fo, fs)
+                _visit_expr(stmt.subject, cur_pos, scope_name, fo, fs, fr)
                 for mc in stmt.cases:
                     c_pos = cur_pos
                     if mc.guard is not None:
-                        _visit_expr(mc.guard, cur_pos, scope_name, fo, fs)
+                        _visit_expr(mc.guard, cur_pos, scope_name, fo, fs, fr)
                         t_pos, _ = _guard_implications(mc.guard, fo, fs)
                         c_pos = c_pos or t_pos
-                    _walk_block(mc.body, c_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                    _walk_block(mc.body, c_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
             else:
                 for _, val in ast.iter_fields(stmt):
                     if isinstance(val, list):
                         if val and all(isinstance(it, ast.stmt) for it in val):
-                            _walk_block(val, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                            _walk_block(val, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
                         else:
                             for it in val:
                                 if isinstance(it, ast.AST):
-                                    _visit_expr(it, cur_pos, scope_name, fo, fs)
+                                    _visit_expr(it, cur_pos, scope_name, fo, fs, fr)
                     elif isinstance(val, ast.AST):
-                        _visit_expr(val, cur_pos, scope_name, fo, fs)
+                        _visit_expr(val, cur_pos, scope_name, fo, fs, fr)
 
             if top_block and isinstance(stmt, ast.Import):
                 for alias in stmt.names:
                     bound = alias.asname or alias.name.split(".", 1)[0]
+                    if alias.name == "re" and bound in pure_re_global:
+                        cur_r.add(bound)
                     if bound in impure:
                         continue
-                    if alias.name == "os" or (alias.asname is None and alias.name.startswith("os.")):
+                    if alias.name == "os" or (alias.asname is None and alias.name == "os.path"):
                         cur_o.add(bound)
                     elif alias.name == "sys":
                         cur_s.add(bound)
 
-    _walk_block(tree.body, False, "<module>", frozenset(), frozenset(), top_block=True)
+    _walk_block(tree.body, False, "<module>", frozenset(), frozenset(), frozenset(), top_block=True)
     return errors
