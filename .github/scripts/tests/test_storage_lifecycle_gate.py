@@ -343,6 +343,14 @@ class StorageLifecycleGateTests(unittest.TestCase):
                 "    import sys as s_sw\n"
                 "    if not s_sw.platform.startswith('win', 1):\n"
                 "        os.kill(pid, 0)\n"
+                "def comp_target_call(pid: int, slots: list[object]) -> list[object]:\n"
+                "    return [None for slots[os.kill(pid, 0)] in [1] if os.name != 'nt']\n"
+                "def identity_op_spoof(pid: int) -> None:\n"
+                "    import sys as s_id\n"
+                "    if s_id.platform is not 'win32':\n"
+                "        os.kill(pid, 0)\n"
+                "def bool_false_signal(pid: int) -> None:\n"
+                "    os.kill(pid, False)\n"
             ),
         )
         errors = sl_gate.verify_storage_lifecycle_hygiene([self.root])
@@ -358,11 +366,23 @@ class StorageLifecycleGateTests(unittest.TestCase):
             "comp_renamed_iter",
             "inner_probe",
             "default_walrus_spoof",
-            "long_chain_kill",
+            "first-class/aliased `.kill`",
             "nonlocal_spoof",
             "startswith_offset_spoof",
+            "comp_target_call",
+            "identity_op_spoof",
+            "bool_false_signal",
         ):
             self.assertTrue(any(expected in e for e in errors), (expected, errors))
+
+        for snippet, marker in (
+            ("import os\ndef f(pid, check=os.kill):\n    check(pid, 0)\n", "first-class/aliased `.kill`"),
+            ("import os, sys\nsys.platform = 'linux'\nif sys.platform != 'win32':\n    os.kill(1, 0)\n", "mutating or deleting `.platform`"),
+            ("import os\nimport sys as p_api\nfrom shim import *\nif p_api.platform != 'win32':\n    os.kill(1, 0)\n", "wildcard"),
+        ):
+            self._write(repo / "scripts/storage_cap.py", snippet)
+            cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
+            self.assertTrue(any(marker in e for e in cap_errs), (marker, cap_errs))
 
 
 if __name__ == "__main__":

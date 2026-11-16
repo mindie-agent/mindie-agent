@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-"""Scope-aware Windows PID safety AST analyzer for storage modules (Guardrail P8).
+"""Capability-restricted Windows PID safety AST verifier for storage modules (Guardrail P8).
 
 [Role]
 Verifies via Python stdlib `ast` that storage lifecycle/lease/GC modules never invoke
-`os.kill(pid, 0)` (or any aliased/imported `kill(pid, 0)`) unless guarded by a direct literal
-POSIX branch.
+`os.kill(pid, 0)` (or any aliased, reflective, or wildcard-imported equivalent) unless guarded
+by a proven literal POSIX branch.
 
 [Invariants]
-- Flags every `<expr>.kill(..., 0)` call unconditionally (eliminating module-alias dataflow
-  evasion across comprehensions, loops, and exception handlers) plus every bare/dynamic callee
-  reaching `"kill"` in an unbounded whole-tree fixed point (`while changed:`).
-- Trusts an identifier in `_guard_implications` (`must_os`, `must_sys`) ONLY when imported by a
-  direct top-of-scope `import os` / `import sys` prior to use and NEVER stored, deleted,
-  parameterized, captured, declared `global`/`nonlocal`, or re-imported anywhere in `ast.walk(tree)`.
-- Evaluates two-valued `(true_implies_posix, false_implies_posix)` De Morgan implications and
-  requires exact 1-arg `sys.platform.startswith('win'|'win32')` calls.
+- Enforces a syntactic capability allowlist rather than heuristic alias taint:
+  1. Bans wildcard imports (`from ... import *`), reflective/dynamic attribute access to `"kill"`
+     (non-literal `getattr`, `getattr(..., 'kill')`, `__getattribute__`, `__dict__`, `attrgetter`,
+     `methodcaller`, `eval`, `exec`, non-call references to `getattr`/`setattr`/`delattr`), and
+     any mutation/deletion of `.name`, `.platform`, or `.kill` attributes.
+  2. Bans first-class value references to `.kill` or imported `kill` (`check=os.kill`, `[os.kill]`,
+     `f = os.kill`, `match os.kill:`): `.kill` / `kill` may ONLY appear directly as `Call.func`.
+  3. Requires every direct `<expr>.kill(...)` / `kill(...)` call (except 0-arg `proc.kill()` or
+     explicit 2-arg non-zero `int` signal literal) to execute at a proven literal POSIX point.
+  4. Trusts `os`/`sys` in `_guard_implications` ONLY via `==`/`!=` (never `is`/`is not`) and 1-arg
+     `startswith('win'|'win32')` when the identifier is top-of-scope imported and globally unmutated.
 
 [Timeouts & Locks]
 - Pure in-memory AST traversal; acquires no locks and spawns no subprocesses.
@@ -29,14 +32,19 @@ import ast
 from pathlib import Path
 
 _COMPREHENSION_TYPES = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
+_REFLECTIVE_FNS = frozenset(
+    {"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller"}
+)
 
 
-def _stmts_always_exit(stmts: list[ast.stmt]) -> bool:
+def _stmts_always_exit(stmts: list[ast.stmt], *, in_loop: bool) -> bool:
     for stmt in stmts:
-        if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
+        if isinstance(stmt, (ast.Return, ast.Raise)):
+            return True
+        if in_loop and isinstance(stmt, (ast.Break, ast.Continue)):
             return True
         if isinstance(stmt, ast.If) and stmt.orelse:
-            if _stmts_always_exit(stmt.body) and _stmts_always_exit(stmt.orelse):
+            if _stmts_always_exit(stmt.body, in_loop=in_loop) and _stmts_always_exit(stmt.orelse, in_loop=in_loop):
                 return True
     return False
 
@@ -70,112 +78,54 @@ def _guard_implications(expr: ast.AST, os_aliases: frozenset[str], sys_aliases: 
             return False, True
     if isinstance(expr, ast.Compare) and len(expr.ops) == 1 and len(expr.comparators) == 1:
         left, op, right = expr.left, expr.ops[0], expr.comparators[0]
-        if not (isinstance(left, ast.Attribute) and isinstance(left.value, ast.Name) and isinstance(right, ast.Constant)):
+        if not (
+            isinstance(left, ast.Attribute)
+            and isinstance(left.value, ast.Name)
+            and isinstance(right, ast.Constant)
+            and isinstance(right.value, str)
+        ):
             return False, False
         if left.value.id in os_aliases and left.attr == "name":
             if right.value == "nt":
-                if isinstance(op, (ast.Eq, ast.Is)):
+                if isinstance(op, ast.Eq):
                     return False, True
-                if isinstance(op, (ast.NotEq, ast.IsNot)):
+                if isinstance(op, ast.NotEq):
                     return True, False
-            elif right.value == "posix" and isinstance(op, (ast.Eq, ast.Is)):
+            elif right.value == "posix" and isinstance(op, ast.Eq):
                 return True, False
         if left.value.id in sys_aliases and left.attr == "platform" and right.value == "win32":
-            if isinstance(op, (ast.Eq, ast.Is)):
+            if isinstance(op, ast.Eq):
                 return False, True
-            if isinstance(op, (ast.NotEq, ast.IsNot)):
+            if isinstance(op, ast.NotEq):
                 return True, False
     return False, False
 
 
-def _is_int_zero(expr: ast.AST | None) -> bool:
-    if expr is None:
-        return False
-    if isinstance(expr, ast.Constant):
-        return type(expr.value) is int and expr.value == 0
-    if isinstance(expr, ast.UnaryOp) and isinstance(expr.op, (ast.UAdd, ast.USub)):
-        return _is_int_zero(expr.operand)
-    return False
-
-
-def _call_passes_zero_signal(call: ast.Call) -> bool:
-    if len(call.args) >= 2 and _is_int_zero(call.args[1]):
+def _is_exempt_direct_kill_call(call: ast.Call, imported_kill_names: frozenset[str]) -> bool:
+    """Exempt only 0-arg `proc.kill()` or explicit 2-arg non-zero `int` signal literal."""
+    is_bare_imported_kill = isinstance(call.func, ast.Name) and call.func.id in imported_kill_names
+    if not is_bare_imported_kill and not call.args and not call.keywords:
         return True
-    for arg in call.args:
-        if isinstance(arg, ast.Starred) and isinstance(arg.value, (ast.Tuple, ast.List)):
-            elts = arg.value.elts
-            if (len(call.args) == 1 and len(elts) >= 2 and _is_int_zero(elts[1])) or (
-                arg is not call.args[0] and elts and _is_int_zero(elts[0])
-            ):
-                return True
-    for kw in call.keywords:
-        if kw.arg == "sig" and _is_int_zero(kw.value):
-            return True
-        if kw.arg is None and isinstance(kw.value, ast.Dict):
-            for k, v in zip(kw.value.keys, kw.value.values):
-                if isinstance(k, ast.Constant) and k.value == "sig" and _is_int_zero(v):
-                    return True
+    if (
+        len(call.args) == 2
+        and not call.keywords
+        and not isinstance(call.args[0], ast.Starred)
+        and isinstance(call.args[1], ast.Constant)
+        and type(call.args[1].value) is int
+        and call.args[1].value != 0
+    ):
+        return True
     return False
 
 
-def _target_names(node: ast.AST) -> set[str]:
-    return {sub.id for sub in ast.walk(node) if isinstance(sub, ast.Name) and isinstance(sub.ctx, (ast.Store, ast.Del))}
-
-
-def _expr_mentions_kill(expr: ast.AST, may_kill: set[str]) -> bool:
-    for sub in ast.walk(expr):
-        if isinstance(sub, ast.Attribute) and sub.attr == "kill":
-            return True
-        if isinstance(sub, ast.Name) and sub.id in may_kill:
-            return True
-        if (
-            isinstance(sub, ast.Call)
-            and isinstance(sub.func, ast.Name)
-            and sub.func.id == "getattr"
-            and len(sub.args) >= 2
-            and isinstance(sub.args[1], ast.Constant)
-            and sub.args[1].value == "kill"
-        ):
-            return True
-    return False
-
-
-def _collect_whole_tree_kill_taint(tree: ast.Module) -> frozenset[str]:
-    """Compute unbounded whole-tree fixed point of identifier names that may reference `os.kill`."""
-    may_kill: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom) and node.module == "os":
-            for alias in node.names:
-                if alias.name == "*":
-                    may_kill.add("kill")
-                elif alias.name == "kill":
-                    may_kill.add(alias.asname or alias.name)
-    changed = True
-    while changed:
-        changed = False
-        before = len(may_kill)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Assign) and _expr_mentions_kill(node.value, may_kill):
-                for tgt in node.targets:
-                    may_kill |= _target_names(tgt)
-            elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None:
-                if _expr_mentions_kill(node.value, may_kill):
-                    may_kill |= _target_names(node.target)
-            elif isinstance(node, (ast.For, ast.AsyncFor, ast.comprehension)):
-                if _expr_mentions_kill(node.iter, may_kill):
-                    may_kill |= _target_names(node.target)
-            elif isinstance(node, ast.withitem) and node.optional_vars is not None:
-                if _expr_mentions_kill(node.context_expr, may_kill):
-                    may_kill |= _target_names(node.optional_vars)
-        if len(may_kill) != before:
-            changed = True
-    return frozenset(may_kill)
-
-
-def _collect_globally_impure_guard_names(tree: ast.Module) -> frozenset[str]:
-    """Return every identifier anywhere in `tree` that is ever non-stdlib-imported or mutated/shadowed."""
+def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str], list[str]]:
+    """Collect `(imported_kill_names, impure_guard_names, capability_errors)` across `tree`."""
+    call_func_ids = {id(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)}
+    imported_kills: set[str] = set()
     impure: set[str] = set()
+    cap_errors: list[str] = []
     scope_top_stmts: set[int] = {id(s) for s in tree.body}
+
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             impure.add(node.name)
@@ -223,22 +173,72 @@ def _collect_globally_impure_guard_names(tree: ast.Module) -> frozenset[str]:
         elif isinstance(node, ast.ImportFrom):
             for alias in node.names:
                 if alias.name == "*":
-                    impure.update({"os", "sys"})
+                    cap_errors.append(
+                        f"line {node.lineno} wildcard `from {node.module or '.'} import *` is banned in storage modules"
+                    )
                 else:
-                    impure.add(alias.asname or alias.name)
+                    bound = alias.asname or alias.name
+                    impure.add(bound)
+                    if alias.name == "kill":
+                        imported_kills.add(bound)
+
     for bound, srcs in import_sources.items():
         if len(srcs) > 1:
             impure.add(bound)
-    return frozenset(impure)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            if isinstance(node.ctx, (ast.Store, ast.Del)) and node.attr in {"name", "platform", "kill"}:
+                cap_errors.append(
+                    f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules"
+                )
+            elif node.attr in {"__dict__", "__getattribute__"}:
+                cap_errors.append(
+                    f"line {node.lineno} reflective `.{node.attr}` access is banned in storage modules"
+                )
+            elif isinstance(node.ctx, ast.Load) and node.attr == "kill" and id(node) not in call_func_ids:
+                cap_errors.append(
+                    f"line {node.lineno} first-class/aliased `.kill` reference is banned in storage modules"
+                )
+            elif isinstance(node.ctx, ast.Load) and node.attr in _REFLECTIVE_FNS and id(node) not in call_func_ids:
+                cap_errors.append(
+                    f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules"
+                )
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
+            if node.id in imported_kills and id(node) not in call_func_ids:
+                cap_errors.append(
+                    f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules"
+                )
+            elif node.id in _REFLECTIVE_FNS and id(node) not in call_func_ids:
+                cap_errors.append(
+                    f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules"
+                )
+        elif isinstance(node, ast.Call):
+            fn = node.func
+            fn_name = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
+            if fn_name in {"setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller"}:
+                cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
+            elif fn_name == "getattr":
+                if (
+                    len(node.args) < 2
+                    or len(node.args) > 3
+                    or node.keywords
+                    or not isinstance(node.args[1], ast.Constant)
+                    or not isinstance(node.args[1].value, str)
+                    or node.args[1].value in {"kill", "name", "platform", "__dict__", "__getattribute__"}
+                ):
+                    cap_errors.append(
+                        f"line {node.lineno} dynamic or sensitive `getattr(...)` is banned in storage modules"
+                    )
+
+    return frozenset(imported_kills), frozenset(impure), cap_errors
 
 
 def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
-    """Ban `os.kill(pid, 0)` (or imported `kill(pid, 0)`) unless guarded by literal POSIX branch."""
+    """Verify storage module `path` never calls `os.kill(pid, 0)` outside proven POSIX branches."""
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
-    errors: list[str] = []
-    may_kill = _collect_whole_tree_kill_taint(tree)
-    impure = _collect_globally_impure_guard_names(tree)
+    imported_kills, impure, errors = _collect_tree_facts(tree)
 
     def _visit_expr(node: ast.AST, posix_proven: bool, scope_name: str, m_os: frozenset[str], m_sys: frozenset[str]) -> None:
         if isinstance(node, ast.Lambda):
@@ -249,6 +249,7 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
         if isinstance(node, _COMPREHENSION_TYPES):
             for gen in node.generators:
                 _visit_expr(gen.iter, posix_proven, scope_name, m_os, m_sys)
+                _visit_expr(gen.target, posix_proven, scope_name, m_os, m_sys)
                 for cond in gen.ifs:
                     _visit_expr(cond, posix_proven, scope_name, m_os, m_sys)
                     t_pos, _ = _guard_implications(cond, m_os, m_sys)
@@ -266,7 +267,11 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
             _visit_expr(node.orelse, posix_proven or f_pos, scope_name, m_os, m_sys)
             return
         if isinstance(node, ast.Call):
-            if _call_passes_zero_signal(node) and _expr_mentions_kill(node.func, set(may_kill)) and not posix_proven:
+            fn = node.func
+            is_kill_call = (isinstance(fn, ast.Attribute) and fn.attr == "kill") or (
+                isinstance(fn, ast.Name) and fn.id in imported_kills
+            )
+            if is_kill_call and not _is_exempt_direct_kill_call(node, imported_kills) and not posix_proven:
                 errors.append(
                     f"line {node.lineno} `{scope_name}` calls unguarded `os.kill(pid, 0)` "
                     "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
@@ -282,6 +287,7 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
         m_sys: frozenset[str],
         *,
         top_block: bool,
+        in_loop: bool = False,
         is_class_body: bool = False,
         lex_os: frozenset[str] = frozenset(),
         lex_sys: frozenset[str] = frozenset(),
@@ -304,7 +310,7 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                     _visit_expr(stmt.returns, cur_pos, scope_name, fo, fs)
                 for dflt in (*stmt.args.defaults, *(d for d in stmt.args.kw_defaults if d is not None)):
                     _visit_expr(dflt, cur_pos, scope_name, fo, fs)
-                _walk_block(stmt.body, cur_pos, stmt.name, child_o, child_s, top_block=True)
+                _walk_block(stmt.body, cur_pos, stmt.name, child_o, child_s, top_block=True, in_loop=False)
             elif isinstance(stmt, ast.ClassDef):
                 for dec in stmt.decorator_list:
                     _visit_expr(dec, cur_pos, scope_name, fo, fs)
@@ -316,23 +322,33 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                     _visit_expr(kw.value, cur_pos, scope_name, fo, fs)
                 _walk_block(
                     stmt.body, cur_pos, stmt.name, child_o, child_s,
-                    top_block=False, is_class_body=True, lex_os=child_o, lex_sys=child_s,
+                    top_block=False, in_loop=False, is_class_body=True, lex_os=child_o, lex_sys=child_s,
                 )
             elif isinstance(stmt, ast.If):
                 _visit_expr(stmt.test, cur_pos, scope_name, fo, fs)
                 t_pos, f_pos = _guard_implications(stmt.test, fo, fs)
-                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, top_block=False)
-                _walk_block(stmt.orelse, cur_pos or f_pos, scope_name, fo, fs, top_block=False)
-                if not stmt.orelse and f_pos and _stmts_always_exit(stmt.body):
+                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.orelse, cur_pos or f_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                if not stmt.orelse and f_pos and _stmts_always_exit(stmt.body, in_loop=in_loop):
                     cur_pos = True
+            elif isinstance(stmt, (ast.For, ast.AsyncFor)):
+                _visit_expr(stmt.iter, cur_pos, scope_name, fo, fs)
+                _visit_expr(stmt.target, cur_pos, scope_name, fo, fs)
+                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, top_block=False, in_loop=True)
+                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+            elif isinstance(stmt, ast.While):
+                _visit_expr(stmt.test, cur_pos, scope_name, fo, fs)
+                t_pos, _ = _guard_implications(stmt.test, fo, fs)
+                _walk_block(stmt.body, cur_pos or t_pos, scope_name, fo, fs, top_block=False, in_loop=True)
+                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
             elif isinstance(stmt, (ast.Try, getattr(ast, "TryStar", ast.Try))):
-                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, top_block=False)
-                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False)
+                _walk_block(stmt.body, cur_pos, scope_name, fo, fs, top_block=False, in_loop=False)
+                _walk_block(stmt.orelse, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
                 for h in stmt.handlers:
                     if h.type is not None:
                         _visit_expr(h.type, cur_pos, scope_name, fo, fs)
-                    _walk_block(h.body, cur_pos, scope_name, fo, fs, top_block=False)
-                _walk_block(stmt.finalbody, cur_pos, scope_name, fo, fs, top_block=False)
+                    _walk_block(h.body, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
+                _walk_block(stmt.finalbody, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
             elif isinstance(stmt, ast.Match):
                 _visit_expr(stmt.subject, cur_pos, scope_name, fo, fs)
                 for mc in stmt.cases:
@@ -341,12 +357,12 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                         _visit_expr(mc.guard, cur_pos, scope_name, fo, fs)
                         t_pos, _ = _guard_implications(mc.guard, fo, fs)
                         c_pos = c_pos or t_pos
-                    _walk_block(mc.body, c_pos, scope_name, fo, fs, top_block=False)
+                    _walk_block(mc.body, c_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
             else:
                 for _, val in ast.iter_fields(stmt):
                     if isinstance(val, list):
                         if val and all(isinstance(it, ast.stmt) for it in val):
-                            _walk_block(val, cur_pos, scope_name, fo, fs, top_block=False)
+                            _walk_block(val, cur_pos, scope_name, fo, fs, top_block=False, in_loop=in_loop)
                         else:
                             for it in val:
                                 if isinstance(it, ast.AST):
