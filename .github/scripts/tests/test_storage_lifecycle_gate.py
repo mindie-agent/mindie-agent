@@ -407,10 +407,18 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("from pathlib import Path\nfrom bounded_process import run\ndef d(py, cmd):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    argv[:] = cmd\n    run(argv, '')\n", "outside `__file__` self-dispatch"),
             ("import sys\nfrom .leases import subprocess\nsubprocess.run([sys.executable, '-c', 'import os; os.kill(1, 0)'])\n", "not in local storage symbol allowlist"),
             ("from _host_exec import bounded_run\nbounded_run(['ps'], '')\n", "banned in storage modules"),
+            ("from pathlib import Path\nfrom bounded_process import run\ndef d(py, cmd):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    match cmd:\n        case argv:\n            return run(argv, '')\n", "outside `__file__` self-dispatch"),
+            ("from pathlib import Path\nfrom bounded_process import run\ndef Path(x):\n    class _P:\n        def resolve(self):\n            return '-c'\n    return _P()\ndef d(py):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    return run(argv, '')\n", "outside `__file__` self-dispatch"),
+            ("from ..probe_helpers import _check\n_check(1)\n", "not in storage module allowlist"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
             self.assertTrue(any(marker in e for e in cap_errs), (marker, cap_errs))
+
+        self._write(repo / "scripts/paths.py", "import os\ndef read_json(pid: int):\n    os.kill(pid, 0)\n")
+        helper_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
+        self.assertTrue(any("scripts/paths.py" in e and "unguarded `os.kill(pid, 0)`" in e for e in helper_errs), helper_errs)
+        (repo / "scripts/paths.py").unlink()
 
         (repo / "scripts/storage_demorgan.py").unlink()
         self._write(repo / "scripts/storage_cap.py", "import re\nPAT = re.compile(r'^[0-9]+$')\n")

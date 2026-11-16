@@ -32,7 +32,10 @@ import re
 import tomllib
 from typing import Sequence
 
-from storage_pid_ast import inspect_storage_module_windows_pid_safety
+from storage_pid_ast import (
+    inspect_helper_windows_pid_safety,
+    inspect_storage_module_windows_pid_safety,
+)
 from storage_temp_ast import (
     inspect_python_temp_hygiene,
     iter_direct_nodes,
@@ -480,6 +483,51 @@ def _iter_scoped_python_files(repo_dir: Path, scopes: Sequence[str]) -> list[Pat
     return found
 
 
+_STORAGE_HELPER_STEMS: frozenset[str] = frozenset({
+    "_host_exec", "bounded_process", "filesystem", "genstate", "host_pin_refresh",
+    "locks", "mindie_paths", "paths", "product_contract", "remote_state_guard", "state_layout",
+})
+
+
+def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_files: Sequence[Path]) -> set[Path]:
+    file_set = set(scoped_files)
+    search_roots = [repo_dir, *(repo_dir / s for s in scopes if (repo_dir / s).is_dir())]
+    queue = [p for p in scoped_files if "storage" in p.parts or p.stem.startswith("storage") or p.stem in _STORAGE_HELPER_STEMS]
+    visited = set(queue)
+    while queue:
+        cur = queue.pop()
+        try:
+            tree = ast.parse(cur.read_text(encoding="utf-8"), filename=str(cur))
+        except (OSError, SyntaxError):
+            continue
+        for node in ast.walk(tree):
+            specs: list[tuple[int, str, str | None]] = []
+            if isinstance(node, ast.Import):
+                specs.extend((0, al.name, None) for al in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                specs.extend((node.level or 0, node.module or "", al.name) for al in node.names)
+            for lvl, mod, name in specs:
+                anchors: list[Path] = []
+                if lvl > 0:
+                    anc = cur.parent
+                    for _ in range(lvl - 1):
+                        anc = anc.parent
+                    anchors.append(anc)
+                else:
+                    anchors.extend(search_roots)
+                mp = mod.replace(".", "/")
+                rels = [mp] if mp else []
+                if name and name != "*":
+                    rels.append(f"{mp}/{name}" if mp else name)
+                for anc in anchors:
+                    for rel in rels:
+                        for cand in (anc / f"{rel}.py", anc / rel / "__init__.py"):
+                            if cand in file_set and cand not in visited:
+                                visited.add(cand)
+                                queue.append(cand)
+    return visited
+
+
 def verify_storage_lifecycle_hygiene(
     siblings_roots: Sequence[Path],
     *,
@@ -565,13 +613,18 @@ def verify_storage_lifecycle_hygiene(
 
     for repo_name, repo_dir in active_repos.items():
         scopes = PRODUCTION_PYTHON_SCOPES.get(repo_name, ())
-        for py_path in _iter_scoped_python_files(repo_dir, scopes):
+        scoped_files = _iter_scoped_python_files(repo_dir, scopes)
+        helper_files = _storage_reachable_helpers(repo_dir, scopes, scoped_files)
+        for py_path in scoped_files:
             rel = py_path.relative_to(repo_dir).as_posix()
             try:
                 for detail in inspect_python_temp_hygiene(py_path):
                     errors.append(f"{repo_name}: {rel} {detail}")
                 if "storage" in py_path.parts or py_path.stem.startswith("storage"):
                     for detail in inspect_storage_module_windows_pid_safety(py_path):
+                        errors.append(f"{repo_name}: {rel} {detail}")
+                elif py_path in helper_files:
+                    for detail in inspect_helper_windows_pid_safety(py_path):
                         errors.append(f"{repo_name}: {rel} {detail}")
             except SyntaxError as exc:
                 errors.append(f"{repo_name}: {rel} syntax error during P8 AST check: {exc}")
