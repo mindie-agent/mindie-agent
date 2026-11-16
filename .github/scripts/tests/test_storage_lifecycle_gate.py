@@ -421,6 +421,10 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ({"scripts/paths.py": "from os import kill as read_json\n"}, "banned in storage helpers"),
             ({"scripts/paths.py": "import os\nfrom builtins import getattr as lookup\ndef read_json(pid: int):\n    return lookup(os, 'kill')(pid, 0)\n"}, "banned in storage"),
             ({"scripts/paths.py": "from process_helpers.probe import read_json\n", "scripts/process_helpers/__init__.py": "import os\nos.kill(12345, 0)\n", "scripts/process_helpers/probe.py": "def read_json(p): return None\n"}, "process_helpers/__init__.py"),
+            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    probe = os.__getattribute__('kill')\n    return probe(pid, 0)\n"}, "reflective dunder"),
+            ({"scripts/paths.py": "import os\nos.__setattr__('name', 'posix')\n"}, "reflective dunder"),
+            ({"scripts/paths.py": "import subprocess\n[(read_json := subprocess.call) for _ in [0]]\n"}, "banned in storage helpers"),
+            ({"scripts/paths.py": "from importlib import import_module\ndef read_json(p):\n    return import_module('mindie_knowledge.pid_backend').probe(p)\n", "scripts/mindie_knowledge/pid_backend.py": "import os\ndef probe(p): return os.kill(p, 0)\n"}, "mindie_knowledge/pid_backend.py"),
         ):
             for rel_p, body in hlp_files.items():
                 self._write(repo / rel_p, body)

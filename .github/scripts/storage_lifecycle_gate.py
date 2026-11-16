@@ -506,6 +506,12 @@ def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_fil
                 specs.extend((0, al.name, None) for al in node.names)
             elif isinstance(node, ast.ImportFrom):
                 specs.extend((node.level or 0, node.module or "", al.name) for al in node.names)
+            elif (
+                isinstance(node, ast.Call)
+                and ((isinstance(node.func, ast.Name) and node.func.id == "import_module") or (isinstance(node.func, ast.Attribute) and node.func.attr == "import_module"))
+                and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)
+            ):
+                specs.append((0, node.args[0].value, None))
             for lvl, mod, name in specs:
                 anchors: list[Path] = []
                 cands: list[Path] = []

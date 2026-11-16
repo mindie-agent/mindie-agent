@@ -288,22 +288,16 @@ def _is_self_dispatch_bounded_run(
 
 
 def _collect_tree_facts(
-    tree: ast.Module, *, strict_capabilities: bool = True
+    tree: ast.Module, *, strict_capabilities: bool = True, module_stem: str = ""
 ) -> tuple[frozenset[str], frozenset[str], frozenset[str], frozenset[str], list[str]]:
     """Collect `(imported_kill_names, impure_os_sys_names, pure_re_names, private_helpers, capability_errors)`."""
     parent_map = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     call_func_ids = {id(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)}
     attr_value_ids = {id(n.value) for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
-    getattr_obj_ids = {
-        id(n.args[0]) for n in ast.walk(tree)
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in {"getattr", "hasattr"} and len(n.args) >= 2
-    }
-    inner_scope_ids = {
-        id(sub) for n in ast.walk(tree)
-        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda, *_COMPREHENSION_TYPES))
-        for sub in ast.walk(n) if sub is not n
-    }
+    getattr_obj_ids = {id(n.args[0]) for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id in {"getattr", "hasattr"} and len(n.args) >= 2}
+    inner_scope_ids = {id(sub) for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)) for sub in ast.walk(n) if sub is not n}
     allowed_helper_syms = frozenset().union(*_ALLOWED_LOCAL_FROM_MAP.values())
+    hlp_ban_pkgs = {"builtins", "posix", "nt", "operator"} | (set() if module_stem in {"bounded_process", "windows_process", "bounded", "updater_schedule", "_host_exec"} else {"subprocess"})
     imported_kills, bounded_run_names, non_import_bound, store_or_del_names = set(), set(), set(), set()
     name_store_counts: dict[str, int] = {}
     self_method_node_ids, windll_vars = set(), set()
@@ -369,7 +363,7 @@ def _collect_tree_facts(
             for alias in node.names:
                 if strict_capabilities and alias.name not in _ALLOWED_EXACT_IMPORTS:
                     cap_errors.append(f"line {node.lineno} `import {alias.name}` is not in storage module allowlist")
-                elif not strict_capabilities and alias.name.split(".", 1)[0] in {"builtins", "posix", "nt", "operator"}:
+                elif not strict_capabilities and alias.name.split(".", 1)[0] in hlp_ban_pkgs:
                     cap_errors.append(f"line {node.lineno} `import {alias.name}` is banned in storage helpers")
                 top_pkg = alias.name.split(".", 1)[0]
                 bound = alias.asname or top_pkg
@@ -407,7 +401,7 @@ def _collect_tree_facts(
                     if alias.name in _REFLECTIVE_FNS or alias.name in _BANNED_ATTR_NAMES or (alias.name.startswith("__") and alias.name.endswith("__")):
                         cap_errors.append(f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules")
                 elif (
-                    mod in {"builtins", "posix", "nt", "operator"}
+                    mod.split(".", 1)[0] in hlp_ban_pkgs
                     or alias.name in (_REFLECTIVE_FNS | {"kill"})
                     or (alias.name.startswith("__") and alias.name.endswith("__") and (mod, alias.name) != ("__future__", "annotations"))
                 ):
@@ -465,39 +459,46 @@ def _collect_tree_facts(
                 )
                 if not ok_base:
                     cap_errors.append(f"line {node.lineno} class `{node.name}` inherits disallowed or shadowed base in storage modules")
-        elif not strict_capabilities and id(node) not in inner_scope_ids and isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store) and node.id in allowed_helper_syms and not node.id.isupper():
-            cap_errors.append(f"line {node.lineno} non-function binding `{node.id}` is banned for callable export in storage helpers")
+        elif not strict_capabilities and isinstance(node, ast.Global) and any(nm in allowed_helper_syms and not nm.isupper() for nm in node.names):
+            cap_errors.append(f"line {node.lineno} `global` rebinding of callable export is banned in storage helpers")
+        elif not strict_capabilities and id(node) not in inner_scope_ids and (
+            (isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)) and node.id in allowed_helper_syms and not node.id.isupper())
+            or (isinstance(node, (ast.ClassDef, ast.AsyncFunctionDef, ast.ExceptHandler, ast.MatchAs, ast.MatchStar)) and getattr(node, "name", None) in allowed_helper_syms and not node.name.isupper())
+            or (isinstance(node, ast.MatchMapping) and node.rest in allowed_helper_syms and not node.rest.isupper())
+            or (isinstance(node, ast.FunctionDef) and node.name in allowed_helper_syms and not node.name.isupper() and name_store_counts.get(node.name, 0) > 1)
+        ):
+            cap_errors.append(f"line {node.lineno} non-function or duplicate binding of callable export is banned in storage helpers")
         elif isinstance(node, ast.Attribute):
             is_dunder = node.attr.startswith("__") and node.attr.endswith("__")
             is_private = node.attr.startswith("_") and not is_dunder
             par = parent_map.get(node)
-            ok_self_store = (
-                isinstance(node.value, ast.Name) and node.value.id == "self"
-                and "self" not in (store_or_del_names | all_module_aliases | imported_kills) and id(node) in self_method_node_ids
-            )
-            ok_field_store = node.attr in {"commands", "dwSize", "depths", "argtypes", "restype"} and not (
-                isinstance(node.value, ast.Name) and node.value.id in (all_module_aliases | set(path_imports))
-            )
+            ok_self_store = isinstance(node.value, ast.Name) and node.value.id == "self" and "self" not in (store_or_del_names | all_module_aliases | imported_kills) and id(node) in self_method_node_ids
+            ok_field_store = node.attr in {"commands", "dwSize", "depths", "argtypes", "restype"} and not (isinstance(node.value, ast.Name) and node.value.id in (all_module_aliases | set(path_imports)))
             if isinstance(node.ctx, (ast.Store, ast.Del)) and (
-                node.attr in {"name", "platform", "kill", "compile", "resolve"}
+                is_dunder or node.attr in {"name", "platform", "kill", "compile", "resolve"}
                 or (strict_capabilities and not (ok_self_store or ok_field_store))
             ):
                 cap_errors.append(f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules")
             elif (strict_capabilities and node.attr in _BANNED_ATTR_NAMES) or (
-                not strict_capabilities and node.attr in {"modules", "_getframe", "f_builtins", "f_globals", "f_locals", "__dict__", "__builtins__", "os"}
+                not strict_capabilities and (
+                    node.attr in {"modules", "_getframe", "f_builtins", "f_globals", "f_locals", "__dict__", "__builtins__", "os"}
+                    or (module_stem not in {"bounded_process", "windows_process", "bounded", "updater_schedule", "_host_exec"} and node.attr in {"system", "popen", "spawnl", "spawnle", "spawnlp", "spawnlpe", "spawnv", "spawnve", "spawnvp", "spawnvpe", "execl", "execle", "execlp", "execlpe", "execv", "execve", "execvp", "execvpe", "posix_spawn", "posix_spawnp"})
+                )
             ):
                 cap_errors.append(f"line {node.lineno} `.{node.attr}` access is banned in storage modules")
             elif strict_capabilities and is_private:
-                ok_self_priv = (
-                    isinstance(node.value, ast.Name) and node.value.id == "self" and node.attr in _ALLOWED_SELF_PRIVATE_ATTRS
-                    and "self" not in (store_or_del_names | all_module_aliases | imported_kills) and id(node) in self_method_node_ids
-                )
+                ok_self_priv = ok_self_store and node.attr in _ALLOWED_SELF_PRIVATE_ATTRS
                 ok_mod_priv = isinstance(node.value, ast.Name) and node.value.id in local_module_aliases and node.value.id not in store_or_del_names and node.attr in _ALLOWED_LOCAL_PRIVATE_ATTRS
                 if not (ok_self_priv or ok_mod_priv):
                     cap_errors.append(f"line {node.lineno} private attribute `.{node.attr}` access on external object is banned in storage modules")
-            elif strict_capabilities and is_dunder and (
-                node.attr not in _SAFE_READ_DUNDERS
-                or (node.attr == "__init__" and not (id(node) in call_func_ids and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == "super" and "super" not in non_import_bound))
+            elif is_dunder and (
+                (strict_capabilities and (
+                    node.attr not in _SAFE_READ_DUNDERS
+                    or (node.attr == "__init__" and not (id(node) in call_func_ids and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name) and node.value.func.id == "super" and "super" not in non_import_bound))
+                ))
+                or (not strict_capabilities and node.attr not in {"__init__", "__name__", "__cause__", "__context__", "__traceback__", "__dataclass_fields__"} and not (
+                    node.attr == "__setattr__" and isinstance(par, ast.Call) and par.func is node and isinstance(node.value, ast.Name) and node.value.id == "object" and "object" not in non_import_bound and par.args and isinstance(par.args[0], ast.Name) and par.args[0].id == "self" and id(node) in self_method_node_ids and "self" not in (store_or_del_names | all_module_aliases | imported_kills)
+                ))
             ):
                 cap_errors.append(f"line {node.lineno} reflective dunder `.{node.attr}` access is banned in storage modules")
             elif strict_capabilities and ((isinstance(node.value, ast.Name) and node.value.id in windll_vars) or (isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "WinDLL")):
@@ -614,7 +615,7 @@ def inspect_storage_module_windows_pid_safety(path: Path, *, strict_capabilities
     """Verify module `path` never calls `os.kill(pid, 0)` outside proven POSIX branches."""
     source = path.read_text(encoding="utf-8")
     tree = ast.parse(source, filename=str(path))
-    imported_kills, impure, pure_re_global, private_helpers, errors = _collect_tree_facts(tree, strict_capabilities=strict_capabilities)
+    imported_kills, impure, pure_re_global, private_helpers, errors = _collect_tree_facts(tree, strict_capabilities=strict_capabilities, module_stem=path.stem)
     proven_posix_helpers: set[str] = set()
     call_sites: dict[str, list[bool]] = {}
     emit_errors = False
