@@ -428,6 +428,11 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    fields = getattr(os, '__dict__')\n    return fields['kill'](pid, 0)\n"}, "banned in storage helpers"),
             ({"scripts/paths.py": "from importlib import import_module as load\ndef read_json(p):\n    return load('mindie_knowledge.pid_backend').probe(p)\n", "scripts/mindie_knowledge/pid_backend.py": "import os\ndef probe(p): return os.kill(p, 0)\n"}, "mindie_knowledge/pid_backend.py"),
             ({"scripts/paths.py": "import sys\nfrom os import spawnv, P_WAIT\ndef read_json():\n    return spawnv(P_WAIT, sys.executable, [sys.executable, '-c', 'import os; os.kill(1, 0)'])\n"}, "banned in storage helpers"),
+            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    probe = vars(globals()['os'])['kill']\n    return probe(pid, 0)\n"}, "banned in storage"),
+            ({"scripts/paths.py": "import shutil\ndef read_json(pid: int):\n    self = shutil\n    name = 'os'\n    self = getattr(self, name)\n    name = 'kill'\n    probe = getattr(self, name)\n    return probe(pid, 0)\n"}, "dynamic `getattr(...)` is banned"),
+            ({"scripts/paths.py": "import bounded\ndef read_json(pid: int):\n    return bounded.probe(pid)\n", "scripts/bounded.py": "import os, sys\ndef probe(pid: int):\n    setattr(sys, 'platform', 'linux')\n    if sys.platform != 'win32':\n        os.kill(pid, 0)\n"}, "`setattr(...)` is banned"),
+            ({"scripts/paths.py": "from importlib import import_module\ndef read_json(p):\n    return import_module('mindie_knowledge.tests.backend').probe(p)\n", "scripts/mindie_knowledge/__init__.py": "", "scripts/mindie_knowledge/tests/backend.py": "import os\ndef probe(p): return os.kill(p, 0)\n"}, "mindie_knowledge/tests/backend.py"),
+            ({"scripts/paths.py": "from importlib import import_module\ndef read_json(p):\n    return import_module('mindie_knowledge.missing_leaf').probe(p)\n", "scripts/mindie_knowledge/__init__.py": ""}, "unresolved `import_module('mindie_knowledge.missing_leaf')`"),
         ):
             for rel_p, body in hlp_files.items():
                 self._write(repo / rel_p, body)

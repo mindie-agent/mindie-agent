@@ -490,10 +490,12 @@ _STORAGE_HELPER_STEMS: frozenset[str] = frozenset({
 
 
 def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_files: Sequence[Path]) -> tuple[set[Path], list[str]]:
-    file_set = set(scoped_files)
+    repo_resolved = repo_dir.resolve()
     search_roots = [repo_dir, *(repo_dir / s for s in scopes if (repo_dir / s).is_dir())]
     queue = [p for p in scoped_files if "storage" in p.parts or p.stem.startswith("storage") or p.stem in _STORAGE_HELPER_STEMS]
     visited, dyn_errors = set(queue), []
+    def _in_repo(cand: Path) -> bool:
+        return cand.is_file() and "__pycache__" not in cand.parts and cand.resolve().is_relative_to(repo_resolved)
     while queue:
         cur = queue.pop()
         try:
@@ -520,13 +522,14 @@ def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_fil
                     dyn_errors.append(f"{cur.relative_to(repo_dir).as_posix()} line {node.lineno} dynamic `import_module(...)` target cannot be resolved")
             for lvl, mod, name, dyn_line in specs:
                 anchors: list[Path] = []
-                cands: list[Path] = []
+                ancestors: list[Path] = []
+                terminals: list[Path] = []
                 if lvl > 0:
                     anc = cur.parent
-                    cands.append(anc / "__init__.py")
+                    ancestors.append(anc / "__init__.py")
                     for _ in range(lvl - 1):
                         anc = anc.parent
-                        cands.append(anc / "__init__.py")
+                        ancestors.append(anc / "__init__.py")
                     anchors.append(anc)
                 else:
                     anchors.extend(search_roots)
@@ -537,14 +540,13 @@ def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_fil
                 for anc in anchors:
                     for rel in rels:
                         parts = [p for p in rel.split("/") if p]
-                        for idx in range(1, len(parts) + 1):
-                            cands.append(anc / "/".join(parts[:idx]) / "__init__.py")
-                        cands.append(anc / f"{rel}.py")
-                matched = [cand for cand in cands if cand in file_set]
-                if dyn_line is not None and not matched:
+                        for idx in range(1, len(parts)):
+                            ancestors.append(anc / "/".join(parts[:idx]) / "__init__.py")
+                        terminals.extend((anc / f"{rel}.py", anc / rel / "__init__.py"))
+                if dyn_line is not None and not any(_in_repo(t) for t in terminals):
                     dyn_errors.append(f"{cur.relative_to(repo_dir).as_posix()} line {dyn_line} unresolved `import_module({mod!r})` target")
-                for cand in matched:
-                    if cand not in visited:
+                for cand in (*ancestors, *terminals):
+                    if _in_repo(cand) and cand not in visited:
                         visited.add(cand)
                         queue.append(cand)
     return visited, dyn_errors
@@ -638,7 +640,8 @@ def verify_storage_lifecycle_hygiene(
         scoped_files = _iter_scoped_python_files(repo_dir, scopes)
         helper_files, dyn_errs = _storage_reachable_helpers(repo_dir, scopes, scoped_files)
         errors.extend(f"{repo_name}: {d}" for d in dyn_errs)
-        for py_path in scoped_files:
+        all_checked = sorted(set(scoped_files) | helper_files)
+        for py_path in all_checked:
             rel = py_path.relative_to(repo_dir).as_posix()
             try:
                 for detail in inspect_python_temp_hygiene(py_path):

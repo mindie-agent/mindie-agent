@@ -63,25 +63,10 @@ _ALLOWED_LOCAL_FROM_MAP: dict[tuple[int, str], frozenset[str]] = {
     (2, "loop.locks"): frozenset({"lock_file", "lock_held", "unlock_file"}),
 }
 _LOCAL_STORAGE_MODULES = frozenset({m for lvl, m in _ALLOWED_LOCAL_FROM_MAP if lvl == 0} | {"mindie_paths", "storage", "storage_gc", "storage_leases", "storage_lifecycle"})
-_ALLOWED_EXACT_IMPORTS = {
-    "_winapi", "argparse", "ast", "contextlib", "ctypes", "errno", "fcntl", "hashlib", "json", "mindie_paths",
-    "msvcrt", "ntpath", "os", "os.path", "pathlib", "plistlib", "re", "select", "shlex", "shutil", "sqlite3",
-    "stat", "storage_support", "subprocess", "sys", "tempfile", "threading", "time", "tomllib", "uuid",
-}
-_ALLOWED_STDLIB_FROM_PAIRS = frozenset({
-    ("__future__", "annotations"), ("collections.abc", "Iterator"), ("contextlib", "ExitStack"),
-    ("contextlib", "contextmanager"), ("contextlib", "suppress"), ("ctypes", "wintypes"),
-    ("os", "kill"), ("pathlib", "Path"), ("urllib.parse", "quote"), ("xml.etree", "ElementTree"),
-})
-_STDLIB_SUBMODULE_IMPORTS: dict[tuple[str, str], str] = {
-    ("ctypes", "wintypes"): "wintypes", ("xml.etree", "ElementTree"): "ElementTree",
-    ("mindie_knowledge", "storage"): "storage", ("mindie_knowledge.storage", "legacy_roots"): "legacy_roots",
-}
-_ALLOWED_TYPING_NAMES = frozenset({
-    "Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator", "IO", "Iterable", "Iterator", "List",
-    "Literal", "Mapping", "MutableMapping", "NamedTuple", "NoReturn", "Optional", "Protocol", "Sequence", "Set",
-    "TextIO", "Tuple", "TYPE_CHECKING", "TypeAlias", "TypedDict", "Union", "cast", "overload",
-})
+_ALLOWED_EXACT_IMPORTS = {"_winapi", "argparse", "ast", "contextlib", "ctypes", "errno", "fcntl", "hashlib", "json", "mindie_paths", "msvcrt", "ntpath", "os", "os.path", "pathlib", "plistlib", "re", "select", "shlex", "shutil", "sqlite3", "stat", "storage_support", "subprocess", "sys", "tempfile", "threading", "time", "tomllib", "uuid"}
+_ALLOWED_STDLIB_FROM_PAIRS = frozenset({("__future__", "annotations"), ("collections.abc", "Iterator"), ("contextlib", "ExitStack"), ("contextlib", "contextmanager"), ("contextlib", "suppress"), ("ctypes", "wintypes"), ("os", "kill"), ("pathlib", "Path"), ("urllib.parse", "quote"), ("xml.etree", "ElementTree")})
+_STDLIB_SUBMODULE_IMPORTS: dict[tuple[str, str], str] = {("ctypes", "wintypes"): "wintypes", ("xml.etree", "ElementTree"): "ElementTree", ("mindie_knowledge", "storage"): "storage", ("mindie_knowledge.storage", "legacy_roots"): "legacy_roots"}
+_ALLOWED_TYPING_NAMES = frozenset({"Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator", "IO", "Iterable", "Iterator", "List", "Literal", "Mapping", "MutableMapping", "NamedTuple", "NoReturn", "Optional", "Protocol", "Sequence", "Set", "TextIO", "Tuple", "TYPE_CHECKING", "TypeAlias", "TypedDict", "Union", "cast", "overload"})
 _ALLOWED_STDLIB_MOD_ATTRS: dict[str, frozenset[str]] = {
     "_winapi": frozenset({"CloseHandle", "GetExitCodeProcess", "OpenProcess", "STILL_ACTIVE"}),
     "ElementTree": frozenset({"ParseError", "fromstring"}),
@@ -122,41 +107,15 @@ _SCALAR_TYPE_NAMES = frozenset({"int", "bool", "str", "float", "bytes", "dict", 
 _ALLOWED_OS_PATH_ATTRS = frozenset({"abspath", "basename", "commonpath", "dirname", "exists", "expanduser", "isabs", "isdir", "isfile", "isjunction", "islink", "join", "lexists", "normcase", "normpath", "realpath", "relpath", "samefile", "split", "splitdrive"})
 _ALLOWED_CLASS_BASE_NAMES = frozenset({"Exception", "RuntimeError", "ValueError", "OSError", "dict", "set", "object", "NamedTuple"})
 _ALLOWED_FROM_MODULES = _LOCAL_STORAGE_MODULES | {m for m, _ in _ALLOWED_STDLIB_FROM_PAIRS} | {"typing"}
-_ALLOWED_GETATTR_NAMES = frozenset({
-    "CREATE_NO_WINDOW", "ERROR_ACCESS_DENIED", "ERROR_INVALID_PARAMETER", "O_BINARY", "O_NOFOLLOW",
-    "PROCESS_ALL_ACCESS", "PROCESS_QUERY_INFORMATION", "PROCESS_QUERY_LIMITED_INFORMATION", "base_prefix",
-    "commands", "depths", "errno", "isjunction", "returncode", "st_file_attributes", "st_reparse_tag", "winerror",
-})
-_BANNED_ATTR_NAMES = frozenset({
-    "modules", "_getframe", "_current_frames", "_current_exceptions", "f_builtins", "f_globals", "f_locals",
-    "f_back", "f_code", "gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code", "tb_frame", "tb_next",
-    "pythonapi", "cdll", "pydll", "oledll", "windll", "CDLL", "PyDLL", "OleDLL", "LoadLibrary", "_dlopen",
-    "CFUNCTYPE", "WINFUNCTYPE", "PYFUNCTYPE", "get_type_hints", "_eval_type", "enable_load_extension", "load_extension",
-    "leases", "lifecycle", "legacy", "subprocess", "ctypes", "_winapi", "ntpath", "shutil", "sys", "os", "re",
-    "tempfile", "msvcrt", "fcntl", "sqlite3",
-})
+_ALLOWED_GETATTR_NAMES = frozenset({"CREATE_NO_WINDOW", "ERROR_ACCESS_DENIED", "ERROR_INVALID_PARAMETER", "O_BINARY", "O_NOFOLLOW", "PROCESS_ALL_ACCESS", "PROCESS_QUERY_INFORMATION", "PROCESS_QUERY_LIMITED_INFORMATION", "base_prefix", "commands", "depths", "errno", "isjunction", "returncode", "st_file_attributes", "st_reparse_tag", "winerror"})
+_BANNED_ATTR_NAMES = frozenset({"modules", "_getframe", "_current_frames", "_current_exceptions", "f_builtins", "f_globals", "f_locals", "f_back", "f_code", "gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code", "tb_frame", "tb_next", "pythonapi", "cdll", "pydll", "oledll", "windll", "CDLL", "PyDLL", "OleDLL", "LoadLibrary", "_dlopen", "CFUNCTYPE", "WINFUNCTYPE", "PYFUNCTYPE", "get_type_hints", "_eval_type", "enable_load_extension", "load_extension", "leases", "lifecycle", "legacy", "subprocess", "ctypes", "_winapi", "ntpath", "shutil", "sys", "os", "re", "tempfile", "msvcrt", "fcntl", "sqlite3"})
 _SAFE_READ_DUNDERS = frozenset({"__init__", "__name__"})
 _ALLOWED_SELF_PRIVATE_ATTRS = frozenset({"_descriptor", "_descriptors", "_lease_file"})
 _ALLOWED_LOCAL_PRIVATE_ATTRS = frozenset({"_config_homes"})
-_ALLOWED_HELPER_IMPORTS = _ALLOWED_EXACT_IMPORTS | {
-    "admission", "atexit", "bounded", "codecs", "consent", "diagnostic_support", "entry", "entry_arguments", "entry_state",
-    "genstate", "heapq", "http.client", "identity", "knowledge_service", "math", "paths", "pywintypes", "selectors", "sharing",
-    "signal", "socket", "ssl", "struct", "updater_schedule", "urllib.error", "win32file", "windows_process", "xml.etree.ElementTree", "yaml",
-}
-_ALLOWED_HELPER_STDLIB_FROM_PAIRS = _ALLOWED_STDLIB_FROM_PAIRS - {("os", "kill")} | {
-    ("contextvars", "ContextVar"), ("dataclasses", "dataclass"), ("dataclasses", "field"), ("datetime", "datetime"),
-    ("datetime", "timedelta"), ("functools", "cache"), ("importlib", "import_module"), ("importlib", "metadata"),
-    ("importlib.metadata", "PackageNotFoundError"), ("importlib.metadata", "version"), ("urllib.parse", "unquote"), ("urllib.parse", "urlparse"),
-}
-_ALLOWED_HELPER_LOCAL_FROM_PREFIXES = frozenset({
-    "admission", "bounded", "consent", "diagnostic_support", "entry", "entry_arguments", "entry_state", "genstate",
-    "identity", "knowledge_service", "mindie_diagnostics", "mindie_knowledge", "paths", "process_helpers",
-    "remote_dev", "sharing", "storage_lifecycle", "updater_schedule",
-})
-_ALLOWED_HELPER_OS_ATTRS = _ALLOWED_STDLIB_MOD_ATTRS["os"] | {
-    "O_BINARY", "O_NOFOLLOW", "O_NONBLOCK", "O_TRUNC", "defpath", "devnull", "ftruncate", "getcwd",
-    "getpgid", "getpgrp", "getuid", "pipe", "strerror", "uname",
-}
+_ALLOWED_HELPER_IMPORTS = _ALLOWED_EXACT_IMPORTS | {"admission", "atexit", "bounded", "codecs", "consent", "diagnostic_support", "entry", "entry_arguments", "entry_state", "genstate", "heapq", "http.client", "identity", "knowledge_service", "math", "paths", "pywintypes", "selectors", "sharing", "signal", "socket", "ssl", "struct", "updater_schedule", "urllib.error", "win32file", "windows_process", "xml.etree.ElementTree", "yaml"}
+_ALLOWED_HELPER_STDLIB_FROM_PAIRS = _ALLOWED_STDLIB_FROM_PAIRS - {("os", "kill")} | {("contextvars", "ContextVar"), ("dataclasses", "dataclass"), ("dataclasses", "field"), ("datetime", "datetime"), ("datetime", "timedelta"), ("functools", "cache"), ("importlib", "import_module"), ("importlib", "metadata"), ("importlib.metadata", "PackageNotFoundError"), ("importlib.metadata", "version"), ("urllib.parse", "unquote"), ("urllib.parse", "urlparse")}
+_ALLOWED_HELPER_LOCAL_FROM_PREFIXES = frozenset({"admission", "bounded", "consent", "diagnostic_support", "entry", "entry_arguments", "entry_state", "genstate", "identity", "knowledge_service", "mindie_diagnostics", "mindie_knowledge", "paths", "process_helpers", "remote_dev", "sharing", "storage_lifecycle", "updater_schedule"})
+_ALLOWED_HELPER_OS_ATTRS = _ALLOWED_STDLIB_MOD_ATTRS["os"] | {"O_BINARY", "O_NOFOLLOW", "O_NONBLOCK", "O_TRUNC", "defpath", "devnull", "ftruncate", "getcwd", "getpgid", "getpgrp", "getuid", "pipe", "strerror", "uname"}
 
 
 def _stmts_always_exit(stmts: list[ast.stmt], *, in_loop: bool) -> bool:
@@ -323,25 +282,18 @@ def _collect_tree_facts(
     cap_errors: list[str] = []
     scope_top_stmts: set[int] = {id(s) for s in tree.body}
 
-    class_first_self_arg_ids: set[int] = {
-        id(stmt.args.args[0])
-        for cls in ast.walk(tree) if isinstance(cls, ast.ClassDef)
-        for stmt in cls.body
-        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.args.args and stmt.args.args[0].arg == "self"
-    }
+    class_first_self_arg_ids = {id(stmt.args.args[0]) for cls in ast.walk(tree) if isinstance(cls, ast.ClassDef) for stmt in cls.body if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.args.args and stmt.args.args[0].arg == "self"}
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             non_import_bound.add(node.name)
             store_or_del_names.add(node.name)
             name_store_counts[node.name] = name_store_counts.get(node.name, 0) + 1
-            scope_top_stmts.update(id(s) for s in node.body)
-        elif isinstance(node, ast.ClassDef):
-            non_import_bound.add(node.name)
-            store_or_del_names.add(node.name)
-            name_store_counts[node.name] = name_store_counts.get(node.name, 0) + 1
-            for stmt in node.body:
-                if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.args.args and stmt.args.args[0].arg == "self":
-                    self_method_node_ids.update(id(sub) for sub in ast.walk(stmt))
+            if isinstance(node, ast.ClassDef):
+                for stmt in node.body:
+                    if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)) and stmt.args.args and stmt.args.args[0].arg == "self":
+                        self_method_node_ids.update(id(sub) for sub in ast.walk(stmt))
+            else:
+                scope_top_stmts.update(id(s) for s in node.body)
         elif isinstance(node, ast.arg):
             non_import_bound.add(node.arg)
             if id(node) not in class_first_self_arg_ids:
@@ -353,19 +305,13 @@ def _collect_tree_facts(
         elif isinstance(node, (ast.Global, ast.Nonlocal)):
             non_import_bound.update(node.names)
             store_or_del_names.update(node.names)
-        elif isinstance(node, ast.ExceptHandler) and node.name:
-            non_import_bound.add(node.name)
-            store_or_del_names.add(node.name)
-        elif isinstance(node, (ast.MatchAs, ast.MatchStar)) and node.name:
+        elif isinstance(node, (ast.ExceptHandler, ast.MatchAs, ast.MatchStar)) and node.name:
             non_import_bound.add(node.name)
             store_or_del_names.add(node.name)
         elif isinstance(node, ast.MatchMapping) and node.rest:
             non_import_bound.add(node.rest)
             store_or_del_names.add(node.rest)
-        elif (
-            isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
-            and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "WinDLL"
-        ):
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "WinDLL":
             windll_vars.add(node.targets[0].id)
 
     all_binding_counts = _count_scope_bindings(tree)
@@ -456,6 +402,46 @@ def _collect_tree_facts(
             pure_re.add(bound)
 
     enclosing_fn = {id(sub): stmt for stmt in tree.body if isinstance(stmt, ast.FunctionDef) for sub in ast.walk(stmt)}
+    enclosing_call_scope: dict[int, ast.AST] = {}
+    def _bind_scopes(cur: ast.AST, active: ast.AST) -> None:
+        enclosing_call_scope[id(cur)] = active
+        nxt = cur if isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef)) else active
+        for ch in ast.iter_child_nodes(cur):
+            _bind_scopes(ch, nxt)
+    _bind_scopes(tree, tree)
+    bad_dyn_attrs = _BANNED_ATTR_NAMES | {"kill", "name", "platform", "compile", "resolve"}
+    def _ok_attr_str(val: object) -> bool:
+        return isinstance(val, str) and not (val.startswith("__") and val.endswith("__")) and val not in bad_dyn_attrs
+    def _is_safe_attr_var(call_n: ast.AST, expr: ast.AST) -> bool:
+        sc = enclosing_call_scope.get(id(call_n))
+        if not (isinstance(expr, ast.Name) and isinstance(sc, (ast.FunctionDef, ast.AsyncFunctionDef))):
+            return False
+        v = expr.id
+        if any(isinstance(g, (ast.Global, ast.Nonlocal)) and v in g.names for g in ast.walk(sc)):
+            return False
+        nst = {id(s) for n in ast.walk(sc) if n is not sc and isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)) for s in ast.walk(n) if s is not n}
+        ctgt = {id(s) for c in ast.walk(sc) if id(c) not in nst and isinstance(c, _COMPREHENSION_TYPES) for g in c.generators for s in ast.walk(g.target)}
+        cnt = sum(
+            (isinstance(n, ast.arg) and n.arg == v)
+            or (n is not sc and isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.ExceptHandler, ast.MatchAs, ast.MatchStar)) and n.name == v)
+            or (isinstance(n, ast.MatchMapping) and n.rest == v)
+            or (isinstance(n, ast.Import) and any((a.asname or a.name.split(".", 1)[0]) == v for a in n.names))
+            or (isinstance(n, ast.ImportFrom) and any((a.asname or a.name) == v for a in n.names))
+            or (isinstance(n, ast.Name) and isinstance(n.ctx, (ast.Store, ast.Del)) and id(n) not in ctgt and n.id == v)
+            for n in ast.walk(sc) if id(n) not in nst
+        )
+        return cnt == 1 and any(
+            id(fn) not in nst and isinstance(fn, ast.For) and isinstance(fn.target, ast.Name) and fn.target.id == v
+            and isinstance(fn.iter, ast.Tuple) and fn.iter.elts and all(isinstance(e, ast.Constant) and _ok_attr_str(e.value) for e in fn.iter.elts)
+            and any(s is call_n for st in fn.body for s in ast.walk(st))
+            for fn in ast.walk(sc)
+        )
+    h_calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "_h"]
+    updater_h_safe = (
+        module_stem == "updater_schedule" and all_binding_counts.get("_h") == 1 and bool(h_calls)
+        and all(id(n) in call_func_ids for n in ast.walk(tree) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load) and n.id == "_h")
+        and all(len(c.args) == 1 and not c.keywords and isinstance(c.args[0], ast.Constant) and _ok_attr_str(c.args[0].value) for c in h_calls)
+    )
     explicit_all: set[str] | None = None
     for stmt in tree.body:
         if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name) and stmt.targets[0].id == "__all__" and isinstance(stmt.value, (ast.List, ast.Tuple)):
@@ -580,8 +566,23 @@ def _collect_tree_facts(
                 continue
             is_bare_name = isinstance(fn, ast.Name)
             fn_name = fn.id if is_bare_name else fn.attr
-            if fn_name in {"eval", "exec", "delattr", "attrgetter", "methodcaller", "__import__"} or (not strict_capabilities and fn_name == "setattr" and module_stem != "bounded"):
+            par = parent_map.get(node)
+            enc_cs = enclosing_call_scope.get(id(node))
+            in_safe_h = updater_h_safe and isinstance(enc_cs, ast.FunctionDef) and enc_cs.name == "_h" and len(enc_cs.args.args) == 1 and enc_cs.args.args[0].arg == "name" and _count_scope_bindings(enc_cs).get("name") == 1
+            if fn_name in {"eval", "exec", "delattr", "vars", "locals", "breakpoint", "attrgetter", "methodcaller", "__import__"}:
                 cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
+            elif fn_name == "globals":
+                ok_glob = not strict_capabilities and is_bare_name and "globals" not in non_import_bound and not node.args and not node.keywords and (
+                    (isinstance(par, ast.Subscript) and par.value is node and isinstance(par.ctx, ast.Store))
+                    or (in_safe_h and isinstance(par, ast.Subscript) and par.value is node and isinstance(par.slice, ast.Name) and par.slice.id == "name")
+                    or (isinstance(par, ast.Attribute) and par.value is node and par.attr == "get" and isinstance(cpar := parent_map.get(par), ast.Call) and cpar.func is par and len(cpar.args) in (1, 2) and not cpar.keywords and isinstance(cpar.args[0], ast.Constant) and _ok_attr_str(cpar.args[0].value))
+                )
+                if not ok_glob:
+                    cap_errors.append(f"line {node.lineno} `globals(...)` namespace reflection is banned in storage modules")
+            elif fn_name == "setattr":
+                ok_set = not strict_capabilities and module_stem == "bounded" and is_bare_name and "setattr" not in non_import_bound and len(node.args) == 3 and not node.keywords and isinstance(node.args[0], ast.Name) and node.args[0].id not in all_module_aliases and _is_safe_attr_var(node, node.args[1])
+                if not ok_set:
+                    cap_errors.append(f"line {node.lineno} `setattr(...)` is banned in storage modules")
             elif fn_name == "import_module" and (strict_capabilities or not is_bare_name or all_binding_counts.get("import_module") != 1 or not (len(node.args) == 1 and not node.keywords and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str) and node.args[0].value.startswith("mindie_knowledge."))):
                 cap_errors.append(f"line {node.lineno} `import_module(...)` outside static `mindie_knowledge.*` submodule is banned")
             elif not strict_capabilities and fn_name == "getattr":
@@ -591,10 +592,13 @@ def _collect_tree_facts(
                 elif isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str):
                     attr_s = node.args[1].value
                     bad_dunder = attr_s.startswith("__") and attr_s.endswith("__") and attr_s not in {"__cause__", "__context__", "__suppress_context__", "__module__", "__with_libyaml__"}
-                    bad_os = arg0_os and attr_s not in {"O_BINARY", "O_NONBLOCK", "O_NOFOLLOW", "getuid"}
-                    if bad_dunder or bad_os or attr_s == "kill" or attr_s in _BANNED_ATTR_NAMES:
+                    if bad_dunder or (arg0_os and attr_s not in {"O_BINARY", "O_NONBLOCK", "O_NOFOLLOW", "getuid"}) or attr_s == "kill" or attr_s in _BANNED_ATTR_NAMES:
                         cap_errors.append(f"line {node.lineno} `getattr(..., {attr_s!r})` is banned in storage helpers")
-                elif arg0_os or not (isinstance(node.args[0], ast.Name) and ((node.args[0].id in {"self", "exc"} and node.args[0].id not in all_module_aliases) or (node.args[0].id in {"signal", "errno"} and stdlib_alias_roots.get(node.args[0].id) == {node.args[0].id}) or (node.args[0].id == "_HOST" and module_stem == "updater_schedule" and node.args[0].id not in all_module_aliases))):
+                elif arg0_os or not (
+                    _is_safe_attr_var(node, node.args[1])
+                    or (isinstance(node.args[0], ast.Name) and node.args[0].id in {"signal", "errno"} and all_binding_counts.get(node.args[0].id) == 1 and stdlib_alias_roots.get(node.args[0].id) == {node.args[0].id})
+                    or (in_safe_h and isinstance(node.args[0], ast.Name) and node.args[0].id == "_HOST" and isinstance(node.args[1], ast.Name) and node.args[1].id == "name")
+                ):
                     cap_errors.append(f"line {node.lineno} dynamic `getattr(...)` is banned in storage helpers")
             elif not strict_capabilities:
                 continue
@@ -606,33 +610,14 @@ def _collect_tree_facts(
                 if enc is None or any(isinstance(s, ast.Constant) and s.value in {"-c", "-m"} for s in ast.walk(enc)) or any(kw.arg in {"shell", "executable"} for kw in node.keywords):
                     cap_errors.append(f"line {node.lineno} `Popen(...)` with shell/inline interpreter flags is banned in storage modules")
             elif is_bare_name and fn_name == "type":
-                par = parent_map.get(node)
-                ok_type_use = (
-                    "type" not in non_import_bound and len(node.args) == 1 and not isinstance(node.args[0], ast.Starred) and not node.keywords
-                    and (
-                        (isinstance(par, ast.Attribute) and par.value is node and par.attr == "__name__")
-                        or (
-                            isinstance(par, ast.Compare) and len(par.ops) == 1 and len(par.comparators) == 1 and isinstance(par.ops[0], (ast.Is, ast.IsNot))
-                            and (
-                                (par.left is node and isinstance(par.comparators[0], ast.Name) and par.comparators[0].id in _SCALAR_TYPE_NAMES and par.comparators[0].id not in non_import_bound)
-                                or (par.comparators[0] is node and isinstance(par.left, ast.Name) and par.left.id in _SCALAR_TYPE_NAMES and par.left.id not in non_import_bound)
-                            )
-                        )
-                    )
+                ok_type_use = "type" not in non_import_bound and len(node.args) == 1 and not isinstance(node.args[0], ast.Starred) and not node.keywords and (
+                    (isinstance(par, ast.Attribute) and par.value is node and par.attr == "__name__")
+                    or (isinstance(par, ast.Compare) and len(par.ops) == 1 and len(par.comparators) == 1 and isinstance(par.ops[0], (ast.Is, ast.IsNot)) and ((par.left is node and isinstance(par.comparators[0], ast.Name) and par.comparators[0].id in _SCALAR_TYPE_NAMES and par.comparators[0].id not in non_import_bound) or (par.comparators[0] is node and isinstance(par.left, ast.Name) and par.left.id in _SCALAR_TYPE_NAMES and par.left.id not in non_import_bound)))
                 )
                 if not ok_type_use:
                     cap_errors.append(f"line {node.lineno} first-class or dynamic `type(...)` is banned in storage modules")
-            elif fn_name in (_REFLECTIVE_FNS - {"getattr", "compile"}):
-                cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
             elif fn_name == "WinDLL":
-                par = parent_map.get(node)
-                ok_windll = (
-                    isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in ctypes_aliases and fn.value.id not in non_import_bound
-                    and len(node.args) == 1 and not isinstance(node.args[0], ast.Starred) and isinstance(node.args[0], ast.Constant)
-                    and isinstance(node.args[0].value, str) and node.args[0].value.lower() in {"kernel32", "kernel32.dll"}
-                    and all(kw.arg == "use_last_error" and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, bool) for kw in node.keywords)
-                    and ((isinstance(par, ast.Assign) and len(par.targets) == 1 and isinstance(par.targets[0], ast.Name) and par.value is node) or (isinstance(par, ast.Attribute) and par.value is node and par.attr in _ALLOWED_KERNEL32_FNS))
-                )
+                ok_windll = isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in ctypes_aliases and fn.value.id not in non_import_bound and len(node.args) == 1 and not isinstance(node.args[0], ast.Starred) and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str) and node.args[0].value.lower() in {"kernel32", "kernel32.dll"} and all(kw.arg == "use_last_error" and isinstance(kw.value, ast.Constant) and isinstance(kw.value.value, bool) for kw in node.keywords) and ((isinstance(par, ast.Assign) and len(par.targets) == 1 and isinstance(par.targets[0], ast.Name) and par.value is node) or (isinstance(par, ast.Attribute) and par.value is node and par.attr in _ALLOWED_KERNEL32_FNS))
                 if not ok_windll:
                     cap_errors.append(f"line {node.lineno} non-kernel32 or unbound `WinDLL(...)` is banned in storage modules")
             elif fn_name == "getattr":
