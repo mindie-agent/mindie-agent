@@ -489,30 +489,36 @@ _STORAGE_HELPER_STEMS: frozenset[str] = frozenset({
 })
 
 
-def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_files: Sequence[Path]) -> set[Path]:
+def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_files: Sequence[Path]) -> tuple[set[Path], list[str]]:
     file_set = set(scoped_files)
     search_roots = [repo_dir, *(repo_dir / s for s in scopes if (repo_dir / s).is_dir())]
     queue = [p for p in scoped_files if "storage" in p.parts or p.stem.startswith("storage") or p.stem in _STORAGE_HELPER_STEMS]
-    visited = set(queue)
+    visited, dyn_errors = set(queue), []
     while queue:
         cur = queue.pop()
         try:
             tree = ast.parse(cur.read_text(encoding="utf-8"), filename=str(cur))
         except (OSError, SyntaxError):
             continue
+        dyn_aliases = {"import_module"}
         for node in ast.walk(tree):
-            specs: list[tuple[int, str, str | None]] = []
+            if isinstance(node, ast.ImportFrom) and node.module == "importlib":
+                dyn_aliases.update(al.asname or al.name for al in node.names if al.name == "import_module")
+        for node in ast.walk(tree):
+            specs: list[tuple[int, str, str | None, int | None]] = []
             if isinstance(node, ast.Import):
-                specs.extend((0, al.name, None) for al in node.names)
+                specs.extend((0, al.name, None, None) for al in node.names)
             elif isinstance(node, ast.ImportFrom):
-                specs.extend((node.level or 0, node.module or "", al.name) for al in node.names)
+                specs.extend((node.level or 0, node.module or "", al.name, None) for al in node.names)
             elif (
                 isinstance(node, ast.Call)
-                and ((isinstance(node.func, ast.Name) and node.func.id == "import_module") or (isinstance(node.func, ast.Attribute) and node.func.attr == "import_module"))
-                and node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)
+                and ((isinstance(node.func, ast.Name) and node.func.id in dyn_aliases) or (isinstance(node.func, ast.Attribute) and node.func.attr == "import_module"))
             ):
-                specs.append((0, node.args[0].value, None))
-            for lvl, mod, name in specs:
+                if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                    specs.append((0, node.args[0].value, None, node.lineno))
+                else:
+                    dyn_errors.append(f"{cur.relative_to(repo_dir).as_posix()} line {node.lineno} dynamic `import_module(...)` target cannot be resolved")
+            for lvl, mod, name, dyn_line in specs:
                 anchors: list[Path] = []
                 cands: list[Path] = []
                 if lvl > 0:
@@ -534,11 +540,14 @@ def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_fil
                         for idx in range(1, len(parts) + 1):
                             cands.append(anc / "/".join(parts[:idx]) / "__init__.py")
                         cands.append(anc / f"{rel}.py")
-                for cand in cands:
-                    if cand in file_set and cand not in visited:
+                matched = [cand for cand in cands if cand in file_set]
+                if dyn_line is not None and not matched:
+                    dyn_errors.append(f"{cur.relative_to(repo_dir).as_posix()} line {dyn_line} unresolved `import_module({mod!r})` target")
+                for cand in matched:
+                    if cand not in visited:
                         visited.add(cand)
                         queue.append(cand)
-    return visited
+    return visited, dyn_errors
 
 
 def verify_storage_lifecycle_hygiene(
@@ -627,7 +636,8 @@ def verify_storage_lifecycle_hygiene(
     for repo_name, repo_dir in active_repos.items():
         scopes = PRODUCTION_PYTHON_SCOPES.get(repo_name, ())
         scoped_files = _iter_scoped_python_files(repo_dir, scopes)
-        helper_files = _storage_reachable_helpers(repo_dir, scopes, scoped_files)
+        helper_files, dyn_errs = _storage_reachable_helpers(repo_dir, scopes, scoped_files)
+        errors.extend(f"{repo_name}: {d}" for d in dyn_errs)
         for py_path in scoped_files:
             rel = py_path.relative_to(repo_dir).as_posix()
             try:

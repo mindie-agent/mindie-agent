@@ -138,6 +138,25 @@ _BANNED_ATTR_NAMES = frozenset({
 _SAFE_READ_DUNDERS = frozenset({"__init__", "__name__"})
 _ALLOWED_SELF_PRIVATE_ATTRS = frozenset({"_descriptor", "_descriptors", "_lease_file"})
 _ALLOWED_LOCAL_PRIVATE_ATTRS = frozenset({"_config_homes"})
+_ALLOWED_HELPER_IMPORTS = _ALLOWED_EXACT_IMPORTS | {
+    "admission", "atexit", "bounded", "codecs", "consent", "diagnostic_support", "entry", "entry_arguments", "entry_state",
+    "genstate", "heapq", "http.client", "identity", "knowledge_service", "math", "paths", "pywintypes", "selectors", "sharing",
+    "signal", "socket", "ssl", "struct", "updater_schedule", "urllib.error", "win32file", "windows_process", "xml.etree.ElementTree", "yaml",
+}
+_ALLOWED_HELPER_STDLIB_FROM_PAIRS = _ALLOWED_STDLIB_FROM_PAIRS - {("os", "kill")} | {
+    ("contextvars", "ContextVar"), ("dataclasses", "dataclass"), ("dataclasses", "field"), ("datetime", "datetime"),
+    ("datetime", "timedelta"), ("functools", "cache"), ("importlib", "import_module"), ("importlib", "metadata"),
+    ("importlib.metadata", "PackageNotFoundError"), ("importlib.metadata", "version"), ("urllib.parse", "unquote"), ("urllib.parse", "urlparse"),
+}
+_ALLOWED_HELPER_LOCAL_FROM_PREFIXES = frozenset({
+    "admission", "bounded", "consent", "diagnostic_support", "entry", "entry_arguments", "entry_state", "genstate",
+    "identity", "knowledge_service", "mindie_diagnostics", "mindie_knowledge", "paths", "process_helpers",
+    "remote_dev", "sharing", "storage_lifecycle", "updater_schedule",
+})
+_ALLOWED_HELPER_OS_ATTRS = _ALLOWED_STDLIB_MOD_ATTRS["os"] | {
+    "O_BINARY", "O_NOFOLLOW", "O_NONBLOCK", "O_TRUNC", "defpath", "devnull", "ftruncate", "getcwd",
+    "getpgid", "getpgrp", "getuid", "pipe", "strerror", "uname",
+}
 
 
 def _stmts_always_exit(stmts: list[ast.stmt], *, in_loop: bool) -> bool:
@@ -363,7 +382,7 @@ def _collect_tree_facts(
             for alias in node.names:
                 if strict_capabilities and alias.name not in _ALLOWED_EXACT_IMPORTS:
                     cap_errors.append(f"line {node.lineno} `import {alias.name}` is not in storage module allowlist")
-                elif not strict_capabilities and alias.name.split(".", 1)[0] in hlp_ban_pkgs:
+                elif not strict_capabilities and (alias.name not in _ALLOWED_HELPER_IMPORTS or alias.name.split(".", 1)[0] in hlp_ban_pkgs):
                     cap_errors.append(f"line {node.lineno} `import {alias.name}` is banned in storage helpers")
                 top_pkg = alias.name.split(".", 1)[0]
                 bound = alias.asname or top_pkg
@@ -403,7 +422,9 @@ def _collect_tree_facts(
                 elif (
                     mod.split(".", 1)[0] in hlp_ban_pkgs
                     or alias.name in (_REFLECTIVE_FNS | {"kill"})
+                    or (alias.name == "import_module" and alias.asname is not None)
                     or (alias.name.startswith("__") and alias.name.endswith("__") and (mod, alias.name) != ("__future__", "annotations"))
+                    or (lvl == 0 and mod != "typing" and mod.split(".", 1)[0] not in _ALLOWED_HELPER_LOCAL_FROM_PREFIXES and (mod, alias.name) not in _ALLOWED_HELPER_STDLIB_FROM_PAIRS)
                 ):
                     cap_errors.append(f"line {node.lineno} `from {mod} import {alias.name}` is banned in storage helpers")
                 bound = alias.asname or alias.name
@@ -501,6 +522,10 @@ def _collect_tree_facts(
                 ))
             ):
                 cap_errors.append(f"line {node.lineno} reflective dunder `.{node.attr}` access is banned in storage modules")
+            elif not strict_capabilities and isinstance(node.value, ast.Name) and "os" in stdlib_alias_roots.get(node.value.id, ()):
+                extra_os = ({"execve"} if module_stem == "windows_process" else set()) | ({"killpg"} if module_stem in {"bounded_process", "bounded"} else set())
+                if node.attr not in (_ALLOWED_HELPER_OS_ATTRS | extra_os):
+                    cap_errors.append(f"line {node.lineno} `os.{node.attr}` is outside allowlisted helper OS APIs")
             elif strict_capabilities and ((isinstance(node.value, ast.Name) and node.value.id in windll_vars) or (isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute) and node.value.func.attr == "WinDLL")):
                 ok_k32_use = id(node) in call_func_ids or (isinstance(par, ast.Attribute) and par.value is node and par.attr in {"argtypes", "restype"} and isinstance(par.ctx, ast.Store))
                 if node.attr not in _ALLOWED_KERNEL32_FNS or not ok_k32_use:
@@ -555,16 +580,22 @@ def _collect_tree_facts(
                 continue
             is_bare_name = isinstance(fn, ast.Name)
             fn_name = fn.id if is_bare_name else fn.attr
-            if fn_name in {"eval", "exec", "attrgetter", "methodcaller", "__import__"}:
+            if fn_name in {"eval", "exec", "delattr", "attrgetter", "methodcaller", "__import__"} or (not strict_capabilities and fn_name == "setattr" and module_stem != "bounded"):
                 cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
-            elif fn_name == "import_module" and (strict_capabilities or not (len(node.args) == 1 and not node.keywords and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str) and node.args[0].value.startswith("mindie_knowledge."))):
+            elif fn_name == "import_module" and (strict_capabilities or not is_bare_name or all_binding_counts.get("import_module") != 1 or not (len(node.args) == 1 and not node.keywords and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str) and node.args[0].value.startswith("mindie_knowledge."))):
                 cap_errors.append(f"line {node.lineno} `import_module(...)` outside static `mindie_knowledge.*` submodule is banned")
             elif not strict_capabilities and fn_name == "getattr":
                 arg0_os = len(node.args) >= 1 and isinstance(node.args[0], ast.Name) and "os" in stdlib_alias_roots.get(node.args[0].id, ())
-                arg1_kill = len(node.args) >= 2 and isinstance(node.args[1], ast.Constant) and node.args[1].value == "kill"
-                arg1_dyn_os = arg0_os and not (len(node.args) >= 2 and isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str) and node.args[1].value != "kill")
-                if not is_bare_name or "getattr" in non_import_bound or len(node.args) < 2 or arg1_kill or arg1_dyn_os:
-                    cap_errors.append(f"line {node.lineno} `getattr(...)` targeting `kill` or `os` dynamically is banned in storage helpers")
+                if not is_bare_name or "getattr" in non_import_bound or not (2 <= len(node.args) <= 3) or node.keywords:
+                    cap_errors.append(f"line {node.lineno} dynamic or shadowed `getattr(...)` is banned in storage helpers")
+                elif isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str):
+                    attr_s = node.args[1].value
+                    bad_dunder = attr_s.startswith("__") and attr_s.endswith("__") and attr_s not in {"__cause__", "__context__", "__suppress_context__", "__module__", "__with_libyaml__"}
+                    bad_os = arg0_os and attr_s not in {"O_BINARY", "O_NONBLOCK", "O_NOFOLLOW", "getuid"}
+                    if bad_dunder or bad_os or attr_s == "kill" or attr_s in _BANNED_ATTR_NAMES:
+                        cap_errors.append(f"line {node.lineno} `getattr(..., {attr_s!r})` is banned in storage helpers")
+                elif arg0_os or not (isinstance(node.args[0], ast.Name) and ((node.args[0].id in {"self", "exc"} and node.args[0].id not in all_module_aliases) or (node.args[0].id in {"signal", "errno"} and stdlib_alias_roots.get(node.args[0].id) == {node.args[0].id}) or (node.args[0].id == "_HOST" and module_stem == "updater_schedule" and node.args[0].id not in all_module_aliases))):
+                    cap_errors.append(f"line {node.lineno} dynamic `getattr(...)` is banned in storage helpers")
             elif not strict_capabilities:
                 continue
             elif is_bare_name and fn_name in bounded_run_names:
@@ -658,31 +689,16 @@ def inspect_storage_module_windows_pid_safety(path: Path, *, strict_capabilities
                         errors.append(f"line {node.lineno} non-regex `compile(...)` is banned in storage modules")
                 if strict_capabilities and isinstance(fn, ast.Attribute) and fn.attr == "Popen" and not posix_proven:
                     errors.append(f"line {node.lineno} `{scope_name}` calls `Popen(...)` outside proven POSIX branch in storage modules")
-                is_kill_call = (isinstance(fn, ast.Attribute) and (fn.attr == "kill" or fn.attr in imported_kills)) or (
-                    isinstance(fn, ast.Name) and fn.id in imported_kills
-                )
+                is_kill_call = (isinstance(fn, ast.Attribute) and (fn.attr == "kill" or fn.attr in imported_kills)) or (isinstance(fn, ast.Name) and fn.id in imported_kills)
                 if is_kill_call and not _is_exempt_direct_kill_call(node, imported_kills) and not posix_proven:
-                    errors.append(
-                        f"line {node.lineno} `{scope_name}` calls unguarded `os.kill(pid, 0)` "
-                        "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
-                    )
+                    errors.append(f"line {node.lineno} `{scope_name}` calls unguarded `os.kill(pid, 0)` (guard with `os.name != 'nt'` or use Win32 `OpenProcess`)")
         for child in ast.iter_child_nodes(node):
             _visit_expr(child, posix_proven, scope_name, m_os, m_sys, m_re)
 
     def _walk_block(
-        block: list[ast.stmt],
-        blk_posix: bool,
-        scope_name: str,
-        m_os: frozenset[str],
-        m_sys: frozenset[str],
-        m_re: frozenset[str],
-        *,
-        top_block: bool,
-        in_loop: bool = False,
-        is_class_body: bool = False,
-        lex_os: frozenset[str] = frozenset(),
-        lex_sys: frozenset[str] = frozenset(),
-        lex_re: frozenset[str] = frozenset(),
+        block: list[ast.stmt], blk_posix: bool, scope_name: str, m_os: frozenset[str], m_sys: frozenset[str], m_re: frozenset[str],
+        *, top_block: bool, in_loop: bool = False, is_class_body: bool = False,
+        lex_os: frozenset[str] = frozenset(), lex_sys: frozenset[str] = frozenset(), lex_re: frozenset[str] = frozenset(),
     ) -> None:
         cur_pos = blk_posix
         cur_o, cur_s, cur_r = set(m_os), set(m_sys), set(m_re)
@@ -706,19 +722,9 @@ def inspect_storage_module_windows_pid_safety(path: Path, *, strict_capabilities
                 fn_pos = cur_pos or (scope_name == "<module>" and stmt.name in proven_posix_helpers)
                 _walk_block(stmt.body, fn_pos, stmt.name, child_o, child_s, child_r, top_block=True, in_loop=False)
             elif isinstance(stmt, ast.ClassDef):
-                for dec in stmt.decorator_list:
-                    _visit_expr(dec, cur_pos, scope_name, fo, fs, fr)
-                for tp in getattr(stmt, "type_params", ()):
-                    _visit_expr(tp, cur_pos, scope_name, fo, fs, fr)
-                for b in stmt.bases:
-                    _visit_expr(b, cur_pos, scope_name, fo, fs, fr)
-                for kw in stmt.keywords:
-                    _visit_expr(kw.value, cur_pos, scope_name, fo, fs, fr)
-                _walk_block(
-                    stmt.body, cur_pos, stmt.name, child_o, child_s, child_r,
-                    top_block=False, in_loop=False, is_class_body=True,
-                    lex_os=child_o, lex_sys=child_s, lex_re=child_r,
-                )
+                for expr in (*stmt.decorator_list, *getattr(stmt, "type_params", ()), *stmt.bases, *(kw.value for kw in stmt.keywords)):
+                    _visit_expr(expr, cur_pos, scope_name, fo, fs, fr)
+                _walk_block(stmt.body, cur_pos, stmt.name, child_o, child_s, child_r, top_block=False, in_loop=False, is_class_body=True, lex_os=child_o, lex_sys=child_s, lex_re=child_r)
             elif isinstance(stmt, ast.If):
                 _visit_expr(stmt.test, cur_pos, scope_name, fo, fs, fr)
                 t_pos, f_pos = _guard_implications(stmt.test, fo, fs)
@@ -750,18 +756,15 @@ def inspect_storage_module_windows_pid_safety(path: Path, *, strict_capabilities
                     c_pos = cur_pos
                     if mc.guard is not None:
                         _visit_expr(mc.guard, cur_pos, scope_name, fo, fs, fr)
-                        t_pos, _ = _guard_implications(mc.guard, fo, fs)
-                        c_pos = c_pos or t_pos
+                        c_pos = c_pos or _guard_implications(mc.guard, fo, fs)[0]
                     _walk_block(mc.body, c_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
             else:
                 for _, val in ast.iter_fields(stmt):
-                    if isinstance(val, list):
-                        if val and all(isinstance(it, ast.stmt) for it in val):
-                            _walk_block(val, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
-                        else:
-                            for it in val:
-                                if isinstance(it, ast.AST):
-                                    _visit_expr(it, cur_pos, scope_name, fo, fs, fr)
+                    if isinstance(val, list) and val and all(isinstance(it, ast.stmt) for it in val):
+                        _walk_block(val, cur_pos, scope_name, fo, fs, fr, top_block=False, in_loop=in_loop)
+                    elif isinstance(val, list):
+                        for it in (x for x in val if isinstance(x, ast.AST)):
+                            _visit_expr(it, cur_pos, scope_name, fo, fs, fr)
                     elif isinstance(val, ast.AST):
                         _visit_expr(val, cur_pos, scope_name, fo, fs, fr)
 
