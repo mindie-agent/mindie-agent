@@ -410,15 +410,24 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("from pathlib import Path\nfrom bounded_process import run\ndef d(py, cmd):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    match cmd:\n        case argv:\n            return run(argv, '')\n", "outside `__file__` self-dispatch"),
             ("from pathlib import Path\nfrom bounded_process import run\ndef Path(x):\n    class _P:\n        def resolve(self):\n            return '-c'\n    return _P()\ndef d(py):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    return run(argv, '')\n", "outside `__file__` self-dispatch"),
             ("from ..probe_helpers import _check\n_check(1)\n", "not in storage module allowlist"),
+            ("from pathlib import Path\nfrom bounded_process import run\nPath.resolve = lambda self: '-c'\ndef d(py):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    return run(argv, '')\n", "mutating or deleting `.resolve`"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
             self.assertTrue(any(marker in e for e in cap_errs), (marker, cap_errs))
 
-        self._write(repo / "scripts/paths.py", "import os\ndef read_json(pid: int):\n    os.kill(pid, 0)\n")
-        helper_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
-        self.assertTrue(any("scripts/paths.py" in e and "unguarded `os.kill(pid, 0)`" in e for e in helper_errs), helper_errs)
-        (repo / "scripts/paths.py").unlink()
+        for hlp_files, hlp_marker in (
+            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    os.kill(pid, 0)\n"}, "unguarded `os.kill(pid, 0)`"),
+            ({"scripts/paths.py": "from os import kill as read_json\n"}, "banned in storage helpers"),
+            ({"scripts/paths.py": "import os\nfrom builtins import getattr as lookup\ndef read_json(pid: int):\n    return lookup(os, 'kill')(pid, 0)\n"}, "banned in storage"),
+            ({"scripts/paths.py": "from process_helpers.probe import read_json\n", "scripts/process_helpers/__init__.py": "import os\nos.kill(12345, 0)\n", "scripts/process_helpers/probe.py": "def read_json(p): return None\n"}, "process_helpers/__init__.py"),
+        ):
+            for rel_p, body in hlp_files.items():
+                self._write(repo / rel_p, body)
+            helper_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
+            self.assertTrue(any(hlp_marker in e for e in helper_errs), (hlp_marker, helper_errs))
+            for rel_p in hlp_files:
+                (repo / rel_p).unlink()
 
         (repo / "scripts/storage_demorgan.py").unlink()
         self._write(repo / "scripts/storage_cap.py", "import re\nPAT = re.compile(r'^[0-9]+$')\n")

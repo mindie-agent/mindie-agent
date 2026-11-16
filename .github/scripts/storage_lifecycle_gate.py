@@ -508,10 +508,13 @@ def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_fil
                 specs.extend((node.level or 0, node.module or "", al.name) for al in node.names)
             for lvl, mod, name in specs:
                 anchors: list[Path] = []
+                cands: list[Path] = []
                 if lvl > 0:
                     anc = cur.parent
+                    cands.append(anc / "__init__.py")
                     for _ in range(lvl - 1):
                         anc = anc.parent
+                        cands.append(anc / "__init__.py")
                     anchors.append(anc)
                 else:
                     anchors.extend(search_roots)
@@ -521,10 +524,14 @@ def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_fil
                     rels.append(f"{mp}/{name}" if mp else name)
                 for anc in anchors:
                     for rel in rels:
-                        for cand in (anc / f"{rel}.py", anc / rel / "__init__.py"):
-                            if cand in file_set and cand not in visited:
-                                visited.add(cand)
-                                queue.append(cand)
+                        parts = [p for p in rel.split("/") if p]
+                        for idx in range(1, len(parts) + 1):
+                            cands.append(anc / "/".join(parts[:idx]) / "__init__.py")
+                        cands.append(anc / f"{rel}.py")
+                for cand in cands:
+                    if cand in file_set and cand not in visited:
+                        visited.add(cand)
+                        queue.append(cand)
     return visited
 
 
