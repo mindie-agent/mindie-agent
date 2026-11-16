@@ -4,8 +4,8 @@
 [Role]
 Verifies that `mindie-agent`, all 7 native harness plugins, and shared/evaluation components
 enforce bounded storage lifecycle GC (`storage` / `storage_gc` / `storage_lifecycle`), delegates
-per-allocation tempfile ownership and scope-aware Windows PID safety checks to `storage_temp_ast.py`,
-and verifies host sandbox redirection in repository test suites.
+per-allocation tempfile ownership to `storage_temp_ast.py` and scope-aware Windows PID safety
+checks to `storage_pid_ast.py`, and verifies host sandbox redirection in repository test suites.
 
 [Invariants]
 - Runs purely on Python stdlib (`ast`, `json`, `pathlib`, `re`, `tomllib`) with zero imports from
@@ -13,8 +13,8 @@ and verifies host sandbox redirection in repository test suites.
 - Enforces `P8` checks whenever a checkout is explicitly targeted via `required_repos` or its
   manifest version meets `STORAGE_LIFECYCLE_FLOOR_VERSIONS`, allowing historical `channels/0.1.json`
   validator checkouts (`< P8 floor`) and unversioned minimal unit-test fixtures to coexist cleanly.
-- Caller wiring requires an unshadowed call to a verified storage GC export (or `importlib.import_module`
-  helper defined in the caller module), rejecting unused imports, unbound factories, and shadowed names.
+- Caller wiring requires an unshadowed, unreassigned static import and call to a verified storage
+  GC export, rejecting unused imports, reassigned bindings, and arbitrary factory calls.
 
 [Timeouts & Locks]
 - Pure synchronous local file parsing (`< 2s` across all 15 repositories); acquires no locks.
@@ -32,11 +32,11 @@ import re
 import tomllib
 from typing import Sequence
 
+from storage_pid_ast import inspect_storage_module_windows_pid_safety
 from storage_temp_ast import (
     inspect_python_temp_hygiene,
-    inspect_storage_module_windows_pid_safety,
     iter_direct_nodes,
-    local_bound_names,
+    non_import_bound_names,
 )
 
 STORAGE_LIFECYCLE_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
@@ -207,80 +207,117 @@ def _caller_invokes_storage_gc(
     storage_stems: frozenset[str],
     valid_gc_attrs: frozenset[str],
 ) -> bool:
+    """Require an unshadowed, unreassigned static import and call to a verified GC export."""
     tree = ast.parse(caller_path.read_text(encoding="utf-8"), filename=str(caller_path))
-    top_mods: set[str] = set()
-    top_fns: set[str] = set()
-    dynamic_loaders: set[str] = set()
 
-    for stmt in tree.body:
-        if isinstance(stmt, ast.Import):
-            for alias in stmt.names:
-                stem = alias.name.rsplit(".", 1)[-1]
-                if stem in storage_stems:
-                    top_mods.add(alias.asname or stem)
-        elif isinstance(stmt, ast.ImportFrom) and stmt.module:
-            if set(stmt.module.split(".")) & storage_stems:
-                for alias in stmt.names:
-                    bound = alias.asname or alias.name
-                    if alias.name in storage_stems:
-                        top_mods.add(bound)
-                    else:
-                        top_fns.add(bound)
-        elif isinstance(stmt, ast.FunctionDef):
-            for sub in ast.walk(stmt):
-                if (
-                    isinstance(sub, ast.Call)
-                    and isinstance(sub.func, ast.Attribute)
-                    and sub.func.attr == "import_module"
-                ):
-                    dynamic_loaders.add(stmt.name)
-
-    def _scope_calls_gc(scope: ast.AST, mods: set[str], fns: set[str], loaders: set[str]) -> bool:
-        local_mods = set(mods)
-        local_fns = set(fns)
+    def _scope_calls_gc(scope: ast.AST, inherited_mods: set[str], inherited_fns: set[str]) -> bool:
+        rebound = non_import_bound_names(scope)
+        # Also invalidate names overwritten by imports from non-storage modules in this scope.
+        non_storage_imports: set[str] = set()
+        local_mods = set(inherited_mods) - rebound
+        local_fns = set(inherited_fns) - rebound
         for sub in iter_direct_nodes(scope):
             if isinstance(sub, ast.Import):
                 for alias in sub.names:
+                    bound = alias.asname or alias.name.split(".", 1)[0]
                     stem = alias.name.rsplit(".", 1)[-1]
-                    if stem in storage_stems:
-                        local_mods.add(alias.asname or stem)
-            elif isinstance(sub, ast.ImportFrom) and sub.module:
-                if set(sub.module.split(".")) & storage_stems:
-                    for alias in sub.names:
-                        bound = alias.asname or alias.name
+                    if stem in storage_stems and bound not in rebound:
+                        local_mods.add(bound)
+                    else:
+                        non_storage_imports.add(bound)
+            elif isinstance(sub, ast.ImportFrom):
+                mod_parts = set((sub.module or "").split("."))
+                is_storage = bool(mod_parts & storage_stems)
+                for alias in sub.names:
+                    bound = alias.asname or alias.name
+                    if is_storage and bound not in rebound:
                         if alias.name in storage_stems:
                             local_mods.add(bound)
-                        else:
+                        elif alias.name in valid_gc_attrs:
                             local_fns.add(bound)
+                    else:
+                        non_storage_imports.add(bound)
+        local_mods -= non_storage_imports
+        local_fns -= non_storage_imports
 
+        child_mods = inherited_mods if isinstance(scope, ast.ClassDef) else local_mods
+        child_fns = inherited_fns if isinstance(scope, ast.ClassDef) else local_fns
         for sub in iter_direct_nodes(scope):
             if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
-                shadowed = local_bound_names(sub)
-                if _scope_calls_gc(sub, local_mods - shadowed, local_fns - shadowed, loaders - shadowed):
+                if _scope_calls_gc(sub, child_mods, child_fns):
                     return True
             elif isinstance(sub, ast.Call):
                 fn = sub.func
                 if isinstance(fn, ast.Name) and fn.id in local_fns:
                     return True
-                if isinstance(fn, ast.Attribute) and fn.attr in valid_gc_attrs:
-                    if isinstance(fn.value, ast.Name) and fn.value.id in local_mods:
-                        return True
-                    if (
-                        isinstance(fn.value, ast.Call)
-                        and isinstance(fn.value.func, ast.Name)
-                        and fn.value.func.id in loaders
-                        and fn.value.args
-                        and isinstance(fn.value.args[0], ast.Constant)
-                        and str(fn.value.args[0].value) in storage_stems
-                    ):
-                        return True
+                if (
+                    isinstance(fn, ast.Attribute)
+                    and fn.attr in valid_gc_attrs
+                    and isinstance(fn.value, ast.Name)
+                    and fn.value.id in local_mods
+                ):
+                    return True
         return False
 
-    return _scope_calls_gc(tree, top_mods, top_fns, dynamic_loaders)
+    return _scope_calls_gc(tree, set(), set())
+
+
+def _is_os_environ_expr(expr: ast.AST, os_aliases: set[str]) -> bool:
+    return (
+        isinstance(expr, ast.Attribute)
+        and isinstance(expr.value, ast.Name)
+        and expr.value.id in os_aliases
+        and expr.attr == "environ"
+    )
+
+
+def _extract_key_constants(expr: ast.AST, all_keys: frozenset[str], key_tables: dict[str, set[str]]) -> set[str]:
+    if isinstance(expr, ast.Constant) and isinstance(expr.value, str) and expr.value in all_keys:
+        return {expr.value}
+    if isinstance(expr, ast.Name) and expr.id in key_tables:
+        return set(key_tables[expr.id])
+    if isinstance(expr, ast.Dict):
+        return {
+            k.value
+            for k in expr.keys
+            if isinstance(k, ast.Constant) and isinstance(k.value, str) and k.value in all_keys
+        }
+    if isinstance(expr, (ast.Tuple, ast.List, ast.Set)):
+        keys: set[str] = set()
+        for elt in expr.elts:
+            if isinstance(elt, ast.Constant) and isinstance(elt.value, str) and elt.value in all_keys:
+                keys.add(elt.value)
+            elif (
+                isinstance(elt, (ast.Tuple, ast.List))
+                and elt.elts
+                and isinstance(elt.elts[0], ast.Constant)
+                and isinstance(elt.elts[0].value, str)
+                and elt.elts[0].value in all_keys
+            ):
+                keys.add(elt.elts[0].value)
+        return keys
+    if isinstance(expr, ast.DictComp) and len(expr.generators) == 1:
+        gen = expr.generators[0]
+        if isinstance(expr.key, ast.Constant) and isinstance(expr.key.value, str) and expr.key.value in all_keys:
+            return {expr.key.value}
+        if isinstance(expr.key, ast.Name):
+            key_var = expr.key.id
+            binds_key = (isinstance(gen.target, ast.Name) and gen.target.id == key_var) or (
+                isinstance(gen.target, (ast.Tuple, ast.List))
+                and gen.target.elts
+                and isinstance(gen.target.elts[0], ast.Name)
+                and gen.target.elts[0].id == key_var
+            )
+            if binds_key:
+                return _extract_key_constants(gen.iter, all_keys, key_tables)
+        return set()
+    if isinstance(expr, ast.Call) and isinstance(expr.func, ast.Attribute) and expr.func.attr in {"items", "keys"}:
+        return _extract_key_constants(expr.func.value, all_keys, key_tables)
+    return set()
 
 
 def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
-    """Verify tests redirect HOME/USERPROFILE and MindIE/XDG roots via actual env mutation calls."""
+    """Verify tests redirect HOME/USERPROFILE and MindIE/XDG roots via real env mutations."""
     candidates: list[Path] = []
     for special in ("conftest.py", "support.py"):
         if (tests_dir / special).is_file():
@@ -296,58 +333,135 @@ def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except (OSError, SyntaxError):
             continue
-        # Collect module-level dicts/tuples holding sandbox env key names (e.g. `_ISOLATED_PATHS = {"HOME": ...}`).
-        key_tables: dict[str, set[str]] = {}
+        top_rebound = non_import_bound_names(tree)
+        top_os_aliases: set[str] = set()
+        top_patch_aliases: set[str] = set()
         for stmt in tree.body:
-            if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
-                found = {
-                    sub.value
-                    for sub in ast.walk(stmt.value)
-                    if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys
-                }
-                if found:
-                    key_tables[stmt.targets[0].id] = found
+            if isinstance(stmt, ast.Import):
+                for alias in stmt.names:
+                    bound = alias.asname or alias.name.split(".", 1)[0]
+                    if (alias.name == "os" or (alias.asname is None and alias.name.startswith("os."))) and bound not in top_rebound:
+                        top_os_aliases.add(bound)
+            elif isinstance(stmt, ast.ImportFrom) and stmt.module == "unittest.mock":
+                for alias in stmt.names:
+                    bound = alias.asname or alias.name
+                    if alias.name == "patch" and bound not in top_rebound:
+                        top_patch_aliases.add(bound)
 
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Call):
-                fn = node.func
-                cname = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
-                is_env_mutation = cname in {"setenv", "setdefault", "update"} or (
-                    cname == "dict"
-                    and isinstance(fn, ast.Attribute)
-                    and isinstance(fn.value, ast.Name)
-                    and fn.value.id == "patch"
-                )
-                if is_env_mutation:
-                    has_env_write = True
-                    for sub in ast.walk(node):
-                        if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys:
-                            redirected_keys.add(sub.value)
-                        elif isinstance(sub, ast.Name) and sub.id in key_tables:
-                            redirected_keys |= key_tables[sub.id]
-            elif isinstance(node, (ast.For, ast.AsyncFor)):
-                iter_keys: set[str] = set()
-                for sub in ast.walk(node.iter):
-                    if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys:
-                        iter_keys.add(sub.value)
-                    elif isinstance(sub, ast.Name) and sub.id in key_tables:
-                        iter_keys |= key_tables[sub.id]
-                if iter_keys:
-                    body_mutates = any(
-                        (isinstance(b, ast.Call) and isinstance(b.func, ast.Attribute) and b.func.attr in {"setenv", "setdefault"})
-                        or isinstance(b, ast.Subscript)
-                        for b in ast.walk(node)
-                    )
-                    if body_mutates:
-                        has_env_write = True
-                        redirected_keys |= iter_keys
-            elif isinstance(node, ast.Assign):
-                for tgt in node.targets:
-                    if isinstance(tgt, ast.Subscript):
-                        has_env_write = True
-                        for sub in ast.walk(tgt.slice):
-                            if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys:
-                                redirected_keys.add(sub.value)
+        scopes: list[tuple[ast.AST, dict[str, set[str]], set[str], set[str], set[str]]] = []
+        top_tables: dict[str, set[str]] = {}
+        top_counts: dict[str, int] = {}
+        for sub in iter_direct_nodes(tree):
+            if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store):
+                top_counts[sub.id] = top_counts.get(sub.id, 0) + 1
+        for stmt in tree.body:
+            if (
+                isinstance(stmt, ast.Assign)
+                and len(stmt.targets) == 1
+                and isinstance(stmt.targets[0], ast.Name)
+                and top_counts.get(stmt.targets[0].id, 0) == 1
+            ):
+                ks = _extract_key_constants(stmt.value, all_keys, {})
+                if ks:
+                    top_tables[stmt.targets[0].id] = ks
+        scopes.append((tree, top_tables, set(), top_os_aliases, top_patch_aliases))
+
+        for fn_node in [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]:
+            fn_rebound = non_import_bound_names(fn_node)
+            fn_os = set(top_os_aliases) - fn_rebound
+            fn_patch = set(top_patch_aliases) - fn_rebound
+            for sub in iter_direct_nodes(fn_node):
+                if isinstance(sub, ast.Import):
+                    for alias in sub.names:
+                        bound = alias.asname or alias.name.split(".", 1)[0]
+                        if (alias.name == "os" or (alias.asname is None and alias.name.startswith("os."))) and bound not in fn_rebound:
+                            fn_os.add(bound)
+                elif isinstance(sub, ast.ImportFrom) and sub.module == "unittest.mock":
+                    for alias in sub.names:
+                        bound = alias.asname or alias.name
+                        if alias.name == "patch" and bound not in fn_rebound:
+                            fn_patch.add(bound)
+            fn_tables = dict(top_tables)
+            fn_counts: dict[str, int] = {}
+            for sub in iter_direct_nodes(fn_node):
+                if isinstance(sub, ast.Name) and isinstance(sub.ctx, ast.Store):
+                    fn_counts[sub.id] = fn_counts.get(sub.id, 0) + 1
+            for name in fn_counts:
+                fn_tables.pop(name, None)
+            for sub in iter_direct_nodes(fn_node):
+                if (
+                    isinstance(sub, ast.Assign)
+                    and len(sub.targets) == 1
+                    and isinstance(sub.targets[0], ast.Name)
+                    and fn_counts.get(sub.targets[0].id, 0) == 1
+                ):
+                    ks = _extract_key_constants(sub.value, all_keys, top_tables)
+                    if ks:
+                        fn_tables[sub.targets[0].id] = ks
+            mp_params = {
+                a.arg
+                for a in (*fn_node.args.posonlyargs, *fn_node.args.args, *fn_node.args.kwonlyargs)
+                if a.arg == "monkeypatch" and fn_counts.get(a.arg, 0) == 0
+            }
+            scopes.append((fn_node, fn_tables, mp_params, fn_os, fn_patch))
+
+        for scope_node, tables, mp_names, os_aliases, patch_aliases in scopes:
+            loop_var_keys: dict[str, set[str]] = {}
+            for sub in iter_direct_nodes(scope_node):
+                if isinstance(sub, (ast.For, ast.AsyncFor)):
+                    ks = _extract_key_constants(sub.iter, all_keys, tables)
+                    if ks:
+                        if isinstance(sub.target, ast.Name):
+                            loop_var_keys[sub.target.id] = ks
+                        elif isinstance(sub.target, (ast.Tuple, ast.List)) and sub.target.elts and isinstance(sub.target.elts[0], ast.Name):
+                            loop_var_keys[sub.target.elts[0].id] = ks
+
+            effective_tables = {**tables, **loop_var_keys}
+            for sub in iter_direct_nodes(scope_node):
+                if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute):
+                    recv, attr = sub.func.value, sub.func.attr
+                    # 1. `monkeypatch.setenv(key, val)`
+                    if isinstance(recv, ast.Name) and recv.id in mp_names and attr == "setenv" and len(sub.args) >= 2:
+                        ks = _extract_key_constants(sub.args[0], all_keys, effective_tables)
+                        if ks:
+                            has_env_write = True
+                            redirected_keys |= ks
+                    # 2. `os.environ.setdefault(key, val)` or `os.environ.update(mapping)`
+                    elif _is_os_environ_expr(recv, os_aliases):
+                        if attr == "setdefault" and len(sub.args) >= 2:
+                            ks = _extract_key_constants(sub.args[0], all_keys, effective_tables)
+                            if ks:
+                                has_env_write = True
+                                redirected_keys |= ks
+                        elif attr == "update" and sub.args:
+                            ks = _extract_key_constants(sub.args[0], all_keys, effective_tables)
+                            if ks:
+                                has_env_write = True
+                                redirected_keys |= ks
+                    # 3. `patch.dict(os.environ, mapping)`
+                    elif (
+                        isinstance(recv, ast.Name)
+                        and recv.id in patch_aliases
+                        and attr == "dict"
+                        and len(sub.args) >= 2
+                        and _is_os_environ_expr(sub.args[0], os_aliases)
+                    ):
+                        ks = _extract_key_constants(sub.args[1], all_keys, effective_tables)
+                        if ks:
+                            has_env_write = True
+                            redirected_keys |= ks
+                # 4. `os.environ[key] = val` (strictly `ast.Store`, never read `ast.Load`)
+                elif isinstance(sub, ast.Assign):
+                    for tgt in sub.targets:
+                        if (
+                            isinstance(tgt, ast.Subscript)
+                            and isinstance(tgt.ctx, ast.Store)
+                            and _is_os_environ_expr(tgt.value, os_aliases)
+                        ):
+                            ks = _extract_key_constants(tgt.slice, all_keys, effective_tables)
+                            if ks:
+                                has_env_write = True
+                                redirected_keys |= ks
 
     return has_env_write and bool(redirected_keys & _HOME_ENV_KEYS) and len(redirected_keys & _MINDIE_ENV_KEYS) >= 2
 
