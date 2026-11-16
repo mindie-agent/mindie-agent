@@ -3,10 +3,9 @@
 
 [Role]
 Verifies that `mindie-agent`, all 7 native harness plugins, and shared/evaluation components
-enforce bounded storage lifecycle GC (`storage` / `storage_gc` / `storage_lifecycle`), track
-per-allocation cleanup or ownership transfer for `mkstemp` / `mkdtemp` / `NamedTemporaryFile(delete=False)`,
-forbid unguarded Windows `os.kill(pid, 0)` probes across all storage modules, and isolate host
-directories in repository test suites.
+enforce bounded storage lifecycle GC (`storage` / `storage_gc` / `storage_lifecycle`), delegates
+per-allocation tempfile ownership and scope-aware Windows PID safety checks to `storage_temp_ast.py`,
+and verifies host sandbox redirection in repository test suites.
 
 [Invariants]
 - Runs purely on Python stdlib (`ast`, `json`, `pathlib`, `re`, `tomllib`) with zero imports from
@@ -14,9 +13,8 @@ directories in repository test suites.
 - Enforces `P8` checks whenever a checkout is explicitly targeted via `required_repos` or its
   manifest version meets `STORAGE_LIFECYCLE_FLOOR_VERSIONS`, allowing historical `channels/0.1.json`
   validator checkouts (`< P8 floor`) and unversioned minimal unit-test fixtures to coexist cleanly.
-- Every manual tempfile allocation is tracked individually to a real filesystem cleanup call
-  (`os.unlink`/`os.replace`/`shutil.rmtree`/`Path.unlink`/1-arg `Path.replace`, never `str.replace`)
-  or an explicit `return`/`yield` of that allocated binding in a module owning cleanup.
+- Caller wiring requires an unshadowed call to a verified storage GC export (or `importlib.import_module`
+  helper defined in the caller module), rejecting unused imports, unbound factories, and shadowed names.
 
 [Timeouts & Locks]
 - Pure synchronous local file parsing (`< 2s` across all 15 repositories); acquires no locks.
@@ -33,6 +31,13 @@ from pathlib import Path
 import re
 import tomllib
 from typing import Sequence
+
+from storage_temp_ast import (
+    inspect_python_temp_hygiene,
+    inspect_storage_module_windows_pid_safety,
+    iter_direct_nodes,
+    local_bound_names,
+)
 
 STORAGE_LIFECYCLE_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
     "knowledge": (0, 13, 22),
@@ -68,7 +73,6 @@ PRODUCTION_PYTHON_SCOPES: dict[str, tuple[str, ...]] = {
     "mindie-agent-oc": ("plugins/mindie-agent/scripts",),
 }
 
-# (repo_name, gc_module_rel_path, required_top_exports, caller_candidates, storage_mod_stems)
 REQUIRED_STORAGE_WIRING: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...], frozenset[str]], ...] = (
     (
         "knowledge",
@@ -146,30 +150,9 @@ VERSION_MANIFESTS: tuple[str, ...] = (
 )
 
 _SKIP_PARTS: frozenset[str] = frozenset({"tests", "test", "__pycache__", "node_modules", "dist", "build"})
-_DIRECT_FS_CLEANUP_FNS: frozenset[str] = frozenset(
-    {
-        "unlink",
-        "remove",
-        "rmdir",
-        "rmtree",
-        "rmtree_force",
-        "_rmtree_force",
-        "_safe_unlink",
-        "_remove_path",
-        "_cleanup_temp",
-        "retire_directory",
-    }
-)
-_SANDBOX_ENV_KEYS: frozenset[str] = frozenset(
-    {
-        "HOME",
-        "USERPROFILE",
-        "MINDIE_CONFIG_HOME",
-        "MINDIE_DATA_HOME",
-        "MINDIE_DIAGNOSTICS_ROOT",
-        "XDG_CONFIG_HOME",
-        "XDG_DATA_HOME",
-    }
+_HOME_ENV_KEYS: frozenset[str] = frozenset({"HOME", "USERPROFILE"})
+_MINDIE_ENV_KEYS: frozenset[str] = frozenset(
+    {"MINDIE_CONFIG_HOME", "MINDIE_DATA_HOME", "MINDIE_DIAGNOSTICS_ROOT", "XDG_CONFIG_HOME", "XDG_DATA_HOME"}
 )
 
 
@@ -198,493 +181,6 @@ def _parse_repo_semver(repo_dir: Path) -> tuple[int, int, int] | None:
     return None
 
 
-def _iter_direct_nodes(root: ast.AST) -> list[ast.AST]:
-    """Walk AST nodes inside `root` without crossing into nested function or class scopes."""
-    out: list[ast.AST] = []
-    stack: list[ast.AST] = list(ast.iter_child_nodes(root))
-    while stack:
-        cur = stack.pop()
-        out.append(cur)
-        if not isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            stack.extend(ast.iter_child_nodes(cur))
-    return out
-
-
-def _names_in_expr(node: ast.AST | None) -> set[str]:
-    if node is None:
-        return set()
-    names: set[str] = set()
-    for sub in ast.walk(node):
-        if isinstance(sub, ast.Name):
-            names.add(sub.id)
-        elif (
-            isinstance(sub, ast.Attribute)
-            and isinstance(sub.value, ast.Name)
-            and sub.value.id == "self"
-        ):
-            names.add(f"self.{sub.attr}")
-    return names
-
-
-def _transferred_vars_in_expr(node: ast.AST | None) -> set[str]:
-    """Extract bindings genuinely transferred out via `return`/`yield` (excluding `.replace()`/`.read_text()` etc.)."""
-    if node is None:
-        return set()
-    if isinstance(node, ast.Name):
-        return {node.id}
-    if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
-        out: set[str] = set()
-        for elt in node.elts:
-            out |= _transferred_vars_in_expr(elt)
-        return out
-    if isinstance(node, ast.Dict):
-        out = set()
-        for val in node.values:
-            out |= _transferred_vars_in_expr(val)
-        return out
-    if isinstance(node, ast.Call):
-        # Allow `Path(d)` or dataclass/class/namedtuple wrappers `Profile(root=d)`,
-        # but never method calls on the path string like `d.replace('a', 'b')`.
-        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
-            if node.func.attr in {"replace", "split", "strip", "encode", "startswith", "endswith", "read_text", "read_bytes"}:
-                return set()
-        out = set()
-        for arg in node.args:
-            out |= _transferred_vars_in_expr(arg)
-        for kw in node.keywords:
-            out |= _transferred_vars_in_expr(kw.value)
-        return out
-    return set()
-
-
-def _collect_temp_aliases(tree: ast.Module) -> tuple[set[str], set[str], set[str], set[str], set[str], set[str]]:
-    mkstemp_names = {"mkstemp"}
-    mkdtemp_names = {"mkdtemp"}
-    ntf_names = {"NamedTemporaryFile"}
-    os_aliases = {"os"}
-    shutil_aliases = {"shutil"}
-    atexit_aliases = {"atexit"}
-    os_replace_names: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                bound = alias.asname or alias.name
-                if alias.name == "os":
-                    os_aliases.add(bound)
-                elif alias.name == "shutil":
-                    shutil_aliases.add(bound)
-                elif alias.name == "atexit":
-                    atexit_aliases.add(bound)
-        elif isinstance(node, ast.ImportFrom):
-            mod = node.module or ""
-            for alias in node.names:
-                bound = alias.asname or alias.name
-                if mod == "tempfile":
-                    if alias.name == "mkstemp":
-                        mkstemp_names.add(bound)
-                    elif alias.name == "mkdtemp":
-                        mkdtemp_names.add(bound)
-                    elif alias.name == "NamedTemporaryFile":
-                        ntf_names.add(bound)
-                elif mod == "os" and alias.name == "replace":
-                    os_replace_names.add(bound)
-    return mkstemp_names, mkdtemp_names, ntf_names, os_aliases | os_replace_names, shutil_aliases, atexit_aliases
-
-
-def _manual_temp_kind(
-    node: ast.Call,
-    mkstemp_names: set[str],
-    mkdtemp_names: set[str],
-    ntf_names: set[str],
-) -> str | None:
-    fn = node.func
-    cname = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
-    if cname in mkstemp_names:
-        return "mkstemp"
-    if cname in mkdtemp_names:
-        return "mkdtemp"
-    if cname in ntf_names:
-        for kw in node.keywords:
-            if kw.arg == "delete" and isinstance(kw.value, ast.Constant) and kw.value.value is False:
-                return "NamedTemporaryFile(delete=False)"
-    return None
-
-
-def _is_fs_cleanup_call(
-    call: ast.Call,
-    os_or_replace: set[str],
-    shutil_aliases: set[str],
-    atexit_aliases: set[str],
-    helper_cleaners: set[str],
-) -> set[str]:
-    """Return variable/self.attr names cleaned by `call` (strictly excluding `str.replace`)."""
-    fn = call.func
-    arg_names: set[str] = set()
-    for arg in call.args:
-        arg_names |= _names_in_expr(arg)
-    for kw in call.keywords:
-        arg_names |= _names_in_expr(kw.value)
-
-    if isinstance(fn, ast.Name):
-        if fn.id in _DIRECT_FS_CLEANUP_FNS or fn.id in helper_cleaners:
-            return arg_names
-        if fn.id in os_or_replace and call.args:
-            return _names_in_expr(call.args[0])
-        return set()
-
-    if isinstance(fn, ast.Attribute):
-        recv = fn.value
-        if isinstance(recv, ast.Name):
-            if recv.id in os_or_replace:
-                if fn.attr in {"unlink", "remove", "rmdir"} and call.args:
-                    return _names_in_expr(call.args[0])
-                if fn.attr in {"replace", "rename"} and len(call.args) >= 2:
-                    return _names_in_expr(call.args[0])
-                return set()
-            if recv.id in shutil_aliases and fn.attr in {"rmtree", "move"} and call.args:
-                return _names_in_expr(call.args[0])
-            if recv.id in atexit_aliases and fn.attr == "register":
-                return arg_names
-        if fn.attr in {"unlink", "cleanup"} and not isinstance(recv, ast.Constant):
-            return _names_in_expr(recv) | arg_names
-        # `Path.replace(target)` / `Path.rename(target)` takes 1 positional arg; `str.replace(old, new)` takes >= 2.
-        if fn.attr in {"replace", "rename"} and len(call.args) == 1 and not call.keywords and not isinstance(recv, ast.Constant):
-            return _names_in_expr(recv)
-    return set()
-
-
-def _extract_binding_vars(target: ast.AST, kind: str) -> set[str]:
-    if isinstance(target, ast.Name):
-        return {target.id} if target.id != "_" else set()
-    if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == "self":
-        return {f"self.{target.attr}"}
-    if isinstance(target, (ast.Tuple, ast.List)):
-        if kind == "mkstemp" and len(target.elts) >= 2:
-            return _extract_binding_vars(target.elts[1], kind)
-        out: set[str] = set()
-        for elt in target.elts:
-            out |= _extract_binding_vars(elt, kind)
-        return out
-    return set()
-
-
-def inspect_python_temp_hygiene(path: Path) -> list[str]:
-    """Verify every manual tempfile allocation in `path` is individually cleaned up or transferred."""
-    source = path.read_text(encoding="utf-8")
-    tree = ast.parse(source, filename=str(path))
-    errors: list[str] = []
-    mkstemp_n, mkdtemp_n, ntf_n, os_rep, shutil_a, atexit_a = _collect_temp_aliases(tree)
-
-    all_fns = [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
-    helper_cleaners: set[str] = set()
-    for _ in range(2):
-        for fn_node in all_fns:
-            param_names = {a.arg for a in fn_node.args.args + fn_node.args.kwonlyargs}
-            for sub in _iter_direct_nodes(fn_node):
-                if isinstance(sub, ast.Call):
-                    cleaned = _is_fs_cleanup_call(sub, os_rep, shutil_a, atexit_a, helper_cleaners)
-                    if cleaned & param_names or (cleaned and not param_names):
-                        helper_cleaners.add(fn_node.name)
-
-    module_has_fs_cleanup = bool(helper_cleaners)
-    if not module_has_fs_cleanup:
-        for sub in ast.walk(tree):
-            if isinstance(sub, ast.Call) and _is_fs_cleanup_call(sub, os_rep, shutil_a, atexit_a, helper_cleaners):
-                module_has_fs_cleanup = True
-                break
-
-    class_cleaned_attrs: dict[int, set[str]] = {}
-    for cls_node in [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]:
-        attrs: set[str] = set()
-        for sub in ast.walk(cls_node):
-            if isinstance(sub, ast.Call):
-                attrs |= {v for v in _is_fs_cleanup_call(sub, os_rep, shutil_a, atexit_a, helper_cleaners) if v.startswith("self.")}
-        class_cleaned_attrs[id(cls_node)] = attrs
-
-    parent_map: dict[int, ast.AST] = {}
-    for parent in ast.walk(tree):
-        for child in ast.iter_child_nodes(parent):
-            parent_map[id(child)] = parent
-
-    def _enclosing_class_attrs(scope_node: ast.AST) -> set[str]:
-        cur = parent_map.get(id(scope_node))
-        while cur is not None:
-            if isinstance(cur, ast.ClassDef):
-                return class_cleaned_attrs.get(id(cur), set())
-            cur = parent_map.get(id(cur))
-        return set()
-
-    scopes: list[tuple[str, ast.AST]] = [("module top-level", tree)]
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef):
-            scopes.append((f"class `{node.name}` body", node))
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            scopes.append((f"function `{node.name}`", node))
-
-    for scope_label, scope_node in scopes:
-        direct = _iter_direct_nodes(scope_node)
-        allocs: list[tuple[str, int, set[str], int]] = []
-        for sub in direct:
-            if isinstance(sub, ast.Call):
-                kind = _manual_temp_kind(sub, mkstemp_n, mkdtemp_n, ntf_n)
-                if kind is None:
-                    continue
-                bound: set[str] = set()
-                cur: ast.AST | None = sub
-                while cur is not None and cur is not scope_node:
-                    par = parent_map.get(id(cur))
-                    if isinstance(par, ast.Assign) and cur is par.value or (
-                        isinstance(par, ast.Assign) and any(cur is s for s in ast.walk(par.value))
-                    ):
-                        for tgt in par.targets:
-                            bound |= _extract_binding_vars(tgt, kind)
-                        break
-                    if isinstance(par, ast.AnnAssign) and par.value is not None:
-                        bound |= _extract_binding_vars(par.target, kind)
-                        break
-                    if isinstance(par, ast.NamedExpr) and cur is par.value:
-                        bound |= _extract_binding_vars(par.target, kind)
-                        break
-                    if isinstance(par, ast.withitem) and par.optional_vars is not None:
-                        bound |= _extract_binding_vars(par.optional_vars, kind)
-                        break
-                    if isinstance(par, (ast.Return, ast.Yield)):
-                        bound.add("__returned__")
-                        break
-                    cur = par
-                allocs.append((kind, sub.lineno, bound, id(sub)))
-
-        if not allocs:
-            continue
-
-        # Propagate local aliases (`p = Path(tmp)`, `name = f.name`, etc.) inside `scope_node`.
-        alias_edges: list[tuple[set[str], set[str]]] = []
-        for sub in direct:
-            if isinstance(sub, ast.Assign):
-                rhs = _names_in_expr(sub.value)
-                lhs: set[str] = set()
-                for tgt in sub.targets:
-                    lhs |= _names_in_expr(tgt)
-                if lhs and rhs:
-                    alias_edges.append((lhs, rhs))
-            elif isinstance(sub, ast.AnnAssign) and sub.value is not None:
-                lhs = _names_in_expr(sub.target)
-                rhs = _names_in_expr(sub.value)
-                if lhs and rhs:
-                    alias_edges.append((lhs, rhs))
-
-        nested_defs = {
-            n.name: n
-            for n in ast.iter_child_nodes(scope_node)
-            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-        }
-        called_names = {
-            (sub.func.id if isinstance(sub.func, ast.Name) else "")
-            for sub in direct
-            if isinstance(sub, ast.Call)
-        }
-        # Include nested helpers registered via atexit.register(helper).
-        for sub in direct:
-            if isinstance(sub, ast.Call):
-                for arg in sub.args:
-                    if isinstance(arg, ast.Name) and arg.id in nested_defs:
-                        called_names.add(arg.id)
-
-        cleaned_vars: set[str] = set(_enclosing_class_attrs(scope_node))
-        for sub in direct:
-            if isinstance(sub, ast.Call):
-                cleaned_vars |= _is_fs_cleanup_call(sub, os_rep, shutil_a, atexit_a, helper_cleaners)
-        for hname in called_names & set(nested_defs):
-            hnode = nested_defs[hname]
-            for sub in _iter_direct_nodes(hnode):
-                if isinstance(sub, ast.Call):
-                    cleaned_vars |= _is_fs_cleanup_call(sub, os_rep, shutil_a, atexit_a, helper_cleaners)
-
-        returned_vars: set[str] = set()
-        if isinstance(scope_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            for sub in direct:
-                if isinstance(sub, (ast.Return, ast.Yield)) and sub.value is not None:
-                    returned_vars |= _transferred_vars_in_expr(sub.value)
-
-        for kind, lineno, initial_bound, _ in allocs:
-            if not initial_bound:
-                errors.append(
-                    f"{scope_label} allocates {kind} (line {lineno}) without binding or cleaning up the path"
-                )
-                continue
-            tracked = set(initial_bound)
-            for _ in range(4):
-                for lhs, rhs in alias_edges:
-                    if rhs & tracked:
-                        tracked |= lhs
-            locally_cleaned = bool(tracked & cleaned_vars)
-            transferred = ("__returned__" in tracked or bool(tracked & returned_vars)) and module_has_fs_cleanup
-            if not (locally_cleaned or transferred):
-                errors.append(
-                    f"{scope_label} allocates {kind} (line {lineno}) without cleanup "
-                    "(`unlink`/`os.replace`/`rmtree`/`atexit.register`) or ownership transfer"
-                )
-    return errors
-
-
-def _expr_platform_polarity(
-    expr: ast.AST,
-    os_aliases: set[str],
-    sys_aliases: set[str],
-    win_bools: set[str],
-    posix_bools: set[str],
-) -> str | None:
-    """Return 'windows', 'posix', or None for an AST boolean guard expression."""
-    if isinstance(expr, ast.Name):
-        if expr.id in win_bools:
-            return "windows"
-        if expr.id in posix_bools:
-            return "posix"
-        return None
-    if isinstance(expr, ast.UnaryOp) and isinstance(expr.op, ast.Not):
-        inner = _expr_platform_polarity(expr.operand, os_aliases, sys_aliases, win_bools, posix_bools)
-        return "posix" if inner == "windows" else ("windows" if inner == "posix" else None)
-    if isinstance(expr, ast.BoolOp):
-        parts = [_expr_platform_polarity(v, os_aliases, sys_aliases, win_bools, posix_bools) for v in expr.values]
-        if isinstance(expr.op, ast.And) and "posix" in parts and "windows" not in parts:
-            return "posix"
-        if isinstance(expr.op, ast.Or) and all(p == "windows" for p in parts):
-            return "windows"
-        return None
-    if isinstance(expr, ast.Call) and isinstance(expr.func, ast.Attribute):
-        recv = expr.func.value
-        if (
-            isinstance(recv, ast.Attribute)
-            and isinstance(recv.value, ast.Name)
-            and recv.value.id in sys_aliases
-            and recv.attr == "platform"
-            and expr.func.attr == "startswith"
-            and expr.args
-            and isinstance(expr.args[0], ast.Constant)
-            and str(expr.args[0].value).startswith("win")
-        ):
-            return "windows"
-    if isinstance(expr, ast.Compare) and len(expr.ops) == 1 and len(expr.comparators) == 1:
-        left, op, right = expr.left, expr.ops[0], expr.comparators[0]
-        if (
-            isinstance(left, ast.Attribute)
-            and isinstance(left.value, ast.Name)
-            and left.value.id in os_aliases
-            and left.attr == "name"
-            and isinstance(right, ast.Constant)
-        ):
-            if right.value == "nt":
-                return "windows" if isinstance(op, (ast.Eq, ast.Is)) else ("posix" if isinstance(op, (ast.NotEq, ast.IsNot)) else None)
-            if right.value == "posix" and isinstance(op, (ast.Eq, ast.Is)):
-                return "posix"
-        if (
-            isinstance(left, ast.Attribute)
-            and isinstance(left.value, ast.Name)
-            and left.value.id in sys_aliases
-            and left.attr == "platform"
-            and isinstance(right, ast.Constant)
-        ):
-            if str(right.value).startswith("win"):
-                return "windows" if isinstance(op, (ast.Eq, ast.Is)) else ("posix" if isinstance(op, (ast.NotEq, ast.IsNot)) else None)
-    return None
-
-
-def _block_terminates(stmts: list[ast.stmt]) -> bool:
-    return bool(stmts) and isinstance(stmts[-1], (ast.Return, ast.Raise, ast.Continue, ast.Break))
-
-
-def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
-    """Ban `os.kill(pid, 0)` (or imported `kill(pid, 0)`) unless AST-proven POSIX-only."""
-    source = path.read_text(encoding="utf-8")
-    tree = ast.parse(source, filename=str(path))
-    os_aliases = {"os"}
-    sys_aliases = {"sys"}
-    kill_names: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                bound = alias.asname or alias.name
-                if alias.name == "os":
-                    os_aliases.add(bound)
-                elif alias.name == "sys":
-                    sys_aliases.add(bound)
-        elif isinstance(node, ast.ImportFrom) and node.module == "os":
-            for alias in node.names:
-                if alias.name == "kill":
-                    kill_names.add(alias.asname or alias.name)
-
-    win_bools: set[str] = set()
-    posix_bools: set[str] = set()
-    for stmt in tree.body:
-        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
-            pol = _expr_platform_polarity(stmt.value, os_aliases, sys_aliases, win_bools, posix_bools)
-            if pol == "windows":
-                win_bools.add(stmt.targets[0].id)
-            elif pol == "posix":
-                posix_bools.add(stmt.targets[0].id)
-
-    errors: list[str] = []
-
-    def _visit(node: ast.AST, posix_proven: bool, scope_name: str) -> None:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            # A function definition resets control-flow guards unless already inside a POSIX-only block.
-            _visit_stmt_list(node.body, posix_proven, node.name)
-            return
-        if isinstance(node, ast.ClassDef):
-            _visit_stmt_list(node.body, posix_proven, node.name)
-            return
-        if isinstance(node, ast.If):
-            pol = _expr_platform_polarity(node.test, os_aliases, sys_aliases, win_bools, posix_bools)
-            _visit_stmt_list(node.body, posix_proven or (pol == "posix"), scope_name)
-            _visit_stmt_list(node.orelse, posix_proven or (pol == "windows"), scope_name)
-            return
-        if isinstance(node, ast.IfExp):
-            pol = _expr_platform_polarity(node.test, os_aliases, sys_aliases, win_bools, posix_bools)
-            _visit(node.test, posix_proven, scope_name)
-            _visit(node.body, posix_proven or (pol == "posix"), scope_name)
-            _visit(node.orelse, posix_proven or (pol == "windows"), scope_name)
-            return
-        if isinstance(node, ast.Call):
-            fn = node.func
-            is_kill_zero = (
-                len(node.args) == 2
-                and isinstance(node.args[1], ast.Constant)
-                and type(node.args[1].value) is int
-                and node.args[1].value == 0
-                and (
-                    (isinstance(fn, ast.Attribute) and isinstance(fn.value, ast.Name) and fn.value.id in os_aliases and fn.attr == "kill")
-                    or (isinstance(fn, ast.Name) and fn.id in kill_names)
-                )
-            )
-            if is_kill_zero and not posix_proven:
-                errors.append(
-                    f"line {node.lineno} `{scope_name}` calls unguarded `os.kill(pid, 0)` "
-                    "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
-                )
-        for field, value in ast.iter_fields(node):
-            if isinstance(value, list):
-                if value and all(isinstance(item, ast.stmt) for item in value):
-                    _visit_stmt_list(value, posix_proven, scope_name)
-                else:
-                    for item in value:
-                        if isinstance(item, ast.AST):
-                            _visit(item, posix_proven, scope_name)
-            elif isinstance(value, ast.AST):
-                _visit(value, posix_proven, scope_name)
-
-    def _visit_stmt_list(stmts: list[ast.stmt], posix_proven: bool, scope_name: str) -> None:
-        cur_posix = posix_proven
-        for stmt in stmts:
-            _visit(stmt, cur_posix, scope_name)
-            if isinstance(stmt, ast.If) and not stmt.orelse:
-                pol = _expr_platform_polarity(stmt.test, os_aliases, sys_aliases, win_bools, posix_bools)
-                if pol == "windows" and _block_terminates(stmt.body):
-                    cur_posix = True
-
-    _visit_stmt_list(tree.body, False, "<module>")
-    return errors
-
-
 def _module_top_level_exports(path: Path) -> set[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     exports: set[str] = set()
@@ -706,65 +202,154 @@ def _module_top_level_exports(path: Path) -> set[str]:
     return exports
 
 
-def _caller_invokes_storage_gc(caller_path: Path, storage_stems: frozenset[str]) -> bool:
+def _caller_invokes_storage_gc(
+    caller_path: Path,
+    storage_stems: frozenset[str],
+    valid_gc_attrs: frozenset[str],
+) -> bool:
     tree = ast.parse(caller_path.read_text(encoding="utf-8"), filename=str(caller_path))
-    imported_modules: set[str] = set()
-    imported_callables: set[str] = set()
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
+    top_mods: set[str] = set()
+    top_fns: set[str] = set()
+    dynamic_loaders: set[str] = set()
+
+    for stmt in tree.body:
+        if isinstance(stmt, ast.Import):
+            for alias in stmt.names:
                 stem = alias.name.rsplit(".", 1)[-1]
                 if stem in storage_stems:
-                    imported_modules.add(alias.asname or stem)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            mod_parts = set(node.module.split("."))
-            if mod_parts & storage_stems:
-                for alias in node.names:
+                    top_mods.add(alias.asname or stem)
+        elif isinstance(stmt, ast.ImportFrom) and stmt.module:
+            if set(stmt.module.split(".")) & storage_stems:
+                for alias in stmt.names:
                     bound = alias.asname or alias.name
                     if alias.name in storage_stems:
-                        imported_modules.add(bound)
+                        top_mods.add(bound)
                     else:
-                        imported_callables.add(bound)
+                        top_fns.add(bound)
+        elif isinstance(stmt, ast.FunctionDef):
+            for sub in ast.walk(stmt):
+                if (
+                    isinstance(sub, ast.Call)
+                    and isinstance(sub.func, ast.Attribute)
+                    and sub.func.attr == "import_module"
+                ):
+                    dynamic_loaders.add(stmt.name)
 
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call):
-            continue
-        fn = node.func
-        if isinstance(fn, ast.Name) and fn.id in imported_callables:
-            return True
-        if isinstance(fn, ast.Attribute):
-            if isinstance(fn.value, ast.Name) and fn.value.id in imported_modules:
-                return True
-            if (
-                isinstance(fn.value, ast.Call)
-                and isinstance(fn.value.func, ast.Name)
-                and fn.value.args
-                and isinstance(fn.value.args[0], ast.Constant)
-                and str(fn.value.args[0].value) in storage_stems
-            ):
-                return True
-    return False
+    def _scope_calls_gc(scope: ast.AST, mods: set[str], fns: set[str], loaders: set[str]) -> bool:
+        local_mods = set(mods)
+        local_fns = set(fns)
+        for sub in iter_direct_nodes(scope):
+            if isinstance(sub, ast.Import):
+                for alias in sub.names:
+                    stem = alias.name.rsplit(".", 1)[-1]
+                    if stem in storage_stems:
+                        local_mods.add(alias.asname or stem)
+            elif isinstance(sub, ast.ImportFrom) and sub.module:
+                if set(sub.module.split(".")) & storage_stems:
+                    for alias in sub.names:
+                        bound = alias.asname or alias.name
+                        if alias.name in storage_stems:
+                            local_mods.add(bound)
+                        else:
+                            local_fns.add(bound)
 
-
-def _test_file_isolates_sandbox_ast(path: Path) -> bool:
-    try:
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-    except (OSError, SyntaxError):
+        for sub in iter_direct_nodes(scope):
+            if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+                shadowed = local_bound_names(sub)
+                if _scope_calls_gc(sub, local_mods - shadowed, local_fns - shadowed, loaders - shadowed):
+                    return True
+            elif isinstance(sub, ast.Call):
+                fn = sub.func
+                if isinstance(fn, ast.Name) and fn.id in local_fns:
+                    return True
+                if isinstance(fn, ast.Attribute) and fn.attr in valid_gc_attrs:
+                    if isinstance(fn.value, ast.Name) and fn.value.id in local_mods:
+                        return True
+                    if (
+                        isinstance(fn.value, ast.Call)
+                        and isinstance(fn.value.func, ast.Name)
+                        and fn.value.func.id in loaders
+                        and fn.value.args
+                        and isinstance(fn.value.args[0], ast.Constant)
+                        and str(fn.value.args[0].value) in storage_stems
+                    ):
+                        return True
         return False
-    seen_env_keys: set[str] = set()
-    uses_temp_fixture = False
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Constant) and isinstance(node.value, str) and node.value in _SANDBOX_ENV_KEYS:
-            seen_env_keys.add(node.value)
-        elif isinstance(node, ast.Call):
-            fn = node.func
-            cname = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
-            if cname in {"TemporaryDirectory", "mkdtemp", "setenv", "patch"}:
-                uses_temp_fixture = True
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            if any(a.arg in {"tmp_path", "monkeypatch"} for a in node.args.args):
-                uses_temp_fixture = True
-    return uses_temp_fixture and len(seen_env_keys) >= 2
+
+    return _scope_calls_gc(tree, top_mods, top_fns, dynamic_loaders)
+
+
+def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
+    """Verify tests redirect HOME/USERPROFILE and MindIE/XDG roots via actual env mutation calls."""
+    candidates: list[Path] = []
+    for special in ("conftest.py", "support.py"):
+        if (tests_dir / special).is_file():
+            candidates.append(tests_dir / special)
+    candidates.extend(sorted(tests_dir.glob("test_*.py"))[:10])
+
+    all_keys = _HOME_ENV_KEYS | _MINDIE_ENV_KEYS
+    redirected_keys: set[str] = set()
+    has_env_write = False
+
+    for path in candidates:
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except (OSError, SyntaxError):
+            continue
+        # Collect module-level dicts/tuples holding sandbox env key names (e.g. `_ISOLATED_PATHS = {"HOME": ...}`).
+        key_tables: dict[str, set[str]] = {}
+        for stmt in tree.body:
+            if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
+                found = {
+                    sub.value
+                    for sub in ast.walk(stmt.value)
+                    if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys
+                }
+                if found:
+                    key_tables[stmt.targets[0].id] = found
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call):
+                fn = node.func
+                cname = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
+                is_env_mutation = cname in {"setenv", "setdefault", "update"} or (
+                    cname == "dict"
+                    and isinstance(fn, ast.Attribute)
+                    and isinstance(fn.value, ast.Name)
+                    and fn.value.id == "patch"
+                )
+                if is_env_mutation:
+                    has_env_write = True
+                    for sub in ast.walk(node):
+                        if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys:
+                            redirected_keys.add(sub.value)
+                        elif isinstance(sub, ast.Name) and sub.id in key_tables:
+                            redirected_keys |= key_tables[sub.id]
+            elif isinstance(node, (ast.For, ast.AsyncFor)):
+                iter_keys: set[str] = set()
+                for sub in ast.walk(node.iter):
+                    if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys:
+                        iter_keys.add(sub.value)
+                    elif isinstance(sub, ast.Name) and sub.id in key_tables:
+                        iter_keys |= key_tables[sub.id]
+                if iter_keys:
+                    body_mutates = any(
+                        (isinstance(b, ast.Call) and isinstance(b.func, ast.Attribute) and b.func.attr in {"setenv", "setdefault"})
+                        or isinstance(b, ast.Subscript)
+                        for b in ast.walk(node)
+                    )
+                    if body_mutates:
+                        has_env_write = True
+                        redirected_keys |= iter_keys
+            elif isinstance(node, ast.Assign):
+                for tgt in node.targets:
+                    if isinstance(tgt, ast.Subscript):
+                        has_env_write = True
+                        for sub in ast.walk(tgt.slice):
+                            if isinstance(sub, ast.Constant) and isinstance(sub.value, str) and sub.value in all_keys:
+                                redirected_keys.add(sub.value)
+
+    return has_env_write and bool(redirected_keys & _HOME_ENV_KEYS) and len(redirected_keys & _MINDIE_ENV_KEYS) >= 2
 
 
 def _iter_scoped_python_files(repo_dir: Path, scopes: Sequence[str]) -> list[Path]:
@@ -850,10 +435,11 @@ def verify_storage_lifecycle_hygiene(
         if not present_callers:
             errors.append(f"{repo_name}: missing storage GC caller module ({', '.join(caller_rels)})")
         else:
+            valid_gc_attrs = frozenset(top_exports) | frozenset(required_exports)
             wired = False
             for rel in present_callers:
                 try:
-                    if _caller_invokes_storage_gc(repo_dir / rel, storage_stems):
+                    if _caller_invokes_storage_gc(repo_dir / rel, storage_stems, valid_gc_attrs):
                         wired = True
                         break
                 except SyntaxError as exc:
@@ -877,13 +463,10 @@ def verify_storage_lifecycle_hygiene(
                 errors.append(f"{repo_name}: {rel} syntax error during P8 AST check: {exc}")
 
         tests_dir = repo_dir / "tests"
-        if tests_dir.is_dir():
-            conftest = tests_dir / "conftest.py"
-            sample_files = [conftest] if conftest.is_file() else sorted(tests_dir.glob("test_*.py"))[:10]
-            if not any(_test_file_isolates_sandbox_ast(tf) for tf in sample_files):
-                errors.append(
-                    f"{repo_name}: tests/ missing AST-verified host sandbox isolation "
-                    "(expected conftest.py or test fixtures redirecting HOME and MindIE roots)"
-                )
+        if tests_dir.is_dir() and not _test_dir_isolates_sandbox_ast(tests_dir):
+            errors.append(
+                f"{repo_name}: tests/ missing AST-verified host sandbox isolation "
+                "(expected conftest.py or test fixtures redirecting HOME and MindIE roots)"
+            )
 
     return errors
