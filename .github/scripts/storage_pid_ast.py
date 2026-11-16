@@ -33,8 +33,10 @@ from pathlib import Path
 
 _COMPREHENSION_TYPES = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
 _REFLECTIVE_FNS = frozenset(
-    {"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller"}
+    {"getattr", "setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__"}
 )
+_BANNED_MODULES = frozenset({"builtins", "operator", "importlib"})
+_SAFE_READ_DUNDERS = frozenset({"__init__", "__name__", "__enter__", "__exit__", "__file__", "__module__", "__class__", "__cause__"})
 
 
 def _stmts_always_exit(stmts: list[ast.stmt], *, in_loop: bool) -> bool:
@@ -163,7 +165,10 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
         if isinstance(node, ast.Import):
             in_top = id(node) in scope_top_stmts
             for alias in node.names:
-                bound = alias.asname or alias.name.split(".", 1)[0]
+                top_pkg = alias.name.split(".", 1)[0]
+                if top_pkg in _BANNED_MODULES:
+                    cap_errors.append(f"line {node.lineno} `import {alias.name}` is banned in storage modules")
+                bound = alias.asname or top_pkg
                 src = "os" if (alias.name == "os" or (alias.asname is None and alias.name.startswith("os."))) else (
                     "sys" if alias.name == "sys" else "other"
                 )
@@ -171,12 +176,19 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                     impure.add(bound)
                 import_sources.setdefault(bound, set()).add(src)
         elif isinstance(node, ast.ImportFrom):
+            top_mod = (node.module or "").split(".", 1)[0]
+            if top_mod in _BANNED_MODULES:
+                cap_errors.append(f"line {node.lineno} `from {node.module} import ...` is banned in storage modules")
             for alias in node.names:
                 if alias.name == "*":
                     cap_errors.append(
                         f"line {node.lineno} wildcard `from {node.module or '.'} import *` is banned in storage modules"
                     )
                 else:
+                    if alias.name in _REFLECTIVE_FNS or (alias.name.startswith("__") and alias.name.endswith("__")):
+                        cap_errors.append(
+                            f"line {node.lineno} importing reflective symbol `{alias.name}` is banned in storage modules"
+                        )
                     bound = alias.asname or alias.name
                     impure.add(bound)
                     if alias.name == "kill":
@@ -188,24 +200,27 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
 
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute):
-            if isinstance(node.ctx, (ast.Store, ast.Del)) and node.attr in {"name", "platform", "kill"}:
+            is_dunder = node.attr.startswith("__") and node.attr.endswith("__")
+            if isinstance(node.ctx, (ast.Store, ast.Del)) and (node.attr in {"name", "platform", "kill"} or is_dunder):
                 cap_errors.append(
                     f"line {node.lineno} mutating or deleting `.{node.attr}` is banned in storage modules"
                 )
-            elif node.attr in {"__dict__", "__getattribute__"}:
+            elif is_dunder and node.attr not in _SAFE_READ_DUNDERS:
                 cap_errors.append(
-                    f"line {node.lineno} reflective `.{node.attr}` access is banned in storage modules"
+                    f"line {node.lineno} reflective dunder `.{node.attr}` access is banned in storage modules"
                 )
             elif isinstance(node.ctx, ast.Load) and node.attr == "kill" and id(node) not in call_func_ids:
                 cap_errors.append(
                     f"line {node.lineno} first-class/aliased `.kill` reference is banned in storage modules"
                 )
-            elif isinstance(node.ctx, ast.Load) and node.attr in _REFLECTIVE_FNS and id(node) not in call_func_ids:
+            elif isinstance(node.ctx, ast.Load) and node.attr in (_REFLECTIVE_FNS - {"compile"}) and id(node) not in call_func_ids:
                 cap_errors.append(
                     f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules"
                 )
         elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load):
-            if node.id in imported_kills and id(node) not in call_func_ids:
+            if node.id == "__builtins__":
+                cap_errors.append(f"line {node.lineno} `__builtins__` access is banned in storage modules")
+            elif node.id in imported_kills and id(node) not in call_func_ids:
                 cap_errors.append(
                     f"line {node.lineno} first-class/aliased `{node.id}` reference is banned in storage modules"
                 )
@@ -215,8 +230,16 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                 )
         elif isinstance(node, ast.Call):
             fn = node.func
-            fn_name = fn.id if isinstance(fn, ast.Name) else (fn.attr if isinstance(fn, ast.Attribute) else "")
-            if fn_name in {"setattr", "delattr", "eval", "exec", "compile", "vars", "globals", "locals", "attrgetter", "methodcaller"}:
+            if not isinstance(fn, (ast.Name, ast.Attribute)):
+                cap_errors.append(
+                    f"line {node.lineno} indirect/chained callee expression is banned in storage modules"
+                )
+                continue
+            is_bare_name = isinstance(fn, ast.Name)
+            fn_name = fn.id if is_bare_name else fn.attr
+            if fn_name in {"setattr", "delattr", "eval", "exec", "vars", "globals", "locals", "attrgetter", "methodcaller", "__import__"} or (
+                is_bare_name and fn_name == "compile"
+            ):
                 cap_errors.append(f"line {node.lineno} `{fn_name}(...)` is banned in storage modules")
             elif fn_name == "getattr":
                 if (
@@ -225,7 +248,8 @@ def _collect_tree_facts(tree: ast.Module) -> tuple[frozenset[str], frozenset[str
                     or node.keywords
                     or not isinstance(node.args[1], ast.Constant)
                     or not isinstance(node.args[1].value, str)
-                    or node.args[1].value in {"kill", "name", "platform", "__dict__", "__getattribute__"}
+                    or node.args[1].value in (_REFLECTIVE_FNS | {"kill", "name", "platform", "__builtins__"})
+                    or node.args[1].value.startswith("__")
                 ):
                     cap_errors.append(
                         f"line {node.lineno} dynamic or sensitive `getattr(...)` is banned in storage modules"

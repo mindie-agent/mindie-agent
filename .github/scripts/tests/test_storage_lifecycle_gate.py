@@ -379,10 +379,17 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import os\ndef f(pid, check=os.kill):\n    check(pid, 0)\n", "first-class/aliased `.kill`"),
             ("import os, sys\nsys.platform = 'linux'\nif sys.platform != 'win32':\n    os.kill(1, 0)\n", "mutating or deleting `.platform`"),
             ("import os\nimport sys as p_api\nfrom shim import *\nif p_api.platform != 'win32':\n    os.kill(1, 0)\n", "wildcard"),
+            ("import os\nfrom builtins import getattr as lookup\nlookup(os, 'kill')(1, 0)\n", "banned in storage modules"),
+            ("import os, builtins\ngetattr(builtins, 'getattr')(os, 'kill')(1, 0)\n", "banned in storage modules"),
+            ("import os\nos.__setattr__('name', 'posix')\nif os.name != 'nt':\n    os.kill(1, 0)\n", "__setattr__"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
             self.assertTrue(any(marker in e for e in cap_errs), (marker, cap_errs))
+
+        (repo / "scripts/storage_demorgan.py").unlink()
+        self._write(repo / "scripts/storage_cap.py", "import re\nPAT = re.compile(r'^[0-9]+$')\n")
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
 
 
 if __name__ == "__main__":
