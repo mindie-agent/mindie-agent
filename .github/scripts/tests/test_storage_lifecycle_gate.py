@@ -276,10 +276,21 @@ class StorageLifecycleGateTests(unittest.TestCase):
                 "        return False\n"
                 "    os.kill(pid, sig=0)\n"
                 "    return True\n"
+                "def try_import_bypass(pid: int) -> bool:\n"
+                "    try:\n"
+                "        import os as local_os\n"
+                "    except ImportError:\n"
+                "        return False\n"
+                "    local_os.kill(pid, 0)\n"
+                "    return True\n"
+                "def comp_guard_spoof(pid: int, platforms: list[object]) -> list[object]:\n"
+                "    import sys\n"
+                "    return [os.kill(pid, 0) if sys.platform != 'win32' else None for sys in platforms]\n"
             ),
         )
         errors = sl_gate.verify_storage_lifecycle_hygiene([self.root])
-        self.assertTrue(any("bad_and" in e for e in errors), errors)
+        for expected in ("bad_and", "try_import_bypass", "comp_guard_spoof"):
+            self.assertTrue(any(expected in e for e in errors), (expected, errors))
 
 
 if __name__ == "__main__":
