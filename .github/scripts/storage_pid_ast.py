@@ -6,12 +6,12 @@ Verifies via Python stdlib `ast` that storage lifecycle/lease/GC modules never i
 `os.kill(pid, 0)` (or imported `kill(pid, 0)`) unless guarded by a direct literal POSIX branch.
 
 [Invariants]
-- Separates `must` platform aliases (intersection across non-exiting control-flow branches, used
-  only to prove literal POSIX guards) from `may` kill aliases (union across reachable branches,
-  used to flag `os.kill(pid, 0)`), propagating imports out of `try`/`if`/`with`/`for`/`match`.
-- Establishes dedicated lexical scopes for comprehensions (`ListComp`, `SetComp`, `DictComp`,
-  `GeneratorExp`), lambdas, functions, and classes so comprehension targets (e.g. `for sys in xs`)
-  or `NamedExpr` (`:=`) bindings never spoof `os`/`sys` guards.
+- Uses scope-hereditary monotonic `may` taint (`may_os`, `may_kill`, never cleared by rebindings,
+  loops, comprehensions, or exception handlers) to detect every `os.kill(pid, 0)` / `kill(pid, 0)`.
+- Trusts an identifier in `_guard_implications` (`must_os`, `must_sys`) ONLY when bound by a
+  direct top-of-scope `import os` / `import sys` prior to use and never rebound or shadowed by any
+  parameter, assignment, walrus `:=`, loop, comprehension target, `match` pattern, handler, or
+  nested import anywhere in the scope chain (propagated into nested lambdas/functions/classes).
 - Evaluates two-valued `(true_implies_posix, false_implies_posix)` De Morgan implications.
 
 [Timeouts & Locks]
@@ -25,45 +25,10 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from typing import NamedTuple
 
 from storage_temp_ast import iter_direct_nodes, non_import_bound_names, pattern_bound_names
 
-
-class _AliasState(NamedTuple):
-    must_os: frozenset[str]
-    must_sys: frozenset[str]
-    may_os: frozenset[str]
-    may_kill: frozenset[str]
-
-    def drop(self, names: set[str] | frozenset[str]) -> _AliasState:
-        if not names:
-            return self
-        return _AliasState(
-            self.must_os - names,
-            self.must_sys - names,
-            self.may_os - names,
-            self.may_kill - names,
-        )
-
-
-_EMPTY_STATE = _AliasState(frozenset(), frozenset(), frozenset(), frozenset())
 _COMPREHENSION_TYPES = (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)
-
-
-def _join_states(states: list[_AliasState], fallback: _AliasState) -> _AliasState:
-    if not states:
-        return fallback
-    must_os = set(states[0].must_os)
-    must_sys = set(states[0].must_sys)
-    may_os: set[str] = set()
-    may_kill: set[str] = set()
-    for st in states:
-        must_os &= st.must_os
-        must_sys &= st.must_sys
-        may_os |= st.may_os
-        may_kill |= st.may_kill
-    return _AliasState(frozenset(must_os), frozenset(must_sys), frozenset(may_os), frozenset(may_kill))
 
 
 def _stmts_always_exit(stmts: list[ast.stmt]) -> bool:
@@ -74,14 +39,6 @@ def _stmts_always_exit(stmts: list[ast.stmt]) -> bool:
             if _stmts_always_exit(stmt.body) and _stmts_always_exit(stmt.orelse):
                 return True
     return False
-
-
-def _expr_named_stores(expr: ast.AST) -> set[str]:
-    return {
-        sub.target.id
-        for sub in iter_direct_nodes(expr)
-        if isinstance(sub, ast.NamedExpr) and isinstance(sub.target, ast.Name)
-    } | ({expr.target.id} if isinstance(expr, ast.NamedExpr) and isinstance(expr.target, ast.Name) else set())
 
 
 def _guard_implications(expr: ast.AST, os_aliases: frozenset[str], sys_aliases: frozenset[str]) -> tuple[bool, bool]:
@@ -156,56 +113,71 @@ def _target_names(node: ast.AST) -> set[str]:
     return {sub.id for sub in ast.walk(node) if isinstance(sub, ast.Name) and isinstance(sub.ctx, (ast.Store, ast.Del))}
 
 
-def _apply_simple_stmt(stmt: ast.AST, st: _AliasState) -> _AliasState:
-    must_os, must_sys = set(st.must_os), set(st.must_sys)
-    may_os, may_kill = set(st.may_os), set(st.may_kill)
-
-    def _clear(bound: str) -> None:
-        must_os.discard(bound)
-        must_sys.discard(bound)
-        may_os.discard(bound)
-        may_kill.discard(bound)
-
-    # Discard any inline walrus `:=` targets inside expressions in this statement.
-    for sub in iter_direct_nodes(stmt):
-        if isinstance(sub, ast.NamedExpr) and isinstance(sub.target, ast.Name):
-            _clear(sub.target.id)
-
-    if isinstance(stmt, ast.Import):
-        for alias in stmt.names:
-            bound = alias.asname or alias.name.split(".", 1)[0]
-            _clear(bound)
-            if alias.name == "os" or (alias.asname is None and alias.name.startswith("os.")):
-                must_os.add(bound)
-                may_os.add(bound)
-            elif alias.name == "sys":
-                must_sys.add(bound)
-    elif isinstance(stmt, ast.ImportFrom):
-        for alias in stmt.names:
-            if alias.name == "*":
-                if stmt.module == "os":
+def _scope_may_taint(scope: ast.AST, inherited_os: frozenset[str], inherited_kill: frozenset[str]) -> tuple[frozenset[str], frozenset[str]]:
+    """Collect monotonic `may_os` and `may_kill` aliases across `scope` (never cleared)."""
+    may_os = set(inherited_os)
+    may_kill = set(inherited_kill)
+    direct = iter_direct_nodes(scope)
+    for node in direct:
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                bound = alias.asname or alias.name.split(".", 1)[0]
+                if alias.name == "os" or (alias.asname is None and alias.name.startswith("os.")):
+                    may_os.add(bound)
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.name == "*" and node.module == "os":
                     may_kill.add("kill")
-                must_os.clear()
-                must_sys.clear()
-                continue
-            bound = alias.asname or alias.name
-            _clear(bound)
-            if stmt.module == "os" and alias.name == "kill":
-                may_kill.add(bound)
-    elif isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-        _clear(stmt.name)
-    elif isinstance(stmt, ast.Assign):
-        for tgt in stmt.targets:
-            for name in _target_names(tgt):
-                _clear(name)
-    elif isinstance(stmt, (ast.AnnAssign, ast.AugAssign)):
-        for name in _target_names(stmt.target):
-            _clear(name)
-    elif isinstance(stmt, ast.Delete):
-        for tgt in stmt.targets:
-            for name in _target_names(tgt):
-                _clear(name)
-    return _AliasState(frozenset(must_os), frozenset(must_sys), frozenset(may_os), frozenset(may_kill))
+                elif node.module == "os" and alias.name == "kill":
+                    may_kill.add(alias.asname or alias.name)
+    for _ in range(3):
+        for node in direct:
+            rhs: ast.AST | None = None
+            targets: set[str] = set()
+            if isinstance(node, ast.Assign):
+                rhs = node.value
+                for t in node.targets:
+                    targets |= _target_names(t)
+            elif isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None:
+                rhs = node.value
+                targets = _target_names(node.target)
+            if rhs is not None and targets:
+                if isinstance(rhs, ast.Name) and rhs.id in may_os:
+                    may_os |= targets
+                elif _is_dynamic_os_expr(rhs):
+                    may_os |= targets
+                elif isinstance(rhs, ast.Name) and rhs.id in may_kill:
+                    may_kill |= targets
+                elif isinstance(rhs, ast.Attribute) and rhs.attr == "kill" and isinstance(rhs.value, ast.Name) and rhs.value.id in may_os:
+                    may_kill |= targets
+    return frozenset(may_os), frozenset(may_kill)
+
+
+def _scope_shadowed_for_must(scope: ast.AST) -> set[str]:
+    """Return every name bound by non-top-import constructs in `scope` (invalidates `must` guards)."""
+    bad = non_import_bound_names(scope)
+    raw_body = getattr(scope, "body", ())
+    top_stmts = {id(s) for s in raw_body if isinstance(s, ast.stmt)} if isinstance(raw_body, list) else set()
+    import_counts: dict[str, int] = {}
+    has_star_import = False
+    for node in iter_direct_nodes(scope):
+        if isinstance(node, ast.Import):
+            in_top = id(node) in top_stmts
+            for alias in node.names:
+                bound = alias.asname or alias.name.split(".", 1)[0]
+                import_counts[bound] = import_counts.get(bound, 0) + 1
+                is_std = alias.name in {"os", "sys"} or (alias.asname is None and alias.name.startswith("os."))
+                if not in_top or not is_std or import_counts[bound] > 1:
+                    bad.add(bound)
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.name == "*":
+                    has_star_import = True
+                else:
+                    bad.add(alias.asname or alias.name)
+    if has_star_import:
+        bad.update({"os", "sys"})
+    return bad
 
 
 def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
@@ -214,37 +186,45 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
     tree = ast.parse(source, filename=str(path))
     errors: list[str] = []
 
-    def _visit_expr(node: ast.AST, posix_proven: bool, scope_name: str, st: _AliasState, enc: _AliasState) -> None:
+    def _visit_expr(
+        node: ast.AST,
+        posix_proven: bool,
+        scope_name: str,
+        must_os: frozenset[str],
+        must_sys: frozenset[str],
+        may_os: frozenset[str],
+        may_kill: frozenset[str],
+    ) -> None:
         if isinstance(node, ast.Lambda):
             for dflt in (*node.args.defaults, *(d for d in node.args.kw_defaults if d is not None)):
-                _visit_expr(dflt, posix_proven, scope_name, st, enc)
-            l_st = enc.drop(non_import_bound_names(node))
-            _visit_expr(node.body, posix_proven, scope_name, l_st, l_st)
+                _visit_expr(dflt, posix_proven, scope_name, must_os, must_sys, may_os, may_kill)
+            bad = _scope_shadowed_for_must(node)
+            l_may_os, l_may_kill = _scope_may_taint(node, may_os, may_kill)
+            _visit_expr(node.body, posix_proven, scope_name, must_os - bad, must_sys - bad, l_may_os, l_may_kill)
             return
         if isinstance(node, _COMPREHENSION_TYPES):
-            comp_st = st
+            c_must_os, c_must_sys = must_os, must_sys
             for idx, gen in enumerate(node.generators):
-                iter_st = st if idx == 0 else comp_st
-                _visit_expr(gen.iter, posix_proven, scope_name, iter_st, enc)
-                comp_st = comp_st.drop(_target_names(gen.target) | _expr_named_stores(gen.iter))
+                i_os = must_os if idx == 0 else c_must_os
+                i_sys = must_sys if idx == 0 else c_must_sys
+                _visit_expr(gen.iter, posix_proven, scope_name, i_os, i_sys, may_os, may_kill)
+                drop = _target_names(gen.target)
+                c_must_os, c_must_sys = c_must_os - drop, c_must_sys - drop
                 for cond in gen.ifs:
-                    cond_clean = comp_st.drop(_expr_named_stores(cond))
-                    _visit_expr(cond, posix_proven, scope_name, comp_st, enc)
-                    t_pos, _ = _guard_implications(cond, cond_clean.must_os, cond_clean.must_sys)
+                    _visit_expr(cond, posix_proven, scope_name, c_must_os, c_must_sys, may_os, may_kill)
+                    t_pos, _ = _guard_implications(cond, c_must_os, c_must_sys)
                     posix_proven = posix_proven or t_pos
-                    comp_st = cond_clean
             if isinstance(node, ast.DictComp):
-                _visit_expr(node.key, posix_proven, scope_name, comp_st, enc)
-                _visit_expr(node.value, posix_proven, scope_name, comp_st.drop(_expr_named_stores(node.key)), enc)
+                _visit_expr(node.key, posix_proven, scope_name, c_must_os, c_must_sys, may_os, may_kill)
+                _visit_expr(node.value, posix_proven, scope_name, c_must_os, c_must_sys, may_os, may_kill)
             else:
-                _visit_expr(node.elt, posix_proven, scope_name, comp_st, enc)
+                _visit_expr(node.elt, posix_proven, scope_name, c_must_os, c_must_sys, may_os, may_kill)
             return
         if isinstance(node, ast.IfExp):
-            _visit_expr(node.test, posix_proven, scope_name, st, enc)
-            post_test = st.drop(_expr_named_stores(node.test))
-            t_pos, f_pos = _guard_implications(node.test, post_test.must_os, post_test.must_sys)
-            _visit_expr(node.body, posix_proven or t_pos, scope_name, post_test, enc)
-            _visit_expr(node.orelse, posix_proven or f_pos, scope_name, post_test, enc)
+            _visit_expr(node.test, posix_proven, scope_name, must_os, must_sys, may_os, may_kill)
+            t_pos, f_pos = _guard_implications(node.test, must_os, must_sys)
+            _visit_expr(node.body, posix_proven or t_pos, scope_name, must_os, must_sys, may_os, may_kill)
+            _visit_expr(node.orelse, posix_proven or f_pos, scope_name, must_os, must_sys, may_os, may_kill)
             return
         if isinstance(node, ast.Call):
             fn = node.func
@@ -258,9 +238,9 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                 (
                     isinstance(fn, ast.Attribute)
                     and fn.attr == "kill"
-                    and ((isinstance(fn.value, ast.Name) and fn.value.id in st.may_os) or _is_dynamic_os_expr(fn.value))
+                    and ((isinstance(fn.value, ast.Name) and fn.value.id in may_os) or _is_dynamic_os_expr(fn.value))
                 )
-                or (isinstance(fn, ast.Name) and fn.id in st.may_kill)
+                or (isinstance(fn, ast.Name) and fn.id in may_kill)
             )
             if is_os_kill_fn and _is_int_zero(sig_expr) and not posix_proven:
                 errors.append(
@@ -268,127 +248,106 @@ def inspect_storage_module_windows_pid_safety(path: Path) -> list[str]:
                     "(terminates or misprobes processes on Windows; guard with `os.name != 'nt'` or use Win32 `OpenProcess`)"
                 )
         for child in ast.iter_child_nodes(node):
-            _visit_expr(child, posix_proven, scope_name, st, enc)
+            _visit_expr(child, posix_proven, scope_name, must_os, must_sys, may_os, may_kill)
 
-    def _visit_stmt(stmt: ast.stmt, posix_proven: bool, scope_name: str, st: _AliasState, enc: _AliasState) -> tuple[_AliasState, bool]:
-        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            for dec in stmt.decorator_list:
-                _visit_expr(dec, posix_proven, scope_name, st, enc)
-            for tp in getattr(stmt, "type_params", ()):
-                _visit_expr(tp, posix_proven, scope_name, st, enc)
-            for arg in (*stmt.args.posonlyargs, *stmt.args.args, *stmt.args.kwonlyargs, stmt.args.vararg, stmt.args.kwarg):
-                if arg is not None and arg.annotation is not None:
-                    _visit_expr(arg.annotation, posix_proven, scope_name, st, enc)
-            if stmt.returns is not None:
-                _visit_expr(stmt.returns, posix_proven, scope_name, st, enc)
-            for dflt in (*stmt.args.defaults, *(d for d in stmt.args.kw_defaults if d is not None)):
-                _visit_expr(dflt, posix_proven, scope_name, st, enc)
-            f_st = enc.drop(non_import_bound_names(stmt))
-            _visit_stmts(stmt.body, posix_proven, stmt.name, f_st, is_class_body=False)
-            return _apply_simple_stmt(stmt, st), posix_proven
-        if isinstance(stmt, ast.ClassDef):
-            for dec in stmt.decorator_list:
-                _visit_expr(dec, posix_proven, scope_name, st, enc)
-            for tp in getattr(stmt, "type_params", ()):
-                _visit_expr(tp, posix_proven, scope_name, st, enc)
-            for b in stmt.bases:
-                _visit_expr(b, posix_proven, scope_name, st, enc)
-            for kw in stmt.keywords:
-                _visit_expr(kw.value, posix_proven, scope_name, st, enc)
-            c_st = enc.drop(non_import_bound_names(stmt))
-            _visit_stmts(stmt.body, posix_proven, stmt.name, c_st, is_class_body=True, lex_enc=enc)
-            return _apply_simple_stmt(stmt, st), posix_proven
-        if isinstance(stmt, ast.If):
-            _visit_expr(stmt.test, posix_proven, scope_name, st, enc)
-            post_test = st.drop(_expr_named_stores(stmt.test))
-            t_pos, f_pos = _guard_implications(stmt.test, post_test.must_os, post_test.must_sys)
-            b_st = _visit_stmts(stmt.body, posix_proven or t_pos, scope_name, post_test, is_class_body=False, lex_enc=enc)
-            e_st = _visit_stmts(stmt.orelse, posix_proven or f_pos, scope_name, post_test, is_class_body=False, lex_enc=enc)
-            b_exits = _stmts_always_exit(stmt.body)
-            e_exits = bool(stmt.orelse) and _stmts_always_exit(stmt.orelse)
-            survivors: list[_AliasState] = []
-            if not b_exits:
-                survivors.append(b_st)
-            if not e_exits:
-                survivors.append(e_st if stmt.orelse else post_test)
-            next_posix = posix_proven or (b_exits and not stmt.orelse and f_pos)
-            return _join_states(survivors, post_test), next_posix
-        if isinstance(stmt, (ast.For, ast.AsyncFor)):
-            _visit_expr(stmt.iter, posix_proven, scope_name, st, enc)
-            loop_in = st.drop(_target_names(stmt.target) | _expr_named_stores(stmt.iter))
-            b_st = _visit_stmts(stmt.body, posix_proven, scope_name, loop_in, is_class_body=False, lex_enc=enc)
-            e_st = _visit_stmts(stmt.orelse, posix_proven, scope_name, _join_states([loop_in, b_st], loop_in), is_class_body=False, lex_enc=enc)
-            return _join_states([st, b_st, e_st], st), posix_proven
-        if isinstance(stmt, ast.While):
-            _visit_expr(stmt.test, posix_proven, scope_name, st, enc)
-            post_test = st.drop(_expr_named_stores(stmt.test))
-            t_pos, _ = _guard_implications(stmt.test, post_test.must_os, post_test.must_sys)
-            b_st = _visit_stmts(stmt.body, posix_proven or t_pos, scope_name, post_test, is_class_body=False, lex_enc=enc)
-            e_st = _visit_stmts(stmt.orelse, posix_proven, scope_name, post_test, is_class_body=False, lex_enc=enc)
-            return _join_states([post_test, b_st, e_st], post_test), posix_proven
-        if isinstance(stmt, (ast.With, ast.AsyncWith)):
-            cur = st
-            for item in stmt.items:
-                _visit_expr(item.context_expr, posix_proven, scope_name, cur, enc)
-                cur = cur.drop(_expr_named_stores(item.context_expr))
-                if item.optional_vars is not None:
-                    cur = cur.drop(_target_names(item.optional_vars))
-            b_st = _visit_stmts(stmt.body, posix_proven, scope_name, cur, is_class_body=False, lex_enc=enc)
-            return b_st, posix_proven
-        if isinstance(stmt, (ast.Try, getattr(ast, "TryStar", ast.Try))):
-            b_st = _visit_stmts(stmt.body, posix_proven, scope_name, st, is_class_body=False, lex_enc=enc)
-            o_st = _visit_stmts(stmt.orelse, posix_proven, scope_name, b_st, is_class_body=False, lex_enc=enc)
-            # An exception in `body` can arise before or after imports inside `body`.
-            exc_entry = _AliasState(st.must_os & b_st.must_os, st.must_sys & b_st.must_sys, st.may_os | b_st.may_os, st.may_kill | b_st.may_kill)
-            survivors = []
-            if not _stmts_always_exit(stmt.body) and not _stmts_always_exit(stmt.orelse):
-                survivors.append(o_st)
-            for handler in stmt.handlers:
-                if handler.type is not None:
-                    _visit_expr(handler.type, posix_proven, scope_name, exc_entry, enc)
-                h_in = exc_entry.drop({handler.name} if handler.name else set())
-                h_st = _visit_stmts(handler.body, posix_proven, scope_name, h_in, is_class_body=False, lex_enc=enc)
-                if not _stmts_always_exit(handler.body):
-                    survivors.append(h_st)
-            joined = _join_states(survivors, exc_entry)
-            if stmt.finalbody:
-                joined = _visit_stmts(stmt.finalbody, posix_proven, scope_name, joined, is_class_body=False, lex_enc=enc)
-            return joined, posix_proven
-        if isinstance(stmt, ast.Match):
-            _visit_expr(stmt.subject, posix_proven, scope_name, st, enc)
-            post_subj = st.drop(_expr_named_stores(stmt.subject))
-            survivors = []
-            for mc in stmt.cases:
-                c_in = post_subj.drop(pattern_bound_names(mc.pattern))
-                c_pos = posix_proven
-                if mc.guard is not None:
-                    _visit_expr(mc.guard, posix_proven, scope_name, c_in, enc)
-                    c_in = c_in.drop(_expr_named_stores(mc.guard))
-                    t_pos, _ = _guard_implications(mc.guard, c_in.must_os, c_in.must_sys)
-                    c_pos = c_pos or t_pos
-                c_out = _visit_stmts(mc.body, c_pos, scope_name, c_in, is_class_body=False, lex_enc=enc)
-                if not _stmts_always_exit(mc.body):
-                    survivors.append(c_out)
-            return _join_states(survivors, post_subj), posix_proven
-        for child in ast.iter_child_nodes(stmt):
-            _visit_expr(child, posix_proven, scope_name, st, enc)
-        return _apply_simple_stmt(stmt, st), posix_proven
-
-    def _visit_stmts(
+    def _visit_scope(
+        scope: ast.AST,
         stmts: list[ast.stmt],
         posix_proven: bool,
         scope_name: str,
-        st: _AliasState,
+        inh_must_os: frozenset[str],
+        inh_must_sys: frozenset[str],
+        inh_may_os: frozenset[str],
+        inh_may_kill: frozenset[str],
         *,
-        is_class_body: bool,
-        lex_enc: _AliasState | None = None,
-    ) -> _AliasState:
-        cur_st = st
-        cur_posix = posix_proven
-        for stmt in stmts:
-            enc = lex_enc if is_class_body and lex_enc is not None else cur_st
-            cur_st, cur_posix = _visit_stmt(stmt, cur_posix, scope_name, cur_st, enc)
-        return cur_st
+        is_class_body: bool = False,
+    ) -> None:
+        bad = _scope_shadowed_for_must(scope)
+        may_os, may_kill = _scope_may_taint(scope, inh_may_os, inh_may_kill)
+        cur_must_os = inh_must_os - bad
+        cur_must_sys = inh_must_sys - bad
 
-    _visit_stmts(tree.body, False, "<module>", _EMPTY_STATE, is_class_body=False)
+        def _walk_block(
+            block: list[ast.stmt],
+            blk_posix: bool,
+            m_os: frozenset[str],
+            m_sys: frozenset[str],
+            *,
+            top_block: bool,
+        ) -> None:
+            cur_pos = blk_posix
+            cur_o, cur_s = set(m_os), set(m_sys)
+            for stmt in block:
+                fo, fs = frozenset(cur_o), frozenset(cur_s)
+                enc_mo = inh_must_os if is_class_body else fo
+                enc_ms = inh_must_sys if is_class_body else fs
+                enc_may_o = inh_may_os if is_class_body else may_os
+                enc_may_k = inh_may_kill if is_class_body else may_kill
+
+                if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    for dec in stmt.decorator_list:
+                        _visit_expr(dec, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for tp in getattr(stmt, "type_params", ()):
+                        _visit_expr(tp, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for arg in (*stmt.args.posonlyargs, *stmt.args.args, *stmt.args.kwonlyargs, stmt.args.vararg, stmt.args.kwarg):
+                        if arg is not None and arg.annotation is not None:
+                            _visit_expr(arg.annotation, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    if stmt.returns is not None:
+                        _visit_expr(stmt.returns, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for dflt in (*stmt.args.defaults, *(d for d in stmt.args.kw_defaults if d is not None)):
+                        _visit_expr(dflt, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    _visit_scope(stmt, stmt.body, cur_pos, stmt.name, enc_mo, enc_ms, enc_may_o, enc_may_k)
+                elif isinstance(stmt, ast.ClassDef):
+                    for dec in stmt.decorator_list:
+                        _visit_expr(dec, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for tp in getattr(stmt, "type_params", ()):
+                        _visit_expr(tp, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for b in stmt.bases:
+                        _visit_expr(b, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for kw in stmt.keywords:
+                        _visit_expr(kw.value, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    _visit_scope(stmt, stmt.body, cur_pos, stmt.name, enc_mo, enc_ms, enc_may_o, enc_may_k, is_class_body=True)
+                elif isinstance(stmt, ast.If):
+                    _visit_expr(stmt.test, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    t_pos, f_pos = _guard_implications(stmt.test, fo, fs)
+                    _walk_block(stmt.body, cur_pos or t_pos, fo, fs, top_block=False)
+                    _walk_block(stmt.orelse, cur_pos or f_pos, fo, fs, top_block=False)
+                    if not stmt.orelse and f_pos and _stmts_always_exit(stmt.body):
+                        cur_pos = True
+                elif isinstance(stmt, ast.Match):
+                    _visit_expr(stmt.subject, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                    for mc in stmt.cases:
+                        pat_names = pattern_bound_names(mc.pattern)
+                        co, cs = fo - pat_names, fs - pat_names
+                        c_pos = cur_pos
+                        if mc.guard is not None:
+                            _visit_expr(mc.guard, cur_pos, scope_name, co, cs, may_os, may_kill)
+                            t_pos, _ = _guard_implications(mc.guard, co, cs)
+                            c_pos = c_pos or t_pos
+                        _walk_block(mc.body, c_pos, co, cs, top_block=False)
+                else:
+                    for _, val in ast.iter_fields(stmt):
+                        if isinstance(val, list):
+                            if val and all(isinstance(it, ast.stmt) for it in val):
+                                _walk_block(val, cur_pos, fo, fs, top_block=False)
+                            else:
+                                for it in val:
+                                    if isinstance(it, ast.AST):
+                                        _visit_expr(it, cur_pos, scope_name, fo, fs, may_os, may_kill)
+                        elif isinstance(val, ast.AST):
+                            _visit_expr(val, cur_pos, scope_name, fo, fs, may_os, may_kill)
+
+                if top_block and isinstance(stmt, ast.Import):
+                    for alias in stmt.names:
+                        bound = alias.asname or alias.name.split(".", 1)[0]
+                        if bound in bad:
+                            continue
+                        if alias.name == "os" or (alias.asname is None and alias.name.startswith("os.")):
+                            cur_o.add(bound)
+                        elif alias.name == "sys":
+                            cur_s.add(bound)
+
+        _walk_block(stmts, posix_proven, cur_must_os, cur_must_sys, top_block=True)
+
+    _visit_scope(tree, tree.body, False, "<module>", frozenset(), frozenset(), frozenset(), frozenset())
     return errors

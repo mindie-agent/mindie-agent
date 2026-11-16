@@ -286,10 +286,42 @@ class StorageLifecycleGateTests(unittest.TestCase):
                 "def comp_guard_spoof(pid: int, platforms: list[object]) -> list[object]:\n"
                 "    import sys\n"
                 "    return [os.kill(pid, 0) if sys.platform != 'win32' else None for sys in platforms]\n"
+                "def comp_lambda_spoof(pid: int, platforms: list[object]) -> list[object]:\n"
+                "    import sys\n"
+                "    return [(lambda: os.kill(pid, 0) if sys.platform != 'win32' else None)() for sys in platforms]\n"
+                "def comp_real_os_shadow(pid: int) -> list[object]:\n"
+                "    return [os.kill(pid, 0) for os in [os]]\n"
+                "def match_import_spoof(pid: int, event: int, platform: object) -> None:\n"
+                "    match event:\n"
+                "        case 1:\n"
+                "            import sys as platform\n"
+                "    if platform.platform != 'win32':\n"
+                "        os.kill(pid, 0)\n"
+                "def except_mid_import(pid: int, fail: object) -> None:\n"
+                "    try:\n"
+                "        import os as api\n"
+                "        fail()\n"
+                "        api = None\n"
+                "    except ValueError:\n"
+                "        api.kill(pid, 0)\n"
+                "def loop_backedge_import(pid: int) -> None:\n"
+                "    for idx in range(2):\n"
+                "        if idx:\n"
+                "            api2.kill(pid, 0)\n"
+                "        import os as api2\n"
             ),
         )
         errors = sl_gate.verify_storage_lifecycle_hygiene([self.root])
-        for expected in ("bad_and", "try_import_bypass", "comp_guard_spoof"):
+        for expected in (
+            "bad_and",
+            "try_import_bypass",
+            "comp_guard_spoof",
+            "comp_lambda_spoof",
+            "comp_real_os_shadow",
+            "match_import_spoof",
+            "except_mid_import",
+            "loop_backedge_import",
+        ):
             self.assertTrue(any(expected in e for e in errors), (expected, errors))
 
 
