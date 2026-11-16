@@ -392,7 +392,12 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import os\nfrom string import Formatter\np, _ = Formatter().get_field('0.kill', (os,), {})\np(1, 0)\n", "not in storage module allowlist"),
             ("import re\nalias = re\nalias._compile = print\nre.compile('x')\n", "first-class module alias"),
             ("import ctypes\nloader = ctypes.WinDLL\nloader('python311.dll')\n", "first-class/aliased `.WinDLL`"),
-            ("import ctypes\nclass Loader(ctypes.WinDLL):\n    _func_flags_ = 5\n", "disallowed base"),
+            ("import ctypes\nclass Loader(ctypes.WinDLL):\n    _func_flags_ = 5\n", "disallowed"),
+            ("import os, argparse\nprobe = dict(argparse.Namespace._get_kwargs(os.path.os))['kill']\nprobe(1, 0)\n", "banned in storage modules"),
+            ("import ctypes\ndict = ctypes.WinDLL('kernel32').__class__\nclass Loader(dict):\n    pass\n", "banned in storage modules"),
+            ("import ctypes\ncls = type(ctypes.WinDLL('kernel32'))\ncls('python311.dll')\n", "banned in storage modules"),
+            ("from ctypes import wintypes\nwintypes.ctypes.WinDLL('python311.dll')\n", "outside allowlisted stdlib storage APIs"),
+            ("import ctypes\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\nk32.WinExec(b'cmd', 0)\n", "outside allowlisted kernel32 APIs"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
