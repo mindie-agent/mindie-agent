@@ -20,12 +20,13 @@ Shared runtime components: `knowledge`, `remote-dev`, `diagnostics`, `debugger`,
 - **Agent-Native Modules & Bounded Resources (Principle 17 & 18)**:
   - Keep core modules `< 800` lines with a top-30-line `[Role]` / `[Invariants]` / `[Timeouts & Locks]` / `[Side-Effect Policy]` docstring header; comment *why* & hardware invariants (e.g., A3 dual-Die `Phy-ID 0..15`), never defensive excuses.
   - Keep working sets $O(\text{Active State})$ (`<= 512 MiB` control-plane peak; `> 1 GiB` is a bug), stream files `> 50 MB`, keep control paths zero-weight/zero-device-context, and place workloads by measured local/remote (`fleet_probe.py`) specs rather than hardcoded `sys.platform`.
+  - **Bounded Storage & Zero Temp Leak (`P8`)**: Retain at most `Active + Rollback` (`<= 2`) runtime generations plus live-leased/cross-plugin-referenced dirs via two-stage `.trash/` atomic retirement and silent legacy reclamation; validate prepared candidates directly (single-venv build, same-volume `UV_CACHE_DIR`); pair every `mkstemp`/`mkdtemp`/`NamedTemporaryFile(delete=False)` with explicit cleanup and never call unguarded `os.kill(pid, 0)` on Windows.
 
 ## 2. Progressive Disclosure Map (Read Only When Triggered)
 
 Do not preload all docs into context. Read only the reference matching your current task:
 
-- **Historical Postmortems & Anti-Regression Guardrails (`P1–P7`)** → [`docs/historical-issues-and-guardrails.md`](docs/historical-issues-and-guardrails.md) *(Consult when touching auto-update, hooks, timeouts, receipts, C6 distillation, benchmarks, or A2/A3/A5 topology)*
+- **Historical Postmortems & Anti-Regression Guardrails (`P1–P8`)** → [`docs/historical-issues-and-guardrails.md`](docs/historical-issues-and-guardrails.md) *(Consult when touching auto-update, hooks, timeouts, receipts, storage/temp GC, C6 distillation, benchmarks, or A2/A3/A5 topology)*
 - **Architecture & Domain Boundaries** → [`docs/architecture.md`](docs/architecture.md)
 - **Engineering Principles, Testing & Resource Placement** → [`docs/design-principles.md`](docs/design-principles.md), [`docs/testing-architecture.md`](docs/testing-architecture.md) & [`docs/execution-resource-budget-design.md`](docs/execution-resource-budget-design.md)
 - **Harness Plugin Lifecycle, Knowledge & Component Specs** → [`docs/harness-boundary-and-lifecycle.md`](docs/harness-boundary-and-lifecycle.md), [`docs/knowledge-system.md`](docs/knowledge-system.md), [`docs/diagnostics-and-reporting.md`](docs/diagnostics-and-reporting.md), [`docs/profiler-system.md`](docs/profiler-system.md) & [`docs/simulation-system.md`](docs/simulation-system.md)

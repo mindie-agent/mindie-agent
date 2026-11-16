@@ -18,7 +18,7 @@
 | **Python 依赖与隔离运行环境** | `uv sync --locked --no-editable` + 随仓提交的 `uv.lock` | 产品组件组合契约（`product-contract.json`）、平台/解释器身份校验与数据格式检查 | 替代了手写的 `venv`/`pip` 编排脚本与松散的顶层 `requirements.txt` |
 | **会话生命周期 Hook** | 宿主原生 Hook + 本地 SQLite 持久准入 | 任务身份核验、项目授权范围检查、增量游标推进与幂等去重 | Hook 绝不阻塞等待大模型调用，也不额外引入第二套文件队列（Spool） |
 | **后台服务与操作进程树管理** | Windows Job Object；WSL `systemd` 临时用户服务；macOS 轻量 `owner-pipe` 守护 | 服务配置指纹、单消费者锁、操作结果落盘与临时目录清理顺序 | 移除了各适配器里重复的父进程 PID（PPID）猜测逻辑 |
-| **安装绑定与无感切换** | 单一规范安装绑定（Canonical Binding）+ 共享/排他操作锁 | 在锁外构建新版本环境；趁服务空闲时原子切换绑定；运行环境脱离宿主易失缓存目录 | 移除了多代并存路由、复杂会话租约与全局 `current` 软链接 |
+| **安装绑定、无感切换与存储有界回收** | 单一规范安装绑定（Canonical Binding）+ 跨平台进程租约（POSIX `flock` / Windows `LockFileEx`）+ 同卷 `.trash/` 原子退役 | 在锁外单环境构建候选（同卷 `UV_CACHE_DIR` 硬链接）；趁服务空闲时原子切换绑定；仅保留 `Active + Rollback` 及活跃进程/跨插件借用目录，并静默回收历史遗留包袱 | 移除了多代无限堆积目录、候选二次重复建 `.venv`、跨卷全量拷贝与全局 `current` 软链接 |
 | **业务状态与故障恢复** | 权威 Markdown 分块 + SQLite 回执 + `diagnostics` | 隐私脱敏、Token 用量落盘、已完成/失败/`unknown` 对账 | 绝不把结果未知的付费模型调用或远端 Git 写入当成普通任务自动重试 |
 
 ---

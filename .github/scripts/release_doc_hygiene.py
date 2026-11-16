@@ -140,7 +140,8 @@ def product_inputs_changed(base: str, *, repository: Path, head: str = "HEAD") -
         "channels/", "docs/releases/", "README.md", "README.en.md", *PRODUCT_DOC_PATHS,
         ".github/workflows/release.yml", ".github/workflows/pr-checklist.yml",
         ".github/scripts/check_auto_update_readiness.py", ".github/scripts/host_compatibility_gate.py",
-        ".github/scripts/windows_zero_popup_gate.py", ".github/scripts/release_doc_hygiene.py",
+        ".github/scripts/windows_zero_popup_gate.py", ".github/scripts/storage_lifecycle_gate.py",
+        ".github/scripts/release_doc_hygiene.py",
         ".github/scripts/sibling_readme_sync.py", ".github/scripts/sync_org_versions.py",
     )
     result = subprocess.run(

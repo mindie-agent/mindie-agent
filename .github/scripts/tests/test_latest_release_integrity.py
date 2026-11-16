@@ -33,8 +33,11 @@ class CapturedCatalog(Catalog):
             raise AssertionError(f"unexpected transport read: {path}")
         return json.loads((CAPTURES / filename).read_bytes())
 
-    def asset(self, name, tag, filename):
-        return (CAPTURES / filename).read_bytes()
+    def asset(self, name, tag, filename, *, force=False, validate=None):
+        body = (CAPTURES / filename).read_bytes()
+        if validate is not None:
+            validate(body)
+        return body
 
 
 class LatestReleaseIntegrityTests(unittest.TestCase):

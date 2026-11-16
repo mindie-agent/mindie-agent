@@ -59,6 +59,7 @@ from host_compatibility_gate import (
     subprocess_window_kwargs,
     verify_flexible_component_compatibility_impl,
     verify_local_host_compatibility_impl,
+    verify_storage_lifecycle_hygiene,
     verify_windows_windowless_spawns,
     which_native,
 )
@@ -584,13 +585,24 @@ def verify_flexible_component_compatibility(
 
     def _run_windowless(roots: list[Path]) -> list[str]:
         if main_repo is None and not require_siblings and not required_repos:
-            return verify_windows_windowless_spawns(roots)
-        return verify_windows_windowless_spawns(
-            roots,
-            main_repo=main_repo,
-            require_siblings=require_siblings,
-            required_repos=required_repos,
-        )
+            return [
+                *verify_windows_windowless_spawns(roots),
+                *verify_storage_lifecycle_hygiene(roots),
+            ]
+        return [
+            *verify_windows_windowless_spawns(
+                roots,
+                main_repo=main_repo,
+                require_siblings=require_siblings,
+                required_repos=required_repos,
+            ),
+            *verify_storage_lifecycle_hygiene(
+                roots,
+                main_repo=main_repo,
+                require_siblings=require_siblings,
+                required_repos=required_repos,
+            ),
+        ]
 
     return verify_flexible_component_compatibility_impl(
         siblings_roots,
