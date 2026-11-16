@@ -60,6 +60,7 @@ from host_compatibility_gate import (
     verify_flexible_component_compatibility_impl,
     verify_local_host_compatibility_impl,
     verify_windows_windowless_spawns,
+    verify_zero_session_binding_gates,
     which_native,
 )
 from release_doc_hygiene import source_version, verify_release_doc_hygiene
@@ -596,6 +597,11 @@ def verify_flexible_component_compatibility(
         siblings_roots,
         ensure_knowledge_importable=_ensure_knowledge_importable,
         windowless_check=_run_windowless,
+        zero_binding_check=lambda roots: verify_zero_session_binding_gates(
+            roots,
+            require_siblings=require_siblings,
+            required_repos=required_repos,
+        ),
         require_siblings=require_siblings,
     )
 

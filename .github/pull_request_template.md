@@ -8,7 +8,7 @@
 
 - [ ] **1–8. 产品边界与机制复用**：总成本优先、封闭问题工具化、单一职责、按需介入、优先复用成熟组件并直接删除被替代的旧状态机。
 - [ ] **9. 错误可见性与反静默回退（Principle 9 & 14）**：无 `except Exception:` 静默返回 `{}` / `"active"` / `exit 0` 假成功，无 `except OSError:` 误吞 `TimeoutError`，无本地记账超时反杀已成功的远端主结果。
-- [ ] **10–11. 超时算术与反过度防御四大铁律（Principle 15）**：满足 `outer_timeout >= sum(inner_budgets) + cleanup_grace`；SQLite WAL + `3s~5s` 超时且零热路径 `.owner`/Schema 反射；仅不可逆外部写用 `unknown` 且零本地永久自锁死；零跨仓复制 `*_fallback.py`/`*_bootstrap.py`；零内嵌巨型 Python 字符串。
+- [ ] **10–11. 超时算术与反过度防御五大铁律（Principle 15）**：满足 `outer_timeout >= sum(inner_budgets) + cleanup_grace`；SQLite WAL + `3s~5s` 超时且零热路径 `.owner`/Schema 反射；仅不可逆外部写用 `unknown` 且零本地永久自锁死；零跨仓复制 `*_fallback.py`/`*_bootstrap.py`；零内嵌巨型 Python 字符串；本地确定性工具（`remote-dev`/`coordinator`/`profiler`/`sim`/`debugger`/`diagnostics`/`npu-top`）零前置宿主会话/Hook/Nonce/`context_file` 门禁（严格会话门禁仅用于 `knowledge` `P2.1` 与外发导出）。
 - [ ] **12–13. 分级测试、宿主机零污染与 Agent-Native 规范（Principle 16 & 17）**：无防御性凑数/文本 grep 测试，符合 Tier 0 (`<5s`) ~ Tier 3 耗时预算；测试全流程隔离 `MINDIE_DIAGNOSTICS_ROOT` / `$HOME`（严禁污染宿主机 `~/.local`、`~/.config` 或系统后台服务）；核心模块 `< 800` 行且前 30 行具备 `[Role]`/`[Invariants]`/`[Timeouts & Locks]`/`[Side-Effect Policy]` 契约头。
 - [ ] **14. 编码性能、内存/显存有界性与本地/远端规格分流（Principle 18）**：
   - **内存有界性**：主循环常驻内存严格保持 $O(\text{当前活跃状态})$ 而非无界累加全量历史，大文件（`> 50 MB`）采用流式处理；控制/分析组件单进程常规峰值 `<= 512 MiB`，严禁出现 `> 1 GiB` 算法膨胀缺陷。

@@ -40,6 +40,7 @@ from windows_zero_popup_gate import (
     inspect_node_windowless_file,
     verify_windows_windowless_spawns,
 )
+from zero_binding_gate import verify_zero_session_binding_gates
 
 WINDOWS_MOUNT_RE = re.compile(r"^/mnt/[a-zA-Z](?:/|$)")
 WINDOWS_SHIM_SUFFIXES = frozenset({".exe", ".cmd", ".bat", ".ps1"})
@@ -203,10 +204,15 @@ def verify_flexible_component_compatibility_impl(
     *,
     ensure_knowledge_importable: Callable[[list[Path]], bool],
     windowless_check: Callable[[list[Path]], list[str]],
+    zero_binding_check: Callable[[list[Path]], list[str]] | None = None,
     require_siblings: bool = False,
 ) -> list[str]:
     """Verify that the latest shared component code is API-compatible with all 7 host plugins."""
     errors: list[str] = list(windowless_check(siblings_roots))
+    if zero_binding_check is not None:
+        errors.extend(zero_binding_check(siblings_roots))
+    else:
+        errors.extend(verify_zero_session_binding_gates(siblings_roots, require_siblings=require_siblings))
     if not ensure_knowledge_importable(siblings_roots):
         if require_siblings:
             errors.append("knowledge: mindie_knowledge unavailable for R4 host compatibility verification")
@@ -496,6 +502,11 @@ def main(argv: list[str] | None = None) -> int:
         windowless_check=lambda r: verify_windows_windowless_spawns(
             r,
             main_repo=main_repo,
+            require_siblings=args.require_siblings,
+            required_repos=args.release_repo,
+        ),
+        zero_binding_check=lambda r: verify_zero_session_binding_gates(
+            r,
             require_siblings=args.require_siblings,
             required_repos=args.release_repo,
         ),
