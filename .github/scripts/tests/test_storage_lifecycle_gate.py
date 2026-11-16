@@ -309,6 +309,40 @@ class StorageLifecycleGateTests(unittest.TestCase):
                 "        if idx:\n"
                 "            api2.kill(pid, 0)\n"
                 "        import os as api2\n"
+                "def comp_renamed_iter(pid: int) -> list[object]:\n"
+                "    return [elem.kill(pid, 0) for elem in [os]]\n"
+                "def handler_nested_fn(pid: int) -> None:\n"
+                "    try:\n"
+                "        raise ValueError()\n"
+                "    except ValueError:\n"
+                "        def inner_probe(p: int) -> None:\n"
+                "            import os as h_api\n"
+                "            h_api.kill(p, 0)\n"
+                "        inner_probe(pid)\n"
+                "def default_walrus_spoof(pid: int, fake: object) -> None:\n"
+                "    import sys as s_def\n"
+                "    _ = lambda x=(s_def := fake): None\n"
+                "    if s_def.platform != 'win32':\n"
+                "        os.kill(pid, 0)\n"
+                "def long_chain_kill(pid: int) -> None:\n"
+                "    k0 = os.kill\n"
+                "    k1 = k0\n"
+                "    k2 = k1\n"
+                "    k3 = k2\n"
+                "    k4 = k3\n"
+                "    k4(pid, 0)\n"
+                "def nonlocal_spoof(pid: int, fake: object) -> None:\n"
+                "    import sys as s_nl\n"
+                "    def rebind() -> None:\n"
+                "        nonlocal s_nl\n"
+                "        s_nl = fake\n"
+                "    rebind()\n"
+                "    if s_nl.platform != 'win32':\n"
+                "        os.kill(pid, 0)\n"
+                "def startswith_offset_spoof(pid: int) -> None:\n"
+                "    import sys as s_sw\n"
+                "    if not s_sw.platform.startswith('win', 1):\n"
+                "        os.kill(pid, 0)\n"
             ),
         )
         errors = sl_gate.verify_storage_lifecycle_hygiene([self.root])
@@ -321,6 +355,12 @@ class StorageLifecycleGateTests(unittest.TestCase):
             "match_import_spoof",
             "except_mid_import",
             "loop_backedge_import",
+            "comp_renamed_iter",
+            "inner_probe",
+            "default_walrus_spoof",
+            "long_chain_kill",
+            "nonlocal_spoof",
+            "startswith_offset_spoof",
         ):
             self.assertTrue(any(expected in e for e in errors), (expected, errors))
 
