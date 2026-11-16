@@ -40,21 +40,50 @@ _REFLECTIVE_FNS = frozenset(
 _ALLOWED_EXACT_IMPORTS = frozenset(
     {
         "_host_exec", "_winapi", "argparse", "ast", "bounded_process", "collections.abc",
-        "contextlib", "ctypes", "errno", "fcntl", "filesystem", "fnmatch", "genstate",
-        "glob", "hashlib", "host_pin_refresh", "io", "json", "leases", "legacy",
-        "legacy_roots", "lifecycle", "loop.locks", "math", "mindie_knowledge",
+        "contextlib", "ctypes", "errno", "fcntl", "filesystem", "genstate",
+        "hashlib", "host_pin_refresh", "json", "leases", "legacy",
+        "legacy_roots", "lifecycle", "loop.locks", "mindie_knowledge",
         "mindie_knowledge.filesystem", "mindie_knowledge.state_layout",
         "mindie_knowledge.storage", "mindie_knowledge.storage.legacy_roots",
         "mindie_knowledge.storage.lifecycle", "mindie_paths", "msvcrt", "ntpath",
-        "os", "os.path", "pathlib", "paths", "plistlib", "posixpath", "product_contract",
+        "os", "os.path", "pathlib", "paths", "plistlib", "product_contract",
         "re", "remote_state_guard", "select", "shlex", "shutil", "sqlite3", "stat",
         "storage", "storage_common", "storage_gc", "storage_leases", "storage_lifecycle",
         "storage_reclaim", "storage_releases", "storage_spool", "storage_support",
-        "string", "struct", "subprocess", "sys", "tempfile", "threading", "time",
+        "subprocess", "sys", "tempfile", "threading", "time",
         "tomllib", "urllib.parse", "uuid", "uv_cache", "xml.etree", "xml.etree.ElementTree",
     }
 )
-_ALLOWED_FROM_MODULES = _ALLOWED_EXACT_IMPORTS | {"__future__", "typing"}
+_LOCAL_STORAGE_MODULES = frozenset(
+    {
+        "_host_exec", "bounded_process", "filesystem", "genstate", "host_pin_refresh",
+        "leases", "legacy", "legacy_roots", "lifecycle", "loop.locks", "mindie_knowledge",
+        "mindie_knowledge.filesystem", "mindie_knowledge.state_layout",
+        "mindie_knowledge.storage", "mindie_knowledge.storage.legacy_roots",
+        "mindie_knowledge.storage.lifecycle", "mindie_paths", "paths", "product_contract",
+        "remote_state_guard", "storage", "storage_common", "storage_gc", "storage_leases",
+        "storage_lifecycle", "storage_reclaim", "storage_releases", "storage_spool",
+        "storage_support", "uv_cache",
+    }
+)
+_ALLOWED_STDLIB_FROM_PAIRS = frozenset(
+    {
+        ("__future__", "annotations"),
+        ("collections.abc", "Iterator"),
+        ("contextlib", "ExitStack"),
+        ("contextlib", "contextmanager"),
+        ("contextlib", "suppress"),
+        ("ctypes", "wintypes"),
+        ("os", "kill"),
+        ("pathlib", "Path"),
+        ("urllib.parse", "quote"),
+        ("xml.etree", "ElementTree"),
+    }
+)
+_ALLOWED_CLASS_BASE_NAMES = frozenset(
+    {"Exception", "RuntimeError", "ValueError", "OSError", "dict", "set", "object", "NamedTuple"}
+)
+_ALLOWED_FROM_MODULES = _LOCAL_STORAGE_MODULES | {m for m, _ in _ALLOWED_STDLIB_FROM_PAIRS} | {"typing"}
 _ALLOWED_TYPING_NAMES = frozenset(
     {
         "Any", "Callable", "ClassVar", "Dict", "Final", "FrozenSet", "Generator",
@@ -182,6 +211,11 @@ def _collect_tree_facts(
     """Collect `(imported_kill_names, impure_os_sys_names, pure_re_names, capability_errors)`."""
     call_func_ids = {id(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)}
     attr_value_ids = {id(n.value) for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
+    getattr_obj_ids = {
+        id(n.args[0])
+        for n in ast.walk(tree)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "getattr" and len(n.args) >= 2
+    }
     imported_kills: set[str] = set()
     non_import_bound: set[str] = set()
     cap_errors: list[str] = []
@@ -237,14 +271,16 @@ def _collect_tree_facts(
                         f"line {node.lineno} wildcard `from {mod or '.'} import *` is banned in storage modules"
                     )
                     continue
-                if mod == "typing" and alias.name not in _ALLOWED_TYPING_NAMES:
-                    cap_errors.append(
-                        f"line {node.lineno} `from typing import {alias.name}` is banned in storage modules"
-                    )
-                if mod == "ctypes" and alias.name != "wintypes":
-                    cap_errors.append(
-                        f"line {node.lineno} `from ctypes import {alias.name}` is banned in storage modules"
-                    )
+                if mod == "typing":
+                    if alias.name not in _ALLOWED_TYPING_NAMES:
+                        cap_errors.append(
+                            f"line {node.lineno} `from typing import {alias.name}` is banned in storage modules"
+                        )
+                elif (node.level or 0) == 0 and mod not in _LOCAL_STORAGE_MODULES:
+                    if (mod, alias.name) not in _ALLOWED_STDLIB_FROM_PAIRS:
+                        cap_errors.append(
+                            f"line {node.lineno} `from {mod} import {alias.name}` is not in storage module allowlist"
+                        )
                 if (
                     alias.name in _REFLECTIVE_FNS
                     or alias.name in _BANNED_ATTR_NAMES
@@ -271,6 +307,18 @@ def _collect_tree_facts(
     for node in ast.walk(tree):
         if isinstance(node, ast.MatchClass):
             cap_errors.append(f"line {node.lineno} class pattern matching is banned in storage modules")
+        elif isinstance(node, ast.ClassDef):
+            for base in node.bases:
+                ok_base = (isinstance(base, ast.Name) and base.id in _ALLOWED_CLASS_BASE_NAMES) or (
+                    isinstance(base, ast.Attribute)
+                    and isinstance(base.value, ast.Name)
+                    and base.value.id in ctypes_aliases
+                    and base.attr == "Structure"
+                )
+                if not ok_base:
+                    cap_errors.append(
+                        f"line {node.lineno} class `{node.name}` inherits disallowed base in storage modules"
+                    )
         elif isinstance(node, ast.Attribute):
             is_dunder = node.attr.startswith("__") and node.attr.endswith("__")
             if node.attr in _BANNED_ATTR_NAMES:
@@ -291,9 +339,9 @@ def _collect_tree_facts(
                 cap_errors.append(
                     f"line {node.lineno} reflective dunder `.{node.attr}` access is banned in storage modules"
                 )
-            elif isinstance(node.ctx, ast.Load) and node.attr == "kill" and id(node) not in call_func_ids:
+            elif isinstance(node.ctx, ast.Load) and node.attr in {"kill", "WinDLL"} and id(node) not in call_func_ids:
                 cap_errors.append(
-                    f"line {node.lineno} first-class/aliased `.kill` reference is banned in storage modules"
+                    f"line {node.lineno} first-class/aliased `.{node.attr}` reference is banned in storage modules"
                 )
             elif isinstance(node.ctx, ast.Load) and node.attr in _REFLECTIVE_FNS and id(node) not in call_func_ids:
                 cap_errors.append(
@@ -305,6 +353,10 @@ def _collect_tree_facts(
             elif node.id in ctypes_aliases and id(node) not in attr_value_ids:
                 cap_errors.append(
                     f"line {node.lineno} first-class `ctypes` module reference is banned in storage modules"
+                )
+            elif node.id in all_module_aliases and id(node) not in attr_value_ids and id(node) not in getattr_obj_ids:
+                cap_errors.append(
+                    f"line {node.lineno} first-class module alias `{node.id}` reference is banned in storage modules"
                 )
             elif node.id in imported_kills and id(node) not in call_func_ids:
                 cap_errors.append(

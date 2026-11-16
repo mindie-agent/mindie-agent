@@ -389,6 +389,10 @@ class StorageLifecycleGateTests(unittest.TestCase):
             ("import re\ndef shadow(cand):\n    match cand:\n        case re:\n            return re.compile('x', '<x>', 'exec')\n", "non-regex `compile(...)`"),
             ("import re\nre.compile = print\nre.compile('x')\n", "mutating or deleting `.compile`"),
             ("import logging.config\np = logging.config.BaseConfigurator({}).resolve('os.kill')\np(1, 0)\n", "not in storage module allowlist"),
+            ("import os\nfrom string import Formatter\np, _ = Formatter().get_field('0.kill', (os,), {})\np(1, 0)\n", "not in storage module allowlist"),
+            ("import re\nalias = re\nalias._compile = print\nre.compile('x')\n", "first-class module alias"),
+            ("import ctypes\nloader = ctypes.WinDLL\nloader('python311.dll')\n", "first-class/aliased `.WinDLL`"),
+            ("import ctypes\nclass Loader(ctypes.WinDLL):\n    _func_flags_ = 5\n", "disallowed base"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
