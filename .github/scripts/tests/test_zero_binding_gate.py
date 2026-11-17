@@ -325,12 +325,28 @@ class ZeroBindingGateTests(unittest.TestCase):
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/skills/mindie-agent/SKILL.md",
-            "returning (out_tensor, metrics_dict)\nNative call identity still applies to plugin tools\n",
+            "---\nname: mindie-agent\ndescription: test\n---\n"
+            "returning (out_tensor, metrics_dict)\nNative call identity still applies to plugin tools\n"
+            "## 3. Non-Intrusive First-Use Onboarding\n",
+        )
+        self._write(
+            "mindie-agent-codex",
+            "plugins/mindie-agent/skills/mindie-agent/references/workspace-setup.md",
+            "# Workspace setup\n",
+        )
+        self._write(
+            "mindie-agent-agy",
+            "plugins/mindie-agent/skills/mindie-agent/SKILL.md",
+            "---\nname: mindie-agent\ndescription: Manually enable MindIE knowledge\n---\n",
         )
         self._write("diagnostics", "AGENTS.md", "fallback.py Can be vendored as a single file\n")
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
         self.assertTrue(any("(out_tensor, metrics_dict)" in err for err in errors), errors)
         self.assertTrue(any("Native call identity" in err for err in errors), errors)
+        self.assertTrue(any("Non-Intrusive First-Use Onboarding" in err for err in errors), errors)
+        self.assertTrue(any("disable-model-invocation" in err for err in errors), errors)
+        self.assertTrue(any("workspace-setup.md" in err and "skills/" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-agy" in err and "manual" in err for err in errors), errors)
         self.assertTrue(any("diagnostics: AGENTS.md" in err for err in errors), errors)
 
     def test_ad01_opencode_bind_gate_and_harness_thin_delegation(self):

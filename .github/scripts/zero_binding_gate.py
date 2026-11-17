@@ -559,7 +559,35 @@ _FORBIDDEN_SKILL_SNIPPETS: tuple[tuple[str, str], ...] = (
     ("remote, and components MCP call must include a fresh request_nonce", "requires request_nonce on deterministic tools"),
     ("(out_tensor, metrics_dict)", "leaks benchmark-specific verifier tuple signature into production SKILL.md (AD-10)"),
     ("brute-force test capture hashes", "leaks benchmark anti-cheat rule into production SKILL.md (AD-10)"),
+    ("Non-Intrusive First-Use Onboarding", "mixes install/onboarding prompts into runtime SKILL.md"),
+    ("needs_onboarding_prompt", "mixes install/onboarding prompts into runtime SKILL.md"),
+    ("workspace-setup.md", "references install-only workspace setup guide inside runtime SKILL.md"),
+    ("github-authentication.md", "references install-only GitHub login guide inside runtime SKILL.md"),
+    ("user-notice.md", "references install-only consent notice inside runtime SKILL.md"),
+    ("starred/mindie-agent", "mixes install-time GitHub star prompt into runtime SKILL.md"),
 )
+
+_FORBIDDEN_SKILL_FILES: frozenset[str] = frozenset(
+    {"workspace-setup.md", "github-authentication.md", "user-notice.md"}
+)
+
+_MANUAL_TRIGGER_REPOS: frozenset[str] = frozenset(
+    {
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh",
+        "mindie-agent-wb",
+        "mindie-agent-oc",
+    }
+)
+
+
+def _extract_frontmatter(text: str) -> str:
+    if not text.startswith("---\n"):
+        return ""
+    end = text.find("\n---\n", 4)
+    return text[4:end] if end != -1 else ""
 
 
 def _check_prompt_and_guide_hygiene(
@@ -571,10 +599,33 @@ def _check_prompt_and_guide_hygiene(
         repo_dir = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
         if repo_dir is None or not (repo_dir / rel_skill).is_file():
             continue
-        text = (repo_dir / rel_skill).read_text(encoding="utf-8")
+        skill_file = repo_dir / rel_skill
+        text = skill_file.read_text(encoding="utf-8")
         for snippet, reason in _FORBIDDEN_SKILL_SNIPPETS:
             if snippet in text:
                 errors.append(f"{repo_name}: {rel_skill} contains `{snippet}` ({reason})")
+        fm = _extract_frontmatter(text)
+        if repo_name in _MANUAL_TRIGGER_REPOS:
+            if "disable-model-invocation: true" not in fm and "disableModelInvocation: true" not in fm:
+                errors.append(
+                    f"{repo_name}: {rel_skill} missing `disable-model-invocation: true` / `disableModelInvocation: true` in YAML frontmatter"
+                )
+        elif repo_name == "mindie-agent-agy":
+            if "Manually enable MindIE knowledge" in text or "Use this skill only when the user explicitly invokes /mindie-agent" in text:
+                errors.append(
+                    f"{repo_name}: {rel_skill} enforces manual `/mindie-agent` gate on a host without manual-only skill invocation"
+                )
+        for child in sorted(skill_file.parent.rglob("*.md")):
+            rel_child = child.relative_to(repo_dir).as_posix()
+            if child.name in _FORBIDDEN_SKILL_FILES:
+                errors.append(
+                    f"{repo_name}: {rel_child} places installation/onboarding documentation inside runtime `skills/` directory"
+                )
+            elif child != skill_file:
+                child_text = child.read_text(encoding="utf-8")
+                for snippet, reason in _FORBIDDEN_SKILL_SNIPPETS:
+                    if snippet in child_text:
+                        errors.append(f"{repo_name}: {rel_child} contains `{snippet}` ({reason})")
     kimi_dir = resolve_repo("mindie-agent-kimi", siblings_roots, explicit_repos=explicit_repos)
     if kimi_dir is not None and (kimi_dir / "kimi.plugin.json").is_file():
         manifest_text = (kimi_dir / "kimi.plugin.json").read_text(encoding="utf-8")
