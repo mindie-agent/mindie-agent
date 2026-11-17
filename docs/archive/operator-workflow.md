@@ -1,3 +1,8 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/operator-workflow.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/architecture.md`](../architecture.md).
+
 # 从 MindIE 发起算子开发
 
 在会话中通过 `/mindie-agent`（OpenAI Codex 中亦可使用 `$mindie-agent`）描述目标算子、参考源码与远端执行环境后，当前宿主 Agent 会读取工作区已安装的 `ascend-op-workflow` 技能，并直接调用 MindIE 原生工具链完成 Shape/Workload 推导、AscendC 代码生成、有界迭代优化与评测产物回收：

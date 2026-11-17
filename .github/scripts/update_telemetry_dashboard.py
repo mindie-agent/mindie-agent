@@ -50,6 +50,7 @@ CORE_REPOS: list[tuple[str, str, str, str]] = [
     ("mindie-agent-agy", "客户端插件", "Client Plugin", "#4285F4"),
     ("mindie-agent-wb", "客户端插件", "Client Plugin", "#0EC8A9"),
     ("mindie-agent-oc", "客户端插件", "Client Plugin", "#0F766E"),
+    ("harness", "宿主底座", "Host Substrate", "#334155"),
     ("knowledge", "运行时组件", "Core Runtime", "#475569"),
     ("remote-dev", "运行时组件", "Core Runtime", "#475569"),
     ("coordinator", "运行时组件", "Core Runtime", "#475569"),

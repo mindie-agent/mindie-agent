@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
-"""Static AST gate for bounded storage lifecycle, legacy reclamation, and zero temp leak (R4 / Guardrail P8).
+"""Static AST gate for bounded storage lifecycle, Windows PID safety & zero NPU init (R4 / P8).
 
 [Role]
-Verifies that `mindie-agent`, all 7 native harness plugins, and shared/evaluation components
-enforce bounded storage lifecycle GC (`storage` / `storage_gc` / `storage_lifecycle`), delegates
-per-allocation tempfile ownership to `storage_temp_ast.py` and scope-aware Windows PID safety
-checks to `storage_pid_ast.py`, and verifies host sandbox redirection in repository test suites.
+Verifies across `mindie-agent`, `harness`, all 7 native harness plugins, and all shared/evaluation
+components (`knowledge`, `diagnostics`, `remote-dev`, `coordinator`, `debugger`, `npu-top`,
+`profiler`, `sim`, `mindie-bench`) that:
+1. Bounded storage lifecycle GC is wired (either via `mindie_harness` or local `storage*` modules).
+2. Manual tempfile allocations (`mkstemp`, `mkdtemp`, `NamedTemporaryFile(delete=False)`) are
+   cleaned up or ownership-transferred (`storage_temp_ast.py`).
+3. Production modules never call unguarded `os.kill(pid, 0)` on Windows and never execute
+   control-plane top-level `import torch_npu` (`storage_pid_ast.py`).
+4. Repository `tests/` suites isolate host `$HOME`/`USERPROFILE` and `MINDIE_*` roots.
 
 [Invariants]
-- Runs purely on Python stdlib (`ast`, `json`, `pathlib`, `re`, `tomllib`) with zero imports from
-  target repositories and zero subprocesses.
+- Pure Python stdlib (`ast`, `json`, `pathlib`, `re`, `tomllib`) with zero target imports or locks.
 - Enforces `P8` checks whenever a checkout is explicitly targeted via `required_repos` or its
-  manifest version meets `STORAGE_LIFECYCLE_FLOOR_VERSIONS`, allowing historical `channels/0.1.json`
-  validator checkouts (`< P8 floor`) and unversioned minimal unit-test fixtures to coexist cleanly.
-- Caller wiring requires an unshadowed, unreassigned static import and call to a verified storage
-  GC export, rejecting unused imports, reassigned bindings, and arbitrary factory calls.
+  manifest version meets `STORAGE_LIFECYCLE_FLOOR_VERSIONS`.
 
 [Timeouts & Locks]
-- Pure synchronous local file parsing (`< 2s` across all 15 repositories); acquires no locks.
+- Pure synchronous local file parsing (`< 2s` across all repositories); acquires no locks.
 
 [Side-Effect Policy]
 - Strictly read-only static inspection of repository checkouts.
@@ -27,12 +28,15 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 from pathlib import Path
 import re
 import tomllib
-from typing import Sequence
+from typing import Mapping, Sequence
 
+from repo_roots import INDEPENDENT_COMPONENTS, INDEPENDENT_PLUGINS, resolve_repo
 from storage_pid_ast import (
+    inspect_control_plane_torch_npu,
     inspect_helper_windows_pid_safety,
     inspect_storage_module_windows_pid_safety,
 )
@@ -43,10 +47,13 @@ from storage_temp_ast import (
 )
 
 STORAGE_LIFECYCLE_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
+    "harness": (0, 1, 0),
     "knowledge": (0, 13, 22),
     "diagnostics": (0, 5, 15),
     "remote-dev": (0, 11, 12),
     "coordinator": (0, 7, 11),
+    "debugger": (0, 1, 0),
+    "npu-top": (0, 3, 0),
     "profiler": (0, 5, 15),
     "sim": (0, 9, 15),
     "mindie-bench": (0, 4, 10),
@@ -60,10 +67,13 @@ STORAGE_LIFECYCLE_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
 }
 
 PRODUCTION_PYTHON_SCOPES: dict[str, tuple[str, ...]] = {
+    "harness": ("mindie_harness",),
     "knowledge": ("mindie_knowledge",),
     "diagnostics": ("mindie_diagnostics",),
     "remote-dev": ("remote_dev",),
     "coordinator": ("mindie_coordinator",),
+    "debugger": ("mindie_debugger",),
+    "npu-top": ("npu_top",),
     "profiler": ("src", "mindie_profiler"),
     "sim": ("src", "mindie_sim"),
     "mindie-bench": ("src/mindie_bench",),
@@ -89,56 +99,56 @@ REQUIRED_STORAGE_WIRING: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...],
             "configure_same_volume_uv_cache",
         ),
         ("mindie_knowledge/component_runtime.py",),
-        frozenset({"storage", "lifecycle", "leases", "legacy"}),
+        frozenset({"storage", "lifecycle", "leases", "legacy", "mindie_harness"}),
     ),
     (
         "mindie-agent-codex",
         "plugins/mindie-agent/scripts/storage_gc.py",
         ("reclaim_storage", "dispatch_cleanup", "serving_runtime_lease"),
         ("plugins/mindie-agent/scripts/harness_update.py", "plugins/mindie-agent/scripts/component_update.py"),
-        frozenset({"storage_gc", "storage"}),
+        frozenset({"storage_gc", "storage", "mindie_harness"}),
     ),
     (
         "mindie-agent-cc",
         "scripts/storage_lifecycle.py",
         ("runtime_leases", "maintenance_tick", "post_switch", "pre_build_reclaim"),
         ("scripts/release_update.py", "scripts/component_update.py"),
-        frozenset({"storage_lifecycle", "storage_reclaim", "storage_releases", "storage"}),
+        frozenset({"storage_lifecycle", "storage_reclaim", "storage_releases", "storage", "mindie_harness"}),
     ),
     (
         "mindie-agent-kimi",
         "scripts/storage_gc.py",
         ("run", "pre_build", "post_switch", "reclaim_remote_state"),
         ("scripts/updater_check.py", "scripts/component_update.py"),
-        frozenset({"storage_gc", "storage"}),
+        frozenset({"storage_gc", "storage", "mindie_harness"}),
     ),
     (
         "mindie-agent-dsh",
         "scripts/storage_lifecycle.py",
         ("sweep", "safe_sweep", "configure_prebuild_uv_cache", "discard_archives"),
         ("scripts/updater.py", "scripts/setup.py"),
-        frozenset({"storage_lifecycle", "storage"}),
+        frozenset({"storage_lifecycle", "storage", "mindie_harness"}),
     ),
     (
         "mindie-agent-agy",
         "plugins/mindie-agent/scripts/storage_lifecycle.py",
         ("hold_runtime_lease", "reclaim_after_switch", "configure_uv_cache"),
         ("plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mcp_server.py"),
-        frozenset({"storage_lifecycle", "storage"}),
+        frozenset({"storage_lifecycle", "storage", "mindie_harness"}),
     ),
     (
         "mindie-agent-wb",
         "plugins/mindie-agent/scripts/storage_lifecycle.py",
         ("hold_runtime_lease", "post_update_maintenance", "prune_workbuddy_plugin_caches", "configure_uv_cache"),
         ("plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mcp_server.py"),
-        frozenset({"storage_lifecycle", "storage"}),
+        frozenset({"storage_lifecycle", "storage", "mindie_harness"}),
     ),
     (
         "mindie-agent-oc",
         "plugins/mindie-agent/scripts/storage_gc.py",
         ("prune_component_generations", "sweep_legacy_baggage", "post_switch_reclaim", "acquire_service_lease"),
         ("plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mcp_server.py"),
-        frozenset({"storage_gc", "storage_spool", "storage"}),
+        frozenset({"storage_gc", "storage_spool", "storage", "mindie_harness"}),
     ),
 )
 
@@ -152,19 +162,12 @@ VERSION_MANIFESTS: tuple[str, ...] = (
     "plugins/mindie-agent/.codex-plugin/plugin.json",
 )
 
+_INDEPENDENT_EXEMPT = frozenset({*INDEPENDENT_COMPONENTS, *INDEPENDENT_PLUGINS})
 _SKIP_PARTS: frozenset[str] = frozenset({"tests", "test", "__pycache__", "node_modules", "dist", "build"})
 _HOME_ENV_KEYS: frozenset[str] = frozenset({"HOME", "USERPROFILE"})
 _MINDIE_ENV_KEYS: frozenset[str] = frozenset(
     {"MINDIE_CONFIG_HOME", "MINDIE_DATA_HOME", "MINDIE_DIAGNOSTICS_ROOT", "XDG_CONFIG_HOME", "XDG_DATA_HOME"}
 )
-
-
-def _resolve_repo(repo_name: str, siblings_roots: Sequence[Path]) -> Path | None:
-    for root in siblings_roots:
-        candidate = root / repo_name
-        if (candidate / ".git").exists():
-            return candidate
-    return None
 
 
 def _parse_repo_semver(repo_dir: Path) -> tuple[int, int, int] | None:
@@ -205,6 +208,22 @@ def _module_top_level_exports(path: Path) -> set[str]:
     return exports
 
 
+def _delegates_to_mindie_harness(py_files: Sequence[Path]) -> bool:
+    for py_path in py_files:
+        try:
+            tree = ast.parse(py_path.read_text(encoding="utf-8"), filename=str(py_path))
+        except (OSError, SyntaxError):
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import) and any(
+                al.name == "mindie_harness" or al.name.startswith("mindie_harness.") for al in node.names
+            ):
+                return True
+            if isinstance(node, ast.ImportFrom) and (node.module or "").startswith("mindie_harness"):
+                return True
+    return False
+
+
 def _caller_invokes_storage_gc(
     caller_path: Path,
     storage_stems: frozenset[str],
@@ -215,7 +234,6 @@ def _caller_invokes_storage_gc(
 
     def _scope_calls_gc(scope: ast.AST, inherited_mods: set[str], inherited_fns: set[str]) -> bool:
         rebound = non_import_bound_names(scope)
-        # Also invalidate names overwritten by imports from non-storage modules in this scope.
         non_storage_imports: set[str] = set()
         local_mods = set(inherited_mods) - rebound
         local_fns = set(inherited_fns) - rebound
@@ -319,19 +337,33 @@ def _extract_key_constants(expr: ast.AST, all_keys: frozenset[str], key_tables: 
     return set()
 
 
+def _walk_python_files(base: Path) -> list[Path]:
+    out: list[Path] = []
+    if not base.is_dir():
+        return out
+    for dpath, dnames, fnames in os.walk(base):
+        dnames[:] = sorted(d for d in dnames if d not in _SKIP_PARTS and not d.startswith("."))
+        for fn in sorted(fnames):
+            if fn.endswith(".py"):
+                out.append(Path(dpath) / fn)
+    return out
+
+
 def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
     """Verify tests redirect HOME/USERPROFILE and MindIE/XDG roots via real env mutations."""
     candidates: list[Path] = []
     for special in ("conftest.py", "support.py"):
         if (tests_dir / special).is_file():
             candidates.append(tests_dir / special)
-    candidates.extend(sorted(tests_dir.glob("test_*.py"))[:10])
+    walked = _walk_python_files(tests_dir)
+    candidates.extend(p for p in walked if p.name == "conftest.py")
+    candidates.extend([p for p in walked if p.name.startswith("test_")][:12])
 
     all_keys = _HOME_ENV_KEYS | _MINDIE_ENV_KEYS
     redirected_keys: set[str] = set()
     has_env_write = False
 
-    for path in candidates:
+    for path in dict.fromkeys(candidates):
         try:
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         except (OSError, SyntaxError):
@@ -423,13 +455,11 @@ def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
             for sub in iter_direct_nodes(scope_node):
                 if isinstance(sub, ast.Call) and isinstance(sub.func, ast.Attribute):
                     recv, attr = sub.func.value, sub.func.attr
-                    # 1. `monkeypatch.setenv(key, val)`
                     if isinstance(recv, ast.Name) and recv.id in mp_names and attr == "setenv" and len(sub.args) >= 2:
                         ks = _extract_key_constants(sub.args[0], all_keys, effective_tables)
                         if ks:
                             has_env_write = True
                             redirected_keys |= ks
-                    # 2. `os.environ.setdefault(key, val)` or `os.environ.update(mapping)`
                     elif _is_os_environ_expr(recv, os_aliases):
                         if attr == "setdefault" and len(sub.args) >= 2:
                             ks = _extract_key_constants(sub.args[0], all_keys, effective_tables)
@@ -441,7 +471,6 @@ def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
                             if ks:
                                 has_env_write = True
                                 redirected_keys |= ks
-                    # 3. `patch.dict(os.environ, mapping)`
                     elif (
                         isinstance(recv, ast.Name)
                         and recv.id in patch_aliases
@@ -453,7 +482,6 @@ def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
                         if ks:
                             has_env_write = True
                             redirected_keys |= ks
-                # 4. `os.environ[key] = val` (strictly `ast.Store`, never read `ast.Load`)
                 elif isinstance(sub, ast.Assign):
                     for tgt in sub.targets:
                         if (
@@ -472,84 +500,8 @@ def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
 def _iter_scoped_python_files(repo_dir: Path, scopes: Sequence[str]) -> list[Path]:
     found: list[Path] = []
     for scope in scopes:
-        base = repo_dir / scope
-        if not base.is_dir():
-            continue
-        for py_path in sorted(base.rglob("*.py")):
-            rel_parts = py_path.relative_to(base).parts
-            if any(part in _SKIP_PARTS or part.startswith(".") for part in rel_parts):
-                continue
-            found.append(py_path)
+        found.extend(_walk_python_files(repo_dir / scope))
     return found
-
-
-_STORAGE_HELPER_STEMS: frozenset[str] = frozenset({
-    "_host_exec", "bounded_process", "filesystem", "genstate", "host_pin_refresh",
-    "locks", "mindie_paths", "paths", "product_contract", "remote_state_guard", "state_layout",
-})
-
-
-def _storage_reachable_helpers(repo_dir: Path, scopes: Sequence[str], scoped_files: Sequence[Path]) -> tuple[set[Path], list[str]]:
-    repo_resolved = repo_dir.resolve()
-    search_roots = [repo_dir, *(repo_dir / s for s in scopes if (repo_dir / s).is_dir())]
-    queue = [p for p in scoped_files if "storage" in p.parts or p.stem.startswith("storage") or p.stem in _STORAGE_HELPER_STEMS]
-    visited, dyn_errors = set(queue), []
-    def _in_repo(cand: Path) -> bool:
-        return cand.is_file() and "__pycache__" not in cand.parts and cand.resolve().is_relative_to(repo_resolved)
-    while queue:
-        cur = queue.pop()
-        try:
-            tree = ast.parse(cur.read_text(encoding="utf-8"), filename=str(cur))
-        except (OSError, SyntaxError):
-            continue
-        dyn_aliases = {"import_module"}
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and node.module == "importlib":
-                dyn_aliases.update(al.asname or al.name for al in node.names if al.name == "import_module")
-        for node in ast.walk(tree):
-            specs: list[tuple[int, str, str | None, int | None]] = []
-            if isinstance(node, ast.Import):
-                specs.extend((0, al.name, None, None) for al in node.names)
-            elif isinstance(node, ast.ImportFrom):
-                specs.extend((node.level or 0, node.module or "", al.name, None) for al in node.names)
-            elif (
-                isinstance(node, ast.Call)
-                and ((isinstance(node.func, ast.Name) and node.func.id in dyn_aliases) or (isinstance(node.func, ast.Attribute) and node.func.attr == "import_module"))
-            ):
-                if node.args and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
-                    specs.append((0, node.args[0].value, None, node.lineno))
-                else:
-                    dyn_errors.append(f"{cur.relative_to(repo_dir).as_posix()} line {node.lineno} dynamic `import_module(...)` target cannot be resolved")
-            for lvl, mod, name, dyn_line in specs:
-                anchors: list[Path] = []
-                ancestors: list[Path] = []
-                terminals: list[Path] = []
-                if lvl > 0:
-                    anc = cur.parent
-                    ancestors.append(anc / "__init__.py")
-                    for _ in range(lvl - 1):
-                        anc = anc.parent
-                        ancestors.append(anc / "__init__.py")
-                    anchors.append(anc)
-                else:
-                    anchors.extend(search_roots)
-                mp = mod.replace(".", "/")
-                rels = [mp] if mp else []
-                if name and name != "*":
-                    rels.append(f"{mp}/{name}" if mp else name)
-                for anc in anchors:
-                    for rel in rels:
-                        parts = [p for p in rel.split("/") if p]
-                        for idx in range(1, len(parts)):
-                            ancestors.append(anc / "/".join(parts[:idx]) / "__init__.py")
-                        terminals.extend((anc / f"{rel}.py", anc / rel / "__init__.py"))
-                if dyn_line is not None and not any(_in_repo(t) for t in terminals):
-                    dyn_errors.append(f"{cur.relative_to(repo_dir).as_posix()} line {dyn_line} unresolved `import_module({mod!r})` target")
-                for cand in (*ancestors, *terminals):
-                    if _in_repo(cand) and cand not in visited:
-                        visited.add(cand)
-                        queue.append(cand)
-    return visited, dyn_errors
 
 
 def verify_storage_lifecycle_hygiene(
@@ -558,6 +510,7 @@ def verify_storage_lifecycle_hygiene(
     main_repo: Path | None = None,
     require_siblings: bool = False,
     required_repos: Sequence[str] = (),
+    explicit_repos: Mapping[str, Path] | None = None,
     enforce_unversioned: bool = False,
 ) -> list[str]:
     """Verify P8 storage lifecycle wiring, tempfile ownership, Windows PID safety, and test isolation."""
@@ -567,7 +520,11 @@ def verify_storage_lifecycle_hygiene(
     if main_repo is not None and (main_repo / ".github/scripts").is_dir():
         for script_py in sorted((main_repo / ".github/scripts").glob("*.py")):
             try:
-                for detail in inspect_python_temp_hygiene(script_py):
+                for detail in (
+                    *inspect_python_temp_hygiene(script_py),
+                    *inspect_storage_module_windows_pid_safety(script_py),
+                    *inspect_control_plane_torch_npu(script_py),
+                ):
                     rel = script_py.relative_to(main_repo).as_posix()
                     errors.append(f"mindie-agent: {rel} {detail}")
             except SyntaxError as exc:
@@ -576,9 +533,13 @@ def verify_storage_lifecycle_hygiene(
 
     active_repos: dict[str, Path] = {}
     for repo_name, floor in STORAGE_LIFECYCLE_FLOOR_VERSIONS.items():
-        repo_dir = _resolve_repo(repo_name, siblings_roots)
+        try:
+            repo_dir = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
         if repo_dir is None:
-            if repo_name in must_enforce or (require_siblings and repo_name != "mindie-agent-oc"):
+            if repo_name in must_enforce or (require_siblings and repo_name not in _INDEPENDENT_EXEMPT):
                 errors.append(
                     f"{repo_name}: sibling checkout not found in {list(siblings_roots)} for P8 storage lifecycle gate"
                 )
@@ -596,12 +557,25 @@ def verify_storage_lifecycle_hygiene(
             continue
         active_repos[repo_name] = repo_dir
 
+    if "harness" in active_repos:
+        h_dir = active_repos["harness"]
+        h_candidates = (
+            "mindie_harness/runtime/activation.py",
+            "mindie_harness/atomic.py",
+            "mindie_harness/storage.py",
+        )
+        if (h_dir / "mindie_harness").is_dir() and not any((h_dir / rel).is_file() for rel in h_candidates):
+            errors.append(f"harness: missing P8 storage/activation module (expected one of {', '.join(h_candidates)})")
+
     for repo_name, gc_rel, required_exports, caller_rels, storage_stems in REQUIRED_STORAGE_WIRING:
         repo_dir = active_repos.get(repo_name)
         if repo_dir is None:
             continue
+        scoped_py = _iter_scoped_python_files(repo_dir, PRODUCTION_PYTHON_SCOPES.get(repo_name, ()))
         gc_path = repo_dir / gc_rel
         if not gc_path.is_file():
+            if _delegates_to_mindie_harness(scoped_py):
+                continue
             errors.append(f"{repo_name}: missing P8 storage lifecycle module {gc_rel}")
             continue
         try:
@@ -612,13 +586,15 @@ def verify_storage_lifecycle_hygiene(
         missing_defs = [fn for fn in required_exports if fn not in top_exports]
         if missing_defs:
             errors.append(f"{repo_name}: {gc_rel} missing top-level export(s) {missing_defs}")
-        if repo_name == "mindie-agent-oc":
+        if repo_name == "mindie-agent-oc" and not _delegates_to_mindie_harness(scoped_py):
             spool_rel = "plugins/mindie-agent/scripts/storage_spool.py"
             if not (repo_dir / spool_rel).is_file():
                 errors.append(f"{repo_name}: missing bounded spool module {spool_rel}")
 
         present_callers = [rel for rel in caller_rels if (repo_dir / rel).is_file()]
         if not present_callers:
+            if _delegates_to_mindie_harness(scoped_py):
+                continue
             errors.append(f"{repo_name}: missing storage GC caller module ({', '.join(caller_rels)})")
         else:
             valid_gc_attrs = frozenset(top_exports) | frozenset(required_exports)
@@ -630,7 +606,7 @@ def verify_storage_lifecycle_hygiene(
                         break
                 except SyntaxError as exc:
                     errors.append(f"{repo_name}: {rel} syntax error during P8 AST check: {exc}")
-            if not wired:
+            if not wired and not _delegates_to_mindie_harness(scoped_py):
                 errors.append(
                     f"{repo_name}: {', '.join(present_callers)} does not invoke P8 storage lifecycle GC in AST"
                 )
@@ -638,19 +614,16 @@ def verify_storage_lifecycle_hygiene(
     for repo_name, repo_dir in active_repos.items():
         scopes = PRODUCTION_PYTHON_SCOPES.get(repo_name, ())
         scoped_files = _iter_scoped_python_files(repo_dir, scopes)
-        helper_files, dyn_errs = _storage_reachable_helpers(repo_dir, scopes, scoped_files)
-        errors.extend(f"{repo_name}: {d}" for d in dyn_errs)
-        all_checked = sorted(set(scoped_files) | helper_files)
-        for py_path in all_checked:
+        for py_path in scoped_files:
             rel = py_path.relative_to(repo_dir).as_posix()
             try:
                 for detail in inspect_python_temp_hygiene(py_path):
                     errors.append(f"{repo_name}: {rel} {detail}")
-                if "storage" in py_path.parts or py_path.stem.startswith("storage"):
-                    for detail in inspect_storage_module_windows_pid_safety(py_path):
-                        errors.append(f"{repo_name}: {rel} {detail}")
-                elif py_path in helper_files:
-                    for detail in inspect_helper_windows_pid_safety(py_path):
+                pid_fn = inspect_storage_module_windows_pid_safety if ("storage" in py_path.parts or py_path.stem.startswith("storage")) else inspect_helper_windows_pid_safety
+                for detail in pid_fn(py_path):
+                    errors.append(f"{repo_name}: {rel} {detail}")
+                if repo_name not in {"debugger", "profiler", "sim", "mindie-bench"}:
+                    for detail in inspect_control_plane_torch_npu(py_path):
                         errors.append(f"{repo_name}: {rel} {detail}")
             except SyntaxError as exc:
                 errors.append(f"{repo_name}: {rel} syntax error during P8 AST check: {exc}")

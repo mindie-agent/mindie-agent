@@ -18,10 +18,10 @@ MindIE Agent 采用 **`0.Y.0` 特性里程碑 + `0.Y.Z` 维护补丁/组件独�
 
 | 维度 | 版本号与载体 | 实际职责与选择源 | 宿主插件是否需重发 |
 | --- | --- | --- | --- |
-| **特性里程碑（Milestone Release）** | `0.Y.0`（如 `0.1.0` → `0.2.0`） | 重大功能演进或跨组件协议升级；配套十二仓全量基准验证与主仓 [`channels/0.1.json`](../channels/0.1.json) 里程碑清单 | **是**（四个宿主插件对齐升级至新的 `0.Y.0` 里程碑基线） |
-| **宿主插件版本选择（Plugin Release Selection）** | 四个宿主插件仓正式 GitHub Release（`mindie-plugin-release.json`） | 客户端按本机宿主 CLI 版本与 `harness-compatibility.json` 直接从对应插件官方仓库筛选最高兼容正式版（`mindie_knowledge.releases` / `releases_io.py`） | 按插件自身变更独立发版 |
-| **共享组件独立更新（Independent Component Release Update）** | 八个共享组件加评测组件的正式 GitHub Release（`knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`npu-top`、`coordinator`、`mindie-bench`） | 客户端**直接读取各官方组件仓库的正式 GitHub Release**（`mindie_knowledge.component_releases` / `component_runtime.py`），在旁路独立 `uv` 环境中构建并通过 API 探针后等待空闲切换 | **否**（组件独立发版即可被发现，无需仅因单组件补丁连坐重发宿主插件） |
-| **主仓发布通道清单（Product Channel Manifest）** | [`channels/0.1.json`](../channels/0.1.json)（`schema: "mindie-release-channel/1"`） | 记录主产品里程碑（`0.Y.0`）与维护补丁（`0.Y.Z`）经过验证的十二仓 + 七大知识语料库版本与不可变 Commit SHA 组合，供发布流水线门禁与审计溯源使用；**不作为客户端运行时更新的选择源** | 随主产品里程碑或维护补丁汇总更新 |
+| **特性里程碑（Milestone Release）** | `0.Y.0`（如 `0.1.0` → `0.2.0`） | 重大功能演进或跨组件协议升级；配套全量代码仓基准验证与主仓 [`channels/0.1.json`](../channels/0.1.json) 里程碑清单 | **是**（7 款宿主插件对齐升级至新的 `0.Y.0` 里程碑基线） |
+| **宿主插件版本选择（Plugin Release Selection）** | 7 款宿主插件仓正式 GitHub Release（`mindie-plugin-release.json`） | 客户端按本机宿主 CLI 版本与 `harness-compatibility.json` 直接从对应插件官方仓库筛选最高兼容正式版 | 按插件自身变更独立发版 |
+| **共享底座与组件独立更新（Independent Component Release Update）** | 9 个共享组件加评测组件的正式 GitHub Release（`harness`、`knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`npu-top`、`coordinator`、`mindie-bench`） | 客户端**直接读取各官方组件仓库的正式 GitHub Release**，在旁路独立 `uv` 环境中构建并通过 API 探针后等待空闲切换 | **否**（组件独立发版即可被发现，无需仅因单组件补丁连坐重发宿主插件） |
+| **主仓发布通道清单（Product Channel Manifest）** | [`channels/0.1.json`](../channels/0.1.json)（`schema: "mindie-release-channel/1"`） | 记录主产品里程碑（`0.Y.0`）与维护补丁（`0.Y.Z`）经过验证的代码仓与 9 大知识语料库版本及不可变 Commit SHA 组合，供发布流水线门禁与审计溯源使用；**不作为客户端运行时更新的选择源** | 随主产品里程碑或维护补丁汇总更新 |
 
 ### 1. 主仓通道清单（`channels/0.1.json`）的定位与字段身份
 
@@ -90,13 +90,14 @@ gh workflow run release.yml --repo mindie-agent/sim --ref main
 在发布任何共享组件、知识语料、宿主插件或主仓产品组合前后，**必须按实际发布范围完整通过 `R1–R6` 六项门禁**。其中各组件仓的正式 GitHub Release 是客户端独立更新的真实发现源，而主仓 [`channels/0.1.json`](../channels/0.1.json) 仅记录某次主产品汇总验证通过的历史组合快照（允许落后于单个组件的最新正式版）。因此，独立发布单个组件、语料或插件时，无需升版主仓、无需改动 `channels/0.1.json`，也无需连坐修改兄弟仓库的 README：
 
 ```bash
-# 独立组件/语料/插件发布：默认 independent，显式选择待发布仓库；可重复 --release-repo。
-python3 .github/scripts/check_auto_update_readiness.py --release-repo knowledge --require-siblings --verify-local-hosts --verify-github-releases
+# 独立组件/底座/语料/插件发布：默认 independent，显式选择待发布仓库（支持尚未进入历史 channels/0.1.json 的新组件如 harness）；
+# 支持平铺兄弟目录、--siblings-root ../.worktrees（自动识别链接工作树 .git 文件）或精确覆盖 --repo <name>=/abs/path。
+python3 .github/scripts/check_auto_update_readiness.py --release-repo harness --require-siblings --verify-local-hosts --verify-github-releases
 
-# 产品组合发布 / channels/0.1.json 更新：显式启用全量文档一致性检查。
+# 产品组合发布 / channels/0.1.json 更新：显式启用全量活跃文档一致性检查（自动排除 docs/archive/** 历史归档）。
 python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
 
-# 仅在主动发布产品组合时，执行全量写入同步。
+# 仅在主动发布产品组合时，执行全量写入同步（每次运行均显式打印 selected / exercised / missing / unselected 仓库覆盖率）。
 python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
 ```
 

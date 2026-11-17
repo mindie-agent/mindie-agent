@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/knowledge-tiered-testing-plan.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/testing-architecture.md`](../testing-architecture.md).
+
 # L1–L4 架构闭环与知识飞轮分级测试方案
 
-[返回文档中心](README.md) · [分级测试规范](testing-architecture.md) · [上下文与经验演化设计](knowledge-context-and-exploration.md)
+[返回文档中心](../README.md) · [分级测试规范](../testing-architecture.md) · [上下文与经验演化设计](knowledge-context-and-exploration.md)
 
 本方案覆盖 `vllm-ascend`、`operators` 两个领域，面向模型与算子适配、问题诊断、性能优化三类任务。验收分别回答四个问题：知识是否正确且适用、Agent 在 `L1–L4` 四层认知与执行架构中是否正确使用、使用后任务是否改善、经验能否迁移并随新证据修订。四类结果分别报告，不合成一个“知识系统总分”。
 
@@ -10,7 +15,7 @@
 
 | 维度 | 含义 | 使用方式 |
 | --- | --- | --- |
-| **系统认知与执行架构 `L1–L4`** | `L1` 硬件约束与语法基座；`L2` 性能剖析与仿真定界；`L3` Hermes 经验收敛模式；`L4` RSI 去偏置发散探索模式 | 定义 Agent 解决昇腾复杂工程问题的四层认知与执行闭环（详见[系统架构 §4](architecture.md#4-l1l4-四层认知与执行架构及知识飞轮)） |
+| **系统认知与执行架构 `L1–L4`** | `L1` 硬件约束与语法基座；`L2` 性能剖析与仿真定界；`L3` Hermes 经验收敛模式；`L4` RSI 去偏置发散探索模式 | 定义 Agent 解决昇腾复杂工程问题的四层认知与执行闭环（详见[系统架构 §4](../architecture.md#4-l1l4-四层认知与执行架构及知识飞轮)） |
 | **知识飞轮内容类别 `category`** | `axiom / measurement`（约束与测量基线，服务 `L1/L2`）；`sop`（操作规程，服务 `L2/L3`）；`workflow`（决策经验，服务 `L3`）；`mutator`（受控代码变换，服务 `L3/L4`） | 标注 `knowledge` 飞轮中的结构化知识类型（现有 Schema 遗留的 `tier: L1..L4` 字段及下文 `L1-01..L4-05` 用例编号均表示“服务于对应 `L1–L4` 架构层级的知识与闭环能力”，不代表把 `knowledge` 定义为“L1–L4 分级知识库”） |
 | **工程验证范围 `Tier 0–3`** | 纯内存、本地组件、真实 NPU 集成、真实宿主短 Canary | 决定验证环境、频率和预算 |
 | **NPU 物理拓扑规模 `S0–S3`** | `S0` 单 Die 算子微基准、`S1` 2–4 Dies 子集群、`S2` 8–16 Dies 整机/同机 PD 分离、`S3` 双机 RoCE 跨节点 | 决定真实多卡/分布式评测的硬件拓扑层级 |
@@ -20,7 +25,7 @@
 | **宿主执行控制** | DSH 固定标准模式（`preset=standard` / `tools.mode="native"`）与默认思考强度 `reasoningEffort="max"` | 所有对照分组保持同一宿主模式与思考强度；bench 的 `build_dsh_profile` 显式声明 `reasoningEfforts` 与 `tools.mode="native"` |
 | **机制消融** | 角色、账本、检索、并行探索的单因素比较 | 固定其余输入与总预算；本方案的加载、检索和更新条件是独立子实验 |
 
-经验提炼（`knowledge_distill`）是从已验证里程碑中学习并修订知识的过程，可更新任意 `category` 的知识单元。常规 `L3` 任务可以直接复用已知 `mutator` 变换；`L4` 开放探索也可能产出一项新的 `sop` 诊断规程或 `measurement` 边界。以上定义与[系统架构](architecture.md)及[上下文与经验设计](knowledge-context-and-exploration.md)保持一致，产品组和执行档位分别以 [Product value suite v2][B-product-doc]、[TaskSpec][B-models] 为准。
+经验提炼（`knowledge_distill`）是从已验证里程碑中学习并修订知识的过程，可更新任意 `category` 的知识单元。常规 `L3` 任务可以直接复用已知 `mutator` 变换；`L4` 开放探索也可能产出一项新的 `sop` 诊断规程或 `measurement` 边界。以上定义与[系统架构](../architecture.md)及[上下文与经验设计](knowledge-context-and-exploration.md)保持一致，产品组和执行档位分别以 [Product value suite v2][B-product-doc]、[TaskSpec][B-models] 为准。
 
 本方案按 2026-10-20 检查到的源码制定：
 
@@ -78,7 +83,7 @@
 三处实现边界应优先闭合：
 
 1. **离线回放不等于 Agent 行为（需补非模拟适用性与干扰项评测器）。** [knowledge_replay.py][B-replay]已委托生产 `mindie_knowledge.graded.index.RoutingIndex` 并显式标记 `simulation_only=True`，但其 `steps/attempts` 由基线值和未就绪次数推算，增长回放的稀有条件保留来自输入事件。后续必须在 `mindie-bench` 提供直接针对真实 `GradedRepository.query/explain` 的适用性题集与干扰项评测器（区分 `matched`、`mismatch`、`condition_unknown` 与近似干扰项错误采用），并将回放指标与真实轨迹指标严格分栏。
-2. **三轴结果、隐藏输入泛化与回执-反馈桥接需接入执行闭环。** `knowledge` 与 `mindie-bench` 的 `evaluate_rsi_candidate_gates()` / `evaluate_exploration_axes()` 已默认开启 `preserve_subtarget_evidence=True`（`1 < speedup < 目标` 且高于噪声时返回 `verdict="subtarget_valid"`、`distill_ready=True`，不生成 `conditional_avoid` 通用反证）。下一步需在 `mindie-bench` 补齐：（a）候选冻结后的隐藏输入五分类泛化评估（`L4-02`）；（b）从运行回执到 `knowledge_feedback`（`applied` / `evaluated`）及跨会话 `distill`（`U@1 → U@2`）的确定性桥接，且严格遵守[设计原则 14](design-principles.md#14-故障边界禁止静默回退与-unknown-外部状态保护)：**次要回执/反馈/提炼记账失败绝不覆写已成功的主任务验证结果**，设备/环境故障统一标为 `inconclusive`。
+2. **三轴结果、隐藏输入泛化与回执-反馈桥接需接入执行闭环。** `knowledge` 与 `mindie-bench` 的 `evaluate_rsi_candidate_gates()` / `evaluate_exploration_axes()` 已默认开启 `preserve_subtarget_evidence=True`（`1 < speedup < 目标` 且高于噪声时返回 `verdict="subtarget_valid"`、`distill_ready=True`，不生成 `conditional_avoid` 通用反证）。下一步需在 `mindie-bench` 补齐：（a）候选冻结后的隐藏输入五分类泛化评估（`L4-02`）；（b）从运行回执到 `knowledge_feedback`（`applied` / `evaluated`）及跨会话 `distill`（`U@1 → U@2`）的确定性桥接，且严格遵守[设计原则 14](../design-principles.md#14-故障边界禁止静默回退与-unknown-外部状态保护)：**次要回执/反馈/提炼记账失败绝不覆写已成功的主任务验证结果**，设备/环境故障统一标为 `inconclusive`。
 3. **DSH 宿主标准模式与 `max` 思考强度契约固化。** `mindie-bench` 的 `build_dsh_profile` 在生成隔离 DSH profile 时，必须显式固定 `tools.mode="native"`（标准模式，防止环境变量 `DSH_TOOLS_MODE=ptc` 漂移），并在 `providers.bench.models` 声明 `reasoningEfforts` 映射、在 `agent-default-model` 设置默认 `reasoningEffort="max"`，避免 `dsh-llm-pi-ai` 将自定义路由模型判定为不支持推理而拒绝 `max`。
 
 ### 3.2 当前语料视图与业务题
@@ -429,7 +434,7 @@ NPU 成本报告实际物理卡数、Die 数、租约及负载区间；卡时与
 
 题源准备可与组件契约验证并行；Held-out 未就绪不阻塞 Dev 和机制修复，但不能提前发布独立迁移结论。首批代表题用于跑通协议，不设置“全部领域已覆盖”的结论。若基线全成功，先将问题转为成本比较或在 Dev 补充有业务代表性的难题；不通过强制检索、追加候选重试或删除负结果制造收益。
 
-新增实现优先放进现有入口，并严格遵守[工程设计原则](design-principles.md)：
+新增实现优先放进现有入口，并严格遵守[工程设计原则](../design-principles.md)：
 
 - **单一权威与零影子状态机（原则 4、8、15 铁律三）**：`knowledge/graded` 负责条件、依赖、使用事件、提炼与修订；`mindie-bench` 直接调用 `mindie_knowledge.graded` 公开接口，严禁跨仓复制粘贴条件匹配、闭包或提炼影子状态机。
 - **知识仅供参考与自然触发（原则 6、7）**：默认 `advisory` 协议下不强制 Agent 检索或调用 `knowledge_feedback`；无命中或无需检索直接解题（`L1-04`）绝不判失败，禁止增加任务收尾汇报仪式。

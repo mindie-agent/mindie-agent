@@ -4,7 +4,7 @@
 
 MindIE Agent 将可复用的昇腾研发经验组织为带适用条件、代码来源和版本号的结构化知识条目（Knowledge Units），同时支持在本地保留脱敏后的排障会话记录供溯源查阅。当前版本重点覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 三大昇腾主力推理/生成框架与昇腾算子**核心领域，并配套提供推理核心机制、分布式通信、可观测性、算子兼容性与 Agent 工程知识库，服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查**三类场景。
 
-检索引擎与经验提炼运行时由 [`knowledge`](https://github.com/mindie-agent/knowledge) 维护；领域知识分别存放在 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) 等内容仓库中。整体组件分工见[系统架构](architecture.md)，会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，上下文预算与探索机制的扩展设计见[上下文分层、经验演化与开放探索设计](knowledge-context-and-exploration.md)。
+纯知识检索引擎与经验提炼运行时由 [`knowledge`](https://github.com/mindie-agent/knowledge) 维护，跨宿主共享的单状态源 `ExperimentLedger` RSI 探索闭环沉入 [`harness`](https://github.com/mindie-agent/harness)（`mindie_harness.rsi`）；领域知识分别存放在 [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators) 等内容仓库中。整体组件分工见[系统架构](architecture.md)，会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，早期设计推演归档见[历史归档：上下文分层、经验演化与开放探索设计](archive/knowledge-context-and-exploration.md)。
 
 知识检索遵循**按需信息缺口决策（Information-Gap Retrieval）**：当本地代码、调用栈与验证命令已经足以直接推进修复时，无需强制发起知识查询；当任务存在跨模块排障、硬件规范或架构选型缺口时，再按需调用 `knowledge_query` 检索候选，并仅对选中的高价值条目调用 `knowledge_read_ref` 精确展开，避免无关上下文挤占推理窗口（详见 [2026-10-29 按需知识检索验收记录](audits/2026-10-29-knowledge-p0.md)）。
 
@@ -99,7 +99,7 @@ flowchart LR
 
 ### 4.1 触发时机与输入脱敏
 
-`knowledge_distill(inputs, task_state, domain=...)` 在所选证据包含可提炼发现时调用；`task_state` 描述更广的任务状态（`in_flight`、`verified_milestone` 或 `completed`），当存在实质且已验证的里程碑时也可保持为 `in_flight`——该准入语义在已检查的 `knowledge 0.13.17` 与 `0.13.19` 中均已生效。每个 `inputs` 项必须提供 `kind`、`outcome`、`source_locator`、`content` 与 `evidence_refs`，可选 `repetitions`（整数且 ≥ 1）；公开 Schema 与允许取值见 [Windows 知识调用与恢复 · 蒸馏输入与结果](knowledge-invocation-recovery.md#distillation)。`prepare_request` 先执行确定性隐私脱敏与 Gitleaks 扫描。
+`knowledge_distill(inputs, task_state, domain=...)` 在所选证据包含可提炼发现时调用；`task_state` 描述更广的任务状态（`in_flight`、`verified_milestone` 或 `completed`），当存在实质且已验证的里程碑时也可保持为 `in_flight`。每个 `inputs` 项必须提供 `kind`（如 `experiment`、`commit`、`diagnosis`、`hardware_doc`）、`outcome`（`verified`、`refuted`、`observed`）、`source_locator`、`content` 与 `evidence_refs`，可选 `repetitions`（整数且 ≥ 1）；历史恢复案例存档见 [历史归档：Windows 知识调用与恢复](archive/knowledge-invocation-recovery.md)。`prepare_request` 先执行确定性隐私脱敏与 Gitleaks 扫描。
 
 因此，`task_state="in_flight"` 并不无条件返回 `noop`：未完成任务中**有实质证据且已验证的里程碑**仍可被准入；空输入、未验证或琐碎输入才可能产生 `noop`。`Stop` 事件本身不代表任务完成。不要把“任务尚未结束”当成拒绝提炼的唯一理由，也不要把 `noop` 当作已经发布知识变更。
 
@@ -114,8 +114,8 @@ flowchart LR
 ## 5. 独立探索模式（`mode="explore"`）与四步消融验证
 
 当常规排障/调优工作流（`L3`）连续多次未能达成性能目标，而实测耗时距离硬件 Roofline 理论下界仍有明显优化空间时，系统支持切换至**独立探索模式**：
-- 去偏置上下文构建集中在 [`mindie_knowledge.graded.explore`](https://github.com/mindie-agent/knowledge)（通过 `knowledge_query(..., mode="explore")` 暴露给各端插件）；
-- 候选方案调度、多输入泛化校验与留一法消融验证位于 [`mindie_bench.runner.rsi_explorer`](https://github.com/mindie-agent/mindie-bench) 与 [`mindie_bench.runner.rsi_campaign`](https://github.com/mindie-agent/mindie-bench)。
+- 去偏置知识检索集中在纯知识组件 [`mindie_knowledge.graded.explore`](https://github.com/mindie-agent/knowledge)（通过 `knowledge_query(..., mode="explore")` 暴露）；
+- 单状态源 `ExperimentLedger`、停滞检测、多父正交融合（`rsi_crossover`）与探索状态机已统一收敛至共享宿主底座 [`mindie_harness.rsi`](https://github.com/mindie-agent/harness)（`experiment_ledger.py`、`rsi_loop.py`、`rsi_explore.py`、`rsi_crossover.py`），评测运行器 [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) 直接消费该能力执行端到端门禁实验。
 
 ### 5.1 常规调优停滞检测
 

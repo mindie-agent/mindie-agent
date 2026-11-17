@@ -10,37 +10,24 @@
 |---|---|---|
 | [工程设计原则与演进准则](design-principles.md) | [Engineering Design Principles](design-principles.en.md) | 指导 MindIE Agent 工具边界、用户体验、机制复用与容错语义的工程准则 |
 | [参与贡献指南（Agent-First 贡献规范）](../CONTRIBUTING.md) | [Contributing Guide](../CONTRIBUTING.en.md) | 面向 Agent 的两阶段贡献门禁：开发前先读设计原则、提交 PR 后完成 Pre-PR Checklist 自检 |
-| [系统架构与模块分工](architecture.md) | [Architecture & Module Boundaries](architecture.en.md) | 宿主插件、知识引擎、远端执行、集群观测与诊断组件如何协同工作 |
-| [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | 本地实战经验如何脱敏沉淀、生成检索导航，并与社区公共知识库双向流转 |
-| [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | 分层 Token 预算、渐进式加载、`workflow` 决策经验修订、`L4` 开放探索回流与条件化策略选择设计 |
+| [系统架构与模块分工](architecture.md) | [Architecture & Module Boundaries](architecture.en.md) | 7 端宿主薄插件、共享宿主底座 `harness`、纯知识引擎、远端执行、集群观测与诊断组件协同 |
+| [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | `L1–L4` 分级知识检索、按信息缺口精读、脱敏沉淀与社区公共知识库双向流转 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 就地只读解析、纳秒区间归因、Host-Device 异步关联、跨 Run 对比与稳态按需采集设计 |
 | [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.4` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学，以及跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内多工况校准与 856 例 DSH 集群泛化验证 |
-| [Profiler 与 Sim 的结构复用和实测映射](profiler-sim-structure.md) | — | `mindie-model-structure/1` 结构导出、同构算子集合（Cohort）对账、`auto_segment_decode_forwards` 拓扑引导切分与跨芯片实测回放结果 |
-| [`mindie-sim` 接口演进与消费者集成说明](simulation-consumer-migration.md) | — | `0.7.x -> 0.8.x/0.9.x` CLI/API 映射以及在各原生宿主插件、`profiler` 与 `mindie-bench` 中的集成状态 |
-| [A3 预测性能与应达性能双模型方案](a3-performance-modeling-plan.md) | — | 历史 A3 双模型设计与机制演进追溯（仅供背景参考，不再定义当前版执行入口或验收门槛） |
-| [A3 最低模型覆盖集](a3-model-coverage.md) | — | 早期 `se-tools` 九款代表模型的逐层结构与适配状态参考（当前建模范围已扩展至多代硬件） |
-| [A3 双模型实现与验收](a3-performance-modeling-acceptance.md) | — | 旧版实现的调度对照、A3 数据校准与算法复核记录（归档备查，不作为新版统一引擎的验收依据） |
-| [A5 通信展开与竞争校准 TODO](a5-communication-calibration-todo.md) | — | Ascend 950DT (A5) UB/URMA 通信曲线采集、软件栈隔离、MC2 重叠分解与待补测 `AICPU`/`AIV` 展开清单 |
-| [核心能力落地与知识持续演进设计](core-implementation-and-geak-evolution-design.md) | — | 知识上下文预算、经验沉淀回流与组件化落地记录 |
-
-## 算子开发
-
-- [从 MindIE 发起算子开发](operator-workflow.md)：端到端算子开发工作流（默认由宿主编码 Agent 生成与迭代算子，按需挂载 CANNBot 工具链并自动回收远端评测作业）。
+| [历史架构、建模与演进方案归档索引](archive/README.md) | [Historical Archive Index](archive/README.md) | 已完成阶段方案、早期设计推演、接口迁移与历史评审快照归档（`docs/archive/**`，非活跃门禁） |
 
 ## 运行机制与工程规范
 
 | 文档 | English | 核心内容 |
 |---|---|---|
-| [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | 任务身份识别、持久授权设置、操作生命周期管理与本地状态保护机制 |
-| [Windows 知识调用与恢复](knowledge-invocation-recovery.md) | [Windows Knowledge Invocation & Recovery](knowledge-invocation-recovery.en.md) | 配置运行时、PowerShell 编码、Windows 服务启动器、会话授权与分层恢复 |
+| [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | 7 端薄插件与 `mindie-harness` 底座分工、任务身份识别、持久授权、双层 PE `Subsystem == 2` 核验与双代原子切换 |
 | [源码开发、重编译与产物恢复契约](source-rebuild-contract.md) | [Source Rebuild & Recovery](source-rebuild-contract.en.md) | 工作区与容器源码定位、Python 解释器对齐、原生扩展重编译、基线备份恢复及受阻时的原生逃生通道 |
 | [执行资源预期、代码有界性与规格匹配设计](execution-resource-budget-design.md) | — | 代码层内存/显存有界性红线（Principle 18）、工作负载资源预期声明，以及 Windows/macOS/Linux 本机与远端 `fleet_probe` 硬件规格自动匹配分流 |
-| [版本兼容与无感更新](release-compatibility-and-update.md) | [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | 双层版本演进与产品组合清单（`channels/0.1.json`）、组件仓库正式 Release 直接发现、宿主兼容匹配及空闲无感切换 |
-| [诊断日志与故障上报](diagnostics-and-reporting.md) | [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | 本地结构化诊断日志、隐私脱敏红线与可选的 GitHub Issue 自动故障上报 |
+| [版本兼容与无感更新](release-compatibility-and-update.md) | [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | 双层版本演进、产品组合清单（`channels/0.1.json`）、Worktree 原生跨仓门禁（`R1–R6`）及空闲无感切换 |
+| [诊断日志与故障上报](diagnostics-and-reporting.md) | [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | 本地结构化轮转日志、隐私白名单红线、Scale-to-Zero 按需排空与 `7d` `pending` 过期治理 |
 | [原生能力与系统机制复用](native-runtime-reuse.md) | [Native Runtime & Process Reuse](native-runtime-reuse.en.md) | 为什么及如何复用宿主插件市场、`uv` 锁定环境与操作系统原生进程树管理 |
 | [企业网络下的配置与传输](enterprise-network.md) | [Enterprise Network Transport](enterprise-network.en.md) | 企业代理与系统根证书信任、GitHub 登录引导、离线/内网安装更新、后台上传与回环直连规范 |
 | [分级测试体系与用例设计规范](testing-architecture.md) | [Tiered Testing Architecture](testing-architecture.en.md) | 用例有效性红线与基于常备 A2/A3 昇腾真机的 Tier 0 ~ Tier 3 分级验证体系 |
-| [L1–L4 架构闭环与知识飞轮分级测试方案](knowledge-tiered-testing-plan.md) | — | 开源端到端评测协议、L1–L4 覆盖与缺口矩阵、条件化策略选择对照设计、输入防泄露隔离与验收判据 |
 
 ## 版本记录与路线图
 
@@ -62,13 +49,13 @@
 | [`0.0.3` 版本发布记录](releases/0.0.3.md) | [`0.0.3` Release Record](releases/0.0.3.en.md) | L1–L4 渐进式知识披露、`profiler` 与 `sim` 组件发布、CANN 确定性故障分诊及十二仓正式 benchmark |
 | [`0.0.2` 版本发布记录](releases/0.0.2.md) | [`0.0.2` Release Record](releases/0.0.2.en.md) | 插件统一版本、精确组件源码、实机验收范围与常态化十仓 benchmark |
 | [`0.0.1` 版本发布记录](releases/0.0.1.md) | [`0.0.1` Release Record](releases/0.0.1.en.md) | 支持客户端矩阵、配套组件版本映射、实机验证范围与已知限制 |
-| [后续演进路线图](next-steps.md) | [Roadmap & Next Steps](next-steps.en.md) | 下一阶段重点推进的业务基准评测、更多宿主支持与体验优化计划 |
+| [历史演进路线图归档](archive/next-steps.md) | [Archived Roadmap & Next Steps](archive/next-steps.en.md) | 早期阶段推进计划归档备查 |
 
 ## 质量审计
 
 | 文档 | English | 范围 |
 |---|---|---|
-| [**历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）**](historical-issues-and-guardrails.md) | [**Historical Postmortems & Guardrails (`0.0.1 → 0.1.6`)**](historical-issues-and-guardrails.en.md) | 按 `P1–P7` 七大根因域归档历次版本暴露的自动更新、生命周期、超时竞态、回执诚实性、知识预算/C6、评测防失真与 A3 双 Die 拓扑问题及自动化拦截门禁 |
+| [**历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）**](historical-issues-and-guardrails.md) | [**Historical Postmortems & Guardrails (`0.0.1 → 0.1.6`)**](historical-issues-and-guardrails.en.md) | 按 `P1–P8` 根因域归档历次版本暴露的自动更新、生命周期、超时竞态、回执诚实性、知识预算/C6、评测防失真、A3 双 Die 拓扑与有界存储问题及自动化拦截门禁 |
 | [2026-10-29 基准判分器加固与历史归档复判报告](audits/2026-10-23-mindie-bench-integrity.md) | — | 20 个 `mindie-bench` 任务的真实子进程行为级 Oracle 加固（109 项三态与辅助函数/类控制全过）及 74 轮主实验零模型行为级复判账本 |
-| [并行架构评审与修复（2026-10-24）](architecture-review-20261024.md) · [前次简化记录（2026-10-23）](architecture-simplification-20261023.md) | — | 整包预算与去重记账、探索透传、SSH 清理与双 Die 容量放置、评测判分器与证据边界审查记录 |
+| [并行架构评审归档（2026-10-24）](archive/architecture-review-20261024.md) · [前次简化归档（2026-10-23）](archive/architecture-simplification-20261023.md) | — | 整包预算与去重记账、探索透传、SSH 清理与双 Die 容量放置、评测判分器与证据边界历史审查记录 |
 | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | 固定源码版本的跨仓扫描、实测行/分支覆盖率、审查结论与分批修改计划 |

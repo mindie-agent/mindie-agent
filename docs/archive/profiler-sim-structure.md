@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/profiler-sim-structure.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/profiler-system.md`](../profiler-system.md).
+
 # Profiler 与 Sim 的结构复用和实测映射
 
-[Profiler 系统设计](profiler-system.md) · [Sim 建模系统](simulation-system.md) · [系统架构](architecture.md) · [设计原则](design-principles.md) · [文档中心](README.md)
+[Profiler 系统设计](../profiler-system.md) · [Sim 建模系统](../simulation-system.md) · [系统架构](../architecture.md) · [设计原则](../design-principles.md) · [文档中心](../README.md)
 
 本文说明 [`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v0.5.6`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v0.9.4`）如何共享模型结构声明、关联昇腾真机 Profiling 事件，并完成算子同构集合（Cohort）与 Decode / Prefill 主体的端到端精度对账。
 

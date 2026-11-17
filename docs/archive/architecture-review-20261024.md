@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/architecture-review-20261024.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/architecture.md`](../architecture.md).
+
 # 并行架构评审与修复（2026-10-24）
 
-[返回文档中心](README.md) · [前次简化记录（2026-10-23）](architecture-simplification-20261023.md)
+[返回文档中心](../README.md) · [前次简化记录（2026-10-23）](architecture-simplification-20261023.md)
 
 > **记录范围与验收边界说明**：本文记录 2026-10-24 当轮四路并行架构评审及独立源码复核时的发现、补丁与分项验证快照，**仅覆盖实际检查与验证过的代码路径，不能冒充主产品 `0.1.1` 正式版的完整最终验收报告**。主仓 `mindie-agent` 仅承载架构与文档，运行时代码在各组件与宿主插件仓中独立修复。
 

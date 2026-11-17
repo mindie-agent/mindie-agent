@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/knowledge-context-and-exploration.en.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/knowledge-system.en.md`](../knowledge-system.en.md).
+
 # Detailed Design: Context Layers, Experience Evolution, and Open Exploration
 
-[中文](knowledge-context-and-exploration.md) · [Current knowledge system](knowledge-system.en.md) · [Documentation](README.en.md)
+[中文](knowledge-context-and-exploration.md) · [Current knowledge system](../knowledge-system.en.md) · [Documentation](../README.en.md)
 
 **Status: design proposal.** This document defines behavior, measurement, and acceptance for subsequent implementation. It does not claim that the proposed capabilities have shipped. It draws on local implementation checks and public sources read on 2026-10-20. Implementation can be assigned to Gemini, DeepSeek, or other contributors; this repository owns the design.
 
@@ -10,7 +15,7 @@ The goal is to improve the next engineering decision while controlling the total
 2. **Experience:** turn task facts into reusable conclusions, update existing knowledge, and validate, revise, or remove it from default retrieval through later use.
 3. **Exploration:** identify gaps in established methods, run discriminating experiments, evaluate results, and return findings with explicit conditions to the experience system.
 
-Performance artifact access, targeted capture, accounting, and comparison are specified in the companion [Profiler design](profiler-system.en.md). This document covers budgets, use, and revision when that evidence enters context and experience.
+Performance artifact access, targeted capture, accounting, and comparison are specified in the companion [Profiler design](../profiler-system.en.md). This document covers budgets, use, and revision when that evidence enters context and experience.
 
 ## 1. Decisions and boundaries
 
@@ -55,7 +60,7 @@ Fix assembly and accounting before adapting budgets. Adaptation based on incorre
 ### 3.1 Knowledge content categories (`category`) in the `knowledge` flywheel
 
 > [!IMPORTANT]
-> **Avoid calling the knowledge base an "L1–L4 knowledge base"**: `L1–L4` denotes the 4-tier cognitive and execution architecture (see [Architecture §4](architecture.en.md#4-l1l4-cognitive--execution-architecture-and-the-knowledge-flywheel)). Structured units inside the `knowledge` flywheel are organized by **semantic `category`** and serve the `L1–L4` architecture layers as needed (the `tier: L1..L4` field in the existing schema is merely a legacy compatibility alias mapping to the four categories below):
+> **Avoid calling the knowledge base an "L1–L4 knowledge base"**: `L1–L4` denotes the 4-tier cognitive and execution architecture (see [Architecture §4](../architecture.en.md#4-l1l4-cognitive--execution-architecture-and-the-knowledge-flywheel)). Structured units inside the `knowledge` flywheel are organized by **semantic `category`** and serve the `L1–L4` architecture layers as needed (the `tier: L1..L4` field in the existing schema is merely a legacy compatibility alias mapping to the four categories below):
 
 | Knowledge Content Category (`category`) | Architecture Layer Served (schema alias `tier`) | Content | Question answered |
 | --- | --- | --- | --- |
@@ -595,7 +600,7 @@ A minimal complete replay spans two tasks: a verified milestone in A creates `U@
 
 ### 13.3 Behavioral acceptance
 
-Follow the [testing architecture](testing-architecture.en.md), testing actual behavior:
+Follow the [testing architecture](../testing-architecture.en.md), testing actual behavior:
 
 | Scenario | Required behavior |
 | --- | --- |

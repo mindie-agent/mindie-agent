@@ -49,9 +49,17 @@ class ZeroBindingGateTests(unittest.TestCase):
                     "HOME",
                     "USERPROFILE",
                     "APPDATA",
+                    "LOCALAPPDATA",
+                    "XDG_CONFIG_HOME",
+                    "XDG_DATA_HOME",
+                    "XDG_STATE_HOME",
+                    "XDG_CACHE_HOME",
                     "MINDIE_CONFIG_HOME",
                     "MINDIE_DATA_HOME",
                     "MINDIE_DIAGNOSTICS_ROOT",
+                    "REMOTE_DEV_AUTH_DIR",
+                    "UV_CACHE_DIR",
+                    "TMPDIR",
                 )
             },
         )
@@ -160,6 +168,24 @@ class ZeroBindingGateTests(unittest.TestCase):
             "mindie-agent-dsh",
             "scripts/component_mcp.py",
             "def handle(message):\n    return component_tools.execute('sim', {})\n",
+        )
+        self._write(
+            "mindie-agent-oc",
+            "plugins/mindie-agent/scripts/mcp_server.py",
+            "_CONNECTION_SESSION_ID = 'oc-mcp-1'\n\n"
+            "def _resolve_session(surface, name, args):\n"
+            "    if surface == 'knowledge':\n"
+            "        return claim_bind('id', name, args)\n"
+            "    return _CONNECTION_SESSION_ID\n",
+        )
+        self._write(
+            "harness",
+            "mindie_harness/mcp/router.py",
+            "_CONNECTION_SESSION_ID = 'harness-mcp-1'\n\n"
+            "def dispatch(surface, name, args):\n"
+            "    if surface == 'knowledge':\n"
+            "        return claim_bind('id', name, args)\n"
+            "    return _CONNECTION_SESSION_ID\n",
         )
 
     def test_valid_sibling_checkouts_pass_zero_binding_gate(self):
@@ -306,6 +332,29 @@ class ZeroBindingGateTests(unittest.TestCase):
         self.assertTrue(any("(out_tensor, metrics_dict)" in err for err in errors), errors)
         self.assertTrue(any("Native call identity" in err for err in errors), errors)
         self.assertTrue(any("diagnostics: AGENTS.md" in err for err in errors), errors)
+
+    def test_ad01_opencode_bind_gate_and_harness_thin_delegation(self):
+        # Reproduce the exact AD-01 OpenCode bug (`_with_bind_property` + unguarded `claim_bind` on deterministic tools)
+        self._write(
+            "mindie-agent-oc",
+            "plugins/mindie-agent/scripts/mcp_server.py",
+            "def _with_bind_property(tool):\n"
+            "    tool['inputSchema']['properties']['_mindie_bind_id'] = {'type': 'string'}\n"
+            "    return tool\n\n"
+            "def _resolve_session(surface, name, args):\n"
+            "    return claim_bind(args.get('_mindie_bind_id'), name, args)\n",
+        )
+        errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
+        self.assertTrue(any("mindie-agent-oc" in err and "_with_bind_property" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-oc" in err and "_CONNECTION_SESSION_ID" in err for err in errors), errors)
+
+        # Thin host plugin delegating to `mindie_harness` passes when `harness` enforces P2.7 + P2.1
+        self._write(
+            "mindie-agent-oc",
+            "plugins/mindie-agent/scripts/mcp_server.py",
+            "from mindie_harness.mcp_gateway import dispatch\n\ndef main():\n    return dispatch('remote', 'ping', {})\n",
+        )
+        self.assertEqual(zgate.verify_zero_session_binding_gates([self.root], require_siblings=True), [])
 
 
 if __name__ == "__main__":

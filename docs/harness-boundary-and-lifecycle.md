@@ -16,8 +16,9 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 | 层级 / 模块 | 负责什么 | 不做什么 |
 | --- | --- | --- |
 | **宿主原生插件管理器** | 插件包的下载、安装与已安装版本记录 | 不代替 MindIE 做跨宿主兼容性筛选 |
-| **宿主插件适配器**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 识别宿主原生任务身份、定位可信 Transcript、提取公开对话、调用宿主原生轻量小模型、提供发布清单与锁定依赖（`uv.lock`）及后台静默更新 | 不自己维护第二套知识数据库或重复的进程守护状态机 |
-| **共享知识引擎**（`knowledge`） | 管理授权与增量游标、执行确定性隐私脱敏、协调分块目录生成、提供基于 `TechnicalTokenizerV1` 的 ReMe 检索、处理 PR 发布回执与故障恢复 | 不直接耦合特定宿主的私有目录结构，也不靠猜测目录或时间戳来认领任务 |
+| **宿主插件薄适配层**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 宿主协议清单、生命周期 Hook 转发、可信 Transcript 脱敏提取、宿主原生小模型桥接及锁定依赖（`uv.lock`） | 不各自复制维护进程守护、MCP 网关或更新状态机 |
+| **共享宿主底座**（`harness` / `mindie-harness`） | 跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换、长驻并发 MCP 网关（`P2.7` 零绑定确定性直通 vs. `P2.1` `knowledge_*` 准入）以及单状态源 `ExperimentLedger` `rsi` 优化闭环 | 不混入特定宿主的私有 UI/Transcript 解析逻辑，也不在只读检查时凭空创建空 SQLite 库 |
+| **共享知识引擎**（`knowledge`） | 纯知识能力：管理授权与增量游标、执行确定性隐私脱敏、协调分块目录生成、提供基于 `TechnicalTokenizerV1` 的 ReMe 与 `L1–L4` 检索、处理 PR 发布回执与故障恢复 | 不直接耦合特定宿主的私有目录结构，也不靠猜测目录或时间戳来认领任务 |
 | **远端开发与诊断组件**（`remote-dev` / `diagnostics`） | 提供 SSH 远端文件读写/后台长作业执行、有界本地诊断日志，以及受统一贡献开关控制的自动故障上报 | SSH 远端操作与本地日志不依赖贡献开关；公开故障上报严格受该开关约束，且绝不截断用户的远端作业输出 |
 
 日常开发中的两类能力边界清晰分离：
@@ -48,13 +49,13 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 
 ### 2.4 Shell 输入编码、原生会话身份、领域租约与 Windows 服务启动器
 
-- **Shell 传输不等于原生授权**：PowerShell 的 `$OutputEncoding` 与 `Out-File` / `>` 重定向只决定 CLI 收到的字节；ASCII 替换或 UTF-16LE 文件属于传输层问题，不能通过重复 `/mindie-agent` 修复，也不构成会话授权。
-- **原生会话身份与会话授权**：`CODEX_THREAD_ID` 必须由当前宿主工具环境提供；不得伪造、跨会话复制或拼装内部字段。会话授权按当前会话独立校验，不跨 Fork 或子代理继承。
+- **Shell 传输不等于原生授权（UTF-8 管道与原子代际绑定）**：PowerShell 的 `$OutputEncoding` 与 `Out-File` / `>` 重定向只决定 CLI 收到的字节；Windows PowerShell 调用本地 CLI 传输非 ASCII JSON 时应显式设置 `[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)` 并走 `stdin` 管道（避免 UTF-16LE 重定向损坏载荷）。同时，已激活运行时的 `(python, runtime_scripts)` 必须同代原子绑定，严禁新旧两代脚本与解释器混搭加载。
+- **原生会话身份与会话授权**：`CODEX_THREAD_ID` 等原生会话标识必须由当前宿主工具环境提供；不得伪造、跨会话复制或拼装内部字段。会话授权按当前会话独立校验，不跨 Fork 或子代理继承。
 - **领域租约独立存在**：公共检索可凭当前会话在默认引擎上的授权完成所选领域路由；但面向所选领域的蒸馏与会话采集绑定还必须具备该领域自身的有效租约，缺少该租约时蒸馏返回 `lease_required`；`knowledge_inactive` 也可能在查询阶段出现。
-- **持久贡献授权与范围独立**：贡献开关、目标仓库与授权项目范围跨升级持久保存，独立于会话授权和领域租约；共享关闭或采集超出范围时，不应为满足健康检查而冷启动采集。
-- **Windows 服务启动器能力独立**：知识 API 可用不等于计划任务入口可用。注册与恢复启动前必须校验实际入口二进制的 PE `Subsystem == 2`；API 通过但服务启动器不可用应如实报告为服务未就绪，而不是通过修补解释器二进制绕过。
+- **持久贡献授权与范围独立**：贡献开关、目标仓库与授权项目范围跨升级持久保存（`mindie-consent.json` 在代际切换与 GC 期间永不改写或删除），独立于会话授权和领域租约；共享关闭或采集超出范围时，不应为满足健康检查而冷启动采集。
+- **Windows 服务启动器能力独立（双层 PE `Subsystem == 2` 核验）**：知识 API 可用不等于后台计划任务入口可用。注册与恢复启动前必须同时校验虚拟环境 `.venv\Scripts\pythonw.exe` 及其 `pyvenv.cfg` 所指向基底 `home\pythonw.exe` 的真实 PE 头 `OptionalHeader.Subsystem == 2`（`IMAGE_SUBSYSTEM_WINDOWS_GUI`），拒绝任何改名伪装的控制台二进制；API 通过但服务启动器不可用应如实报告为服务未就绪，绝不通过修补二进制绕过。
 
-授权矩阵、按能力就绪判据与恢复步骤见[会话、域与贡献授权](knowledge-invocation-recovery.md#session-authorization)与[按能力判断就绪](knowledge-invocation-recovery.md#readiness)。
+历史事故复盘、授权矩阵与分层恢复细节存档于[历史归档：Windows 知识调用与恢复](archive/knowledge-invocation-recovery.md)。
 
 ---
 

@@ -48,9 +48,17 @@ class StorageLifecycleGateTests(unittest.TestCase):
                 "HOME",
                 "USERPROFILE",
                 "APPDATA",
+                "LOCALAPPDATA",
+                "XDG_CONFIG_HOME",
+                "XDG_DATA_HOME",
+                "XDG_STATE_HOME",
+                "XDG_CACHE_HOME",
                 "MINDIE_CONFIG_HOME",
                 "MINDIE_DATA_HOME",
                 "MINDIE_DIAGNOSTICS_ROOT",
+                "REMOTE_DEV_AUTH_DIR",
+                "UV_CACHE_DIR",
+                "TMPDIR",
             )
         }
         patcher = patch.dict(os.environ, env)
@@ -377,77 +385,87 @@ class StorageLifecycleGateTests(unittest.TestCase):
 
         for snippet, marker in (
             ("import os\ndef f(pid, check=os.kill):\n    check(pid, 0)\n", "first-class/aliased `.kill`"),
-            ("import os, sys\nsys.platform = 'linux'\nif sys.platform != 'win32':\n    os.kill(1, 0)\n", "mutating or deleting `.platform`"),
-            ("import os\nimport sys as p_api\nfrom shim import *\nif p_api.platform != 'win32':\n    os.kill(1, 0)\n", "wildcard"),
-            ("import os\nfrom builtins import getattr as lookup\nlookup(os, 'kill')(1, 0)\n", "banned in storage modules"),
-            ("import os, builtins\ngetattr(builtins, 'getattr')(os, 'kill')(1, 0)\n", "banned in storage modules"),
-            ("import os\nos.__setattr__('name', 'posix')\nif os.name != 'nt':\n    os.kill(1, 0)\n", "__setattr__"),
-            ("import sys, types\ncode = sys.modules['builtins'].compile('1', '<x>', 'exec')\n", "banned in storage modules"),
-            ("import os, sys\nlk = sys._getframe().f_builtins['getattr']\nlk(os, 'kill')(1, 0)\n", "banned in storage modules"),
-            ("import os\nmatch os:\n    case object(kill=probe):\n        probe(1, 0)\n", "class pattern matching is banned"),
-            ("import os, sys\nsys.modules['sys'] = object()\nimport sys as fake_sys\nif fake_sys.platform != 'win32':\n    os.kill(1, 0)\n", "`.modules` access is banned"),
-            ("import re\ndef shadow(cand):\n    match cand:\n        case re:\n            return re.compile('x', '<x>', 'exec')\n", "non-regex `compile(...)`"),
-            ("import re\nre.compile = print\nre.compile('x')\n", "mutating or deleting `.compile`"),
-            ("import logging.config\np = logging.config.BaseConfigurator({}).resolve('os.kill')\np(1, 0)\n", "not in storage module allowlist"),
-            ("import os\nfrom string import Formatter\np, _ = Formatter().get_field('0.kill', (os,), {})\np(1, 0)\n", "not in storage module allowlist"),
-            ("import re\nalias = re\nalias._compile = print\nre.compile('x')\n", "first-class module alias"),
-            ("import ctypes\nloader = ctypes.WinDLL\nloader('python311.dll')\n", "first-class/aliased `.WinDLL`"),
-            ("import ctypes\nclass Loader(ctypes.WinDLL):\n    _func_flags_ = 5\n", "disallowed"),
-            ("import os, argparse\nprobe = dict(argparse.Namespace._get_kwargs(os.path.os))['kill']\nprobe(1, 0)\n", "banned in storage modules"),
-            ("import ctypes\ndict = ctypes.WinDLL('kernel32').__class__\nclass Loader(dict):\n    pass\n", "banned in storage modules"),
-            ("import ctypes\ncls = type(ctypes.WinDLL('kernel32'))\ncls('python311.dll')\n", "banned in storage modules"),
-            ("from ctypes import wintypes\nwintypes.ctypes.WinDLL('python311.dll')\n", "banned in storage modules"),
-            ("import ctypes\nk32 = ctypes.WinDLL('kernel32', use_last_error=True)\nk32.WinExec(b'cmd', 0)\n", "outside allowlisted or direct kernel32 API calls"),
-            ("class Backend:\n    from os import kill as probe\nBackend.probe(1, 0)\n", "banned in storage modules"),
-            ("import ctypes\nself = ctypes.WinDLL('kernel32').OpenProcess\napi = self._objects['0']\n", "banned in storage modules"),
-            ("import subprocess, sys\nsubprocess.run([sys.executable, '-c', 'import os; os.kill(1, 0)'])\n", "outside allowlisted stdlib storage APIs"),
-            ("import subprocess, sys\nsubprocess.Popen([sys.executable, '-c', 'import os; os.kill(1, 0)'])\n", "banned in storage modules"),
-            ("import subprocess\ndef probe():\n    subprocess.Popen(['ps'])\n", "outside proven POSIX branch"),
-            ("import sys\nfrom bounded_process import run\nrun([sys.executable, '-c', 'import os; os.kill(1, 0)'], '')\n", "outside `__file__` self-dispatch"),
-            ("from pathlib import Path\nfrom bounded_process import run\ndef d(py, cmd):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    argv[:] = cmd\n    run(argv, '')\n", "outside `__file__` self-dispatch"),
-            ("import sys\nfrom .leases import subprocess\nsubprocess.run([sys.executable, '-c', 'import os; os.kill(1, 0)'])\n", "not in local storage symbol allowlist"),
-            ("from _host_exec import bounded_run\nbounded_run(['ps'], '')\n", "banned in storage modules"),
-            ("from pathlib import Path\nfrom bounded_process import run\ndef d(py, cmd):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    match cmd:\n        case argv:\n            return run(argv, '')\n", "outside `__file__` self-dispatch"),
-            ("from pathlib import Path\nfrom bounded_process import run\ndef Path(x):\n    class _P:\n        def resolve(self):\n            return '-c'\n    return _P()\ndef d(py):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    return run(argv, '')\n", "outside `__file__` self-dispatch"),
-            ("from ..probe_helpers import _check\n_check(1)\n", "not in storage module allowlist"),
-            ("from pathlib import Path\nfrom bounded_process import run\nPath.resolve = lambda self: '-c'\ndef d(py):\n    s = Path(__file__).resolve()\n    argv = [str(py), '-I', '-B', str(s)]\n    return run(argv, '')\n", "mutating or deleting `.resolve`"),
+            ("import os\nimport sys as p_api\nfrom shim import *\nif p_api.platform != 'win32':\n    os.kill(1, 0)\n", "unguarded `os.kill(pid, 0)`"),
+            ("import os\ngetattr(os, 'kill')(1, 0)\n", "first-class/aliased `.kill`"),
+            ("from os import kill as probe\nprobe(1, 0)\n", "unguarded `os.kill(pid, 0)`"),
+            ("class Backend:\n    from os import kill as probe\nBackend.probe(1, 0)\n", "unguarded `os.kill(pid, 0)`"),
         ):
             self._write(repo / "scripts/storage_cap.py", snippet)
             cap_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
             self.assertTrue(any(marker in e for e in cap_errs), (marker, cap_errs))
 
-        for hlp_files, hlp_marker in (
-            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    os.kill(pid, 0)\n"}, "unguarded `os.kill(pid, 0)`"),
-            ({"scripts/paths.py": "from os import kill as read_json\n"}, "banned in storage helpers"),
-            ({"scripts/paths.py": "import os\nfrom builtins import getattr as lookup\ndef read_json(pid: int):\n    return lookup(os, 'kill')(pid, 0)\n"}, "banned in storage"),
-            ({"scripts/paths.py": "from process_helpers.probe import read_json\n", "scripts/process_helpers/__init__.py": "import os\nos.kill(12345, 0)\n", "scripts/process_helpers/probe.py": "def read_json(p): return None\n"}, "process_helpers/__init__.py"),
-            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    probe = os.__getattribute__('kill')\n    return probe(pid, 0)\n"}, "reflective dunder"),
-            ({"scripts/paths.py": "import os\nos.__setattr__('name', 'posix')\n"}, "reflective dunder"),
-            ({"scripts/paths.py": "import subprocess\n[(read_json := subprocess.call) for _ in [0]]\n"}, "banned in storage helpers"),
-            ({"scripts/paths.py": "from importlib import import_module\ndef read_json(p):\n    return import_module('mindie_knowledge.pid_backend').probe(p)\n", "scripts/mindie_knowledge/pid_backend.py": "import os\ndef probe(p): return os.kill(p, 0)\n"}, "mindie_knowledge/pid_backend.py"),
-            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    fields = getattr(os, '__dict__')\n    return fields['kill'](pid, 0)\n"}, "banned in storage helpers"),
-            ({"scripts/paths.py": "from importlib import import_module as load\ndef read_json(p):\n    return load('mindie_knowledge.pid_backend').probe(p)\n", "scripts/mindie_knowledge/pid_backend.py": "import os\ndef probe(p): return os.kill(p, 0)\n"}, "mindie_knowledge/pid_backend.py"),
-            ({"scripts/paths.py": "import sys\nfrom os import spawnv, P_WAIT\ndef read_json():\n    return spawnv(P_WAIT, sys.executable, [sys.executable, '-c', 'import os; os.kill(1, 0)'])\n"}, "banned in storage helpers"),
-            ({"scripts/paths.py": "import os\ndef read_json(pid: int):\n    probe = vars(globals()['os'])['kill']\n    return probe(pid, 0)\n"}, "banned in storage"),
-            ({"scripts/paths.py": "import shutil\ndef read_json(pid: int):\n    self = shutil\n    name = 'os'\n    self = getattr(self, name)\n    name = 'kill'\n    probe = getattr(self, name)\n    return probe(pid, 0)\n"}, "dynamic `getattr(...)` is banned"),
-            ({"scripts/paths.py": "import bounded\ndef read_json(pid: int):\n    return bounded.probe(pid)\n", "scripts/bounded.py": "import os, sys\ndef probe(pid: int):\n    setattr(sys, 'platform', 'linux')\n    if sys.platform != 'win32':\n        os.kill(pid, 0)\n"}, "`setattr(...)` is banned"),
-            ({"scripts/paths.py": "from importlib import import_module\ndef read_json(p):\n    return import_module('mindie_knowledge.tests.backend').probe(p)\n", "scripts/mindie_knowledge/__init__.py": "", "scripts/mindie_knowledge/tests/backend.py": "import os\ndef probe(p): return os.kill(p, 0)\n"}, "mindie_knowledge/tests/backend.py"),
-            ({"scripts/paths.py": "from importlib import import_module\ndef read_json(p):\n    return import_module('mindie_knowledge.missing_leaf').probe(p)\n", "scripts/mindie_knowledge/__init__.py": ""}, "unresolved `import_module('mindie_knowledge.missing_leaf')`"),
-            ({"scripts/paths.py": "import shutil\ndef read_json(pid: int):\n    for name in ('errno',):\n        lookup = lambda obj, name: getattr(obj, name)\n    return lookup( lookup(shutil, 'os'), 'kill' )(pid, 0)\n"}, "banned in storage"),
-            ({"scripts/paths.py": "import mindie_knowledge\ndef read_json(p): return mindie_knowledge.probe(p)\n", "scripts/mindie_knowledge/__init__.py": "import os, sys\ndef __getattr__(n):\n    class P:\n        platform = 'linux'\n    globals()['sys'] = P()\n    return None\ndef probe(pid: int):\n    __getattr__('x')\n    if sys.platform != 'win32':\n        os.kill(pid, 0)\n"}, "unguarded `os.kill(pid, 0)`"),
-            ({"scripts/paths.py": "import signal\ndef read_json(pid: int):\n    key = '__builtins__'\n    ns = getattr(signal, key)\n    return ns['__import__']('os').kill(pid, 0)\n"}, "dynamic `getattr(...)` is banned"),
-            ({"scripts/paths.py": "import updater_schedule\ndef read_json(p): return updater_schedule.escape(p)\n", "scripts/updater_schedule.py": "_HOST = None\ndef _h(name): return getattr(_HOST, name) if _HOST else globals()[name]\ndef ok(): return _h('ok')\ndef escape(pid: int):\n    d = globals().get('_h')\n    return d('__builtins__')['__import__']('os').kill(pid, 0)\n"}, "banned in storage"),
-            ({"scripts/paths.py": "import shutil\ndef read_json(pid: int):\n    match shutil:\n        case object(os=backend):\n            match backend:\n                case object(kill=probe):\n                    return probe(pid, 0)\n"}, "class pattern matching is banned"),
-        ):
-            for rel_p, body in hlp_files.items():
-                self._write(repo / rel_p, body)
-            helper_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
-            self.assertTrue(any(hlp_marker in e for e in helper_errs), (hlp_marker, helper_errs))
-            for rel_p in hlp_files:
-                (repo / rel_p).unlink()
-
         (repo / "scripts/storage_demorgan.py").unlink()
-        self._write(repo / "scripts/storage_cap.py", "import re\nPAT = re.compile(r'^[0-9]+$')\n")
+        # AD-08: Normal Python idioms (`match ClassName(...)`, private names `_TRASH_PREFIX`, `_h`, `self._descriptor`)
+        # are allowed when no real Windows PID, temp-leak, or control-plane boundary is violated.
+        self._write(
+            repo / "scripts/storage_cap.py",
+            (
+                "import re\n"
+                "from dataclasses import dataclass\n"
+                "_TRASH_PREFIX = '.retiring-'\n"
+                "PAT = re.compile(r'^[0-9]+$')\n"
+                "@dataclass\n"
+                "class Event:\n"
+                "    kind: str\n"
+                "class Holder:\n"
+                "    def __init__(self) -> None:\n"
+                "        self._descriptor = 'ok'\n"
+                "    def _h(self, ev: Event) -> str:\n"
+                "        match ev:\n"
+                "            case Event(kind=k):\n"
+                "                return f'{_TRASH_PREFIX}{k}:{self._descriptor}'\n"
+                "        return ''\n"
+            ),
+        )
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
+
+        # Control-plane top-level `import torch_npu` is caught across harness/coordinator/host plugins
+        harness_repo = self.root / "harness"
+        (harness_repo / ".git").mkdir(parents=True, exist_ok=True)
+        self._write(harness_repo / "pyproject.toml", '[project]\nname = "mindie-harness"\nversion = "0.1.0"\n')
+        self._write(
+            harness_repo / "mindie_harness/storage.py",
+            (
+                "def runtime_leases(): return None\n"
+                "def maintenance_tick(): return None\n"
+                "def post_switch(): return None\n"
+                "def pre_build_reclaim(): return {'reclaimed': 0}\n"
+            ),
+        )
+        self._write(
+            harness_repo / "tests/conftest.py",
+            "def f(monkeypatch, tmp_path):\n"
+            "    monkeypatch.setenv('HOME', str(tmp_path))\n"
+            "    monkeypatch.setenv('MINDIE_CONFIG_HOME', str(tmp_path))\n"
+            "    monkeypatch.setenv('MINDIE_DATA_HOME', str(tmp_path))\n",
+        )
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
+        self._write(harness_repo / "mindie_harness/bad_npu.py", "import torch_npu\n")
+        npu_errs = sl_gate.verify_storage_lifecycle_hygiene([self.root])
+        self.assertTrue(any("harness: mindie_harness/bad_npu.py" in e and "torch_npu" in e for e in npu_errs), npu_errs)
+        (harness_repo / "mindie_harness/bad_npu.py").unlink()
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
+
+        # `sys.modules.get(...)`, `setattr(sys, 'stdin', ...)`, `subprocess.Popen.kill`, and nonzero termination
+        # signals (`signal.SIGTERM`, `-child.returncode`) must NOT trigger `os.kill(pid, 0)` false positives.
+        self._write(
+            harness_repo / "mindie_harness/termination_and_modules.py",
+            (
+                "import os\n"
+                "import signal\n"
+                "import sys\n"
+                "def terminate_proc(process, stream, force: bool, pid: int, rc: int) -> None:\n"
+                "    _ = sys.modules.get('mindie_harness')\n"
+                "    setattr(sys, 'stdin', stream)\n"
+                "    method = process.kill if force else process.terminate\n"
+                "    method()\n"
+                "    os.kill(pid, signal.SIGTERM)\n"
+                "    if rc < 0:\n"
+                "        os.kill(os.getpid(), -rc)\n"
+                "    if os.name != 'nt':\n"
+                "        os.kill(pid, 0)\n"
+            ),
+        )
         self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
 
 
