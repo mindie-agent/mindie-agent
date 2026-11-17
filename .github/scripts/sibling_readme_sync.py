@@ -3,27 +3,26 @@
 
 [Role]
 Shared helper imported by `sync_org_versions.py` and `check_auto_update_readiness.py` to
-synchronize and verify version references across `mindie-agent/docs/*.md` and all 15
-sibling component/plugin repositories' `README.md`, `README.en.md`, `docs/README.md`,
-and `docs/README.en.md`.
+synchronize and verify version references across active `mindie-agent` living docs and all
+sibling component/plugin repositories' `README.md`, `README.en.md`, `docs/README.md`, and
+`docs/README.en.md`.
 
 [Invariants]
-- This is a product-combination synchronizer. `channels/0.1.json` owns that
-  combination's versions; it does not own independently released current versions.
-- Every present sibling component/plugin repository must include both `README.md` and
-  `README.en.md`, each carrying a `shields.io/badge/[Rr]elease-v<version>` badge that
-  matches its `channels/0.1.json` version.
-- All wheel download URLs, paired `mindie-agent` patch versions, and cross-component
-  package version pins in `README*.md` and `docs/README*.md` must match `channels/0.1.json`,
-  and all inspected markdown files must use Unix LF (`\n`) line endings.
+- Product-combination synchronizer: `channels/0.1.json` owns that combination's versions;
+  independently released repositories (`harness`, `mindie-agent-oc`) validate against their
+  own manifests prior to channel inclusion without retroactively invalidating historical
+  `channels/0.1.json` snapshots.
+- Active product doc transforms (`PRODUCT_DOC_TRANSFORMS`) use an explicit `{path: fn}` dict
+  and strictly exclude `docs/archive/**` and `docs/releases/**` from version rewriting.
+- All inspected/written markdown files enforce UTF-8 encoding and Unix LF (`\n`) line endings.
 
 [Timeouts & Locks]
-- Documentation transforms are local and lock-free. Release metadata reads have
-  15s subprocess budgets; optional remote Tag dereferencing shares another 15s.
+- Documentation transforms are local and lock-free. Subprocess Git/GitHub Release checks
+  enforce bounded `15s` timeouts (`CREATE_NO_WINDOW` on Windows).
 
 [Side-Effect Policy]
 - In `write=False` (`--check`) mode, strictly read-only. In `write=True` (`--write`) mode,
-  rewrites only out-of-sync markdown files with UTF-8 encoding and Unix LF (`\n`) line endings.
+  rewrites only out-of-sync owned markdown files.
 """
 
 from __future__ import annotations
@@ -37,64 +36,54 @@ import shutil
 import subprocess
 import sys
 import urllib.parse
-from typing import Callable
+from typing import Callable, Mapping, Sequence
 
 from host_compatibility_gate import subprocess_window_kwargs, which_native
-
-PACKAGE_INFO: dict[str, tuple[str, str]] = {
-    "diagnostics": ("mindie-diagnostics", "mindie_diagnostics"),
-    "debugger": ("mindie-debugger", "mindie_debugger"),
-    "profiler": ("mindie-profiler", "mindie_profiler"),
-    "sim": ("mindie-sim", "mindie_sim"),
-    "npu-top": ("npu-top", "npu_top"),
-    "remote-dev": ("remote-dev", "remote_dev"),
-    "knowledge": ("mindie-knowledge", "mindie_knowledge"),
-    "coordinator": ("mindie-coordinator", "mindie_coordinator"),
-    "mindie-bench": ("mindie-bench", "mindie_bench"),
-}
+from repo_roots import (
+    ALL_KNOWN_REPOS,
+    ALL_PLUGINS,
+    BENCH_REPO,
+    CHANNEL_PLUGINS as EXPECTED_PLUGINS,
+    CHANNEL_SHARED_COMPONENTS as EXPECTED_SHARED_COMPONENTS,
+    EXPECTED_CORPORA,
+    HUB_REPO,
+    INDEPENDENT_COMPONENTS,
+    INDEPENDENT_PLUGINS,
+    PACKAGE_INFO,
+    infer_default_siblings_roots,
+    parse_repo_overrides,
+    resolve_repo,
+    summarize_repo_coverage,
+)
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-EXPECTED_CORPORA = (
-    "knowledge-infer-core",
-    "knowledge-operators",
-    "knowledge-vllm-ascend",
-    "knowledge-xllm",
-    "knowledge-mindie-sd",
-    "knowledge-infer-distributed",
-    "knowledge-infer-observability",
-    "knowledge-infer-ops-compat",
-    "knowledge-agent-engineering",
-)
-EXPECTED_SHARED_COMPONENTS = (
-    "diagnostics",
-    "debugger",
-    "profiler",
-    "sim",
-    "npu-top",
-    "remote-dev",
-    "knowledge",
-    "coordinator",
-)
-EXPECTED_PLUGINS = (
-    "mindie-agent-codex",
-    "mindie-agent-cc",
-    "mindie-agent-kimi",
-    "mindie-agent-dsh",
-    "mindie-agent-agy",
-    "mindie-agent-wb",
-)
-INDEPENDENT_PLUGINS = (
-    "mindie-agent-oc",
-)
-ALL_PLUGINS = (*EXPECTED_PLUGINS, *INDEPENDENT_PLUGINS)
 
-# The synchronizer and CI change routing share the same owned document set.
-PRODUCT_DOC_PATHS = (
-    "docs/README.md", "docs/README.en.md", "docs/simulation-system.md",
-    "docs/profiler-sim-structure.md", "docs/simulation-consumer-migration.md",
-    "docs/mechanism-first-performance-modeling-design.md",
-    "docs/next-steps.md", "docs/next-steps.en.md",
-)
+
+def _transform_docs_readme(txt: str, m: dict) -> str:
+    sim_v = m["components"]["sim"]["version"]
+    return re.sub(
+        r"\| \[(?:面向 Agent 的通用性能建模系统|General Performance Modeling System)\]\(simulation-system\.md\)([^\n]*?)`mindie-sim v[0-9.]+`",
+        lambda match: match.group(0).rsplit("`mindie-sim v", 1)[0] + f"`mindie-sim v{sim_v}`",
+        txt,
+    )
+
+
+def _transform_sim_doc(txt: str, m: dict) -> str:
+    sim_v = m["components"]["sim"]["version"]
+    txt = re.sub(r"当前正式版本 `v[0-9.]+`", f"当前正式版本 `v{sim_v}`", txt)
+    txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
+    return txt
+
+
+# Explicit {relative_doc_path: transform(text, manifest)} map for active living docs ONLY.
+# Historical archives (`docs/archive/**`) and immutable release notes (`docs/releases/**`)
+# are intentionally excluded so historical snapshots are never rewritten.
+PRODUCT_DOC_TRANSFORMS: dict[str, Callable[[str, dict], str]] = {
+    "docs/README.md": _transform_docs_readme,
+    "docs/README.en.md": _transform_docs_readme,
+    "docs/simulation-system.md": _transform_sim_doc,
+}
+PRODUCT_DOC_PATHS: tuple[str, ...] = tuple(PRODUCT_DOC_TRANSFORMS.keys())
 
 
 def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
@@ -137,7 +126,13 @@ def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
             errors.append(f"channels/0.1.json: corpus {name} invalid units {entry.get('units')!r}")
 
     components = manifest.get("components") or {}
-    for name in (*EXPECTED_SHARED_COMPONENTS, "mindie-bench", *EXPECTED_PLUGINS):
+    required_channel_names = [
+        *EXPECTED_SHARED_COMPONENTS,
+        BENCH_REPO,
+        *EXPECTED_PLUGINS,
+        *(name for name in (*INDEPENDENT_COMPONENTS, *INDEPENDENT_PLUGINS) if name in components),
+    ]
+    for name in required_channel_names:
         entry = components.get(name)
         if not isinstance(entry, dict):
             errors.append(f"channels/0.1.json: missing component/plugin {name}")
@@ -156,7 +151,11 @@ def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
     kb = str(((manifest.get("update_policy") or {}).get("implementation_status") or {}).get("known_boundaries") or "")
     kb_tokens = [
         f"The {cpv} channel pins",
-        *(f"{k} {components[k]['version']}" for k in (*EXPECTED_SHARED_COMPONENTS, "mindie-bench") if k in components),
+        *(
+            f"{k} {components[k]['version']}"
+            for k in (*INDEPENDENT_COMPONENTS, *EXPECTED_SHARED_COMPONENTS, BENCH_REPO)
+            if k in components
+        ),
         f"Codex {components.get('mindie-agent-codex', {}).get('version', '')}",
         f"Claude Code {components.get('mindie-agent-cc', {}).get('version', '')}",
         f"Kimi {components.get('mindie-agent-kimi', {}).get('version', '')}",
@@ -164,6 +163,8 @@ def verify_channel_schema(manifest: dict, main_repo: Path) -> list[str]:
         f"Google Antigravity {components.get('mindie-agent-agy', {}).get('version', '')}",
         f"Tencent WorkBuddy {components.get('mindie-agent-wb', {}).get('version', '')}",
     ]
+    if "mindie-agent-oc" in components:
+        kb_tokens.append(f"OpenCode {components['mindie-agent-oc'].get('version', '')}")
     for token in kb_tokens:
         if token and token not in kb:
             errors.append(f"channels/0.1.json: known_boundaries missing or out of sync for {token!r}")
@@ -194,41 +195,36 @@ def verify_product_benchmark_manifest(manifest: dict, main_repo: Path) -> list[s
         raise
     except (OSError, ValueError) as exc:
         return [f"{path.relative_to(main_repo)}: publication input unavailable ({type(exc).__name__})"]
-    if (not isinstance(benchmark, dict) or benchmark.get("schema_version") != "mindie-release-manifest/1"
-            or benchmark.get("product_version") != version):
+    if (
+        not isinstance(benchmark, dict)
+        or benchmark.get("schema_version") != "mindie-release-manifest/1"
+        or benchmark.get("product_version") != version
+    ):
         return [f"{path.relative_to(main_repo)}: schema or product version differs from channel"]
     rows = benchmark.get("repositories")
     if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
         return [f"{path.relative_to(main_repo)}: repositories must be a list of release targets"]
-    expected = {item["repository"]: (item["version"], item["commit"])
-                for item in (manifest.get("components") or {}).values()}
+    expected = {
+        item["repository"]: (item["version"], item["commit"])
+        for item in (manifest.get("components") or {}).values()
+    }
     actual = {row.get("repository"): (row.get("version"), row.get("revision")) for row in rows}
     if len(actual) != len(rows) or actual != expected:
         return [f"{path.relative_to(main_repo)}: repository versions and revisions differ from channel"]
     return []
 
 
-def default_siblings_roots(repo_root: Path, extra_roots: list[Path] | None = None) -> list[Path]:
-    roots: list[Path] = []
-    if extra_roots:
-        candidates: tuple[Path, ...] = tuple(extra_roots)
-    elif os.name == "nt":
-        candidates = (repo_root.parent,)
-    else:
-        candidates = (repo_root.parent, Path("/Volumes/data/code"))
-    for candidate in candidates:
-        resolved = candidate.resolve()
-        if resolved.is_dir() and resolved not in roots:
-            roots.append(resolved)
-    return roots
+def default_siblings_roots(repo_root: Path, extra_roots: Sequence[Path] | None = None) -> list[Path]:
+    return infer_default_siblings_roots(repo_root, extra_roots)
 
 
-def resolve_sibling_repo(repo_name: str, siblings_roots: list[Path]) -> Path | None:
-    for root in siblings_roots:
-        candidate = root / repo_name
-        if (candidate / ".git").exists():
-            return candidate
-    return None
+def resolve_sibling_repo(
+    repo_name: str,
+    siblings_roots: Sequence[Path],
+    *,
+    explicit_repos: Mapping[str, Path] | None = None,
+) -> Path | None:
+    return resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
 
 
 def process_markdown_file(path: Path, transform: Callable[[str], str], write: bool) -> list[str]:
@@ -249,109 +245,18 @@ def process_markdown_file(path: Path, transform: Callable[[str], str], write: bo
 
 
 def sync_docs_versions(repo_root: Path, m: dict, write: bool) -> list[str]:
-    c = m["components"]
-    cpv = m["current_patch_version"]
-    sim_v = c["sim"]["version"]
-    prof_v = c["profiler"]["version"]
-    know_v = c["knowledge"]["version"]
-    rdev_v = c["remote-dev"]["version"]
-    diag_v = c["diagnostics"]["version"]
-    dbg_v = c["debugger"]["version"]
-    ntop_v = c["npu-top"]["version"]
-    coord_v = c["coordinator"]["version"]
-    bench_v = c["mindie-bench"]["version"]
-    codex_v = c["mindie-agent-codex"]["version"]
-    cc_v = c["mindie-agent-cc"]["version"]
-    kimi_v = c["mindie-agent-kimi"]["version"]
-    dsh_v = c["mindie-agent-dsh"]["version"]
-    agy_v = c["mindie-agent-agy"]["version"]
-    wb_v = c["mindie-agent-wb"]["version"]
-
     errors: list[str] = []
-
-    def _transform_docs_readme(txt: str) -> str:
-        return re.sub(
-            r"\| \[(?:面向 Agent 的通用性能建模系统|General Performance Modeling System)\]\(simulation-system\.md\)([^\n]*?)`mindie-sim v[0-9.]+`",
-            lambda match: match.group(0).rsplit("`mindie-sim v", 1)[0] + f"`mindie-sim v{sim_v}`",
-            txt,
-        )
-
-    def _transform_sim_doc(txt: str) -> str:
-        txt = re.sub(r"当前正式版本 `v[0-9.]+`", f"当前正式版本 `v{sim_v}`", txt)
-        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
-        return txt
-
-    def _transform_prof_sim_doc(txt: str) -> str:
-        txt = re.sub(
-            r"\[`mindie-profiler`\]\(https://github\.com/mindie-agent/profiler\)（`v[0-9.]+`）与 \[`mindie-sim`\]\(https://github\.com/mindie-agent/sim\)（`v[0-9.]+`）",
-            f"[`mindie-profiler`](https://github.com/mindie-agent/profiler)（`v{prof_v}`）与 [`mindie-sim`](https://github.com/mindie-agent/sim)（`v{sim_v}`）",
-            txt,
-        )
-        txt = re.sub(r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`", txt)
-        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
-        return txt
-
-    def _transform_consumer_migration(txt: str) -> str:
-        txt = re.sub(r"当前正式版 `v[0-9.]+`", f"当前正式版 `v{sim_v}`", txt)
-        txt = re.sub(r"`mindie-profiler`（`v[0-9.]+`）", f"`mindie-profiler`（`v{prof_v}`）", txt)
-        txt = re.sub(r"`mindie-bench`（`v[0-9.]+`）", f"`mindie-bench`（`v{bench_v}`）", txt)
-        txt = re.sub(r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`", txt)
-        txt = re.sub(r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`", txt)
-        row_versions = {
-            "mindie-agent-codex": codex_v,
-            "mindie-agent-cc": cc_v,
-            "mindie-agent-kimi": kimi_v,
-            "mindie-agent-dsh": dsh_v,
-            "mindie-agent-agy": agy_v,
-            "mindie-agent-wb": wb_v,
-            "mindie-profiler": prof_v,
-            "mindie-debugger": dbg_v,
-            "mindie-bench": bench_v,
-        }
-        for name, ver in row_versions.items():
-            txt = re.sub(
-                rf"(\| \*\*`{re.escape(name)}`\*\* \| )`v[0-9.]+`",
-                rf"\1`v{ver}`",
-                txt,
+    for relative_path, transform_fn in PRODUCT_DOC_TRANSFORMS.items():
+        norm_rel = relative_path.replace("\\", "/").lstrip("./")
+        if norm_rel.startswith(("docs/archive/", "docs/releases/")):
+            raise ValueError(f"PRODUCT_DOC_TRANSFORMS must never target archived/release docs: {relative_path}")
+        errors.extend(
+            process_markdown_file(
+                repo_root / norm_rel,
+                lambda txt, fn=transform_fn: fn(txt, m),
+                write,
             )
-        return txt
-
-    def _transform_next_steps(txt: str, is_en: bool) -> str:
-        suffix = ".en.md" if is_en else ".md"
-        txt = re.sub(
-            rf"`v0\.1\.1`–\[`v[0-9.]+`\]\(releases/[0-9.]+{re.escape(suffix)}\)",
-            f"`v0.1.1`–[`v{cpv}`](releases/{cpv}{suffix})",
-            txt,
         )
-        pairs = [
-            (r"`knowledge v[0-9.]+`", f"`knowledge v{know_v}`"),
-            (r"`mindie-sim v[0-9.]+`", f"`mindie-sim v{sim_v}`"),
-            (r"`mindie-profiler v[0-9.]+`", f"`mindie-profiler v{prof_v}`"),
-            (r"`remote-dev v[0-9.]+`", f"`remote-dev v{rdev_v}`"),
-            (r"`diagnostics v[0-9.]+`", f"`diagnostics v{diag_v}`"),
-            (r"`debugger v[0-9.]+`", f"`debugger v{dbg_v}`"),
-            (r"`mindie-debugger v[0-9.]+`", f"`mindie-debugger v{dbg_v}`"),
-            (r"`npu-top v[0-9.]+`", f"`npu-top v{ntop_v}`"),
-            (r"`coordinator v[0-9.]+`", f"`coordinator v{coord_v}`"),
-            (r"`mindie-bench v[0-9.]+`", f"`mindie-bench v{bench_v}`"),
-            (r"`Codex v[0-9.]+`", f"`Codex v{codex_v}`"),
-            (r"`Claude Code v[0-9.]+`", f"`Claude Code v{cc_v}`"),
-            (r"`Kimi v[0-9.]+`", f"`Kimi v{kimi_v}`"),
-            (r"`DSH v[0-9.]+`", f"`DSH v{dsh_v}`"),
-            (r"`Google Antigravity v[0-9.]+`", f"`Google Antigravity v{agy_v}`"),
-            (r"`Tencent WorkBuddy v[0-9.]+`", f"`Tencent WorkBuddy v{wb_v}`"),
-        ]
-        for pat, repl in pairs:
-            txt = re.sub(pat, repl, txt)
-        return txt
-
-    transforms = (
-        _transform_docs_readme, _transform_docs_readme, _transform_sim_doc,
-        _transform_prof_sim_doc, _transform_consumer_migration, _transform_sim_doc,
-        lambda t: _transform_next_steps(t, False), lambda t: _transform_next_steps(t, True),
-    )
-    for relative_path, fn in zip(PRODUCT_DOC_PATHS, transforms, strict=True):
-        errors.extend(process_markdown_file(repo_root / relative_path, fn, write))
     return errors
 
 
@@ -402,8 +307,10 @@ def transform_sibling_readme(txt: str, repo_name: str, m: dict) -> str:
     txt = re.sub(r"(配套主产品 `)\d+\.\d+\.\d+(`)", rf"\g<1>{cpv}\g<2>", txt)
     txt = re.sub(r"(paired with `mindie-agent )\d+\.\d+\.\d+(`)", rf"\g<1>{cpv}\g<2>", txt)
 
-    if repo_name not in EXPECTED_PLUGINS:
+    if repo_name not in ALL_PLUGINS:
         for comp_key, (pkg_dash, pkg_under) in PACKAGE_INFO.items():
+            if comp_key not in comps:
+                continue
             c_ver = str(comps[comp_key]["version"])
             c_sha = str(comps[comp_key]["commit"])
             txt = re.sub(
@@ -495,14 +402,19 @@ def verify_no_stale_self_versions(label: str, text: str, repo_name: str, self_ve
     return errors
 
 
-def verify_unreleased_plugin_main(manifest: dict, siblings_roots: list[Path]) -> list[str]:
+def verify_unreleased_plugin_main(
+    manifest: dict,
+    siblings_roots: Sequence[Path],
+    *,
+    explicit_repos: Mapping[str, Path] | None = None,
+) -> list[str]:
     errors: list[str] = []
     comps = manifest.get("components") or {}
-    for plugin_name in EXPECTED_PLUGINS:
+    for plugin_name in ALL_PLUGINS:
         entry = comps.get(plugin_name)
         if not isinstance(entry, dict):
             continue
-        repo_dir = resolve_sibling_repo(plugin_name, siblings_roots)
+        repo_dir = resolve_sibling_repo(plugin_name, siblings_roots, explicit_repos=explicit_repos)
         if repo_dir is None:
             continue
         git_bin = which_native("git", os_mod=os, shutil_mod=shutil) or "git"
@@ -533,10 +445,11 @@ def sync_sibling_readmes(
     m: dict,
     write: bool,
     *,
-    siblings_roots: list[Path] | None = None,
+    siblings_roots: Sequence[Path] | None = None,
+    explicit_repos: Mapping[str, Path] | None = None,
     require_siblings: bool = False,
 ) -> list[str]:
-    roots = siblings_roots if siblings_roots is not None else default_siblings_roots(repo_root)
+    roots = list(siblings_roots) if siblings_roots is not None else default_siblings_roots(repo_root)
     comps = m.get("components") or {}
     errors: list[str] = []
 
@@ -546,7 +459,11 @@ def sync_sibling_readmes(
             errors.extend(verify_markdown_anchors(f"mindie-agent/{main_rel}", main_readme.read_text(encoding="utf-8")))
 
     for repo_name, entry in comps.items():
-        repo_dir = resolve_sibling_repo(repo_name, roots)
+        try:
+            repo_dir = resolve_sibling_repo(repo_name, roots, explicit_repos=explicit_repos)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
         if repo_dir is None:
             if require_siblings:
                 errors.append(f"{repo_name}: sibling checkout not found in {roots}")
@@ -624,14 +541,19 @@ def verify_github_releases(manifest: dict, *, verify_commits: bool = False) -> l
             errors.append(f"{repo}: GitHub Release {tag} missing SHA256SUMS asset")
         if verify_commits:
             from release_tag_integrity import verify_tag_commit
-            errors.extend(verify_tag_commit(gh_bin, repo, tag, entry['commit']))
+
+            errors.extend(verify_tag_commit(gh_bin, repo, tag, entry["commit"]))
     return errors
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--release-scope", choices=("product",), required=True,
-                        help="Full synchronization is reserved for an explicitly selected product combination")
+    parser.add_argument(
+        "--release-scope",
+        choices=("product",),
+        required=True,
+        help="Full synchronization is reserved for an explicitly selected product combination",
+    )
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--check", action="store_true", help="Verify docs and sibling READMEs without writing")
     mode.add_argument("--write", action="store_true", help="Rewrite out-of-sync docs and sibling READMEs in place")
@@ -649,14 +571,36 @@ def main(argv: list[str] | None = None) -> int:
         help="Directory containing sibling MindIE Agent repository checkouts",
     )
     parser.add_argument(
+        "--repo",
+        action="append",
+        default=[],
+        metavar="NAME=/ABS/PATH",
+        help="Explicit repository checkout or worktree override",
+    )
+    parser.add_argument(
         "--require-siblings",
         action="store_true",
         help="Fail if any expected sibling repository checkout is missing",
     )
     args = parser.parse_args(argv)
+    try:
+        explicit_repos = parse_repo_overrides(args.repo)
+    except ValueError as exc:
+        print(f"[sibling-readme-sync:FAIL] {exc}", file=sys.stderr)
+        return 1
     repo_root = args.channel.resolve().parents[1]
     manifest = json.loads(args.channel.read_text(encoding="utf-8"))
     roots = default_siblings_roots(repo_root, args.siblings_root)
+    selected = [HUB_REPO, *(manifest.get("components") or {}).keys()]
+    coverage = summarize_repo_coverage(
+        ALL_KNOWN_REPOS,
+        selected,
+        roots,
+        explicit_repos=explicit_repos,
+        extra_present={HUB_REPO: repo_root},
+    )
+    print(coverage.format_line("sibling-readme-sync"))
+
     errors = [
         *verify_channel_schema(manifest, repo_root),
         *sync_docs_versions(repo_root, manifest, args.write),
@@ -665,6 +609,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest,
             args.write,
             siblings_roots=roots,
+            explicit_repos=explicit_repos,
             require_siblings=args.require_siblings,
         ),
     ]

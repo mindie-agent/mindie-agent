@@ -1,8 +1,13 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/core-implementation-and-geak-evolution-design.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/harness-boundary-and-lifecycle.md`](../harness-boundary-and-lifecycle.md).
+
 # MindIE Agent 核心实现评估与优化设计
 
 状态：P0/P1 核心机制与四插件依赖已落地合入，P2–P4 真实任务与设备验收推进中。检查与落地日期：2026-10-20（北京时间）。
 
-本文以 MindIE Agent [原始九项设计原则及后续工程准则](design-principles.md)为约束，对照 AMD-AGI/GEAK 的当前源码、指定 Antigravity session 的产出，以及 MindIE 各组件实际实现，给出后续核心工作的设计与验收方案。本文补充[上下文与经验设计](knowledge-context-and-exploration.md)和 [Profiler 设计](profiler-system.md)，不把其中的目标接口当作已交付能力。
+本文以 MindIE Agent [原始九项设计原则及后续工程准则](../design-principles.md)为约束，对照 AMD-AGI/GEAK 的当前源码、指定 Antigravity session 的产出，以及 MindIE 各组件实际实现，给出后续核心工作的设计与验收方案。本文补充[上下文与经验设计](knowledge-context-and-exploration.md)和 [Profiler 设计](../profiler-system.md)，不把其中的目标接口当作已交付能力。
 
 ## 1. 总体判断
 
@@ -614,7 +619,7 @@ P0 的插件接通与核心修复可以独立推进，但不能先发布一个�
 | --- | --- | --- |
 | 1. 对齐决策入口与 Phase 0 融合先行 | 四插件 `skills/mindie-agent/SKILL.md` 与现有参考：取消次数驱动的强制升级、固定 NPU 0 和诊断必经性能消融；按需加载 `references/diagnostic-reasoning.md`，覆盖 **Phase 0 子图跨界融合先行分析**（先定子图融合边界与 I/O 契约，再抠单算子流水）与六种机制 | 核对宿主特有入口、frontmatter 与引用完整性。真实上下文隔离、实验选择质量和资源调度仍需按宿主分别验收 |
 | 2. 保留反证、阻止不完整改写与后台静默防膨胀 | `knowledge/graded/distill.py` 明确决策片段、观察扰动、历史状态、人工纠正、作废计划与同源证据边界；`worker.py` 将旧单元固定 1,200 字符摘录改为共享 16 KiB 旧正文预算，完整返回或显式省略；`body_complete` 为 false 时禁止直接 merge。**在 `knowledge` 后台 C6 链路（`worker.py`/`distill.py`/`publication.py`）内落地静默防膨胀机制**：自动将同算子/同子图多次负向尝试折叠进紧凑排除表，强制等义重写收紧与单单元字节软硬门禁，对前台业务 Agent 完全透明、零额外负担 | 检查尾部反证进入实际对照、超限/旧摘录无法覆盖原单元、连续里程碑修订下活跃单元数与单单元正文字节净增长自动收敛。16 KiB 是 UTF-8 正文预算，不是实测模型 tokens |
-| 3. 四层仿真与实测分工 | 当前归属已更新为独立仓库 `sim/mindie_sim` 与 `profiler/mindie_profiler`，见 [`simulation-system.md`](simulation-system.md)。周期求解、子图关键路径及整网桥接已有实现 | 首批 Golden 图用于确定性求解测试；通用接口不能以 K3/A5 历史数值补齐未校准输入。最新状态及反例见第 13.3 节 |
+| 3. 四层仿真与实测分工 | 当前归属已更新为独立仓库 `sim/mindie_sim` 与 `profiler/mindie_profiler`，见 [`simulation-system.md`](../simulation-system.md)。周期求解、子图关键路径及整网桥接已有实现 | 首批 Golden 图用于确定性求解测试；通用接口不能以 K3/A5 历史数值补齐未校准输入。最新状态及反例见第 13.3 节 |
 | 4. 零负担准入脚手架与决策回放验收 | `mindie-bench` 预置对业务 Agent 零负担的 `G0–G3` 算子/模块准入脚手架（Gate Runner，自动封装 `MAKEFLAGS=-jN`、`native-gate-opp` 增量包、`.o`/AICPU JSON/`ldd -r` 符号检查与热态 ABBA 配对计时），100% `import` 生产组件公开接口；先按 M1–M6 做 exposed-dev 决策回放，再由 **DSH（`standard` 模式 + `reasoningEffort=max`）** 执行真实新会话和独立迁移验收 | 预写 proposal 回放仅证明接口串联。A2/A3 必要探针、无插桩复验、U@1→U@2 跨会话真实使用、后台静默防膨胀曲线和全成本对照均须单独给结果 |
 | 延后 | 两个领域知识仓的 A5 参数、K3 专用布局/修复与大规模历史导入 | 本批不改知识语料，不将已作废的历史方案作为正确答案入库 |
 

@@ -41,9 +41,10 @@ class ReleaseDocScopeTests(unittest.TestCase):
         cls.addClassCleanup(_rmtree_force, Path(cls.base.name))
         root = Path(cls.base.name)
         environment = patch.dict(os.environ, {name: str(root / name) for name in (
-            "HOME", "USERPROFILE", "XDG_CONFIG_HOME", "XDG_STATE_HOME", "XDG_DATA_HOME",
+            "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA",
+            "XDG_CONFIG_HOME", "XDG_STATE_HOME", "XDG_DATA_HOME", "XDG_CACHE_HOME",
             "MINDIE_CONFIG_HOME", "MINDIE_DATA_HOME", "MINDIE_DIAGNOSTICS_ROOT",
-            "MINDIE_DIAGNOSTICS_CONFIG")})
+            "MINDIE_DIAGNOSTICS_CONFIG", "REMOTE_DEV_AUTH_DIR", "UV_CACHE_DIR", "TMPDIR")})
         environment.start()
         cls.addClassCleanup(environment.stop)
         cls.template = root / "git-template"
@@ -245,25 +246,38 @@ class ReleaseDocScopeTests(unittest.TestCase):
             path = self.main / relative
             path.parent.mkdir(exist_ok=True)
             path.write_text("Product fixture\n", encoding="utf-8", newline="\n")
-        migration = self.main / "docs/simulation-consumer-migration.md"
-        version = self.manifest["components"]["mindie-agent-codex"]["version"]
-        migration.write_text(f"| **`mindie-agent-codex`** | `v{version}` |\n", encoding="utf-8", newline="\n")
+        sim_doc = self.main / "docs/simulation-system.md"
+        sim_ver = self.manifest["components"]["sim"]["version"]
+        sim_doc.write_text(f"Pinned `mindie-sim v{sim_ver}`.\n", encoding="utf-8", newline="\n")
+        archived_doc = self.main / "docs/archive/simulation-consumer-migration.md"
+        archived_doc.parent.mkdir(parents=True, exist_ok=True)
+        archived_doc.write_text("| **`mindie-agent-codex`** | `v0.0.0` |\n", encoding="utf-8", newline="\n")
         self.assertEqual(sync_docs_versions(self.main, self.manifest, False), [])
         base = self.commit_product_fixture()
         architecture = self.main / "docs/architecture.md"
         architecture.write_text("An independent documentation change\n", encoding="utf-8", newline="\n")
+        archived_doc.write_text("| **`mindie-agent-codex`** | `v0.0.1` |\n", encoding="utf-8", newline="\n")
         self.commit_product_fixture()
         self.assertFalse(product_inputs_changed(base, repository=self.main))
 
-        migration.write_text("| **`mindie-agent-codex`** | `v0.0.0` |\n", encoding="utf-8", newline="\n")
+        sim_doc.write_text("Pinned `mindie-sim v0.0.0`.\n", encoding="utf-8", newline="\n")
         head = self.commit_product_fixture()
         self.assertTrue(product_inputs_changed(base, repository=self.main))
-        self.assertTrue(any("simulation-consumer-migration.md" in error
+        self.assertTrue(any("simulation-system.md" in error
                             for error in sync_docs_versions(self.main, self.manifest, False)))
+
+        # Independent pre-channel harness release validates without appearing in historical channels/0.1.json
+        harness = self.root / "harness"
+        shutil.copytree(self.template, harness)
+        (harness / "pyproject.toml").write_text(
+            '[project]\nname = "mindie-harness"\nversion = "0.1.0"\n', encoding="utf-8", newline="\n")
+        self.readmes(harness, "harness", "0.1.0")
+        self.assertEqual(self.check("harness"), [])
 
         # Every document owned by the sync and the gate implementation must
         # route through product checks even when it is the only changed input.
         for relative in (*PRODUCT_DOC_PATHS, ".github/scripts/release_doc_hygiene.py",
+                         ".github/scripts/repo_roots.py",
                          ".github/scripts/host_compatibility_gate.py",
                          ".github/scripts/windows_zero_popup_gate.py",
                          ".github/workflows/pr-checklist.yml"):

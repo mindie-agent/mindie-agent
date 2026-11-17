@@ -1,3 +1,8 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/a3-model-coverage.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/simulation-system.md`](../simulation-system.md).
+
 # A3 建模最低模型覆盖集
 
 [双模型设计](a3-performance-modeling-plan.md) · [实现与验收](a3-performance-modeling-acceptance.md)

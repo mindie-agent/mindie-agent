@@ -3,17 +3,16 @@
 
 [Role]
 Extracted R4/R5 verification helpers for `check_auto_update_readiness.py`: validates 7-host
-`harness-compatibility.json` forward SemVer ranges, Windows windowless subprocess wrappers
+`harness-compatibility.json` forward SemVer ranges, Windows windowless subprocess spawns
 (`CREATE_NO_WINDOW` / `windowsHide: true`), bounded storage lifecycle & temp hygiene (`P8`),
-and active local host CLI versions.
+`P2.7` zero-binding deterministic tool dispatch, and active local host CLI versions.
 
 [Invariants]
 - WSL2 / POSIX binary lookups reject `.exe`/`.cmd`/`.bat`/`.ps1` files and PE/CRLF/MSYS Windows
   shims on `/mnt/<drive>/...`, while preserving native Linux ELF binaries and LF scripts stored on
   WSL mounts; Windows lookups skip 0-byte `WindowsApps` store execution aliases.
-- Windows zero-popup checks (`windows_zero_popup_gate.py`) run unconditionally before
-  `mindie_knowledge` import probes, inspect every co-existing refactored module via AST, and
-  enforce per-call `windowsHide: true` across Node.js child-process launches.
+- Supports `--repo name=/abs/path` overrides, linked Git worktrees via `repo_roots`, and explicit
+  `selected/exercised/missing/unselected` repository coverage reporting.
 
 [Timeouts & Locks]
 - Delegates all subprocess execution to the caller's bounded `15s` runner; acquires no locks.
@@ -32,8 +31,19 @@ import re
 import shutil
 import subprocess
 import sys
-from typing import Callable
+from typing import Callable, Mapping, Sequence
 
+from repo_roots import (
+    ALL_KNOWN_REPOS,
+    ALL_PLUGINS,
+    ALL_SHARED_COMPONENTS,
+    BENCH_REPO,
+    HUB_REPO,
+    infer_default_siblings_roots,
+    parse_repo_overrides,
+    resolve_repo,
+    summarize_repo_coverage,
+)
 from storage_lifecycle_gate import (
     STORAGE_LIFECYCLE_FLOOR_VERSIONS,
     inspect_python_temp_hygiene,
@@ -155,14 +165,6 @@ def which_native(cmd: str, *, path: str | None = None, os_mod=os, shutil_mod=shu
     return None
 
 
-def _resolve_repo(repo_name: str, siblings_roots: list[Path]) -> Path | None:
-    for root in siblings_roots:
-        candidate = root / repo_name
-        if (candidate / ".git").exists():
-            return candidate
-    return None
-
-
 def matches_dsh_peer(requirement: str, version: str) -> bool:
     """Evaluate exact or comparator-range DSH peerDependencies with includePrerelease semantics."""
     from semantic_version import Version
@@ -207,20 +209,30 @@ def extract_semver(raw: str) -> str | None:
 
 
 def verify_flexible_component_compatibility_impl(
-    siblings_roots: list[Path],
+    siblings_roots: Sequence[Path],
     *,
     ensure_knowledge_importable: Callable[[list[Path]], bool],
     windowless_check: Callable[[list[Path]], list[str]],
     zero_binding_check: Callable[[list[Path]], list[str]] | None = None,
     require_siblings: bool = False,
+    explicit_repos: Mapping[str, Path] | None = None,
+    required_repos: Sequence[str] = (),
 ) -> list[str]:
     """Verify that the latest shared component code is API-compatible with all 7 host plugins."""
-    errors: list[str] = list(windowless_check(siblings_roots))
+    roots_list = list(siblings_roots)
+    errors: list[str] = list(windowless_check(roots_list))
     if zero_binding_check is not None:
-        errors.extend(zero_binding_check(siblings_roots))
+        errors.extend(zero_binding_check(roots_list))
     else:
-        errors.extend(verify_zero_session_binding_gates(siblings_roots, require_siblings=require_siblings))
-    if not ensure_knowledge_importable(siblings_roots):
+        errors.extend(
+            verify_zero_session_binding_gates(
+                roots_list,
+                require_siblings=require_siblings,
+                required_repos=required_repos,
+                explicit_repos=explicit_repos,
+            )
+        )
+    if not ensure_knowledge_importable(roots_list):
         if require_siblings:
             errors.append("knowledge: mindie_knowledge unavailable for R4 host compatibility verification")
         return errors
@@ -232,8 +244,8 @@ def verify_flexible_component_compatibility_impl(
     expected_harnesses = {"codex", "claude-code", "kimi-code", "dsh", "antigravity", "workbuddy"}
     if set(REPOSITORIES) not in (expected_harnesses, expected_harnesses | {"opencode"}):
         errors.append(f"mindie_knowledge.releases.REPOSITORIES keys {set(REPOSITORIES)} != {expected_harnesses}")
-    oc_dir = _resolve_repo("mindie-agent-oc", siblings_roots)
-    if oc_dir is not None:
+    oc_dir = resolve_repo("mindie-agent-oc", roots_list, explicit_repos=explicit_repos)
+    if oc_dir is not None and (oc_dir / "plugins/mindie-agent/scripts/oc_native_compat.py").is_file():
         oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
         if oc_scripts not in sys.path:
             sys.path.insert(0, oc_scripts)
@@ -254,6 +266,11 @@ def verify_flexible_component_compatibility_impl(
         "npu-top",
         "mindie-coordinator",
     }
+    if "mindie-harness" in COMPONENTS:
+        if COMPONENTS["mindie-harness"] != "mindie-agent/harness":
+            errors.append(
+                f"mindie_knowledge.runtime_inventory.COMPONENTS['mindie-harness']={COMPONENTS['mindie-harness']!r} != 'mindie-agent/harness'"
+            )
     if not required_pkgs.issubset(set(COMPONENTS)):
         errors.append(f"mindie_knowledge.runtime_inventory.COMPONENTS missing {required_pkgs - set(COMPONENTS)}")
 
@@ -269,7 +286,7 @@ def verify_flexible_component_compatibility_impl(
 
     for harness_key, repo_slug in harness_repos.items():
         plugin_name = repo_slug.split("/", 1)[1]
-        plugin_dir = _resolve_repo(plugin_name, siblings_roots)
+        plugin_dir = resolve_repo(plugin_name, roots_list, explicit_repos=explicit_repos)
         if plugin_dir is None:
             continue
         compat_path = (
@@ -342,18 +359,20 @@ def _codex_config_candidates() -> list[Path]:
 
 
 def verify_local_host_compatibility_impl(
-    siblings_roots: list[Path],
+    siblings_roots: Sequence[Path],
     *,
     ensure_knowledge_importable: Callable[[list[Path]], bool],
     which_fn: Callable[[str], str | None],
     run_cmd: Callable[[list[str]], subprocess.CompletedProcess[str]],
+    explicit_repos: Mapping[str, Path] | None = None,
 ) -> list[str]:
+    roots_list = list(siblings_roots)
     errors: list[str] = []
-    if not ensure_knowledge_importable(siblings_roots):
+    if not ensure_knowledge_importable(roots_list):
         return ["mindie_knowledge.releases unavailable for host compatibility verification"]
     from mindie_knowledge.releases import supports_harness
 
-    codex_dir = _resolve_repo("mindie-agent-codex", siblings_roots)
+    codex_dir = resolve_repo("mindie-agent-codex", roots_list, explicit_repos=explicit_repos)
     if codex_dir is not None:
         compat = json.loads(
             (codex_dir / "plugins/mindie-agent/harness-compatibility.json").read_text(encoding="utf-8")
@@ -421,7 +440,7 @@ def verify_local_host_compatibility_impl(
         ("mindie-agent-cc", "claude", "claude-code"),
         ("mindie-agent-kimi", "kimi", "kimi-code"),
     ):
-        plugin_dir = _resolve_repo(repo_name, siblings_roots)
+        plugin_dir = resolve_repo(repo_name, roots_list, explicit_repos=explicit_repos)
         resolved_cli = filter_native_executable(which_fn(cli_name))
         if plugin_dir is not None and resolved_cli:
             compat = json.loads((plugin_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
@@ -434,7 +453,7 @@ def verify_local_host_compatibility_impl(
             elif not supports_harness(compat, harness_name=harness_key, harness_version=ver):
                 errors.append(f"{repo_name}: harness-compatibility.json does not support installed {cli_name} {ver}")
 
-    dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots)
+    dsh_dir = resolve_repo("mindie-agent-dsh", roots_list, explicit_repos=explicit_repos)
     resolved_dsh = filter_native_executable(which_fn("dsh"))
     if dsh_dir is not None and resolved_dsh:
         pkg_json = json.loads((dsh_dir / "package.json").read_text(encoding="utf-8"))
@@ -451,14 +470,15 @@ def verify_local_host_compatibility_impl(
                 f"does not support installed dsh {ver}"
             )
 
-    oc_dir = _resolve_repo("mindie-agent-oc", siblings_roots)
+    oc_dir = resolve_repo("mindie-agent-oc", roots_list, explicit_repos=explicit_repos)
     if oc_dir is not None:
-        oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
-        if oc_scripts not in sys.path:
-            sys.path.insert(0, oc_scripts)
-        from oc_native_compat import ensure_oc_native_support
+        if (oc_dir / "plugins/mindie-agent/scripts/oc_native_compat.py").is_file():
+            oc_scripts = str(oc_dir / "plugins/mindie-agent/scripts")
+            if oc_scripts not in sys.path:
+                sys.path.insert(0, oc_scripts)
+            from oc_native_compat import ensure_oc_native_support
 
-        ensure_oc_native_support()
+            ensure_oc_native_support()
         compat = json.loads((oc_dir / "harness-compatibility.json").read_text(encoding="utf-8"))
         home_oc_names = ("opencode.exe", "opencode.cmd") if os.name == "nt" else ("opencode",)
         oc_candidates = [
@@ -498,11 +518,33 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run R4 host compatibility and Windows zero-popup checks.")
     parser.add_argument("--main-repo", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--siblings-root", type=Path, action="append", default=[])
+    parser.add_argument("--repo", action="append", default=[], metavar="NAME=/ABS/PATH")
     parser.add_argument("--require-siblings", action="store_true")
     parser.add_argument("--release-repo", action="append", default=[])
     args = parser.parse_args(argv)
-    roots = [p.resolve() for p in args.siblings_root]
+
+    try:
+        explicit_repos = parse_repo_overrides(args.repo)
+    except ValueError as exc:
+        print(f"[host-compatibility-gate:FAIL] {exc}", file=sys.stderr)
+        return 1
+
     main_repo = args.main_repo.resolve()
+    roots = infer_default_siblings_roots(main_repo, args.siblings_root)
+    selected = (
+        [HUB_REPO, *args.release_repo]
+        if args.release_repo
+        else [HUB_REPO, *ALL_SHARED_COMPONENTS, BENCH_REPO, *ALL_PLUGINS]
+    )
+    coverage = summarize_repo_coverage(
+        ALL_KNOWN_REPOS,
+        selected,
+        roots,
+        explicit_repos=explicit_repos,
+        extra_present={HUB_REPO: main_repo},
+    )
+    print(coverage.format_line("host-compatibility-gate"))
+
     errors = verify_flexible_component_compatibility_impl(
         roots,
         ensure_knowledge_importable=lambda _r: _can_import_knowledge(),
@@ -512,20 +554,25 @@ def main(argv: list[str] | None = None) -> int:
                 main_repo=main_repo,
                 require_siblings=args.require_siblings,
                 required_repos=args.release_repo,
+                explicit_repos=explicit_repos,
             ),
             *verify_storage_lifecycle_hygiene(
                 r,
                 main_repo=main_repo,
                 require_siblings=args.require_siblings,
                 required_repos=args.release_repo,
+                explicit_repos=explicit_repos,
             ),
         ],
         zero_binding_check=lambda r: verify_zero_session_binding_gates(
             r,
             require_siblings=args.require_siblings,
             required_repos=args.release_repo,
+            explicit_repos=explicit_repos,
         ),
         require_siblings=args.require_siblings,
+        explicit_repos=explicit_repos,
+        required_repos=args.release_repo,
     )
     if errors:
         for err in errors:

@@ -8,7 +8,7 @@ This document defines the unified **Test Validity Redlines** and **Four-Tier Tes
 
 - Governed by: [Engineering Design Principles](design-principles.en.md) · [Architecture & Module Boundaries](architecture.en.md)
 
-Dedicated evaluation plans for the knowledge flywheel and `L1–L4` architectural capabilities are documented in the [L1–L4 Knowledge Flywheel Testing Plan](knowledge-tiered-testing-plan.md). Note the two orthogonal numbering schemes: `L1–L4` denotes cognitive and execution knowledge tiers (`axiom/measurement`, `sop`, `workflow`, and `mutator` units in `knowledge`), whereas `Tier 0–3` denotes engineering test execution scope; full-task net value, cross-task learning, and multi-round exploration experiments carry dedicated budgets rather than being approximated by short Canary runs.
+Dedicated evaluation plans for the knowledge flywheel and `L1–L4` architectural capabilities are documented in the [L1–L4 Knowledge Flywheel Testing Plan](archive/knowledge-tiered-testing-plan.md). Note the two orthogonal numbering schemes: `L1–L4` denotes cognitive and execution knowledge tiers (`axiom/measurement`, `sop`, `workflow`, and `mutator` units in `knowledge`), whereas `Tier 0–3` denotes engineering test execution scope; full-task net value, cross-task learning, and multi-round exploration experiments carry dedicated budgets rather than being approximated by short Canary runs.
 
 ---
 

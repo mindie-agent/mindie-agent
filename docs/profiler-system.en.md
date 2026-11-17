@@ -1,6 +1,6 @@
 # Profiler System Design for MindIE Agent
 
-[中文](profiler-system.md) · [Architecture](architecture.en.md) · [Shared Structure and Measured Attribution](profiler-sim-structure.md) · [Design Principles](design-principles.en.md) · [Context & Experience Design](knowledge-context-and-exploration.en.md) · [Documentation](README.en.md)
+[中文](profiler-system.md) · [Architecture](architecture.en.md) · [Shared Structure and Measured Attribution](archive/profiler-sim-structure.md) · [Design Principles](design-principles.en.md) · [Context & Experience Design](archive/knowledge-context-and-exploration.en.md) · [Documentation](README.en.md)
 
 `mindie_profiler` is a standalone Ascend NPU performance collection, in-place analysis, and comparison package maintained in [`mindie-agent/profiler`](https://github.com/mindie-agent/profiler) (exposing both the `mindie-profiler` CLI and Python APIs), orthogonal to [`diagnostics`](https://github.com/mindie-agent/diagnostics) and [`sim`](https://github.com/mindie-agent/sim).
 
@@ -53,7 +53,7 @@ flowchart LR
 | **`knowledge` (and domain repos)** | Store verified measurement & constraint baselines (`axiom` / `measurement`), capture/correlation procedures (`sop`), bottleneck decision workflows (`workflow`), and operator/graph code transforms (`mutator`) supporting the `L1–L4` execution architecture | Never stores raw traces or one-off Top-K reports lacking cross-task reuse value |
 | **`mindie-bench`** | Verify end-to-end numerical correctness and performance gains under matched inputs and hardware conditions | Never acts as the sole entry point for routine interactive profiling |
 
-Model structure and measured trace parsing each have a single owner: `mindie-sim` exports `mindie-model-structure/1`, while `mindie-profiler` maps raw events onto declared nodes or fused subgraphs (such as `MlaPrologV3` and `LightningIndexer`), aggregates repeated isomorphic layer candidates into Cohorts, and automatically segments steady-state Decode forwards via `auto_segment_decode_forwards`. See [Shared Structure and Measured Attribution](profiler-sim-structure.md) for the full contract and multi-cluster verification results.
+Model structure and measured trace parsing each have a single owner: `mindie-sim` exports `mindie-model-structure/1`, while `mindie-profiler` maps raw events onto declared nodes or fused subgraphs (such as `MlaPrologV3` and `LightningIndexer`), aggregates repeated isomorphic layer candidates into Cohorts, and automatically segments steady-state Decode forwards via `auto_segment_decode_forwards`. See [Shared Structure and Measured Attribution](archive/profiler-sim-structure.md) for the full contract and multi-cluster verification results.
 
 ---
 
@@ -217,7 +217,7 @@ Each event carries three distinct dimensions:
    - Repeated isomorphic Transformer blocks are grouped into `cohorts` with measured invocation counts, single-call Mean/P50, `activity_sum_ns`, and `busy_union_ns`, which `python -m mindie_sim.cohort_comparison` reconciles directly against predicted operator costs.
 3. **Topology-Guided Decode Forward Segmentation (`auto_segment_decode_forwards`)**:
    - `mindie_profiler.decode_segmentation` aligns the unified event stream against `ModelSpec.layer_plans` to automatically segment each complete Decode body forward (`body_forward_span_ms`), stripping cross-step bubbles and asynchronous `AI_CPU` tail waits while recovering active batch sizes from observed block tables.
-   - Verified across the Ascend A2 synchronized module replay (18,000/18,000 events `bound`), **280 Decode + 15 Prefill cases** on A3/A5 (`<= 15%` error), and **856 DSH fleet cases (`841/856 = 98.25%` overall, `546/561 = 97.33%` on independent held-out cases within `<= 15%` error)**; see [Shared Structure and Measured Attribution](profiler-sim-structure.md#5-标准调用流程与多集群验证汇总).
+   - Verified across the Ascend A2 synchronized module replay (18,000/18,000 events `bound`), **280 Decode + 15 Prefill cases** on A3/A5 (`<= 15%` error), and **856 DSH fleet cases (`841/856 = 98.25%` overall, `546/561 = 97.33%` on independent held-out cases within `<= 15%` error)**; see [Shared Structure and Measured Attribution](archive/profiler-sim-structure.md#5-标准调用流程与多集群验证汇总).
 
 ---
 

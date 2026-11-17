@@ -8,7 +8,7 @@
 
 - 遵循准则：[工程设计原则与演进准则](design-principles.md) · [系统架构与模块分工](architecture.md)
 
-知识飞轮与 `L1–L4` 系统能力专项验证详见 [L1–L4 架构闭环与知识飞轮测试方案](knowledge-tiered-testing-plan.md)。需注意区分两套正交编号：`L1–L4` 表示知识认知与执行架构层级（分别对应 `knowledge` 中的 `axiom/measurement`、`sop`、`workflow`、`mutator` 四类分级单元），而 `Tier 0–3` 表示工程测试的执行层级与隔离边界；端到端任务净收益、跨任务经验迁移与长周期探索实验均单列独立预算，不以短耗时 Canary 测试替代。
+知识飞轮与 `L1–L4` 系统能力专项验证详见 [L1–L4 架构闭环与知识飞轮测试方案](archive/knowledge-tiered-testing-plan.md)。需注意区分两套正交编号：`L1–L4` 表示知识认知与执行架构层级（分别对应 `knowledge` 中的 `axiom/measurement`、`sop`、`workflow`、`mutator` 四类分级单元），而 `Tier 0–3` 表示工程测试的执行层级与隔离边界；端到端任务净收益、跨任务经验迁移与长周期探索实验均单列独立预算，不以短耗时 Canary 测试替代。
 
 ---
 

@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/knowledge-invocation-recovery.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/harness-boundary-and-lifecycle.md`](../harness-boundary-and-lifecycle.md).
+
 # Windows 知识调用与恢复
 
-[English](knowledge-invocation-recovery.en.md) · [返回文档中心](README.md)
+[English](knowledge-invocation-recovery.en.md) · [返回文档中心](../README.md)
 
 本手册面向在 Windows 上使用 `mindie-agent-codex` 的开发者与维护者，说明如何按配置绑定和原生会话身份调用知识能力，并在输入编码、授权、Windows 服务启动器或传输失败时按阶段恢复。它保留 [PR #357](https://github.com/mindie-agent/mindie-agent/pull/357) 由 `YzTongNiar` 提交的 Windows 现场报告，但**不是**对该现场的桌面复现验收：文中“已检查”的结论来自指定版本的源码与接口审查，“现场报告”仅代表贡献者观察，“未复现”项必须如实保留为未知。
 
@@ -543,8 +548,8 @@ notes: <sanitized>
 
 ## 相关文档
 
-- [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)（会话授权与 §2.4 边界）
-- [历史版本问题复盘与系统性防复发门禁](historical-issues-and-guardrails.md)（P1.6、P2.6）
-- [知识与经验系统](knowledge-system.md)（§4.1 蒸馏触发与证据）
-- [源码开发、重编译与产物恢复契约](source-rebuild-contract.md)
+- [宿主边界与任务生命周期](../harness-boundary-and-lifecycle.md)（会话授权与 §2.4 边界）
+- [历史版本问题复盘与系统性防复发门禁](../historical-issues-and-guardrails.md)（P1.6、P2.6）
+- [知识与经验系统](../knowledge-system.md)（§4.1 蒸馏触发与证据）
+- [源码开发、重编译与产物恢复契约](../source-rebuild-contract.md)
 - [PR #357](https://github.com/mindie-agent/mindie-agent/pull/357)（`YzTongNiar` 的 Windows 现场报告）

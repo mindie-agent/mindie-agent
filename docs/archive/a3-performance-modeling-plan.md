@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/a3-performance-modeling-plan.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/simulation-system.md`](../simulation-system.md).
+
 # A3 预测性能与应达性能双模型方案
 
-[仿真系统设计](simulation-system.md) · [Profiler 系统设计](profiler-system.md) · [文档中心](README.md)
+[仿真系统设计](../simulation-system.md) · [Profiler 系统设计](../profiler-system.md) · [文档中心](../README.md)
 
 最低模型范围见 [九模型覆盖要求](a3-model-coverage.md)，实际进展和证据见 [实现与验收记录](a3-performance-modeling-acceptance.md)。
 

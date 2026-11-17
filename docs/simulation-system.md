@@ -1,6 +1,6 @@
 # 面向 Agent 的通用性能建模系统（`mindie-sim`）
 
-[系统架构](architecture.md) · [Profiler 系统设计](profiler-system.md) · [结构复用与实测映射](profiler-sim-structure.md) · [设计原则](design-principles.md) · [消费者迁移指南](simulation-consumer-migration.md) · [文档中心](README.md)
+[系统架构](architecture.md) · [Profiler 系统设计](profiler-system.md) · [结构复用与实测映射](archive/profiler-sim-structure.md) · [设计原则](design-principles.md) · [消费者迁移指南](archive/simulation-consumer-migration.md) · [文档中心](README.md)
 
 `mindie-sim`（Python 包 `mindie_sim`，当前正式版本 `v0.9.4`）是面向编程 Agent 的硬件无关、机理优先（Mechanism-First）性能建模组件。它从模型结构、算子实现和硬件资源声明出发，用**同一个因果执行引擎**计算算子、子图、纯模型与服务场景的成本，并提供**确定性 Case 合成器（`compose`）**、**`async_scheduling` 异步调度延迟释放 KV 显存公理模型**、**4D 硬件效率拆解**（`Cube_MFU / Vec_MFU / MBU / Link_Util / CV_Overlap`）、**SLA 硬件缩放与多维拓扑/PD 分离精确 Pareto 求解（`sla` / `sweep`）**、**多 DP 偏斜/MoE EPLB/Chunked-Prefill 干扰屏障物理力学（`skew`）**与 **`mindie-model-structure/1` 结构导出**。
 
@@ -115,7 +115,7 @@ Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`
 
 ## 4. 与 `mindie-profiler` 的结构对齐与实测校准
 
-`mindie-sim` 与 `mindie-profiler` 通过声明结构导出与实测观测报告形成闭环，详见[结构复用与实测映射](profiler-sim-structure.md)：
+`mindie-sim` 与 `mindie-profiler` 通过声明结构导出与实测观测报告形成闭环，详见[结构复用与实测映射](archive/profiler-sim-structure.md)：
 
 1. **统一结构导出（`mindie-model-structure/1`）**：`mindie-sim` 从模型配置或 `OpSpec` DAG 导出包含语义节点、层/块归属（`layer / block / role`）、张量契约（`contract`）、物理工作量签名（`physical_work / physical_signature`）与融合子图边界（`subgraphs` / `resource_boundary`）的结构清单。
 2. **同构算子集合（Cohort）对账**：对于模型中重复出现的同构层，无需强行猜测单个事件属于第几层；`mindie-profiler` 将相同契约、相同物理工作量的事件聚合成 Cohort，由 `mindie_sim.cohort_comparison` 直接比对单次耗时（Mean / P50）与整组累计耗时。
@@ -133,4 +133,4 @@ Python 公开入口包括 `mindie_sim.predict`、`mindie_sim.operator_costs`、`
   - **Prefill 阶段预测**：**15 个完整 Prefill 用例**全部收敛在 **`<= 15%`** 误差容差内；
   - **三芯片样本内多工况校准（A2 + A3 + A5）**：覆盖 A2（`565/565`）、A3（`580/580`）与 A5（`508/508`）共 **202 个 Cohort-Phase、1,653 份** 实测 Golden Profiles（含 `4K..400K` 超长上下文与合成少专家 MoE），实现 **`1,653 / 1,653 = 100.00% <= 10%`** 样本内误差收敛（平均绝对误差 `2.77%`，中位数 `2.11%`）；
   - **大规模集群盲测泛化（DSH Fleet Generalization）**：在独立的 **856 个 DSH 真实集群用例**上整体预测准确率达到 **`841 / 856 = 98.25%`（误差 `<= 15%`）**，其中 **561 个独立 Held-out 盲测用例**达到 **`546 / 561 = 97.33%`（误差 `<= 15%`）**。
-- **五端宿主与评测套件全量集成**：`mindie-sim v0.9.4` 已通过 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi`、`mindie-agent-dsh` 与 `mindie-agent-agy` 的 `components` / `mindie-tools` MCP 服务在五端统一暴露，并与 `mindie-bench` 的 `sim-causal-modeling-boundaries` 基准完成闭环验证（接口迁移说明见[消费者迁移指南](simulation-consumer-migration.md)）。
+- **五端宿主与评测套件全量集成**：`mindie-sim v0.9.4` 已通过 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi`、`mindie-agent-dsh` 与 `mindie-agent-agy` 的 `components` / `mindie-tools` MCP 服务在五端统一暴露，并与 `mindie-bench` 的 `sim-causal-modeling-boundaries` 基准完成闭环验证（接口迁移说明见[消费者迁移指南](archive/simulation-consumer-migration.md)）。

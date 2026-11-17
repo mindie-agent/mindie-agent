@@ -612,6 +612,101 @@ class HostCompatibilityGateTests(unittest.TestCase):
         self.assertEqual(len(errors), 1)
         self.assertIn("configured Codex CLI is not a native executable", errors[0])
 
+    def test_windows_popup_gate_catches_banned_flags_inline_strings_and_all_repos(self):
+        siblings = self.root / "siblings"
+        siblings.mkdir()
+        for name, rel in (
+            ("harness", "mindie_harness/proc.py"),
+            ("debugger", "mindie_debugger/cli.py"),
+            ("npu-top", "npu_top/ssh.py"),
+        ):
+            repo = siblings / name
+            (repo / ".git").mkdir(parents=True)
+            target = repo / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                "import subprocess\n"
+                "def run_safe():\n"
+                "    return subprocess.run(['git', 'status'], creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+        (siblings / "npu-top/bin").mkdir(parents=True)
+        (siblings / "npu-top/bin/npu-top.js").write_text(
+            "import { spawn } from 'node:child_process';\n"
+            "spawn('python', ['-m', 'npu_top'], { windowsHide: true });\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        self.assertEqual(
+            host_gate.verify_windows_windowless_spawns(
+                [siblings], required_repos=["harness", "debugger", "npu-top"]
+            ),
+            [],
+        )
+
+        # Inline `-c` CREATE_NEW_CONSOLE, DETACHED_PROCESS, and unconditional win32 `detached: true` are caught
+        (siblings / "harness/mindie_harness/proc.py").write_text(
+            "import subprocess\n"
+            "CODE = 'subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)'\n"
+            "def run_bad():\n"
+            "    return subprocess.Popen(['cmd'], creationflags=subprocess.DETACHED_PROCESS)\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        (siblings / "npu-top/bin/npu-top.js").write_text(
+            "spawn('python', ['-m', 'npu_top'], { windowsHide: true, detached: true });\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        errs = host_gate.verify_windows_windowless_spawns(
+            [siblings], required_repos=["harness", "debugger", "npu-top"]
+        )
+        self.assertTrue(any("CREATE_NEW_CONSOLE" in e for e in errs), errs)
+        self.assertTrue(any("DETACHED_PROCESS" in e for e in errs), errs)
+        self.assertTrue(any("detached: true" in e for e in errs), errs)
+
+        # Authoritative `--repo` (`explicit_repos`) overrides flat sibling checkouts in Windows zero-popup gate
+        override_harness = self.root / "override-harness"
+        (override_harness / ".git").mkdir(parents=True)
+        (override_harness / "mindie_harness").mkdir(parents=True)
+        (override_harness / "mindie_harness/proc.py").write_text(
+            "import subprocess\n"
+            "def run_safe():\n"
+            "    return subprocess.run(['git', 'status'], creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        empty_sibs = self.root / "empty-for-override"
+        empty_sibs.mkdir()
+        self.assertEqual(
+            host_gate.verify_windows_windowless_spawns(
+                [empty_sibs],
+                required_repos=["harness"],
+                explicit_repos={"harness": override_harness},
+            ),
+            [],
+        )
+
+        # Interpolated JS template literals (`${...}`) do not erase subsequent `spawn(..., { windowsHide: true })`
+        dsh_tpl = empty_sibs / "mindie-agent-dsh"
+        (dsh_tpl / ".git").mkdir(parents=True)
+        (dsh_tpl / "scripts").mkdir(parents=True)
+        (dsh_tpl / "scripts/setup_process.py").write_text("subprocess.CREATE_NO_WINDOW\n", encoding="utf-8", newline="\n")
+        (dsh_tpl / "scripts/knowledge_mcp.py").write_text("subprocess.CREATE_NO_WINDOW\n", encoding="utf-8", newline="\n")
+        (dsh_tpl / "scripts/hook_launcher.py").write_text("import runpy\n", encoding="utf-8", newline="\n")
+        (dsh_tpl / "host3.mjs").write_text(
+            "const a = `prefix ${1 + 2} suffix`;\n"
+            "spawn('python', ['-V'], { windowsHide: true });\n"
+            "const b = `tail ${a}`;\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        self.assertEqual(
+            host_gate.verify_windows_windowless_spawns([empty_sibs], required_repos=["mindie-agent-dsh"]),
+            [],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

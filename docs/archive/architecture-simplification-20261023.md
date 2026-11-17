@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/architecture-simplification-20261023.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/architecture.md`](../architecture.md).
+
 # 架构简化与正确性修复记录（2026-10-23）
 
-[返回文档中心](README.md)
+[返回文档中心](../README.md)
 
 > **历史审计记录边界（2026-10-23）**：本页按原貌保留 2026-10-23 第一阶段跨仓简化与本地 Tier 0 / Tier 1 验证快照，**不代表后续全部问题均已完结，亦不能冒充当前主产品最终验收结论**。后续更深入的四路并行源码复核、补充修复及 PR 状态请参阅 **[并行架构评审与修复记录（2026-10-24）](architecture-review-20261024.md)**。
 

@@ -16,10 +16,10 @@ MindIE Agent uses a two-tier **`0.Y.0` Feature Milestone + `0.Y.Z` Maintenance P
 
 | Dimension | Version Pattern & Carrier | Actual Role & Selection Source | Host Plugin Republish Required? |
 | --- | --- | --- | --- |
-| **Feature Milestone Release** | `0.Y.0` (`0.1.0` → `0.2.0`) | Major feature additions or cross-component protocol evolution; ships with 12-repository benchmark verification and an updated [`channels/0.1.json`](../channels/0.1.json) milestone manifest | **Yes** (all four Harness plugins align on the new `0.Y.0` milestone baseline) |
-| **Host Plugin Release Selection** | Formal GitHub Releases in each of the 4 plugin repositories (`mindie-plugin-release.json`) | Client selects the highest compatible formal plugin Release directly from the official plugin repository based on the installed host CLI version and `harness-compatibility.json` (`mindie_knowledge.releases` / `releases_io.py`) | Published independently when plugin code changes |
-| **Independent Shared Component Update** | Formal GitHub Releases for eight shared components plus the evaluation component (`knowledge`, `remote-dev`, `diagnostics`, `debugger`, `profiler`, `sim`, `npu-top`, `coordinator`, `mindie-bench`) | Client **discovers formal GitHub Releases directly from each official component repository** (`mindie_knowledge.component_releases` / `component_runtime.py`), builds a side-by-side isolated `uv` environment from the exact Git SHA, runs a native API probe, and cuts over when idle | **No** (a component bugfix Release can be discovered directly without republishing host plugins) |
-| **Product Channel Manifest** | [`channels/0.1.json`](../channels/0.1.json) (`schema: "mindie-release-channel/1"`) | Records the product-verified 12-repository + 7-corpus version and immutable commit SHA combination for each product milestone (`0.Y.0`) or patch (`0.Y.Z`) for release pipeline gating and audit provenance; **not used by clients as the runtime update selection source** | Updated when assembling a main product milestone or patch record |
+| **Feature Milestone Release** | `0.Y.0` (`0.1.0` → `0.2.0`) | Major feature additions or cross-component protocol evolution; ships with full-repository benchmark verification and an updated [`channels/0.1.json`](../channels/0.1.json) milestone manifest | **Yes** (all 7 Harness plugins align on the new `0.Y.0` milestone baseline) |
+| **Host Plugin Release Selection** | Formal GitHub Releases in each of the 7 plugin repositories (`mindie-plugin-release.json`) | Client selects the highest compatible formal plugin Release directly from the official plugin repository based on the installed host CLI version and `harness-compatibility.json` | Published independently when plugin code changes |
+| **Independent Shared Substrate & Component Update** | Formal GitHub Releases for 9 shared components plus the evaluation component (`harness`, `knowledge`, `remote-dev`, `diagnostics`, `debugger`, `profiler`, `sim`, `npu-top`, `coordinator`, `mindie-bench`) | Client **discovers formal GitHub Releases directly from each official component repository**, builds a side-by-side isolated `uv` environment from the exact Git SHA, runs a native API probe, and cuts over when idle | **No** (a component bugfix Release can be discovered directly without republishing host plugins) |
+| **Product Channel Manifest** | [`channels/0.1.json`](../channels/0.1.json) (`schema: "mindie-release-channel/1"`) | Records the product-verified code-repository + 9-corpus version and immutable commit SHA combination for each product milestone (`0.Y.0`) or patch (`0.Y.Z`) for release pipeline gating and audit provenance; **not used by clients as the runtime update selection source** | Updated when assembling a main product milestone or patch record |
 
 ### 1. Role and Field Identity of `channels/0.1.json`
 
@@ -88,13 +88,14 @@ gh workflow run release.yml --repo mindie-agent/sim --ref main
 Before and after publishing any shared component, knowledge corpus, host plugin, or product combination, **all six `R1–R6` gates must pass for the actual shipping scope**. Formal GitHub Releases in each component repository serve as the live discovery source for independent client updates, whereas [`channels/0.1.json`](../channels/0.1.json) records historical product-verified combinations and may legitimately lag newer independent component Releases. Consequently, shipping an independent component, corpus, or plugin requires no main-product version bump, no `channels/0.1.json` edit, and no sibling README churn:
 
 ```bash
-# Independent release (the default); repeat --release-repo for multiple targets.
-python3 .github/scripts/check_auto_update_readiness.py --release-repo knowledge --require-siblings --verify-local-hosts --verify-github-releases
+# Independent release (supports pre-channel components like harness, linked Git worktrees via
+# --siblings-root ../.worktrees, and authoritative overrides via --repo <name>=/abs/path).
+python3 .github/scripts/check_auto_update_readiness.py --release-repo harness --require-siblings --verify-local-hosts --verify-github-releases
 
-# Product combination release or channel update: full documentation alignment.
+# Product combination release or channel update: full active-doc alignment (excluding docs/archive/**).
 python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
 
-# Full writes are reserved for an intentional product combination release.
+# Full writes are reserved for an intentional product combination release (prints explicit repo coverage).
 python3 .github/scripts/sync_org_versions.py --release-scope product --write --org-profile-dir <path-to-.github>
 ```
 

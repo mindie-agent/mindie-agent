@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/knowledge-invocation-recovery.en.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/harness-boundary-and-lifecycle.en.md`](../harness-boundary-and-lifecycle.en.md).
+
 # Windows Knowledge Invocation & Recovery
 
-[中文](knowledge-invocation-recovery.md) · [Documentation Center](README.en.md)
+[中文](knowledge-invocation-recovery.md) · [Documentation Center](../README.en.md)
 
 This runbook is for developers and maintainers using `mindie-agent-codex` on Windows. It explains how to invoke knowledge capabilities through the configured runtime binding and native session identity, and how to recover by failure stage when input encoding, authorization, the Windows service launcher, or transport fails. It preserves the Windows field report contributed by `YzTongNiar` in [PR #357](https://github.com/mindie-agent/mindie-agent/pull/357), but it is **not** a desktop reproduction or acceptance of that field report: statements marked "inspected" come from source and interface review at the pinned versions, "field report" means the contributor's observation, and "not reproduced" remains explicitly unknown.
 
@@ -543,8 +548,8 @@ Until a formal `mindie-agent-codex` release `> 0.1.32` is published and interact
 
 ## Related documents
 
-- [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) (session authorization and the §2.4 boundary)
-- [Historical Postmortems & Guardrails](historical-issues-and-guardrails.en.md) (P1.6, P2.6)
-- [Knowledge & Experience System](knowledge-system.en.md) (§4.1 distillation triggers and evidence)
-- [Source Rebuild & Recovery](source-rebuild-contract.en.md)
+- [Harness Boundary & Lifecycle](../harness-boundary-and-lifecycle.en.md) (session authorization and the §2.4 boundary)
+- [Historical Postmortems & Guardrails](../historical-issues-and-guardrails.en.md) (P1.6, P2.6)
+- [Knowledge & Experience System](../knowledge-system.en.md) (§4.1 distillation triggers and evidence)
+- [Source Rebuild & Recovery](../source-rebuild-contract.en.md)
 - [PR #357](https://github.com/mindie-agent/mindie-agent/pull/357) (`YzTongNiar`'s Windows field report)

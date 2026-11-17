@@ -1,10 +1,15 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/next-steps.en.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/architecture.en.md`](../architecture.en.md).
+
 # MindIE Agent Roadmap & Next Steps
 
-[中文](next-steps.md) · [Back to Documentation Center](README.en.md)
+[中文](next-steps.md) · [Back to Documentation Center](../README.en.md)
 
-For the system architecture and knowledge loop design, see [Architecture & Module Boundaries](architecture.en.md) and [Knowledge & Experience System](knowledge-system.en.md). Engineering guidelines are documented in [Engineering Design Principles](design-principles.en.md).
+For the system architecture and knowledge loop design, see [Architecture & Module Boundaries](../architecture.en.md) and [Knowledge & Experience System](../knowledge-system.en.md). Engineering guidelines are documented in [Engineering Design Principles](../design-principles.en.md).
 
-The ecosystem has completed the **[`v0.1.0`](releases/0.1.0.en.md)** milestone release ([18-Task Benchmark Report](releases/0.1.0/value-results.md) · [Author's Note](releases/0.1.0/design-philosophy.en.md)) and subsequent `v0.1.1`–[`v0.1.12`](releases/0.1.12.en.md) updates (pinned in [`channels/0.1.json`](../channels/0.1.json); see [Release Records & Roadmap](README.en.md#release-records--roadmap)). Key delivered capabilities include:
+The ecosystem has completed the **[`v0.1.0`](../releases/0.1.0.en.md)** milestone release ([18-Task Benchmark Report](../releases/0.1.0/value-results.md) · [Author's Note](../releases/0.1.0/design-philosophy.en.md)) and subsequent `v0.1.1`–[`v0.1.12`](../releases/0.1.12.en.md) updates (pinned in [`channels/0.1.json`](../../channels/0.1.json); see [Release Records & Roadmap](../README.en.md#release-records--roadmap)). Key delivered capabilities include:
 - **Knowledge & Experience Flywheel**: Information-gap retrieval, L1–L4 progressive disclosure, token-budget gating, the `G3` C6 experience distillation flywheel, `G4` `mode="explore"` exploration, and automatic unit `revision` monotonicity in `knowledge v0.13.14` across public Ascend domain corpora (`450+` graded units);
 - **Mechanism-First Performance Modeling & Profiling**: A unified 5-layer causal engine, deterministic Case composer (`compose`), `async_scheduling` delayed KV release model, and topology/PD Pareto solvers in `mindie-sim v0.9.4` paired with topology-guided Decode/Prefill segmentation in `mindie-profiler v0.5.6` (achieving `1,653 / 1,653 = 100.00% <= 10%` in-sample multi-regime calibration across A2/A3/A5 captures, converging across 280 Decode + 15 Prefill cases, and reaching `841/856 = 98.25% <= 15%` overall and `546/561 = 97.33% <= 15%` independent held-out accuracy on the 856-case DSH fleet benchmark);
 - **Remote Execution, Diagnostics & Multi-Host Evaluation**: Shared SSH authentication in `remote-dev v0.11.6`, deterministic CANN/`plog` fault triage in `diagnostics v0.5.8`, Ascend A5 topology/HCCL preflight and native Antigravity session discovery in `coordinator v0.7.5`, native host plugins (including `Codex v0.1.21`, `Claude Code v0.1.17`, `Kimi v0.1.17`, `DSH v0.1.16`, and `Google Antigravity v0.1.8`), and subprocess behavioral oracle hardening plus colloquial-prompt `G0–G5` full-matrix evaluation in `mindie-bench v0.4.6`.

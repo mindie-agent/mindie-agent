@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/knowledge-context-and-exploration.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/knowledge-system.md`](../knowledge-system.md).
+
 # 上下文分层、经验演化与开放探索详细设计
 
-[English](knowledge-context-and-exploration.en.md) · [知识系统现状](knowledge-system.md) · [文档中心](README.md)
+[English](knowledge-context-and-exploration.en.md) · [知识系统现状](../knowledge-system.md) · [文档中心](../README.md)
 
 **状态：设计提案。** 本文定义后续实现的行为、数据口径与验收方式，不把设计写成已交付能力。基于 2026-10-20 的本地实现检查与开源资料，供 Gemini、DeepSeek 等实现方按模块落地；主仓库只维护设计。
 
@@ -10,7 +15,7 @@
 2. **经验回路**：任务事实 → 可复用结论 → 更新已有知识 → 在后续任务中验证、修订或退出默认检索。
 3. **探索回路**：识别常规路径的解释缺口 → 做有区分力的实验 → 判断结果 → 将适用范围明确的发现交回经验系统。
 
-性能优化中的原始数据读取、按需采集、计量与对比由配套的 [Profiler 系统设计](profiler-system.md)定义；本文负责这些证据进入上下文与经验系统后的预算、采用和修订。
+性能优化中的原始数据读取、按需采集、计量与对比由配套的 [Profiler 系统设计](../profiler-system.md)定义；本文负责这些证据进入上下文与经验系统后的预算、采用和修订。
 
 ## 1. 设计决策与边界
 
@@ -55,7 +60,7 @@
 ### 3.1 知识内容类别（`category`）：在 `knowledge` 飞轮中保存什么
 
 > [!IMPORTANT]
-> **避免把知识库称为“L1–L4 知识库”**：`L1–L4` 是系统认知与执行架构的四层分级（详见[系统架构 §4](architecture.md#4-l1l4-四层认知与执行架构及知识飞轮)）。`knowledge` 飞轮中的结构化知识单元按**内容语义类别（`category`）**划分，分别服务于 `L1–L4` 架构各层（现有 Schema 中的 `tier: L1..L4` 仅为对应下表四类 `category` 的历史兼容字段）：
+> **避免把知识库称为“L1–L4 知识库”**：`L1–L4` 是系统认知与执行架构的四层分级（详见[系统架构 §4](../architecture.md#4-l1l4-四层认知与执行架构及知识飞轮)）。`knowledge` 飞轮中的结构化知识单元按**内容语义类别（`category`）**划分，分别服务于 `L1–L4` 架构各层（现有 Schema 中的 `tier: L1..L4` 仅为对应下表四类 `category` 的历史兼容字段）：
 
 | 知识内容类别（`category`） | 服务的系统架构层级（兼容字段 `tier`） | 保存内容 | 回答的核心问题 |
 | --- | --- | --- | --- |
@@ -677,7 +682,7 @@ knowledge_feedback(ref, rating=None, reason="", event_type=None,
 
 ### 13.3 功能验收
 
-遵循[分级测试体系](testing-architecture.md)，只验证真实行为：
+遵循[分级测试体系](../testing-architecture.md)，只验证真实行为：
 
 各层知识的现有实现覆盖、具体用例、开源协议对照、评价指标与落地顺序见 [L1–L4 知识与系统能力分级测试方案](knowledge-tiered-testing-plan.md)。下表保留本设计的功能验收要求，真实任务收益与长期学习按该方案分别验证。
 
@@ -771,7 +776,7 @@ P0/P1 可以先服务日常任务。P2/P3 在相同接口上迭代，不以新�
 
 下列 M1–M6 与工程流程 W1–W6 仅是设计追踪编号，不新增运行时枚举或要求用户填写的表单。它们可以组合使用，不是固定阶段流程。来源 T1–T6 的身份和具体位置见第 15.5 节。
 
-这些机制遵循[工程原则第 10 条](design-principles.md#10-按真实缺口自研以核心业务逻辑为唯一基准直接重构清理)：默认信任 Agent 和内部组件，直接复用已有运行结果。经验提炼、检索和报告不逐层重验事实，也不要求 Agent 为每项判断另交证明。评测器按题意做一次任务评价；真实任务出现矛盾时再做针对性定位。
+这些机制遵循[工程原则第 10 条](../design-principles.md#10-按真实缺口自研以核心业务逻辑为唯一基准直接重构清理)：默认信任 Agent 和内部组件，直接复用已有运行结果。经验提炼、检索和报告不逐层重验事实，也不要求 Agent 为每项判断另交证明。评测器按题意做一次任务评价；真实任务出现矛盾时再做针对性定位。
 
 | 机制 | 主责与配合组件 | 复核基线与缺口（本批状态见 15.4） | 实现工作 | 验收要求 | 来源 |
 | --- | --- | --- | --- | --- | --- |
@@ -819,7 +824,7 @@ P0/P1 可以先服务日常任务。P2/P3 在相同接口上迭代，不以新�
 | **C4 混合架构（Dense + MoE + MTP）Profiler 层切分与主流选择** | 1. **主计算流判定**：按窗口累计执行时长 `argmax_s sum(duration_ns)` 选择主计算 `streamId`，禁取 `first_event`。<br/>2. **MLA 子算子内聚与混合层归并**：`MlaPrologV3` 与 `KvQuantSparseFlashAttention` 归属同一层内部；`3 Dense + 75 MoE + 1 MTP` 必须归并为单个完整 Step（79 层），禁拆为 3 个伪 Step。 | `docs/profiler-system.md`（5.3 节）+ `knowledge-vllm-ascend`（`sfa-layerwise`、`pd-hixl-mooncake`） |
 | **W7 & C5 扩散模型（`Ascend/MindIE-SD`）与多阶段全模态（`vllm-project/vllm-omni`）全仓蒸馏与门禁契约** | 1. **两阶段集成（API 优先→`torch.compile`）与 DiT 少步探针（`W7`）**：融合算子/稀疏注意力/缓存在接入 DiT 时先验证 Eager API 替换与精度，再开启 `torch_npu._inductor` `PatternMatcherPass`（配 `_check_fn` 布局/对齐守卫与 `_pattern_pass=True`）；多卡并行（Ulysses/Ring/CFG）先跑 `3–5` 步 DiT-only 少步探针并以 $S_{\text{max}} \le 1/(1 - c/f)$（要求 $c/f \ge 10\%$）评估通信掩盖，排查 `FlashAttention + AllToAll` 并发触发的 A2/A3 芯片功耗墙降频（`seq_len/sp_size < 4096` 时降级 `AllToAll` 并发）。<br/>2. **窗口化交错 A/B/A 性能门禁与三级生成精度门禁（`W7`）**：探索态跑 1 轮 A/B，验收态跑 $\ge 2$ 轮窗口化 A/B/A 交错比对（`baseline_recheck <= 3%` 漂移、$\ge 1\%$ 净收益）；区分无损融合（`PSNR >= 35 dB`、`SSIM >= 0.98`、`LPIPS <= 0.02`）与有损缓存/稀疏/量化（`PSNR >= 26 dB`、`SSIM >= 0.88`），严禁对 50 步生成结果套用逐元素 `allclose`。<br/>3. **VAE 潜空间边界带状态切片、量化字节契约与多阶段流式全模态（`C5`）**：视频 3D 因果 VAE（`Wan2.2`/`TAEHV`）仅在潜空间时空边界切片并跨块传递 `feat_cache` 环形缓存；`MindIE-SD` 量化权重严禁用 `.numel() * element_size()` 估算打包/NZ 张量字节数并强制 `32/64` 对齐；`vllm-omni` `Thinker -> Talker -> Code2Wav` 拆解 `TTFP` 与 `RTF`，开启 `async_chunk: true`（`codec_chunk_frames: 25`、`codec_left_context_frames: 25`），并在 Talker/CodePredictor FIA Eager 解码中锁定 `max_num_seqs: 1` 静态 `[B, 1]` Shape。 | 7 大知识库新增 16 条 `L1–L3` 单元（总计 `450` 单元：`knowledge-vllm-ascend` 5 条、`knowledge-infer-core` 4 条、`knowledge-operators` 2 条、`knowledge-infer-distributed` 2 条、`knowledge-infer-observability` 1 条、`knowledge-infer-ops-compat` 1 条、`knowledge-agent-engineering` 1 条）+ `knowledge` 子词/双语别名检索 + 四端插件 `diagnostic-reasoning.md` |
 
-不为上述机制与流程新建全局工作流引擎、原因分类器或长驻学习 Agent。诊断、Phase 0 与工程交付流程指导进入各宿主的按需参考；可复用机制进入现有方法/决策经验单元；四层仿真求解归入独立仓库 `sim` 的 [`mindie_sim`](simulation-system.md)，实测归入独立仓库 `profiler`；确定性证据、Gate 脚手架和预算检查继续使用现有组件。
+不为上述机制与流程新建全局工作流引擎、原因分类器或长驻学习 Agent。诊断、Phase 0 与工程交付流程指导进入各宿主的按需参考；可复用机制进入现有方法/决策经验单元；四层仿真求解归入独立仓库 `sim` 的 [`mindie_sim`](../simulation-system.md)，实测归入独立仓库 `profiler`；确定性证据、Gate 脚手架和预算检查继续使用现有组件。
 
 ### 15.3 经验的最小单元、反证处理与后台静默防膨胀
 

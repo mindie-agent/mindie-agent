@@ -1,6 +1,11 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/a3-performance-modeling-acceptance.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/simulation-system.md`](../simulation-system.md).
+
 # A3 双模型实现与验收记录
 
-[设计方案](a3-performance-modeling-plan.md) · [仿真系统](simulation-system.md)
+[设计方案](a3-performance-modeling-plan.md) · [仿真系统](../simulation-system.md)
 
 本轮工作始于 2026-10-20，持续验收日期为 2026-10-21。DSH 以 `max` 推理强度负责运行时代码实现；独立验收读取公开入口、执行数学反例、采集真实 A3 数据并保留未用于拟合的样本。本文只把实际执行过的结果记为已验证。
 

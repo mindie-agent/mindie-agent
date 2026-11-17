@@ -1,3 +1,8 @@
+> **Historical Archive (Non-Gate Snapshot)** — Preserved from baseline commit `02a1d371`.
+> Original path: `docs/a5-communication-calibration-todo.md` · Excluded from active release/version gates.
+> Retained for historical design provenance; do not treat point-in-time plans or wave checklists as live contracts.
+> Current living specification: [`docs/simulation-system.md`](../simulation-system.md).
+
 # A5 通信展开与竞争校准 TODO
 
 [A3 双模型方案](a3-performance-modeling-plan.md) · [实现与验收记录](a3-performance-modeling-acceptance.md)

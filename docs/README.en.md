@@ -10,29 +10,24 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 |---|---|---|
 | [Engineering Design Principles](design-principles.en.md) | [工程设计原则与演进准则](design-principles.md) | The core product and engineering principles governing tool boundaries, developer experience, mechanism reuse, and error visibility |
 | [Contributing Guide (Agent-First Workflow)](../CONTRIBUTING.en.md) | [参与贡献指南（Agent-First 贡献规范）](../CONTRIBUTING.md) | Two-gate Agent contributing workflow: read design principles before coding, and complete the Pre-PR Checklist self-review after PR submission |
-| [Architecture & Module Boundaries](architecture.en.md) | [系统架构与模块分工](architecture.md) | How native Harness plugins, the knowledge engine, remote execution, NPU observability, and diagnostics fit together |
-| [Knowledge & Experience System](knowledge-system.en.md) | [知识与经验闭环设计](knowledge-system.md) | How troubleshooting sessions are redacted, indexed into lightweight Markdown packages, and shared with the community |
-| [Context, Experience & Exploration Design](knowledge-context-and-exploration.en.md) | [上下文分层、经验演化与开放探索详细设计](knowledge-context-and-exploration.md) | Proposed token budgets, progressive loading, `workflow` decision experience, knowledge growth control, and `L4` exploration feedback, with source comparisons and acceptance criteria |
+| [Architecture & Module Boundaries](architecture.en.md) | [系统架构与模块分工](architecture.md) | How the 7 thin host plugins, shared `harness` substrate, pure knowledge engine, remote execution, NPU observability, and diagnostics fit together |
+| [Knowledge & Experience System](knowledge-system.en.md) | [知识与经验闭环设计](knowledge-system.md) | Graded `L1–L4` retrieval, information-gap citation inspection, redacted capture, and community corpus publishing |
 | [Profiler System Design](profiler-system.en.md) | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | In-place Ascend profiling analysis, nanosecond interval accounting, Host-to-Device correlation, cross-run comparison, and controlled online capture |
 | [General Performance Modeling System](simulation-system.md) | [面向 Agent 的通用性能建模系统](simulation-system.md) | `mindie-sim v0.9.4` 5-layer unified causal modeling, `compose` synthesis, `async_scheduling` delayed KV release, 4D efficiency breakdown, SLA/PD Pareto solvers, `skew` barrier mechanics, and `1,653/1,653 <=10%` A2/A3/A5 in-sample multi-regime calibration + 856-case DSH fleet generalization |
-| [Shared Structure & Measured Attribution](profiler-sim-structure.md) | [Profiler 与 Sim 的结构复用和实测映射](profiler-sim-structure.md) | `mindie-model-structure/1` structure export, isomorphic Cohort reconciliation, `auto_segment_decode_forwards` topology-guided segmentation, and multi-chip measured replay results |
-| [Simulation Interface Evolution & Consumer Integration](simulation-consumer-migration.md) | [`mindie-sim` 接口演进与消费者集成说明](simulation-consumer-migration.md) | `0.7.x -> 0.8.x/0.9.x` CLI/API mapping and integration across all native host plugins, `profiler`, and `mindie-bench` |
-| [Core Implementation & Knowledge Evolution Design](core-implementation-and-geak-evolution-design.md) | [核心能力落地与知识持续演进设计](core-implementation-and-geak-evolution-design.md) | Context token budget, experience distillation loop, and component implementation records |
+| [Historical Architecture & Wave Archive](archive/README.md) | [历史架构与演进方案归档索引](archive/README.md) | Frozen completed execution plans, early design explorations, interface migrations, and point-in-time reviews (`docs/archive/**`, non-gate) |
 
 ## Runtime Lifecycle & Engineering Specifications
 
 | Document (English) | 中文 | What It Covers |
 |---|---|---|
-| [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | Task identity attribution, persistent user consent, operation lifetimes, and local state protection |
-| [Windows Knowledge Invocation & Recovery](knowledge-invocation-recovery.en.md) | [Windows 知识调用与恢复](knowledge-invocation-recovery.md) | Configured runtimes, PowerShell encoding, Windows service launchers, session authorization, and recovery by failure stage |
+| [Harness Boundary & Lifecycle](harness-boundary-and-lifecycle.en.md) | [宿主边界与任务生命周期](harness-boundary-and-lifecycle.md) | 7-host thin adapters + `mindie-harness` substrate boundary, task identity, persistent consent, dual PE `Subsystem == 2` validation, and 2-generation atomic updates |
 | [Source Rebuild & Recovery](source-rebuild-contract.en.md) | [源码开发、重编译与产物恢复契约](source-rebuild-contract.md) | Workspace and container source discovery, Python interpreter alignment, native C++/AscendC rebuilds, baseline recovery, and native escape routes |
 | [Execution Resource Expectations & Spec Placement](execution-resource-budget-design.md) | [执行资源预期、代码有界性与规格匹配设计](execution-resource-budget-design.md) | Code-level bounded memory/VRAM rules (Principle 18), workload resource expectations, and cross-platform (Windows/macOS/Linux) local vs. remote `fleet_probe` spec-driven placement |
-| [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | [版本兼容与无感更新](release-compatibility-and-update.md) | Two-tier release architecture & product combination manifest (`channels/0.1.json`), direct component Release discovery, SemVer host compatibility, and idle atomic cutover |
-| [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | [诊断日志与故障上报](diagnostics-and-reporting.md) | Bounded local structured logs, strict privacy redaction rules, and opt-in GitHub Issue fault reporting |
+| [Release Compatibility & Silent Update](release-compatibility-and-update.en.md) | [版本兼容与无感更新](release-compatibility-and-update.md) | Two-tier release architecture, `channels/0.1.json`, worktree-native `R1–R6` gates, SemVer host compatibility, and idle atomic cutover |
+| [Diagnostics & Fault Reporting](diagnostics-and-reporting.en.md) | [诊断日志与故障上报](diagnostics-and-reporting.md) | Bounded local structured logs, strict allowlist redaction, Scale-to-Zero on-demand drain, and `7d` unsent `pending` expiry |
 | [Native Runtime & Process Reuse](native-runtime-reuse.en.md) | [原生能力与系统机制复用](native-runtime-reuse.md) | How MindIE Agent reuses native plugin managers, `uv` locked environments, and OS process-tree primitives |
 | [Enterprise Network Transport](enterprise-network.en.md) | [企业网络下的配置与传输](enterprise-network.md) | Corporate proxy and system root-CA trust, GitHub sign-in flow, offline/intranet installation & updates, background uploads, and loopback bypass rules |
 | [Tiered Testing Architecture](testing-architecture.en.md) | [分级测试体系与用例设计规范](testing-architecture.md) | Test validity redlines and the Tier 0 – Tier 3 pyramid backed by standing live A2/A3 Ascend NPU clusters |
-| [L1–L4 Tiered Knowledge & System Testing Plan](knowledge-tiered-testing-plan.md) | [L1–L4 知识与系统能力分级测试方案](knowledge-tiered-testing-plan.md) | End-to-end evaluation protocols, L1–L4 coverage/gap matrix, conditional strategy-selection controls, input leak isolation, and acceptance gates |
 
 ## Release Records & Roadmap
 
@@ -54,13 +49,13 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 | [`0.0.3` Release Record](releases/0.0.3.en.md) | [`0.0.3` 版本发布记录](releases/0.0.3.md) | L1–L4 progressive disclosure, `profiler` and `sim` components, deterministic CANN fault triage, and 12-repository formal benchmarks |
 | [`0.0.2` Release Record](releases/0.0.2.en.md) | [`0.0.2` 版本发布记录](releases/0.0.2.md) | Aligned plugin versions, exact component sources, native acceptance, and recurring ten-repository benchmarks |
 | [`0.0.1` Release Record](releases/0.0.1.en.md) | [`0.0.1` 版本发布记录](releases/0.0.1.md) | Supported host matrix, paired component release mapping, verified capabilities, and known host limitations |
-| [Roadmap & Next Steps](next-steps.en.md) | [后续演进路线图](next-steps.md) | Upcoming work on end-to-end benchmarks, broader host coverage, and developer experience improvements |
+| [Archived Roadmap & Next Steps](archive/next-steps.en.md) | [历史演进路线图归档](archive/next-steps.md) | Historical milestone roadmap snapshot |
 
 ## Quality Audits
 
 | Document (English) | 中文 | Scope |
 |---|---|---|
-| [**Historical Postmortems & Guardrails (`0.0.1 → 0.1.6`)**](historical-issues-and-guardrails.en.md) | [**历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）**](historical-issues-and-guardrails.md) | Systematic `P1–P7` root-cause catalog of historical defects across auto-update, harness lifecycles, timeout races, receipt honesty, knowledge/C6 budgets, benchmark soundness, and A3 dual-Die topology, paired with automated gates |
+| [**Historical Postmortems & Guardrails (`0.0.1 → 0.1.6`)**](historical-issues-and-guardrails.en.md) | [**历史版本问题复盘与系统性防复发门禁（`0.0.1 → 0.1.6`）**](historical-issues-and-guardrails.md) | Systematic `P1–P8` root-cause catalog of historical defects across auto-update, harness lifecycles, timeout races, receipt honesty, knowledge/C6 budgets, benchmark soundness, A3 dual-Die topology, and bounded storage, paired with automated gates |
 | [2026-10-29 Benchmark Oracle Hardening & Archive Re-evaluation](audits/2026-10-23-mindie-bench-integrity.md) | [2026-10-29 基准判分器加固与历史归档复判报告](audits/2026-10-23-mindie-bench-integrity.md) | Real subprocess behavioral oracle hardening across all 20 `mindie-bench` tasks (109 three-state and helper controls passed) and zero-model behavioral re-evaluation across 74 primary trials |
-| [Parallel Architecture Review & Fixes (2026-10-24)](architecture-review-20261024.md) · [2026-10-23 Simplification Record](architecture-simplification-20261023.md) | [并行架构评审与修复（2026-10-24）](architecture-review-20261024.md) | Whole-delivery budgeting, exploration pass-through, SSH cleanup & dual-Die placement, behavior task verifiers, and benchmark evidence boundary corrections |
+| [Archived Architecture Review (2026-10-24)](archive/architecture-review-20261024.md) · [2026-10-23 Simplification Record](archive/architecture-simplification-20261023.md) | [并行架构评审归档（2026-10-24）](archive/architecture-review-20261024.md) | Whole-delivery budgeting, exploration pass-through, SSH cleanup & dual-Die placement, behavior task verifiers, and benchmark evidence boundary corrections |
 | [2026-10-20 Code Quality Audit](audits/2026-10-20/README.en.md) | [2026-10-20 代码质量审计](audits/2026-10-20/README.md) | Cross-repository review at fixed revisions, measured line/branch coverage, findings, and staged changes |
