@@ -138,6 +138,8 @@ class ReleaseDocScopeTests(unittest.TestCase):
         self.assertTrue(self.check("mindie-agent-kimi"))
 
     def test_independent_opencode_plugin_validates_without_channel_entry(self):
+        self.manifest["components"].pop("mindie-agent-oc", None)
+        self.channel.write_text(json.dumps(self.manifest), encoding="utf-8", newline="\n")
         self.assertNotIn("mindie-agent-oc", self.manifest["components"])
         plugin = self.repo("mindie-agent-oc", "0.1.0")
         (plugin / "package.json").write_text('{"name":"@mindie-agent/oc","version":"0.1.0"}\n', encoding="utf-8", newline="\n")
