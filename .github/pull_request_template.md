@@ -15,7 +15,8 @@
   - **性能与并发纪律**：热循环内无 `deepcopy` / 起子进程 / 逐行 Commit；并行 Worker 数同时受可用 CPU 核数与可用安全内存双重约束（$\min(\text{CPU}, \lfloor\text{可用内存}/\text{单 Worker 内存}\rfloor)$）。
   - **显存（HBM/VRAM）安全**：控制与元数据路径保持“零权重、零设备上下文”；上卡操作启动前完成静态显存预算核验（`vram_free_mb >= Expected VRAM`）。
   - **跨平台规格分流（Windows / macOS / Linux）**：无 `sys.platform == "darwin"` 等操作系统硬编码特判；重计算/重内存/需显存任务声明 `WorkloadExpectation`，按本机与远端（`fleet_probe.py`）的真实可用硬件规格自动分流（本机规格充裕则本地跑，不足则分流远端）。
-- [ ] **15. 自动更新就绪、Windows 零控制台弹窗必检（Release Checklist `R1–R6` & Zero Console Popup）与文件格式规范（PR Format Hygiene）**：已核验 Windows Node.js 子进程带 `windowsHide: true`、Python 子进程带 `CREATE_NO_WINDOW`；按实际范围通过 `check_auto_update_readiness.py`（独立组件/语料/插件用 `--release-repo <仓库>`，产品组合用 `--release-scope product`，按需加 `--require-siblings --verify-local-hosts`，发版加 `--verify-github-releases`）。R6 独立发布只核对所选仓自身源码版本、README 与 LF，不要求主仓升版、通道更新或其他仓 README 同步；全量版本同步仅用于产品组合发布。文本文件通过 `python3 .github/scripts/check_lf_eol.py`，保持 Unix `LF`（`\n`）。
+  - **存储生命周期有界与零临时目录泄漏（`P8`）**：运行时代际仅保留 `Active + Rollback` 及活跃进程租约/跨插件引用目录（支持升级静默回收历史包袱），候选验证单环境复用，无未配对清理的 `mkstemp`/`mkdtemp` 临时泄漏，Windows 路径零裸 `os.kill(pid, 0)`。
+- [ ] **15. 自动更新就绪、Windows 零控制台弹窗与存储门禁必检（Release Checklist `R1–R6`、`P1.5` & `P8`）与文件格式规范（PR Format Hygiene）**：已核验 Windows Node.js 子进程带 `windowsHide: true`、Python 子进程带 `CREATE_NO_WINDOW`；按实际范围通过 `check_auto_update_readiness.py`（含 `storage_lifecycle_gate.py`；独立组件/语料/插件用 `--release-repo <仓库>`，产品组合用 `--release-scope product`，按需加 `--require-siblings --verify-local-hosts`，发版加 `--verify-github-releases`）。R6 独立发布只核对所选仓自身源码版本、README 与 LF，不要求主仓升版、通道更新或其他仓 README 同步；全量版本同步仅用于产品组合发布。文本文件通过 `python3 .github/scripts/check_lf_eol.py`，保持 Unix `LF`（`\n`）。
 > 计划任务等直接执行入口还须验证 `pythonw.exe` 的真实 PE GUI 子系统（`Subsystem == 2`），覆盖新注册与旧注册恢复；文件名、文件存在和任务 `Hidden` 不能代替此检查。Windows 桌面验收须核对就绪、虚拟环境身份、参数与窗口/进程树，并正常停止和删除临时任务。
 
 - **自查结论与证据**：

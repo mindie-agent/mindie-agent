@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Cross-version host compatibility, WSL2 native binary filtering, and Windows windowless spawn gate.
+"""Cross-version host compatibility, WSL2 native binary filtering, Windows zero-popup & storage gate.
 
 [Role]
 Extracted R4/R5 verification helpers for `check_auto_update_readiness.py`: validates 7-host
 `harness-compatibility.json` forward SemVer ranges, Windows windowless subprocess wrappers
-(`CREATE_NO_WINDOW` / `windowsHide: true`), and active local host CLI versions.
+(`CREATE_NO_WINDOW` / `windowsHide: true`), bounded storage lifecycle & temp hygiene (`P8`),
+and active local host CLI versions.
 
 [Invariants]
 - WSL2 / POSIX binary lookups reject `.exe`/`.cmd`/`.bat`/`.ps1` files and PE/CRLF/MSYS Windows
@@ -33,6 +34,12 @@ import subprocess
 import sys
 from typing import Callable
 
+from storage_lifecycle_gate import (
+    STORAGE_LIFECYCLE_FLOOR_VERSIONS,
+    inspect_python_temp_hygiene,
+    inspect_storage_module_windows_pid_safety,
+    verify_storage_lifecycle_hygiene,
+)
 from windows_zero_popup_gate import (
     WINDOWS_NODE_WINDOWLESS_FILES,
     WINDOWS_NO_WINDOW_COMPANION_FILES,
@@ -499,12 +506,20 @@ def main(argv: list[str] | None = None) -> int:
     errors = verify_flexible_component_compatibility_impl(
         roots,
         ensure_knowledge_importable=lambda _r: _can_import_knowledge(),
-        windowless_check=lambda r: verify_windows_windowless_spawns(
-            r,
-            main_repo=main_repo,
-            require_siblings=args.require_siblings,
-            required_repos=args.release_repo,
-        ),
+        windowless_check=lambda r: [
+            *verify_windows_windowless_spawns(
+                r,
+                main_repo=main_repo,
+                require_siblings=args.require_siblings,
+                required_repos=args.release_repo,
+            ),
+            *verify_storage_lifecycle_hygiene(
+                r,
+                main_repo=main_repo,
+                require_siblings=args.require_siblings,
+                required_repos=args.release_repo,
+            ),
+        ],
         zero_binding_check=lambda r: verify_zero_session_binding_gates(
             r,
             require_siblings=args.require_siblings,
