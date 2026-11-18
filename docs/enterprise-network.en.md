@@ -43,7 +43,7 @@ The main repository install prompt, native plugin auto-install protocols, and fi
 2. Whether to enable community knowledge sharing and automated fault reporting (persisted via `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"` or `setup.py sharing --disable` across `mindie-community.json`, `mindie-consent.json`, and `diagnostics.json`);
 3. Whether to star `mindie-agent/mindie-agent` on GitHub ⭐ (executing `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent` strictly when the user explicitly opts in, never silently).
 
-Manual installation instructions conclude with `/mindie-agent help me finish first-time setup`; background wakeups and routine engineering sessions never repeat onboarding prompts.
+Manual installation instructions conclude with one-time `setup.py sharing` onboarding; background wakeups and routine engineering sessions never repeat onboarding prompts.
 
 - **Workspace initialization and auth reuse**: Initializing [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace) runs its checked-out `AGENTS.md` workflow and `repo_init.py`, preserving saved fork selections in `workspace.json`. Standalone workspace setup verifies GitHub authentication upfront, while workspace onboarding launched from plugin setup reuses the already verified identity.
 - **Single-step native workspace registration**: Once the user chooses to create or reuse a workspace directory, onboarding registers that absolute path in the host's native project/workspace list within the same flow without asking a redundant confirmation question. Directory registration is decoupled from source cloning, so users can register the workspace immediately and defer large repository downloads.
@@ -70,7 +70,7 @@ When assembling Git subprocess environments, preserve existing caller proxy, CA,
 
 ## GitHub sign-in flow
 
-During installation, first-time onboarding, or credential repair, `/mindie-agent` executes the five-step flow below. The Agent guides method selection interactively, while official `gh` CLI storage owns credential persistence and invocation—introducing no custom auth daemon or MindIE-specific token file format:
+During installation, first-time onboarding, or credential repair, the installer onboarding guide executes the five-step flow below. The Agent guides method selection interactively, while official `gh` CLI storage owns credential persistence and invocation—introducing no custom auth daemon or MindIE-specific token file format:
 
 1. **Reuse working authentication first.** Install `gh` if absent, then run `gh api --hostname github.com user --jq .login`. When the expected account responds cleanly, proceed immediately without prompting for login. Use `gh auth status` to inspect credential provenance; an expired secondary account stored in `gh` must never block an active valid account.
 2. **Recommend a sign-in method suited to the network.** Recommend token sign-in when the user is on an enterprise network, proxy or custom CA variables are active, or browser OAuth callbacks are blocked; otherwise default to browser sign-in while offering token sign-in as an option. Proxy or CA settings are a heuristic hint rather than proof that browser login will fail. Always resolve TCP timeouts, proxy `407` errors, and TLS certificate failures as transport issues before treating them as invalid credentials.

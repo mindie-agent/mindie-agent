@@ -43,7 +43,7 @@ Experience capture strictly separates **fast foreground admission** from **async
 
 ```text
 Host triggers Stop Hook
-  -> 1. Verify session manual-entry lease (knowledge_lease), task identity & authorized project scope (unactivated sessions short-circuit immediately)
+  -> 1. Check saved contribution consent (enabled == true) & authorized project_roots first (< 100ms zero-SQLite short-circuit when disabled or out of scope); when in scope, verify task identity and provision session lease
   -> 2. Commit durable admission record to local SQLite
   -> 3. Return neutral response immediately (milliseconds, zero LLM calls)
   -> 4. Independent background worker consumes queue

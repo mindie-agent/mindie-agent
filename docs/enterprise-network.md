@@ -43,7 +43,7 @@
 2. 是否开启社区知识共享与自动故障上报（通过 `setup.py sharing --enable --project-root "$WORKSPACE_ROOT"` 或 `setup.py sharing --disable` 统一落盘至 `mindie-community.json`、`mindie-consent.json` 与 `diagnostics.json`）；
 3. 是否顺手为 `mindie-agent/mindie-agent` 点亮一颗 GitHub Star ⭐（仅在用户明确选择同意后执行 `gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent`，严禁未经同意静默执行）。
 
-手动安装文档统一以 `/mindie-agent 帮我完成首次配置` 收尾；后台服务唤醒与日常研发任务绝不重复弹出首次配置询问。
+手动安装文档以 `setup.py sharing` 引导完成首次配置收尾；后台服务唤醒与日常研发任务绝不重复弹出首次配置询问。
 
 - **工作区初始化与认证复用**：工作区安装通过 [vllm-ascend-workspace](https://github.com/mindie-agent/vllm-ascend-workspace) 当前检出的 `AGENTS.md` 与 `repo_init.py` 执行，自动沿用 `workspace.json` 中已保存的 Fork 选择。独立运行工作区初始化时同样先完成认证检查；从插件引导进入时则直接复用同一次认证结果。
 - **一步完成原生项目登记**：用户确认创建或复用工作区后，引导流程在同一轮内直接将该绝对路径登记到当前宿主的原生项目/工作区列表中，不再二次追问是否登记。目录初始化选项独立保存，即使暂缓下载源码也可先行完成工作区路径登记。
@@ -70,7 +70,7 @@
 
 ## GitHub 登录引导
 
-在首次安装、初始化配置或修复凭据时，`/mindie-agent` 统一遵循以下五步引导流程。登录方式选择由 Agent 交互引导，底层凭据存储与调用则完全复用官方 `gh` CLI，不另建私有认证服务或自定义 Token 存储格式：
+在首次安装、初始化配置或修复凭据时，安装引导流程统一遵循以下五步协议。登录方式选择由 Agent 交互引导，底层凭据存储与调用则完全复用官方 `gh` CLI，不另建私有认证服务或自定义 Token 存储格式：
 
 1. **优先复用既有有效登录。** 若环境缺失 `gh` 则先完成安装，随后执行 `gh api --hostname github.com user --jq .login`。只要调用成功且返回账号符合当前任务预期，即直接继续后续步骤，不再重复询问登录方式。`gh auth status` 仅用于辅助诊断凭据来源；其他非活跃保存账号的过期状态不应阻断当前有效账号。
 2. **需要登录时按网络环境推荐方式。** 若用户已说明身处企业内网、检测到代理或自定义 CA 配置，或浏览器 OAuth 跳转受阻，优先推荐使用 Token 登录；普通直连网络默认提供浏览器一键登录，同时保留 Token 选项。检测到代理或自定义 CA 仅作为推荐依据，不预设浏览器登录必然失败。遇到连接超时、代理 `407` 或 TLS 证书报错时，必须先按传输层故障排障，严禁误判为 Token 失效。

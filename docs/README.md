@@ -33,7 +33,8 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
-| [**`0.1.14` 补丁发布说明**](releases/0.1.14.md) | [**`0.1.14` Patch Notes**](releases/0.1.14.en.md) | 按宿主原生能力对齐触发机制（`mindie-agent-agy v0.1.19` 默认开放全功能，其余六款支持手动触发的客户端强制 `disable-model-invocation` 手动唤醒），并彻底剥离全端运行时 `skills/` 中的安装向导至 `docs/install/`（`P2.8`） |
+| [**`0.1.15` 补丁发布说明**](releases/0.1.15.md) | [**`0.1.15` Patch Notes**](releases/0.1.15.en.md) | 全七端统一收敛为“启用即全功能静默自启（Silent Default-On）”：移除全部 `/mindie-agent` 口令暴露、`disable-model-invocation` 阻断及 `knowledge_*` 会话绑定门禁，经验采集仅受共享开关与授权目录约束 |
+| [**`0.1.14` 补丁发布说明**](releases/0.1.14.md) | [**`0.1.14` Patch Notes**](releases/0.1.14.en.md) | 彻底剥离全端运行时 `skills/` 中的安装向导至 `docs/install/`，并在 Google Antigravity（`v0.1.19`）率先切换为默认全功能开放 |
 | [**`0.1.13` 补丁发布说明**](releases/0.1.13.md) | [**`0.1.13` Patch Notes**](releases/0.1.13.en.md) | 全栈洁净架构收敛：抽离公共宿主底座 `mindie-harness v0.1.0`、`mindie-knowledge v0.13.23` 回归纯知识引擎、确定性工具零前置会话绑定（`P2.7`）与 7 宿主统一对齐 |
 | [**`0.1.12` 补丁发布说明**](releases/0.1.12.md) | [**`0.1.12` Patch Notes**](releases/0.1.12.en.md) | 加固 Windows 计划任务启动入口（在 `knowledge 0.13.14` 与 `diagnostics 0.5.8` 中预校验 PE GUI 子系统，防止控制台启动器弹窗） |
 | [**`0.1.11` 补丁发布说明**](releases/0.1.11.md) · [**`0.1.10` 补丁发布说明**](releases/0.1.10.md) | [**`0.1.11` Patch Notes**](releases/0.1.11.en.md) · [**`0.1.10` Patch Notes**](releases/0.1.10.en.md) | Google Antigravity / WorkBuddy 原位升级时的解释器与内容摘要脚本代际绑定（`0.1.11`），以及 `remote_auth(action="setup")` 首次 SSH 密码装钥与跨宿主任务连续性契约（`0.1.10`） |

@@ -1,71 +1,47 @@
-"""Unit contracts for R4 zero-session-binding AST gate (Iron Rule 5 / Guardrail P2.7).
+"""Unit tests for the R4 zero-session-binding & silent default-on static gate (`P2.7` / `P2.8`).
 
 [Role]
-Verifies `zero_binding_gate.verify_zero_session_binding_gates` across synthetic repository
-checkouts for `coordinator` and all 6 Python/Node host plugins (`codex`, `cc`, `kimi`,
-`agy`, `wb`, `dsh`), confirming both negative interception of deterministic session-binding
-regressions and preservation of strict `knowledge` identity (`P2.1`).
+Verifies that `zero_binding_gate.py` passes valid zero-binding silent default-on checkouts
+(including `${PLUGIN_ROOT}/mindie-agent/...` paths, `/mindie-agent-tools` identifiers,
+`except TimeoutError: raise` in WorkBuddy, and optional caught `claim_bind` in OpenCode)
+while reliably catching re-introduction of pre-call session/nonce/`context_file` gates,
+manual `/mindie-agent` ceremonies, `disable-model-invocation`, or install docs in `skills/`.
 
 [Invariants]
-- Isolates `HOME`, `USERPROFILE`, `APPDATA`, `MINDIE_CONFIG_HOME`, `MINDIE_DATA_HOME`, and
-  `MINDIE_DIAGNOSTICS_ROOT` inside per-test temporary directories (zero host pollution).
-- Zero external subprocesses, network calls, or `MagicMock` hardware payloads.
+- Zero host pollution: uses `tempfile.TemporaryDirectory()` only.
+- Pure in-memory/tempdir execution (`< 1s`), zero network calls, zero subprocesses.
 
 [Timeouts & Locks]
-- Pure Tier 0 in-memory/tempdir AST checks (`< 2s` total); acquires no locks.
+- Synchronous stdlib `unittest` suite; no external locks.
 
 [Side-Effect Policy]
-- Writes only inside `tempfile.TemporaryDirectory` cleaned up after every test.
+- Writes only inside disposable `TemporaryDirectory` fixtures.
 """
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 
-SCRIPTS = Path(__file__).resolve().parents[1]
-if str(SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS))
+SCRIPTS_DIR = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 import zero_binding_gate as zgate  # noqa: E402
 
 
 class ZeroBindingGateTests(unittest.TestCase):
-    """Enforces Iron Rule 5 across coordinator and all host plugins without weakening P2.1."""
+    """Enforces Iron Rule 5 & silent default-on across harness, coordinator, and all 7 host plugins."""
 
-    def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix="mindie-zero-bind-")
-        self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name).resolve()
-        sandbox = patch.dict(
-            os.environ,
-            {
-                key: str(self.root / key)
-                for key in (
-                    "HOME",
-                    "USERPROFILE",
-                    "APPDATA",
-                    "LOCALAPPDATA",
-                    "XDG_CONFIG_HOME",
-                    "XDG_DATA_HOME",
-                    "XDG_STATE_HOME",
-                    "XDG_CACHE_HOME",
-                    "MINDIE_CONFIG_HOME",
-                    "MINDIE_DATA_HOME",
-                    "MINDIE_DIAGNOSTICS_ROOT",
-                    "REMOTE_DEV_AUTH_DIR",
-                    "UV_CACHE_DIR",
-                    "TMPDIR",
-                )
-            },
-        )
-        sandbox.start()
-        self.addCleanup(sandbox.stop)
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="mindie-zero-bind-")
+        self.root = Path(self._tmp.name)
         self._populate_valid_repos()
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
 
     def _write(self, repo: str, rel: str, code: str) -> Path:
         repo_dir = self.root / repo
@@ -97,15 +73,13 @@ class ZeroBindingGateTests(unittest.TestCase):
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/scripts/mcp_identity.py",
-            "def native_identity(meta):\n    return ('s', 't')\n\n"
             "def optional_native_identity(meta):\n    return None\n\n"
             "def optional_turn_identity(meta):\n    return None\n",
         )
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/scripts/mcp_transport.py",
-            "def dispatch(surface, meta):\n"
-            "    return native_identity(meta) if surface == 'knowledge' else optional_turn_identity(meta)\n",
+            "def dispatch(surface, meta):\n    return optional_turn_identity(meta)\n",
         )
         self._write(
             "mindie-agent-codex",
@@ -114,22 +88,21 @@ class ZeroBindingGateTests(unittest.TestCase):
             "    def call(self, request):\n"
             "        if self.surface == 'remote':\n"
             "            return self._remote_call(request)\n"
-            "        if self.surface == 'components':\n"
-            "            return optional_native_identity(request)\n"
-            "        return native_identity(request)\n"
+            "        return optional_native_identity(request)\n"
             "    def _remote_call(self, request):\n"
             "        return optional_turn_identity(request)\n",
+        )
+        self._write(
+            "mindie-agent-codex",
+            "plugins/mindie-agent/skills/mindie-agent/agents/openai.yaml",
+            "interface:\n  display_name: \"MindIE Agent\"\npolicy:\n  allow_implicit_invocation: true\n",
         )
         self._write(
             "mindie-agent-cc",
             "scripts/mcp_server.py",
             "_CONNECTION_SESSION_ID = 'cc-mcp-1'\n\n"
             "def handle(surface, message):\n"
-            "    if surface == 'knowledge':\n"
-            "        session = claim_bind('id', 'tool', {})\n"
-            "    else:\n"
-            "        session = _CONNECTION_SESSION_ID\n"
-            "    return session\n",
+            "    return _CONNECTION_SESSION_ID\n",
         )
         self._write(
             "mindie-agent-kimi",
@@ -137,12 +110,9 @@ class ZeroBindingGateTests(unittest.TestCase):
             "_CONNECTION_SESSION_ID = 'kimi-mcp-1'\n\n"
             "def remote_tools():\n    return _nonce_tools([], require=False)\n\n"
             "def component_tools():\n    return _nonce_tools([], require=False)\n\n"
+            "def knowledge_tools():\n    return _nonce_tools([], require=False)\n\n"
             "def handle(surface, message):\n"
-            "    if surface == 'knowledge':\n"
-            "        session = claim_nonce(require_nonce('n'), 't', {})\n"
-            "    else:\n"
-            "        session = _CONNECTION_SESSION_ID\n"
-            "    return session\n",
+            "    return _CONNECTION_SESSION_ID\n",
         )
         self._write(
             "mindie-agent-agy",
@@ -156,13 +126,19 @@ class ZeroBindingGateTests(unittest.TestCase):
             "plugins/mindie-agent/scripts/mcp_server.py",
             "_CONNECTION_SESSION_ID = 'wb-mcp-1'\n\n"
             "def _resolve_claim(surface, name, args, meta=None, require=False):\n"
+            "    try:\n"
+            "        probe_session(meta)\n"
+            "    except TimeoutError:\n"
+            "        raise\n"
+            "    except (OSError, ValueError):\n"
+            "        pass\n"
             "    return (_CONNECTION_SESSION_ID, None, None)\n\n"
             "def call_remote_surface(name, args, meta=None):\n"
             "    return _resolve_claim('remote', name, args, meta=meta)\n\n"
             "def call_tools_surface(name, args, meta=None):\n"
             "    return _resolve_claim('tools', name, args, meta=meta)\n\n"
             "def call_knowledge_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('knowledge', name, args, meta=meta, require=True)\n",
+            "    return _resolve_claim('knowledge', name, args, meta=meta)\n",
         )
         self._write(
             "mindie-agent-dsh",
@@ -170,29 +146,48 @@ class ZeroBindingGateTests(unittest.TestCase):
             "def handle(message):\n    return component_tools.execute('sim', {})\n",
         )
         self._write(
+            "mindie-agent-dsh",
+            "scripts/knowledge_mcp.py",
+            "_CONNECTION_SESSION_ID = 'dsh-mcp-1'\n\n"
+            "def session_identity():\n    return _CONNECTION_SESSION_ID\n\n"
+            "def discoverable_tools():\n    return []\n",
+        )
+        self._write(
             "mindie-agent-oc",
             "plugins/mindie-agent/scripts/mcp_server.py",
             "_CONNECTION_SESSION_ID = 'oc-mcp-1'\n\n"
             "def _resolve_session(surface, name, args):\n"
-            "    if surface == 'knowledge':\n"
-            "        return claim_bind('id', name, args)\n"
-            "    return _CONNECTION_SESSION_ID\n",
+            "    try:\n"
+            "        return claim_bind('opt', name, args)\n"
+            "    except TimeoutError:\n"
+            "        raise\n"
+            "    except ValueError:\n"
+            "        return _CONNECTION_SESSION_ID\n",
         )
         self._write(
             "harness",
             "mindie_harness/mcp/router.py",
             "_CONNECTION_SESSION_ID = 'harness-mcp-1'\n\n"
-            "def dispatch(surface, name, args):\n"
-            "    if surface == 'knowledge':\n"
-            "        return claim_bind('id', name, args)\n"
-            "    return _CONNECTION_SESSION_ID\n",
+            "class MCPRouter:\n"
+            "    def list_tools(self):\n"
+            "        return self._tools\n"
+            "    def call_tool(self, request):\n"
+            "        return _CONNECTION_SESSION_ID\n",
         )
+        for repo, rel in zgate._SKILL_PATHS:
+            self._write(
+                repo,
+                rel,
+                "---\nname: mindie-agent\ndescription: Ascend NPU engineering tools and graded knowledge.\n---\n"
+                "# MindIE Agent Runtime Workflow\n"
+                "Path example: `${PLUGIN_ROOT}/mindie-agent/config.json` and `/mindie-agent-tools`.\n",
+            )
 
     def test_valid_sibling_checkouts_pass_zero_binding_gate(self):
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
         self.assertEqual(errors, [])
 
-    def test_coordinator_session_gate_regressions_are_caught(self):
+    def test_coordinator_and_harness_session_gate_regressions_are_caught(self):
         self._write(
             "coordinator",
             "mindie_coordinator/task_server.py",
@@ -204,17 +199,30 @@ class ZeroBindingGateTests(unittest.TestCase):
             "def task_schema(properties):\n"
             "    return {'properties': properties, 'required': ['context_file']}\n",
         )
+        self._write(
+            "harness",
+            "mindie_harness/mcp/router.py",
+            "class MCPRouter:\n"
+            "    def list_tools(self):\n"
+            "        return []\n"
+            "    def call_tool(self, request):\n"
+            "        _verify_knowledge_admission(self.profile, 's', 'knowledge_query', None)\n"
+            "        return 'session_identity_required'\n",
+        )
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
         self.assertTrue(any("native_turn_context" in err for err in errors), errors)
         self.assertTrue(any("context_file" in err for err in errors), errors)
+        self.assertTrue(any("harness:" in err and "session_identity_required" in err for err in errors), errors)
+        self.assertTrue(any("harness:" in err and "_verify_knowledge_admission" in err for err in errors), errors)
 
-    def test_host_plugin_deterministic_bind_regressions_are_caught(self):
+    def test_host_plugin_bind_regressions_are_caught_on_any_surface(self):
         self._write(
             "mindie-agent-kimi",
             "scripts/mcp_server.py",
             "_CONNECTION_SESSION_ID = 'kimi-mcp-1'\n\n"
             "def remote_tools():\n    return _nonce_tools([])\n\n"
-            "def component_tools():\n    return _nonce_tools([], require=True)\n\n"
+            "def component_tools():\n    return _nonce_tools([], require=False)\n\n"
+            "def knowledge_tools():\n    return _nonce_tools([], require=True)\n\n"
             "def handle(surface, message):\n    return claim_nonce(require_nonce('n'), 't', {})\n",
         )
         self._write(
@@ -232,7 +240,7 @@ class ZeroBindingGateTests(unittest.TestCase):
             "def _resolve_claim(surface, name, args, meta=None, require=False):\n"
             "    return (_CONNECTION_SESSION_ID, None, None)\n\n"
             "def call_remote_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('remote', name, args, meta=meta, require=True)\n\n"
+            "    return _resolve_claim('remote', name, args, meta=meta)\n\n"
             "def call_tools_surface(name, args, meta=None):\n"
             "    return _resolve_claim('tools', name, args, meta=meta)\n\n"
             "def call_knowledge_surface(name, args, meta=None):\n"
@@ -240,94 +248,82 @@ class ZeroBindingGateTests(unittest.TestCase):
         )
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
         self.assertTrue(any("mindie-agent-kimi" in err and "remote_tools" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-kimi" in err and "component_tools" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-agy" in err and "RuntimeError" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-wb" in err and "call_remote_surface" in err for err in errors), errors)
-
-    def test_weakening_knowledge_passive_default_gate_is_caught(self):
-        self._write(
-            "mindie-agent-wb",
-            "plugins/mindie-agent/scripts/mcp_server.py",
-            "_CONNECTION_SESSION_ID = 'wb-mcp-1'\n\n"
-            "def _resolve_claim(surface, name, args, meta=None, require=False):\n"
-            "    return (_CONNECTION_SESSION_ID, None, None)\n\n"
-            "def call_remote_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('remote', name, args, meta=meta)\n\n"
-            "def call_tools_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('tools', name, args, meta=meta)\n\n"
-            "def call_knowledge_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('knowledge', name, args, meta=meta, require=False)\n",
-        )
-        self._write(
-            "mindie-agent-cc",
-            "scripts/mcp_server.py",
-            "_CONNECTION_SESSION_ID = 'cc-mcp-1'\n\n"
-            "def handle(surface, message):\n    return _CONNECTION_SESSION_ID\n",
-        )
-        errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
+        self.assertTrue(any("mindie-agent-kimi" in err and "knowledge_tools" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-kimi" in err and "require_nonce" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-agy" in err and "fail-closed" in err for err in errors), errors)
         self.assertTrue(any("mindie-agent-wb" in err and "call_knowledge_surface" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-cc" in err and "claim_bind" in err for err in errors), errors)
 
-    def test_inverted_predicates_and_swapped_resolvers_are_caught(self):
+    def test_strict_knowledge_gates_in_cc_codex_wb_dsh_are_caught(self):
         self._write(
             "mindie-agent-cc",
             "scripts/mcp_server.py",
             "_CONNECTION_SESSION_ID = 'cc-mcp-1'\n\n"
             "def handle(surface, message):\n"
-            "    if surface != 'knowledge':\n"
-            "        session = claim_bind('id', 'tool', {})\n"
-            "    else:\n"
-            "        session = _CONNECTION_SESSION_ID\n"
-            "    return session\n",
+            "    if surface == 'knowledge':\n"
+            "        return claim_bind('id', 'tool', {})\n"
+            "    return _CONNECTION_SESSION_ID\n",
         )
         self._write(
             "mindie-agent-wb",
             "plugins/mindie-agent/scripts/mcp_server.py",
             "_CONNECTION_SESSION_ID = 'wb-mcp-1'\n\n"
             "def _resolve_claim(surface, name, args, meta=None, config=None):\n"
-            "    if surface != 'knowledge':\n"
+            "    if surface == 'knowledge':\n"
             "        raise ValueError('blocked')\n"
             "    return {'session': _CONNECTION_SESSION_ID}\n\n"
             "def call_remote_surface(name, args, meta=None):\n"
             "    return _resolve_claim('remote', name, args, meta=meta)\n\n"
             "def call_tools_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('tools', name, args, meta=meta)\n\n"
-            "def call_knowledge_surface(name, args, meta=None):\n"
-            "    return _resolve_claim('knowledge', name, args, meta=meta)\n",
+            "    return _resolve_claim('tools', name, args, meta=meta)\n",
         )
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/scripts/mcp_gate.py",
             "class Gate:\n"
             "    def call(self, request):\n"
-            "        if self.surface == 'components':\n"
-            "            return native_identity(request)\n"
+            "        if self.surface == 'knowledge':\n"
+            "            return native_turn_identity(request)\n"
             "        return optional_native_identity(request)\n"
             "    def _remote_call(self, request):\n"
             "        return optional_turn_identity(request)\n",
         )
+        self._write(
+            "mindie-agent-dsh",
+            "scripts/knowledge_mcp.py",
+            "GATED = 'Requires an active `/mindie-agent` session.'\n"
+            "def session_identity():\n    raise RuntimeError('missing')\n"
+            "def discoverable_tools():\n    return [] if not Admission('x').knowledge_lease('s') else []\n",
+        )
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
-        self.assertTrue(any("mindie-agent-cc" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-wb" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-codex" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-cc" in err and "claim_bind" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-wb" in err and "raises" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-codex" in err and "native_turn_identity" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-dsh" in err and "knowledge_mcp.py exposes" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-dsh" in err and "session_identity" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-dsh" in err and "discoverable_tools" in err for err in errors), errors)
 
-    def test_codex_transport_inverted_predicate_is_caught(self):
+    def test_codex_transport_strict_identity_is_caught(self):
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/scripts/mcp_transport.py",
             "def dispatch(surface, meta):\n"
-            "    return native_turn_identity(meta) if surface != 'knowledge' else optional_turn_identity(meta)\n",
+            "    return native_turn_identity(meta) if surface == 'knowledge' else optional_turn_identity(meta)\n",
         )
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
         self.assertTrue(any("mcp_transport.py" in err for err in errors), errors)
 
-    def test_prompt_and_guide_principle_contradictions_are_caught(self):
+    def test_prompt_manifest_and_guide_principle_contradictions_are_caught(self):
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/skills/mindie-agent/SKILL.md",
-            "---\nname: mindie-agent\ndescription: test\n---\n"
+            "---\nname: mindie-agent\ndescription: unquoted colon: breaks yaml\ndisable-model-invocation:   true\n---\n"
             "returning (out_tensor, metrics_dict)\nNative call identity still applies to plugin tools\n"
-            "## 3. Non-Intrusive First-Use Onboarding\n",
+            "## 3. Non-Intrusive First-Use Onboarding\nInvoke /mindie-agent first.\n",
+        )
+        self._write(
+            "mindie-agent-codex",
+            "plugins/mindie-agent/skills/mindie-agent/agents/openai.yaml",
+            "interface:\n  default_prompt: \"$mindie-agent help\"\npolicy:\n  allow_implicit_invocation: false\n",
         )
         self._write(
             "mindie-agent-codex",
@@ -335,9 +331,14 @@ class ZeroBindingGateTests(unittest.TestCase):
             "# Workspace setup\n",
         )
         self._write(
-            "mindie-agent-agy",
-            "plugins/mindie-agent/skills/mindie-agent/SKILL.md",
-            "---\nname: mindie-agent\ndescription: Manually enable MindIE knowledge\n---\n",
+            "mindie-agent-kimi",
+            "kimi.plugin.json",
+            '{"systemPrompt": "Knowledge tools require /mindie-agent and a fresh PreToolUse-bound request_nonce."}\n',
+        )
+        self._write(
+            "mindie-agent-wb",
+            "plugins/mindie-agent/plugin.json",
+            '{"suggestedPrompts": ["输入/mindie-agent即可启动"]}\n',
         )
         self._write("diagnostics", "AGENTS.md", "fallback.py Can be vendored as a single file\n")
         errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
@@ -345,12 +346,15 @@ class ZeroBindingGateTests(unittest.TestCase):
         self.assertTrue(any("Native call identity" in err for err in errors), errors)
         self.assertTrue(any("Non-Intrusive First-Use Onboarding" in err for err in errors), errors)
         self.assertTrue(any("disable-model-invocation" in err for err in errors), errors)
+        self.assertTrue(any("unquoted `: `" in err for err in errors), errors)
+        self.assertTrue(any("SKILL.md exposes `/mindie-agent`" in err for err in errors), errors)
+        self.assertTrue(any("openai.yaml sets `allow_implicit_invocation: false`" in err for err in errors), errors)
         self.assertTrue(any("workspace-setup.md" in err and "skills/" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-agy" in err and "manual" in err for err in errors), errors)
+        self.assertTrue(any("kimi.plugin.json" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-wb: plugins/mindie-agent/plugin.json exposes" in err for err in errors), errors)
         self.assertTrue(any("diagnostics: AGENTS.md" in err for err in errors), errors)
 
     def test_ad01_opencode_bind_gate_and_harness_thin_delegation(self):
-        # Reproduce the exact AD-01 OpenCode bug (`_with_bind_property` + unguarded `claim_bind` on deterministic tools)
         self._write(
             "mindie-agent-oc",
             "plugins/mindie-agent/scripts/mcp_server.py",
@@ -360,11 +364,12 @@ class ZeroBindingGateTests(unittest.TestCase):
             "def _resolve_session(surface, name, args):\n"
             "    return claim_bind(args.get('_mindie_bind_id'), name, args)\n",
         )
-        errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
+        errors = zgate.verify_zero_session_binding_gates(
+            [self.root], require_siblings=True, required_repos=("mindie-agent-oc",)
+        )
         self.assertTrue(any("mindie-agent-oc" in err and "_with_bind_property" in err for err in errors), errors)
-        self.assertTrue(any("mindie-agent-oc" in err and "_CONNECTION_SESSION_ID" in err for err in errors), errors)
+        self.assertTrue(any("mindie-agent-oc" in err and "uncaught fail-closed `claim_bind`" in err for err in errors), errors)
 
-        # Thin host plugin delegating to `mindie_harness` passes when `harness` enforces P2.7 + P2.1
         self._write(
             "mindie-agent-oc",
             "plugins/mindie-agent/scripts/mcp_server.py",

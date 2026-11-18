@@ -29,9 +29,9 @@ flowchart TB
 ```
 
 七个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
-- **领域知识按需激活**：输入 `/mindie-agent`（在 Codex 中也可使用 `$mindie-agent`）即可按当前任务加载昇腾领域知识与工作流引导。
-- **工程工具默认就绪**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试，以及 `diagnostics` 本地诊断通过 MCP（`knowledge`、`remote`、`components` / `mindie-tools`）在七端宿主中统一暴露，无需先启用知识会话即可直接调用；未启用 `/mindie-agent` 的普通聊天不加载 `knowledge` 工具目录，`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
-- **经验沉淀按授权运行**：仅当当前会话显式调用 `/mindie-agent` 且满足用户保存的本地授权与项目范围时，宿主生命周期事件才会触发脱敏会话采集与经验提炼。
+- **领域知识与 Skill 静默按需就绪**：无需输入任何斜杠唤醒命令，主代理与子代理在遇到昇腾领域任务时按语义静默按需加载运行时 `SKILL.md` 与 `L1–L4` 知识检索。
+- **全工具面开箱即用**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试、`diagnostics` 本地诊断以及 `knowledge_*` 知识工具通过标准零绑定 MCP 在七端宿主中统一默认暴露；`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
+- **经验沉淀严格受授权开关与目录范围约束**：仅当用户开启本地贡献授权且当前目录命中显式授权的 `project_roots` 范围时，宿主回合结束事件才会触发脱敏会话采集与经验提炼（非授权目录 `< 100ms` 直接跳过）。
 
 默认插件依赖共享宿主底座 `harness`（`mindie-harness`）以及 `knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`coordinator`（Antigravity / WorkBuddy / OpenCode 默认亦包含 `npu-top`）；各组件也可按团队环境独立安装或组合使用。
 
@@ -41,7 +41,7 @@ flowchart TB
 | --- | --- |
 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品架构、领域边界、入口文档、跨仓规范与发布记录；不包含运行时代码或 MCP 服务 |
 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)、[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)、[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | 各宿主客户端的薄原生插件：宿主协议清单、生命周期 Hook 转发、宿主专属会话记录脱敏提取与组件版本锁定，运行时与 MCP 分发统一委托给 `harness` |
-| [`harness`](https://github.com/mindie-agent/harness) | **7 端宿主共享底座（`mindie-harness` / `mindie_harness`）**：跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子更新、长驻并发 MCP 网关（`P2.7` 确定性零绑定直通 / `P2.1` `knowledge_*` 准入分流）以及单状态源 `ExperimentLedger` 的 `rsi` 优化探索闭环 |
+| [`harness`](https://github.com/mindie-agent/harness) | **7 端宿主共享底座（`mindie-harness` / `mindie_harness`）**：跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子更新、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）以及单状态源 `ExperimentLedger` 的 `rsi` 优化探索闭环 |
 | [`knowledge`](https://github.com/mindie-agent/knowledge) | **纯知识引擎（`mindie-knowledge`）**：`L1–L4` 分级单元管理、适用条件匹配、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、脱敏任务切片、经验提炼校验与社区 PR 投递 |
 | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、`xLLM`、`MindIE-SD`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 9 大结构化分级知识库（`L1–L4`） |
 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |
@@ -73,7 +73,7 @@ flowchart TB
 
 ## 4. 四类知识协同与双模式工作流（经验复用 + 独立探索）
 
-本节所述的知识上下文挂载与经验沉淀闭环仅在用户显式输入 `/mindie-agent` 唤醒的会话中运行；`profiler`、`sim`、`coordinator`、`debugger` 等确定性工具无需唤醒知识会话即可随时独立调用。
+本节所述的分级知识检索、确定性工程工具（`profiler`、`sim`、`coordinator`、`debugger`）与授权目录内的经验沉淀闭环在插件启用期间全端默认就绪，支持主会话与子代理（Subagent）无缝协同调用。
 
 在解决复杂的昇腾推理适配与性能优化问题时，MindIE Agent 将领域知识按工程用途分为四个层级（对应知识库 Schema 中的 `category` 与兼容字段 `tier: L1..L4`），并支持**常规经验复用**与**跳出既有思路的独立探索（`mode="explore"`）**两种工作方式：
 

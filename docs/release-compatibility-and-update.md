@@ -55,8 +55,8 @@ MindIE Agent 采用 **`0.Y.0` 特性里程碑 + `0.Y.Z` 维护补丁/组件独�
    - **OpenAI Codex CLI（`update_trigger.py` / `harness_update.py`）与 Claude Code（`release_update.py`）**：复用常驻 MCP 服务进程内的可取消后台维护线程（`mindie-release-check`）异步触发（不拉起独立知识守护进程），日常工具调用仅检查内存/本地时间戳，零前台网络阻塞；成功检查后的常规冷却周期为 `CHECK_INTERVAL = 300s`（5 分钟），失败退避为 `FAILURE_BACKOFF = 60s`，待激活候选重试间隔为 `ACTIVATION_BACKOFF = 5s`。
    - **Kimi Code（`updater.py` / `updater_check.py` / `updater_schedule.py`）**：通过系统定时任务（macOS `launchd` `agent.mindie.kimi-update` 或 Windows 计划任务 `MindIEKimiUpdate`，默认 `INTERVAL_SECONDS = 300s` / 5 分钟，单次检查预算 `CHECK_BUDGET = 1200.0s`）在后台独立运行 `updater check` 并切换 `current.json`（仅组件更新时 `update_native=False`）；失败后按指数退避（`300s` 起，最高 `6 小时`）推迟 `next_retry_at`。
    - **DeepSeek Harness（`host.mjs` / `updater.py`）**：在插件加载 `30s` 后及随后每隔 `interval_minutes`（默认 `5` 分钟），当检测当前无 `running` 状态的 Agent 会话时，在后台启动分离的 `updater.py check --silent` 子进程；`host.mjs` 的 `entryFor()` 优先读取 `paths.configFile`（`config.json`）中的 `package_dir` 作为权威适配器绑定（`current.json` 仅在无该字段的 legacy seed 情形下作兼容回退），并同代挂载 `./host3.mjs` 与 `remote-dev`。
-3. **公共知识流同步与手动会话启用门禁严格解耦**：
-   - 昇腾公共知识语料库（`knowledge-*`）的拉取与热加载仅在用户已通过 `/mindie-agent` 显式启用的会话中按需执行；**后台软件更新检查与组件环境构建绝不会主动启动知识 Worker、创建会话租约或触发知识语料同步**。
+3. **公共知识流按需同步与后台版本检查严格解耦**：
+   - 昇腾公共知识语料库（`knowledge-*`）的拉取与热加载仅在遇到昇腾领域检索或同步调用时按需执行；**后台软件更新检查与组件环境构建绝不会主动启动知识 Worker、触发对话采集或发起知识语料同步**。
 
 ---
 
@@ -71,7 +71,7 @@ MindIE Agent 对外发布的是**经过验证的组件与插件组合**。OpenAI
 2. 并行准备并发布依赖它们的 [`remote-dev`](https://github.com/mindie-agent/remote-dev)、[`knowledge`](https://github.com/mindie-agent/knowledge)、[`profiler`](https://github.com/mindie-agent/profiler) 与 [`npu-top`](https://github.com/mindie-agent/npu-top)；
 3. 发布锁定正式 `remote-dev` 与 `diagnostics` 版本的 [`coordinator`](https://github.com/mindie-agent/coordinator)；
 4. 若需同步发布宿主插件，则发布锁定实际运行时依赖的四个宿主插件（[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)），最后更新 [`channels/0.1.json`](../channels/0.1.json) 并汇总发布主仓库版本说明。
-   - 宿主插件运行时基线默认打包 `knowledge`、`remote-dev` 与 `diagnostics`（以及 `debugger`），但打包依赖不等于默认公开暴露知识接口：例如自 Codex `0.1.8` 起，默认 MCP 工具发现仅注册 `remote-dev` 与确定性工程组件入口，`knowledge` 工具目录仅在手动调用 `/mindie-agent` Skill 时私有挂载；独立安装的 `coordinator`、`profiler`、`sim` 可直接接入确定性入口，`npu-top` 则保持为面向开发者的独立监控看板（其余宿主按各自发布验收记录核对发现边界）。
+   - 全部七款宿主插件运行时基线默认打包 `mindie-harness`、`knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim` 与 `coordinator`，插件启用即默认通过标准零绑定 MCP 暴露远程执行、确定性工程组件与 `L1–L4` 知识检索工具，`npu-top` 则保持为面向开发者的独立监控看板（兼支持只读观测调用）。
    - `mindie-bench` 保持独立版本号演进。各代码仓的发布工作流统一委托受保护 `main` 分支上的发布控制器执行：每次发版先校验控制器自身 CI 状态，再解析并锁定唯一工具 Commit SHA，供后续依赖核验、基准测试与正式发布全程共用。
 
 ### 标准发布事务与服务端约束
@@ -173,7 +173,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
 不同于在活动虚拟环境中原地执行单包替换，MindIE Agent 的插件更新与共享组件更新均采用**旁路独立 Generation 构建 + 隔离进程探针校验 + 空闲服务退役 + 唯一指针文件原子替换（`os.replace`）**的四步安全流程：
 
 - **日常调用零网络阻塞**：日常工具调用和短时 Hook 仅读取本地已激活绑定文件或检查时间戳，不在前台等待网络请求、扫描版本列表或运行 `uv` 构建。
-- **不主动启动知识服务、不重置用户授权**：更新检查、旁路环境构建、API 探针与激活切换均在无模型（Model-Free）模式下运行，**绝不会主动启动知识后台服务或创建会话知识授权**（会话知识循环仍严格由用户在会话中手动输入 `/mindie-agent` 启用），并完整保留用户已保存的知识贡献开关、项目范围与故障上报设置。
+- **不主动拉起后台守护进程、不重置用户授权**：更新检查、旁路环境构建、API 探针与激活切换均在无模型（Model-Free）模式下运行，**绝不会主动启动知识后台服务或触发对话采集**，并完整保留用户已保存的知识贡献开关、项目范围与故障上报设置。
 - **失败可见与幂等复用**：若网络不可达、GitHub Release 资产不完整或探针校验失败，更新器将错误如实记录在本地更新状态文件（如 `status.json` / `release-update.json`）并进入退避窗口，绝不触碰当前正在运行的环境；同一组件组合（由插件源码摘要、目标组件修订集合与 Python/平台 ABI 共同计算的 `generation_key`）通过非阻塞 `prepare.lock` 去重，已完成校验的候选环境无需重复构建。
 
 ### 四步安全准备与空闲切换流程
