@@ -509,13 +509,13 @@ class StorageLifecycleGateTests(unittest.TestCase):
         self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
         self.assertEqual(len(sl_gate._iter_plugin_production_code_files(codex, ("plugins/mindie-agent/scripts",))), 2)
 
-    def test_thin_host_loc_gate_rejects_1201_lines_across_py_and_js(self) -> None:
+    def test_thin_host_loc_gate_rejects_1501_lines_across_py_and_js(self) -> None:
         self._make_thin_repo(
-            "mindie-agent-codex", "0.1.38", "plugins/mindie-agent/.codex-plugin/plugin.json", "plugins/mindie-agent/scripts", 600,
-            {"host3.mjs": 601},
+            "mindie-agent-codex", "0.1.38", "plugins/mindie-agent/.codex-plugin/plugin.json", "plugins/mindie-agent/scripts", 750,
+            {"host3.mjs": 751},
         )
         errors = sl_gate.verify_storage_lifecycle_hygiene([self.root])
-        self.assertTrue(any("mindie-agent-codex" in e and "1201" in e and "> 1200 line budget" in e for e in errors), errors)
+        self.assertTrue(any("mindie-agent-codex" in e and "1501" in e and "> 1500 line budget" in e for e in errors), errors)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@
 
 <!-- mindie-org-versions:main-badges-en:start -->
 <p align="center">
-  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.16.en.md"><img src="https://img.shields.io/badge/release-v0.1.16-7045F5.svg" alt="Release v0.1.16"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.17.en.md"><img src="https://img.shields.io/badge/release-v0.1.17-7045F5.svg" alt="Release v0.1.17"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-cc"><img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757.svg" alt="Claude Code Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-codex"><img src="https://img.shields.io/badge/OpenAI_Codex-Plugin-10A37F.svg" alt="OpenAI Codex Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-kimi"><img src="https://img.shields.io/badge/Kimi_Code-Plugin-2563EB.svg" alt="Kimi Code Plugin"></a>
@@ -98,16 +98,16 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 >
 > | Host (session markers first) | Native plugin registration entry & success criterion | Pinned version |
 > | --- | --- | --- |
-> | **Claude Code** (`CLAUDECODE`) | [mindie-agent-cc Quick Start](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.30/README.en.md#quick-start); `mindie-agent@mindie-agent-cc` enabled in `claude plugin list --json` | `mindie-agent-cc v0.1.30` |
-> | **OpenAI Codex CLI** (`CODEX_THREAD_ID` / `CODEX_CI`) | [mindie-agent-codex Quick Start](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.38/README.en.md#quick-start); `mindie-agent@mindie-agent` enabled in `codex plugin list --json` | `mindie-agent-codex v0.1.38` |
-> | **Kimi Code CLI** (`KIMI_CODE_HOME`) | [mindie-agent-kimi Quick Start](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.31/README.en.md#quick-start) | `mindie-agent-kimi v0.1.31` |
-> | **DeepSeek Harness / DSH** (`DSH_PROFILE` / `DSH_HOME`) | [mindie-agent-dsh Quick Start](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.26/README.en.md#quick-start) | `mindie-agent-dsh v0.1.26` |
+> | **Claude Code** (`CLAUDECODE`) | [mindie-agent-cc Quick Start](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.31/README.en.md#quick-start); `mindie-agent@mindie-agent-cc` enabled in `claude plugin list --json` | `mindie-agent-cc v0.1.31` |
+> | **OpenAI Codex CLI** (`CODEX_THREAD_ID` / `CODEX_CI`) | [mindie-agent-codex Quick Start](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.39/README.en.md#quick-start); `mindie-agent@mindie-agent` enabled in `codex plugin list --json` | `mindie-agent-codex v0.1.39` |
+> | **Kimi Code CLI** (`KIMI_CODE_HOME`) | [mindie-agent-kimi Quick Start](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.32/README.en.md#quick-start) | `mindie-agent-kimi v0.1.32` |
+> | **DeepSeek Harness / DSH** (`DSH_PROFILE` / `DSH_HOME`) | [mindie-agent-dsh Quick Start](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.27/README.en.md#quick-start) | `mindie-agent-dsh v0.1.27` |
 > | **Google Antigravity** (`~/.gemini/antigravity*` / `AGY_APP_DATA_DIR`) | [mindie-agent-agy Quick Start](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.21/README.en.md#quick-start-one-sentence-agent-install); Clone the pinned `v0.1.21` tag and run the install page's `setup.py init` | `mindie-agent-agy v0.1.21` |
 > | **Tencent WorkBuddy / CodeBuddy** (app bundle + `~/.workbuddy`) | [mindie-agent-wb Installation](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.19/README.en.md#installation); `setup.py init --install-wb` + `codebuddy plugin validate` | `mindie-agent-wb v0.1.19` |
 > | **OpenCode** (`OPENCODE_SESSION_ID`) | [mindie-agent-oc Installation & Upgrades](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.11/README.en.md#2-installation--upgrades); dual-channel `opencode plugin add` or npm package `@mindie-agent/oc@0.1.11` | `mindie-agent-oc v0.1.11` |
 > | **Cursor / generic MCP client** (remote substrate only) | Register the stdio server per the [remote-dev README](https://github.com/mindie-agent/remote-dev/blob/v0.11.14/README.md) | `remote-dev@v0.11.14` |
 >
-> The current plugin versions are Codex `v0.1.38`, Claude Code `v0.1.30`, Kimi Code `v0.1.31`, DSH `v0.1.26`, Google Antigravity `v0.1.21`, Tencent WorkBuddy `v0.1.19`, and OpenCode `v0.1.11`, matching [`channels/0.1.json`](./channels/0.1.json) and the formal Release tags on each host's install page. `install.py` provisions shared runtime components in one pass—no per-repo clone required.
+> The current plugin versions are Codex `v0.1.39`, Claude Code `v0.1.31`, Kimi Code `v0.1.32`, DSH `v0.1.27`, Google Antigravity `v0.1.21`, Tencent WorkBuddy `v0.1.19`, and OpenCode `v0.1.11`, matching [`channels/0.1.json`](./channels/0.1.json) and the formal Release tags on each host's install page. `install.py` provisions shared runtime components in one pass—no per-repo clone required.
 
 > #### Step 3: Pop Up the 3 Native Interactive Questions (`ask_question` / `question` / `AskUserQuestion` / `request_user_input`)
 >
@@ -299,7 +299,7 @@ Every repository under `@mindie-agent` has a clean, single-purpose boundary and 
 
 | Repository | Version | Role |
 | --- | --- | --- |
-| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(This Repo)* | [`v0.1.16`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.16) | Product entry point, system architecture, engineering design principles, release compatibility contracts, and release records |
+| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(This Repo)* | [`v0.1.17`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.17) | Product entry point, system architecture, engineering design principles, release compatibility contracts, and release records |
 | **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.14`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.14) | End-to-end evaluation harness and live NPU benchmark suite: 20 behavioral-oracle tasks (109 3-state & helper controls), Gate Runner, isolated host runs, component benchmarks, and cross-task reuse evaluation |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | [`main`](https://github.com/mindie-agent/awesome-mindie-skills) | Curated catalogue of open-source Agent Skills for the Ascend NPU AI Infra workflow (covering `vLLM-Ascend`, `AscendC`/`Triton` kernels, accuracy testing, and profiling) |
 | **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | [`main`](https://github.com/mindie-agent/vllm-ascend-workspace) | Lightweight customizable local workspace for `vLLM` + `vLLM-Ascend` development with isolated task Git Worktrees and MindIE Agent integration |
@@ -308,10 +308,10 @@ Every repository under `@mindie-agent` has a clean, single-purpose boundary and 
 
 | Repository | Host Client | Version | Role |
 | --- | --- | --- | --- |
-| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.30`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.30) | Native Claude Code plugin: lifecycle hooks, MCP stdio bridges, and pinned runtime management |
-| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.38`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.38) | Native OpenAI Codex CLI plugin: marketplace packaging, session redaction, and background service management |
-| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.31`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.31) | Native Kimi Code plugin: atomic version switching, redacted session capture, and MCP bridging |
-| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.26`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.26) | Native DSH plugin: silent semantic Ascend Skill, default-enabled knowledge & component tools, and `remote-dev` integration |
+| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.31`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.31) | Native Claude Code plugin: lifecycle hooks, MCP stdio bridges, and pinned runtime management |
+| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.39`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.39) | Native OpenAI Codex CLI plugin: marketplace packaging, session redaction, and background service management |
+| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.32`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.32) | Native Kimi Code plugin: atomic version switching, redacted session capture, and MCP bridging |
+| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.27`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.27) | Native DSH plugin: silent semantic Ascend Skill, default-enabled knowledge & component tools, and `remote-dev` integration |
 | **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.21`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.21) | Native Google Antigravity plugin: silent default-enabled knowledge & shared component MCP, native remote tool aliases, and opt-in Brain transcript redaction |
 | **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.19`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.19) | Native Tencent WorkBuddy / CodeBuddy plugin: dual-surface mounting (WorkBuddy Connector + CodeBuddy native plugin), silent default-on tools & knowledge, and shared component MCP bridge |
 | **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.11`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.11) | Native OpenCode plugin: dual-channel distribution (`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`), silent default-on tools & knowledge, and SQLite `session_v2` transcript redaction |

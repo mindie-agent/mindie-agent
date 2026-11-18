@@ -10,7 +10,7 @@
 
 <!-- mindie-org-versions:main-badges-zh:start -->
 <p align="center">
-  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.16.md"><img src="https://img.shields.io/badge/release-v0.1.16-7045F5.svg" alt="Release v0.1.16"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.17.md"><img src="https://img.shields.io/badge/release-v0.1.17-7045F5.svg" alt="Release v0.1.17"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-cc"><img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757.svg" alt="Claude Code Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-codex"><img src="https://img.shields.io/badge/OpenAI_Codex-Plugin-10A37F.svg" alt="OpenAI Codex Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-kimi"><img src="https://img.shields.io/badge/Kimi_Code-Plugin-2563EB.svg" alt="Kimi Code Plugin"></a>
@@ -98,16 +98,16 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 >
 > | 宿主（会话标记优先） | 原生插件注册入口与成功标准 | 钉住版本 |
 > | --- | --- | --- |
-> | **Claude Code**（`CLAUDECODE`） | [mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.30/README.md#快速开始)；`claude plugin list --json` 中 `mindie-agent@mindie-agent-cc` 已启用 | `mindie-agent-cc v0.1.30` |
-> | **OpenAI Codex CLI**（`CODEX_THREAD_ID` / `CODEX_CI`） | [mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.38/README.md#快速开始)；`codex plugin list --json` 中 `mindie-agent@mindie-agent` 已启用 | `mindie-agent-codex v0.1.38` |
-> | **Kimi Code CLI**（`KIMI_CODE_HOME`） | [mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.31/README.md#快速开始) | `mindie-agent-kimi v0.1.31` |
-> | **DeepSeek Harness / DSH**（`DSH_PROFILE` / `DSH_HOME`） | [mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.26/README.md#快速开始) | `mindie-agent-dsh v0.1.26` |
+> | **Claude Code**（`CLAUDECODE`） | [mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.31/README.md#快速开始)；`claude plugin list --json` 中 `mindie-agent@mindie-agent-cc` 已启用 | `mindie-agent-cc v0.1.31` |
+> | **OpenAI Codex CLI**（`CODEX_THREAD_ID` / `CODEX_CI`） | [mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.39/README.md#快速开始)；`codex plugin list --json` 中 `mindie-agent@mindie-agent` 已启用 | `mindie-agent-codex v0.1.39` |
+> | **Kimi Code CLI**（`KIMI_CODE_HOME`） | [mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.32/README.md#快速开始) | `mindie-agent-kimi v0.1.32` |
+> | **DeepSeek Harness / DSH**（`DSH_PROFILE` / `DSH_HOME`） | [mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.27/README.md#快速开始) | `mindie-agent-dsh v0.1.27` |
 > | **Google Antigravity**（`~/.gemini/antigravity*` / `AGY_APP_DATA_DIR`） | [mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.21/README.md#快速开始交给-agent-一句话自动安装)；检出钉住的 `v0.1.21` tag 并执行安装页的 `setup.py init` | `mindie-agent-agy v0.1.21` |
 > | **Tencent WorkBuddy / CodeBuddy**（应用包 + `~/.workbuddy`） | [mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.19/README.md#3-快速安装与验证)；`setup.py init --install-wb` + `codebuddy plugin validate` | `mindie-agent-wb v0.1.19` |
 > | **OpenCode**（`OPENCODE_SESSION_ID`） | [mindie-agent-oc 安装、升级与初始化](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.11/README.md#3-安装升级与初始化)；双通道 `opencode plugin add` 或 npm 包 `@mindie-agent/oc@0.1.11` | `mindie-agent-oc v0.1.11` |
 > | **Cursor / 通用 MCP 客户端**（仅远端底座） | [remote-dev README](https://github.com/mindie-agent/remote-dev/blob/v0.11.14/README.md) 注册 stdio 服务 | `remote-dev@v0.11.14` |
 >
-> 当前插件版本为 Codex `v0.1.38`、Claude Code `v0.1.30`、Kimi Code `v0.1.31`、DSH `v0.1.26`、Google Antigravity `v0.1.21`、Tencent WorkBuddy `v0.1.19` 与 OpenCode `v0.1.11`，与 [`channels/0.1.json`](./channels/0.1.json) 及各宿主安装页锁定的正式 Release tag 一致。共享运行时组件由 `install.py` 统一预置，无需逐仓 clone。
+> 当前插件版本为 Codex `v0.1.39`、Claude Code `v0.1.31`、Kimi Code `v0.1.32`、DSH `v0.1.27`、Google Antigravity `v0.1.21`、Tencent WorkBuddy `v0.1.19` 与 OpenCode `v0.1.11`，与 [`channels/0.1.json`](./channels/0.1.json) 及各宿主安装页锁定的正式 Release tag 一致。共享运行时组件由 `install.py` 统一预置，无需逐仓 clone。
 
 > #### 第三步：弹出宿主原生三问（`ask_question` / `question` / `AskUserQuestion` / `request_user_input`）
 >
@@ -299,7 +299,7 @@ MindIE Agent 的核心交互理念是**开箱即用与渐进式披露（Progress
 
 | 仓库 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- |
-| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | [`v0.1.16`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.16) | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
+| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | [`v0.1.17`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.17) | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
 | **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.14`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.14) | 独立评测框架与真机基准套件：20 个行为级验证任务（109 项三态与辅助变体对照）、预置准入脚手架（Gate Runner）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、组件级基准、跨任务知识复用及端到端总工程成本校验 |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | [`main`](https://github.com/mindie-agent/awesome-mindie-skills) | 面向昇腾 NPU AI Infra 全流程的高质量开源 Agent Skills 精选目录（现已覆盖 `vLLM-Ascend`、`AscendC`/`Triton` 算子开发、精度测试与性能调优，持续扩展中） |
 | **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | [`main`](https://github.com/mindie-agent/vllm-ascend-workspace) | 轻量可定制的 `vLLM` + `vLLM-Ascend` 本地多任务开发工作区，支持独立 Git Worktree 隔离与 MindIE Agent 集成 |
@@ -308,10 +308,10 @@ MindIE Agent 的核心交互理念是**开箱即用与渐进式披露（Progress
 
 | 仓库 | 适用宿主 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- | --- |
-| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.30`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.30) | Claude Code 原生插件：生命周期 Hook、MCP 服务桥接与运行时版本锁定 |
-| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.38`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.38) | OpenAI Codex CLI 原生插件：Marketplace 安装、会话记录增量脱敏采集与 MCP 服务管理 |
-| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.31`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.31) | Kimi Code 原生插件：运行时原子版本切换、会话记录脱敏采集与 MCP 桥接 |
-| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.26`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.26) | DSH 原生插件：默认静默挂载昇腾 Skill、分级知识检索工具、确定性组件与 `remote-dev` 集成 |
+| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.31`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.31) | Claude Code 原生插件：生命周期 Hook、MCP 服务桥接与运行时版本锁定 |
+| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.39`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.39) | OpenAI Codex CLI 原生插件：Marketplace 安装、会话记录增量脱敏采集与 MCP 服务管理 |
+| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.32`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.32) | Kimi Code 原生插件：运行时原子版本切换、会话记录脱敏采集与 MCP 桥接 |
+| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.27`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.27) | DSH 原生插件：默认静默挂载昇腾 Skill、分级知识检索工具、确定性组件与 `remote-dev` 集成 |
 | **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.21`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.21) | Google Antigravity 原生插件：默认静默开放全功能（知识检索与共享组件 MCP）、原生远端工具别名与授权范围内的 Brain Transcript 脱敏采集 |
 | **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.19`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.19) | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、全功能静默自启与共享组件 MCP 桥接 |
 | **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.11`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.11) | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、全功能静默自启、共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |
