@@ -86,6 +86,17 @@ PRODUCTION_PYTHON_SCOPES: dict[str, tuple[str, ...]] = {
     "mindie-agent-oc": ("plugins/mindie-agent/scripts",),
 }
 
+THIN_HOST_PLUGIN_MAX_LOC = 1200
+THIN_HOST_PLUGIN_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
+    "mindie-agent-codex": (0, 1, 38),
+    "mindie-agent-cc": (0, 1, 30),
+    "mindie-agent-kimi": (0, 1, 31),
+    "mindie-agent-dsh": (0, 1, 26),
+    "mindie-agent-agy": (0, 1, 21),
+    "mindie-agent-wb": (0, 1, 19),
+    "mindie-agent-oc": (0, 1, 11),
+}
+
 REQUIRED_STORAGE_WIRING: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...], frozenset[str]], ...] = (
     (
         "knowledge",
@@ -164,6 +175,14 @@ VERSION_MANIFESTS: tuple[str, ...] = (
 
 _INDEPENDENT_EXEMPT = frozenset({*INDEPENDENT_COMPONENTS, *INDEPENDENT_PLUGINS})
 _SKIP_PARTS: frozenset[str] = frozenset({"tests", "test", "__pycache__", "node_modules", "dist", "build"})
+_PLUGIN_CODE_SKIP_DIRS: frozenset[str] = frozenset(
+    {
+        "tests", "test", "__pycache__", "node_modules", "dist", "build", "benchmarks", "docs",
+        ".git", ".local", ".mindie-local", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+    }
+)
+_PLUGIN_CODE_SUFFIXES: frozenset[str] = frozenset({".py", ".mjs", ".cjs", ".js"})
+_PLUGIN_JS_SUFFIXES: frozenset[str] = frozenset({".mjs", ".cjs", ".js"})
 _HOME_ENV_KEYS: frozenset[str] = frozenset({"HOME", "USERPROFILE"})
 _MINDIE_ENV_KEYS: frozenset[str] = frozenset(
     {"MINDIE_CONFIG_HOME", "MINDIE_DATA_HOME", "MINDIE_DIAGNOSTICS_ROOT", "XDG_CONFIG_HOME", "XDG_DATA_HOME"}
@@ -497,6 +516,28 @@ def _test_dir_isolates_sandbox_ast(tests_dir: Path) -> bool:
     return has_env_write and bool(redirected_keys & _HOME_ENV_KEYS) and len(redirected_keys & _MINDIE_ENV_KEYS) >= 2
 
 
+def _iter_plugin_production_code_files(repo_dir: Path, scopes: Sequence[str]) -> list[Path]:
+    """Collect per-plugin production `.py`/`.mjs`/`.cjs`/`.js` files for the thin-host LOC budget."""
+    found: dict[str, Path] = {}
+
+    def _collect(base: Path, suffixes: frozenset[str]) -> None:
+        if not base.is_dir():
+            return
+        for dpath, dnames, fnames in os.walk(base):
+            dnames[:] = sorted(
+                name for name in dnames if name not in _PLUGIN_CODE_SKIP_DIRS and not name.startswith(".venv")
+            )
+            for filename in sorted(fnames):
+                path = Path(dpath) / filename
+                if path.suffix in suffixes:
+                    found[path.relative_to(repo_dir).as_posix()] = path
+
+    for scope in scopes:
+        _collect(repo_dir / scope, _PLUGIN_CODE_SUFFIXES)
+    _collect(repo_dir, _PLUGIN_JS_SUFFIXES)
+    return [found[key] for key in sorted(found)]
+
+
 def _iter_scoped_python_files(repo_dir: Path, scopes: Sequence[str]) -> list[Path]:
     found: list[Path] = []
     for scope in scopes:
@@ -517,12 +558,16 @@ def verify_storage_lifecycle_hygiene(
     errors: list[str] = []
     must_enforce = set(required_repos)
 
-    if main_repo is not None and (main_repo / ".github/scripts").is_dir():
-        for script_py in sorted((main_repo / ".github/scripts").glob("*.py")):
+    if main_repo is not None:
+        inspection_targets = list(sorted((main_repo / ".github/scripts").glob("*.py")))
+        if (main_repo / "install.py").is_file():
+            inspection_targets.append(main_repo / "install.py")
+        for script_py in inspection_targets:
+            pid_check = inspect_helper_windows_pid_safety if script_py == main_repo / "install.py" else inspect_storage_module_windows_pid_safety
             try:
                 for detail in (
                     *inspect_python_temp_hygiene(script_py),
-                    *inspect_storage_module_windows_pid_safety(script_py),
+                    *pid_check(script_py),
                     *inspect_control_plane_torch_npu(script_py),
                 ):
                     rel = script_py.relative_to(main_repo).as_posix()
@@ -609,6 +654,18 @@ def verify_storage_lifecycle_hygiene(
             if not wired and not _delegates_to_mindie_harness(scoped_py):
                 errors.append(
                     f"{repo_name}: {', '.join(present_callers)} does not invoke P8 storage lifecycle GC in AST"
+                )
+
+    for repo_name, repo_dir in active_repos.items():
+        thin_floor = THIN_HOST_PLUGIN_FLOOR_VERSIONS.get(repo_name)
+        ver = _parse_repo_semver(repo_dir)
+        if thin_floor is not None and ver is not None and ver >= thin_floor:
+            code_files = _iter_plugin_production_code_files(repo_dir, PRODUCTION_PYTHON_SCOPES.get(repo_name, ()))
+            total_loc = sum(len(path.read_text(encoding="utf-8").splitlines()) for path in code_files)
+            if total_loc > THIN_HOST_PLUGIN_MAX_LOC:
+                errors.append(
+                    f"{repo_name}: thin host plugin production code has {total_loc} lines "
+                    f"(> {THIN_HOST_PLUGIN_MAX_LOC} line budget across {len(code_files)} files)"
                 )
 
     for repo_name, repo_dir in active_repos.items():

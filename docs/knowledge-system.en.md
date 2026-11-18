@@ -148,11 +148,15 @@ Each candidate optimization is evaluated across four sequential checks (`evaluat
 
 After each run, `append_ledger_and_render_progress` appends `experiment-ledger.jsonl` and atomically updates `PROGRESS.md` (`Best Supported Candidate`, `Active Hypotheses`, `Refuted Directions`, and `Experiments To Complete`) so long-running optimization campaigns can resume cleanly across sessions.
 
-## 6. Domain Isolation, Privacy Redaction, and Community Publishing
+## 6. Three-Tier Privacy & Experience Model, Privacy Red Lines, and Community Publishing
 
+- **Three-tier privacy & experience model (`contribute` / `local-only` / `read-only`/`disabled`)**: `choice` in `mindie-consent.json` drives two independent permissions—`allows_capture()` is true under `contribute` and `local-only` while `cwd` is strictly inside an authorized `project_roots` path, whereas `allows_publication()` is true only under `contribute`. `read-only` (compatible with the historical `disabled`) disables capture and publication, leaving only read-only retrieval and local tools. Consequently `Stop` capture keeps running under `local-only`, while publication only ever happens under `contribute`.
+- **Non-retroactive `origin_tier="local-only"` provenance guard**: materials and distilled units created under `local-only` carry `origin_tier="local-only"`, inherited across merges and re-distillation, so even if the user later switches to `contribute`, prior `local-only` private project experience is never exported in outbound PRs.
+- **Credential-clean anonymous HTTPS `knowledge_sync`**: public corpus Git sync runs with `GIT_TERMINAL_PROMPT=0` and `-c credential.helper= -c core.askPass= -c http.extraHeader=` while preserving enterprise `HTTPS_PROXY` and custom CA certificates, so a missing or stale `gh` or credential helper never blocks sync.
+- **First-boundary password redaction**: `remote_auth` / `remote.auth` sensitive fields, `password` / `passphrase` keys of any length (including escaped JSON forms), and natural-language password phrases are scrubbed deterministically before touching SQLite / WAL / blocks, and never reach the knowledge base or distillation inputs.
 - **Explicit domain routing**: Each domain binds its own storage and configuration; registering a domain never enables background capture or copies consent across domains.
 - **Deterministic privacy redaction**: Every task block, distillation request, and public knowledge unit passes through deterministic privacy rules and Gitleaks scanning before storage or publication, stripping internal IPs, local paths, credentials, and sensitive CLI arguments.
-- **Opt-in PR publishing**: Markdown files in Git are the single source of truth, and routing indexes are rebuildable from Markdown at any time. Only when community contribution is explicitly enabled does the publisher open or update a PR against the target knowledge repository via `gh`.
+- **Opt-in PR publishing**: Markdown files in Git are the single source of truth, and routing indexes are rebuildable from Markdown at any time. Only when `choice == "contribute"` does the publisher open or update a PR against the target knowledge repository via `gh`; `local-only` and `read-only` never publish.
 
 ## 7. Representative End-to-End Scenarios
 

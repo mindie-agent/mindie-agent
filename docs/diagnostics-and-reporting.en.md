@@ -23,11 +23,31 @@ When a remote command or background indexing step fails, a vague error string wa
 1. **Bounded Local Structured Logs (Always Available)**:
    - Components write structured local logs at real operational boundaries. When a tool call fails, the error response includes a random diagnostic correlation ID, a static error category, and a recovery hint alongside the original exit status and cleanup outcome.
 2. **A Single Contribution Switch Controls Knowledge Sharing and Fault Reporting**:
-   - Setup explains both outgoing actions: contributing redacted knowledge packages within approved project scope and filing allowlisted tool fault metadata in the product repository. **The switch is off by default and takes effect only when explicitly enabled**.
+   - Setup explains both outgoing actions: contributing redacted knowledge packages within approved project scope and filing allowlisted tool fault metadata in the product repository. **The switch is off by default and takes effect only when explicitly enabled**; only `contribute` ever sends outbound data, while `local-only` (private local distillation) and `read-only` (retrieval only) upload **nothing** and need no `gh`.
    - The installation profile's `mindie-consent.json` is the sole authority for contribution consent. Reporter configuration stores the destination repository, log roots, and a reference to that consent file; fault recording, queue ingestion, and final submission all verify the same `choice` and `choice_revision`.
    - **Three Distinct States & Scale-to-Zero Drain**: The system keeps **configuration written**, **on-demand reporter drain worker triggered**, and **external GitHub Issue published** strictly separate. When the outbox is empty, **zero idle resident daemon runs in the background (Scale-to-Zero)**; short-lived drain workers run only when reportable incidents are queued or settings are toggled, and runtime upgrades **retire any active reporter service before reclaiming old `.venv` directories**. Disabling the switch immediately stops new outgoing sends on both paths while local diagnostic logs and queries remain available.
    - **No Silent Expansion on Upgrade**: Existing `disabled`, `later`, and `read-only` choices stay off across upgrades. Legacy knowledge-only `contribute` records lacking the unified consent revision do **not** automatically gain fault-reporting permission on upgrade; users opt in explicitly once through the unified contribution entry.
-   - **Reuses the Verified `gh` Channel**: Automatic reporting uses the authenticated GitHub CLI (`gh`) verified during installation. Plugin-bundled `knowledge`, `remote-dev`, and the background reporter share the same profile diagnostics path; standalone `remote-dev` deployments retain their explicitly configured reporting policy.
+   - **`gh` serves only `contribute` outbound**: automatic reporting reuses the authenticated GitHub CLI (`gh`) only under `contribute`; under `local-only` / `read-only`, a missing or unauthenticated `gh` is completely healthy and produces zero outbound requests. Plugin-bundled `knowledge`, `remote-dev`, and the background reporter share the same profile diagnostics path; standalone `remote-dev` deployments retain their explicitly configured reporting policy.
+
+---
+
+## 2.1 Unified Read-Only Health Check (`mindie_doctor` / `mindie-doctor/1`)
+
+`mindie_doctor` is exposed through three entry points backed by the **same `mindie-doctor/1` contract**, so Agents and humans always see identical facts:
+
+- **Component CLI**: `mindie-diagnostics doctor`;
+- **Shared substrate CLI**: `mindie-harness doctor`;
+- **All 7 host MCP tools**: `mindie_doctor` (`readOnlyHint=True`, mutating no persistent state).
+
+**Timeout budgets (outer strictly >= inner sum)**:
+
+| Mode | Budget | Composition |
+| --- | --- | --- |
+| Local check (default) | `5s` | Reads runtime generation, privacy tier, `gh` channel, and default remote configuration |
+| Remote probe (`probe_remote=True`) | `15s` | `5s` local + `8s` remote NPU connectivity probe + `2s` result aggregation/cleanup |
+
+- **Zero side effects on empty installs**: the read-only check **creates no directories, creates/initializes no SQLite database, and writes no WAL**; missing state is reported honestly as uninitialized, and the health check never cold-starts capture or writes a database to look healthy.
+- **`gh` status tiers**: when privacy mode is `local-only` or `read-only`, a missing or unauthenticated `gh` is reported uniformly as `"optional_unconfigured"`; that state is strictly distinguished from real probe errors (DNS/TLS/timeout/permission) and **is never counted as unhealthy**. Only under `contribute` does an unauthenticated `gh` become an outbound blocker that needs action.
 
 ---
 
@@ -63,6 +83,8 @@ Public GitHub Issues are assembled deterministically from **allowlisted metadata
 
 `diagnostics` provides a shared `category="update"` recorder policy alongside `category="contract_violation"` deterministic invariant probes based on exception types, structured `error_code`/`reason_code`, `contract_name`, and retained causes—never analyzing free-form exception text. Missing modules, broken artifacts or protocols, and corrupted owned state/schema contracts (such as `knowledge` authoritative SQLite schema damage, `coordinator` `machines.json` contract damage, `remote-dev` persisted record corruption, or `debugger` triage payload schema mismatch) are product faults; transport, credentials, permissions, cancellation, and local prerequisites remain visible locally.
 
+**Transient background update failures are strictly `reportable=False`**: transport jitter, DNS/TLS failures, HTTP `429-5xx`, `uv`/extraction errors, disk-floor exhaustion, and lock contention are written only to the local update status and enter a local `1h -> 6h` exponential backoff, **never filing a GitHub Issue**, while the active generation keeps serving; only genuine internal defects, protocol/contract corruption, and missing package files enter the outbox.
+
 All seven host plugins (`mindie-agent-codex`, `-cc`, `-kimi`, `-dsh`, `-agy`, `-wb`, and `-oc`) adopt this pipeline, covering component-inheritance helper startup failures, updater crashes, and process-level abnormal exits of owned component CLIs (`profiler`, `sim`, `coordinator`, `debugger`, and `npu-top`). In-process child fault records verified via per-invocation tokens are reused across outer boundaries so faults are never double-reported.
 
 Fast-path local triage requires no path hunting:
@@ -88,6 +110,7 @@ This bounded view reads at most eight 16 KiB log tails and returns five failures
 To prevent duplicate Issues across rapid patch releases while surfacing new-build occurrences and post-closure regressions:
 
 1. **Central `mindie-agent/mindie-agent` routing + dual-key deduplication (`fingerprint` vs. `fault_signature`)**:
+   - **Outbound reporting is strictly `contribute`-only**: all outbound Issues are created only under `contribute`; `local-only` and `read-only` never write anything to GitHub and keep queue evidence strictly local.
    - All automatic Issues are filed centrally in **`mindie-agent/mindie-agent`** with Triage Card v2 exact-commit source permalinks pointing into the owning component or plugin repository.
    - **Per-build `fingerprint`**: Includes `package_version` / `package_revision` to collapse repeated occurrences on the same build inside the local `Outbox`.
    - **Version-independent `fault_signature` (`<!-- mindie-fault:<sha256> -->`)**: Keyed on `(component, operation, stage, substage, category, error_code, reason_code, contract_name, error_type, innermost owned module + function)`, independent of version bumps or line-number shifts.
