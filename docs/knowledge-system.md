@@ -148,11 +148,15 @@ flowchart LR
 
 每次实验结束后，`append_ledger_and_render_progress` 会将结果追加写入 `experiment-ledger.jsonl`，并更新 `PROGRESS.md`（清晰列出当前最优方案 `Best Supported Candidate`、待验证假设 `Active Hypotheses`、已排除方向 `Refuted Directions` 与待完成实验 `Experiments To Complete`），方便长程任务随时断点续跑。
 
-## 6. 领域隔离、隐私红线与社区贡献
+## 6. 三层隐私与经验模型、隐私红线与社区贡献
 
+- **三层隐私与经验模型（`contribute` / `local-only` / `read-only`/`disabled`）**：`mindie-consent.json` 中的 `choice` 决定两条彼此独立的许可——`allows_capture()` 在 `contribute` 与 `local-only` 下、且严格位于已授权 `project_roots` 内为真；`allows_publication()` 仅在 `contribute` 下为真。`read-only`（兼容历史 `disabled`）关闭采集与外发，只保留只读检索与本地工具能力。因此 `Stop` 采集在 `local-only` 下照常运行，而任何外发发布只可能发生在 `contribute`。
+- **不可回填的 `origin_tier="local-only"` 溯源保护**：在 `local-only` 下产生的任务材料与蒸馏单元都会携带 `origin_tier="local-only"`，并在合并、再蒸馏时被继承；即使用户之后切换为 `contribute`，此前的私有项目经验也绝不会出现在任何出站 PR 中。
+- **凭据洁净的匿名 HTTPS `knowledge_sync`**：公开语料 Git 同步以 `GIT_TERMINAL_PROMPT=0` 与 `-c credential.helper= -c core.askPass= -c http.extraHeader=` 启动，同时保留企业 `HTTPS_PROXY` 与自定义 CA 证书；缺失或过期的 `gh`、凭据助手绝不会阻塞同步。
+- **首边界密码脱敏**：`remote_auth` / `remote.auth` 的敏感字段、任意长度的 `password` / `passphrase` 键（含转义 JSON 形态）与自然语言密码短语，都会在写入 SQLite / WAL / blocks 之前被确定性清洗，绝不进入知识库或蒸馏输入。
 - **显式领域路由**：各知识领域绑定独立的本地存储与配置；注册新领域不会自动开启会话采集或跨领域复制授权。
 - **双层隐私脱敏**：所有任务记录切片、经验提炼输入与公开知识条目在落盘或外发前，均经过确定性隐私规则与 Gitleaks 扫描，确保内网 IP、本机路径、容器凭据与敏感命令参数零泄漏。
-- **可控社区投递**：知识库正文以 Git 仓库中的 Markdown 文件为唯一权威来源，本地检索索引可随时从 Markdown 重建。仅当用户显式开启社区贡献开关时，发布器才会通过 `gh` 向目标知识库提交 PR。
+- **可控社区投递**：知识库正文以 Git 仓库中的 Markdown 文件为唯一权威来源，本地检索索引可随时从 Markdown 重建。仅当 `choice == "contribute"` 时，发布器才会通过 `gh` 向目标知识库提交 PR；`local-only` 与 `read-only` 永不外发。
 
 ## 7. 典型场景闭环示例
 

@@ -468,6 +468,55 @@ class StorageLifecycleGateTests(unittest.TestCase):
         )
         self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
 
+    def _make_thin_repo(self, name: str, version: str, manifest_rel: str, scope: str, py_lines: int, js_files: dict[str, int] | None = None) -> Path:
+        repo = self.root / name
+        (repo / ".git").mkdir(parents=True, exist_ok=True)
+        self._write(repo / manifest_rel, json.dumps({"name": "mindie-agent", "version": version}))
+        lines = ["from mindie_harness import storage"]
+        lines.extend("VALUE = 1" for _ in range(max(0, py_lines - 1)))
+        self._write(repo / scope / "host_adapter.py", "\n".join(lines[:py_lines]) + "\n")
+        for rel, count in (js_files or {}).items():
+            self._write(repo / rel, "\n".join("const value = 1;" for _ in range(count)) + "\n")
+        return repo
+
+    def test_main_repo_install_py_inspection_catches_temp_leak_and_os_kill(self) -> None:
+        main = self.root / "fake-main"
+        (main / ".github/scripts").mkdir(parents=True)
+        self._write(main / "install.py", "import tempfile\ndef leak():\n    return tempfile.mkdtemp()\n")
+        errors = sl_gate.verify_storage_lifecycle_hygiene([], main_repo=main)
+        self.assertTrue(any("mindie-agent: install.py" in e and "mkdtemp" in e for e in errors), errors)
+        self._write(main / "install.py", "import os\ndef probe(pid):\n    return os.kill(pid, 0)\n")
+        errors = sl_gate.verify_storage_lifecycle_hygiene([], main_repo=main)
+        self.assertTrue(any("mindie-agent: install.py" in e and "os.kill" in e for e in errors), errors)
+        self._write(main / "install.py", "import tempfile\ndef ok():\n    with tempfile.TemporaryDirectory() as tmp:\n        return tmp\n")
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([], main_repo=main), [])
+
+    def test_thin_host_loc_gate_skips_versions_below_floor(self) -> None:
+        self._make_thin_repo("mindie-agent-codex", "0.1.37", "plugins/mindie-agent/.codex-plugin/plugin.json", "plugins/mindie-agent/scripts", 1500)
+        self._make_thin_repo("mindie-agent-dsh", "0.1.25", "package.json", "scripts", 1500)
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
+
+    def test_thin_host_loc_gate_accepts_exact_boundary_and_deduplicates_paths(self) -> None:
+        codex = self._make_thin_repo(
+            "mindie-agent-codex", "0.1.38", "plugins/mindie-agent/.codex-plugin/plugin.json", "plugins/mindie-agent/scripts", 600,
+            {"plugins/mindie-agent/scripts/entry.mjs": 600},
+        )
+        self._make_thin_repo("mindie-agent-dsh", "0.1.26", "package.json", "scripts", 600, {"host3.mjs": 600})
+        self._make_thin_repo(
+            "mindie-agent-oc", "0.1.11", "package.json", "plugins/mindie-agent/scripts", 600,
+            {"plugins/mindie-agent/opencode_host.mjs": 600},
+        )
+        self.assertEqual(sl_gate.verify_storage_lifecycle_hygiene([self.root]), [])
+        self.assertEqual(len(sl_gate._iter_plugin_production_code_files(codex, ("plugins/mindie-agent/scripts",))), 2)
+
+    def test_thin_host_loc_gate_rejects_1201_lines_across_py_and_js(self) -> None:
+        self._make_thin_repo(
+            "mindie-agent-codex", "0.1.38", "plugins/mindie-agent/.codex-plugin/plugin.json", "plugins/mindie-agent/scripts", 600,
+            {"host3.mjs": 601},
+        )
+        errors = sl_gate.verify_storage_lifecycle_hygiene([self.root])
+        self.assertTrue(any("mindie-agent-codex" in e and "1201" in e and "> 1200 line budget" in e for e in errors), errors)
+
 
 if __name__ == "__main__":
     unittest.main()

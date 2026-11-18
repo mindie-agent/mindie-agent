@@ -1,50 +1,20 @@
 #!/usr/bin/env python3
-"""R4 AST & Guide Static Gate: Zero Pre-Call Session Binding & Silent Default-On Across All Surfaces.
+"""R4 AST & Guide Static Gate: Zero Pre-Call Session Binding & Silent Default-On.
 
 [Role]
-Prevents regression of two classes of historical anti-patterns (`P2.7` & `P2.8`):
-1. Pre-call host-session / `PreToolUse` nonce / `context_file` fail-closed gates on ANY
-   single-user MCP or CLI tool (`remote-dev`, `coordinator`, `profiler`, `sim`, `debugger`,
-   `diagnostics`, `npu-top`, and `knowledge_*`).
-2. Manual `/mindie-agent` / `$mindie-agent` activation ceremonies, `disable-model-invocation`
-   blocks, or install/onboarding documentation inside runtime `skills/`.
+Prevents regression of `P2.7`/`P2.8`: pre-call session/nonce/`context_file` fail-closed gates on
+single-user MCP/CLI tools, manual `/mindie-agent` ceremonies, `disable-model-invocation`, and
+install/onboarding docs inside runtime `skills/`.
 
 [Invariants]
-- Pure Python 3.11+ standard library (`ast`, `json`, `pathlib`, `re`).
-- Uses structural AST inspection (never fragile line-number regexes) and path-safe command
-  token matching (never false-positiving `${PLUGIN_ROOT}/mindie-agent/...` or `/mindie-agent-*`):
-  * `harness`: MCP router never marks `request_nonce`, `_mindie_bind_id`, or `context_file`
-    required, never hides `knowledge_*` in `list_tools`, and never raises
-    `session_identity_required` on `knowledge_*`.
-  * `coordinator`: `task_server.py` resolves MCP callers via `_resolve_mcp_caller` (never
-    `native_turn_context`), `agent_session.py` provides `ensure_context` and
-    `context_for_execution`, and `ops.py` never marks `context_file` required.
-  * `mindie-agent-codex`: `mcp_transport.py` and `mcp_gate.py` use optional turn/session
-    identity (`optional_turn_identity` / `optional_native_identity`), never fail-closed
-    `native_identity` / `native_turn_identity` / `turn_identity`; `openai.yaml` enables
-    implicit invocation (`allow_implicit_invocation: true`) without `$mindie-agent`.
-  * `mindie-agent-cc`: `scripts/mcp_server.py` falls back to `_CONNECTION_SESSION_ID`
-    without fail-closed `claim_bind`.
-  * `mindie-agent-kimi`: `scripts/mcp_server.py` never requires `request_nonce`
-    (`_nonce_tools(..., require=False)` and no `require_nonce` gate in `handle`), falling
-    back to `_CONNECTION_SESSION_ID`.
-  * `mindie-agent-agy`: `plugins/mindie-agent/scripts/mcp_server.py` `_resolve_session`
-    falls back to `_CONNECTION_SESSION_ID` and never raises fail-closed exceptions.
-  * `mindie-agent-wb`: `plugins/mindie-agent/scripts/mcp_server.py` `_resolve_claim`
-    falls back to `_CONNECTION_SESSION_ID` without fail-closed raises (allowing `TimeoutError`
-    propagation per Principle 14), and no surface passes `require=True`.
-  * `mindie-agent-dsh`: `scripts/component_mcp.py` has zero session/nonce gate imports and
-    `scripts/knowledge_mcp.py` (when present) exposes tools unconditionally with
-    `_CONNECTION_SESSION_ID` fallback and zero `/mindie-agent` gate strings.
-  * `mindie-agent-oc`: `plugins/mindie-agent/scripts/mcp_server.py` never injects
-    `_mindie_bind_id` and `_resolve_session` falls back to `_CONNECTION_SESSION_ID` without
-    uncaught `claim_bind` / `require_session`.
-  * Runtime `skills/` & plugin manifests: zero `disable-model-invocation: true`, zero
-    user-facing `/mindie-agent` or `$mindie-agent` commands, and zero install docs in `skills/`.
+- Pure Python 3.11+ stdlib with structural AST inspection and path-safe command-token matching.
+- Harness/coordinator keep zero-`_meta` fallbacks; Codex uses optional identity; CC/Kimi/Agy/
+  WorkBuddy/DSH/OpenCode keep `_CONNECTION_SESSION_ID` fallbacks and never fail closed.
+- Thin (`< 50`-line) stubs must delegate to `mindie_harness` via executable AST nodes (imports,
+  `-m mindie_harness.cli` argv, or a sibling importer) and never re-introduce binding gates.
 
 [Timeouts & Locks]
-- Pure local file reads and in-memory AST parsing (`< 50ms` across all repositories); zero
-  subprocesses, zero network calls, zero file locks.
+- Pure local file reads and in-memory AST parsing; zero subprocesses, network, or locks.
 
 [Side-Effect Policy]
 - Strictly read-only; returns human-actionable error strings.
@@ -80,7 +50,6 @@ _DISABLED_MODEL_INVOCATION_RE = re.compile(
     r"(?m)^[ \t]*(?:disable-model-invocation|disableModelInvocation)[ \t]*:[ \t]*true\b"
 )
 
-
 def _parse_ast(
     repo_name: str, repo_dir: Path, rel_path: str, *, strict_files: bool, errors: list[str]
 ) -> ast.Module | None:
@@ -95,7 +64,6 @@ def _parse_ast(
         errors.append(f"{repo_name}: {rel_path} syntax error during R4 zero-binding AST check: {exc}")
         return None
 
-
 def _top_functions(tree: ast.AST) -> dict[str, ast.FunctionDef | ast.AsyncFunctionDef]:
     body = getattr(tree, "body", ())
     return {
@@ -103,7 +71,6 @@ def _top_functions(tree: ast.AST) -> dict[str, ast.FunctionDef | ast.AsyncFuncti
         for node in body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
-
 
 def _top_assign_names(tree: ast.Module) -> set[str]:
     names: set[str] = set()
@@ -116,7 +83,6 @@ def _top_assign_names(tree: ast.Module) -> set[str]:
             names.add(node.target.id)
     return names
 
-
 def _called_names(node: ast.AST) -> set[str]:
     called: set[str] = set()
     for item in ast.walk(node):
@@ -127,10 +93,8 @@ def _called_names(node: ast.AST) -> set[str]:
                 called.add(item.func.attr)
     return called
 
-
 def _referenced_names(node: ast.AST) -> set[str]:
     return {item.id for item in ast.walk(node) if isinstance(item, ast.Name)}
-
 
 def _call_keyword_const(func_node: ast.AST, callee_name: str, kw_name: str) -> list[object]:
     values: list[object] = []
@@ -147,14 +111,12 @@ def _call_keyword_const(func_node: ast.AST, callee_name: str, kw_name: str) -> l
                 values.append(kw.value.value)
     return values
 
-
 def _all_functions(tree: ast.AST) -> dict[str, ast.FunctionDef | ast.AsyncFunctionDef]:
     return {
         node.name: node
         for node in ast.walk(tree)
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
-
 
 def _is_allowed_reraise(stmt: ast.Raise, *, in_except_handler: bool) -> bool:
     if stmt.exc is None:
@@ -164,7 +126,6 @@ def _is_allowed_reraise(stmt: ast.Raise, *, in_except_handler: bool) -> bool:
     if isinstance(stmt.exc, ast.Call) and isinstance(stmt.exc.func, ast.Name):
         return stmt.exc.func.id == "TimeoutError"
     return False
-
 
 def _has_fail_closed_raise(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
     """Return True if `fn_node` has an explicit non-`TimeoutError` `raise <Exc>` gate."""
@@ -194,7 +155,6 @@ def _has_fail_closed_raise(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> b
 
     return _walk_stmts(fn_node.body)
 
-
 def _unconditional_calls(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
     """Return function/method call names executed unconditionally at function body / `try` body level."""
     names: set[str] = set()
@@ -220,7 +180,6 @@ def _unconditional_calls(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> set
 
     _walk_stmts(fn_node.body)
     return names
-
 
 def _calls_outside_try(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
     """Return function/method call names executed outside `try:` blocks."""
@@ -250,26 +209,70 @@ def _calls_outside_try(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[s
     return names
 
 
+_HARNESS_MODULES: frozenset[str] = frozenset({"mindie_harness", "mindie_harness.cli"})
+_THIN_STUB_FORBIDDEN: frozenset[str] = frozenset(
+    {
+        "claim_bind", "require_nonce", "claim_nonce", "native_identity", "native_turn_identity",
+        "turn_identity", "ManagedTaskContextRequired", "_with_bind_property", "session_identity_required",
+    }
+)
+_MCP_MANIFEST_RELS: tuple[str, ...] = (
+    ".mcp.json", "mcp.json", "mcp_config.json",
+    "plugins/mindie-agent/.mcp.json", "plugins/mindie-agent/mcp.json", "plugins/mindie-agent/mcp_config.json",
+)
+
+def _ast_delegates_to_harness(tree: ast.AST, scripts_dir: Path | None = None) -> bool:
+    """Return True when executable AST nodes delegate to `mindie_harness` (never comments/docstrings)."""
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import) and any(al.name == "mindie_harness" or al.name.startswith("mindie_harness.") for al in node.names): return True
+        if isinstance(node, ast.ImportFrom) and (node.module or "").startswith("mindie_harness"): return True
+        if isinstance(node, (ast.Call, ast.List, ast.Tuple)) and any(isinstance(item, ast.Constant) and item.value in _HARNESS_MODULES for item in ast.walk(node)): return True
+    if scripts_dir is None: return False
+    for node in ast.walk(tree):
+        names = [node.module] if isinstance(node, ast.ImportFrom) and node.module and not node.module.startswith("mindie_harness") else (
+            [al.name for al in node.names if not al.name.startswith("mindie_harness")] if isinstance(node, ast.Import) else ([al.name for al in node.names] if isinstance(node, ast.ImportFrom) else []))
+        for name in names:
+            for candidate in (scripts_dir / f"{name.replace('.', '/')}.py", scripts_dir / f"{name.rsplit('.', 1)[-1]}.py"):
+                try:
+                    if candidate.is_file() and _ast_delegates_to_harness(ast.parse(candidate.read_text(encoding="utf-8"))): return True
+                except TimeoutError: raise
+                except (OSError, SyntaxError): continue
+    return False
 def _plugin_delegates_mcp_to_harness(repo_dir: Path, scripts_rel: str) -> bool:
-    scripts_dir = repo_dir / scripts_rel
-    if not scripts_dir.is_dir():
-        return False
-    for py_path in sorted(scripts_dir.rglob("*.py")):
-        if "__pycache__" in py_path.parts:
-            continue
+    for rel in _MCP_MANIFEST_RELS:
+        manifest = repo_dir / rel
         try:
-            tree = ast.parse(py_path.read_text(encoding="utf-8"), filename=str(py_path))
-        except (OSError, SyntaxError):
-            continue
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import) and any(
-                al.name == "mindie_harness" or al.name.startswith("mindie_harness.") for al in node.names
-            ):
-                return True
-            if isinstance(node, ast.ImportFrom) and (node.module or "").startswith("mindie_harness"):
-                return True
+            if manifest.is_file() and "mindie_harness" in manifest.read_text(encoding="utf-8"): return True
+        except TimeoutError: raise
+        except OSError: pass
+    scripts_dir = repo_dir / scripts_rel
+    for py_path in sorted(scripts_dir.rglob("*.py")) if scripts_dir.is_dir() else ():
+        try:
+            if "__pycache__" not in py_path.parts and _ast_delegates_to_harness(ast.parse(py_path.read_text(encoding="utf-8")), scripts_dir): return True
+        except TimeoutError: raise
+        except (OSError, SyntaxError): continue
     return False
 
+def _check_thin_stub_forbidden(repo_name: str, rel_path: str, tree: ast.Module, errors: list[str]) -> None:
+    """Reject session-binding gate symbols inside a thin `< 50`-line forwarding stub."""
+    docs = {id(n.body[0].value) for n in ast.walk(tree) if isinstance(n, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and n.body and isinstance(n.body[0], ast.Expr)}
+    found: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Name, ast.Attribute)): symbol = node.id if isinstance(node, ast.Name) else node.attr
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)): symbol = node.name
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in docs: symbol = node.value
+        else: continue
+        if symbol in _THIN_STUB_FORBIDDEN: found.add(symbol)
+    if found: errors.append(f"{repo_name}: {rel_path} thin forwarding stub references session-binding gate symbol(s) {sorted(found)}")
+
+def _thin_stub_allows(repo_name: str, rel_path: str, tree: ast.Module, path: Path, scripts_dir: Path, legacy_names: frozenset[str], errors: list[str]) -> bool:
+    """Return True only for a `< 50`-line stub that legitimately delegates to `mindie_harness`."""
+    defined = set(_all_functions(tree)) | {n.name for n in tree.body if isinstance(n, ast.ClassDef)}
+    if defined & legacy_names: return False
+    if len(path.read_text(encoding="utf-8").splitlines()) < 50 and _ast_delegates_to_harness(tree, scripts_dir):
+        _check_thin_stub_forbidden(repo_name, rel_path, tree, errors)
+        return True
+    return False
 
 def _check_harness(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     pkg_dir = repo_dir / "mindie_harness"
@@ -310,7 +313,6 @@ def _check_harness(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> 
             errors.append(
                 f"harness: {router_rel} `MCPRouter` still calls fail-closed `_verify_knowledge_admission`"
             )
-
 
 def _check_coordinator(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     sess_tree = _parse_ast("coordinator", repo_dir, "mindie_coordinator/agent_session.py", strict_files=strict_files, errors=errors)
@@ -363,67 +365,47 @@ def _check_coordinator(repo_dir: Path, *, strict_files: bool, errors: list[str])
                                     "as required (violates Iron Rule 5)"
                                 )
 
-
 def _check_codex(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    if not (repo_dir / "plugins/mindie-agent/scripts/mcp_gate.py").is_file() and _plugin_delegates_mcp_to_harness(
-        repo_dir, "plugins/mindie-agent/scripts"
-    ):
-        return
-    id_tree = _parse_ast("mindie-agent-codex", repo_dir, "plugins/mindie-agent/scripts/mcp_identity.py", strict_files=strict_files, errors=errors)
-    tr_tree = _parse_ast("mindie-agent-codex", repo_dir, "plugins/mindie-agent/scripts/mcp_transport.py", strict_files=strict_files, errors=errors)
-    gate_tree = _parse_ast("mindie-agent-codex", repo_dir, "plugins/mindie-agent/scripts/mcp_gate.py", strict_files=strict_files, errors=errors)
-    if id_tree is not None:
-        fn_map = _top_functions(id_tree)
+    scripts = repo_dir / "plugins/mindie-agent/scripts"
+    strict = False if _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts") else strict_files
+    id_rel, tr_rel, gate_rel = ("plugins/mindie-agent/scripts/mcp_identity.py", "plugins/mindie-agent/scripts/mcp_transport.py", "plugins/mindie-agent/scripts/mcp_gate.py")
+    id_tree = _parse_ast("mindie-agent-codex", repo_dir, id_rel, strict_files=strict, errors=errors)
+    tr_tree = _parse_ast("mindie-agent-codex", repo_dir, tr_rel, strict_files=strict, errors=errors)
+    gate_tree = _parse_ast("mindie-agent-codex", repo_dir, gate_rel, strict_files=strict, errors=errors)
+    if id_tree is not None and not _thin_stub_allows("mindie-agent-codex", id_rel, id_tree, repo_dir / id_rel, scripts, frozenset({"optional_native_identity", "optional_turn_identity"}), errors):
         for name in ("optional_native_identity", "optional_turn_identity"):
-            if name not in fn_map:
-                errors.append(f"mindie-agent-codex: mcp_identity.py missing `{name}`")
-    if tr_tree is not None:
+            if name not in _top_functions(id_tree): errors.append(f"mindie-agent-codex: mcp_identity.py missing `{name}`")
+    if tr_tree is not None and not _thin_stub_allows("mindie-agent-codex", tr_rel, tr_tree, repo_dir / tr_rel, scripts, frozenset(), errors):
         tr_called = _called_names(tr_tree)
-        strict_tr = tr_called & {"native_identity", "native_turn_identity"}
-        if strict_tr or "optional_turn_identity" not in tr_called:
-            errors.append(
-                "mindie-agent-codex: mcp_transport.py must use `optional_turn_identity` across all MCP surfaces "
-                "(never fail-closed `native_identity` / `native_turn_identity`)"
-            )
-    if gate_tree is not None:
+        if tr_called & {"native_identity", "native_turn_identity"} or "optional_turn_identity" not in tr_called:
+            errors.append("mindie-agent-codex: mcp_transport.py must use `optional_turn_identity` across all MCP surfaces (never fail-closed `native_identity` / `native_turn_identity`)")
+    if gate_tree is not None and not _thin_stub_allows("mindie-agent-codex", gate_rel, gate_tree, repo_dir / gate_rel, scripts, frozenset({"Gate"}), errors):
         gate_cls = next((n for n in gate_tree.body if isinstance(n, ast.ClassDef) and n.name == "Gate"), None)
-        if gate_cls is None:
-            errors.append("mindie-agent-codex: mcp_gate.py missing `Gate`")
+        if gate_cls is None: errors.append("mindie-agent-codex: mcp_gate.py missing `Gate`")
         else:
             methods = _top_functions(gate_cls)
-            call_fn = methods.get("call")
-            remote_fn = methods.get("_remote_call")
-            if call_fn is None:
-                errors.append("mindie-agent-codex: mcp_gate.py missing `Gate.call`")
+            call_fn, remote_fn = methods.get("call"), methods.get("_remote_call")
+            if call_fn is None: errors.append("mindie-agent-codex: mcp_gate.py missing `Gate.call`")
             else:
                 call_names = _called_names(call_fn)
                 if call_names & {"native_identity", "native_turn_identity", "turn_identity"}:
-                    errors.append(
-                        "mindie-agent-codex: `Gate.call` invokes strict `native_identity` / `native_turn_identity` / "
-                        "`turn_identity` (all MCP surfaces must use `optional_native_identity` / `optional_turn_identity`)"
-                    )
+                    errors.append("mindie-agent-codex: `Gate.call` invokes strict `native_identity` / `native_turn_identity` / `turn_identity` (all MCP surfaces must use `optional_native_identity` / `optional_turn_identity`)")
                 if "optional_native_identity" not in call_names and "optional_turn_identity" not in call_names:
-                    errors.append(
-                        "mindie-agent-codex: `Gate.call` must resolve optional identity via `optional_native_identity`"
-                    )
+                    errors.append("mindie-agent-codex: `Gate.call` must resolve optional identity via `optional_native_identity`")
             rem_target = remote_fn or call_fn
-            if (
-                rem_target is None
-                or "optional_turn_identity" not in _called_names(rem_target)
-                or bool(_called_names(rem_target) & {"turn_identity", "native_turn_identity"})
-            ):
+            if rem_target is None or "optional_turn_identity" not in _called_names(rem_target) or bool(_called_names(rem_target) & {"turn_identity", "native_turn_identity"}):
                 errors.append("mindie-agent-codex: `Gate` remote path must use `optional_turn_identity` (never strict `turn_identity`)")
 
-
 def _check_cc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    if not (repo_dir / "scripts/mcp_server.py").is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
+    rel = "scripts/mcp_server.py"
+    if not (repo_dir / rel).is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
         return
-    tree = _parse_ast("mindie-agent-cc", repo_dir, "scripts/mcp_server.py", strict_files=strict_files, errors=errors)
+    tree = _parse_ast("mindie-agent-cc", repo_dir, rel, strict_files=strict_files, errors=errors)
     if tree is None:
         return
-    fn_map = _top_functions(tree)
-    if _plugin_delegates_mcp_to_harness(repo_dir, "scripts") and "handle" not in fn_map:
+    if _thin_stub_allows("mindie-agent-cc", rel, tree, repo_dir / rel, repo_dir / "scripts", frozenset({"handle"}), errors):
         return
+    fn_map = _top_functions(tree)
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
         errors.append("mindie-agent-cc: scripts/mcp_server.py missing `_CONNECTION_SESSION_ID` fallback")
@@ -442,16 +424,16 @@ def _check_cc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     if "_CONNECTION_SESSION_ID" not in refs:
         errors.append("mindie-agent-cc: `handle` must fall back to `_CONNECTION_SESSION_ID` across all surfaces")
 
-
 def _check_kimi(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    if not (repo_dir / "scripts/mcp_server.py").is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
+    rel = "scripts/mcp_server.py"
+    if not (repo_dir / rel).is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
         return
-    tree = _parse_ast("mindie-agent-kimi", repo_dir, "scripts/mcp_server.py", strict_files=strict_files, errors=errors)
+    tree = _parse_ast("mindie-agent-kimi", repo_dir, rel, strict_files=strict_files, errors=errors)
     if tree is None:
         return
-    fn_map = _top_functions(tree)
-    if _plugin_delegates_mcp_to_harness(repo_dir, "scripts") and "handle" not in fn_map:
+    if _thin_stub_allows("mindie-agent-kimi", rel, tree, repo_dir / rel, repo_dir / "scripts", frozenset({"handle"}), errors):
         return
+    fn_map = _top_functions(tree)
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
         errors.append("mindie-agent-kimi: scripts/mcp_server.py missing `_CONNECTION_SESSION_ID` fallback")
@@ -483,16 +465,14 @@ def _check_kimi(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> Non
     if "_CONNECTION_SESSION_ID" not in refs:
         errors.append("mindie-agent-kimi: `handle` must fall back to `_CONNECTION_SESSION_ID` across all surfaces")
 
-
 def _check_agy(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    if not (repo_dir / "plugins/mindie-agent/scripts/mcp_server.py").is_file() and _plugin_delegates_mcp_to_harness(
-        repo_dir, "plugins/mindie-agent/scripts"
-    ):
+    rel = "plugins/mindie-agent/scripts/mcp_server.py"
+    if not (repo_dir / rel).is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts"):
         return
-    tree = _parse_ast("mindie-agent-agy", repo_dir, "plugins/mindie-agent/scripts/mcp_server.py", strict_files=strict_files, errors=errors)
+    tree = _parse_ast("mindie-agent-agy", repo_dir, rel, strict_files=strict_files, errors=errors)
     if tree is None:
         return
-    if _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts") and "_resolve_session" not in _top_functions(tree):
+    if _thin_stub_allows("mindie-agent-agy", rel, tree, repo_dir / rel, repo_dir / "plugins/mindie-agent/scripts", frozenset({"_resolve_session"}), errors):
         return
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
@@ -509,18 +489,16 @@ def _check_agy(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None
             "(violates Iron Rule 5 zero-binding surface)"
         )
 
-
 def _check_wb(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    if not (repo_dir / "plugins/mindie-agent/scripts/mcp_server.py").is_file() and _plugin_delegates_mcp_to_harness(
-        repo_dir, "plugins/mindie-agent/scripts"
-    ):
+    rel = "plugins/mindie-agent/scripts/mcp_server.py"
+    if not (repo_dir / rel).is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts"):
         return
-    tree = _parse_ast("mindie-agent-wb", repo_dir, "plugins/mindie-agent/scripts/mcp_server.py", strict_files=strict_files, errors=errors)
+    tree = _parse_ast("mindie-agent-wb", repo_dir, rel, strict_files=strict_files, errors=errors)
     if tree is None:
         return
-    fn_map = _top_functions(tree)
-    if _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts") and "_resolve_claim" not in fn_map:
+    if _thin_stub_allows("mindie-agent-wb", rel, tree, repo_dir / rel, repo_dir / "plugins/mindie-agent/scripts", frozenset({"_resolve_claim"}), errors):
         return
+    fn_map = _top_functions(tree)
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
         errors.append("mindie-agent-wb: mcp_server.py missing `_CONNECTION_SESSION_ID` fallback")
@@ -546,19 +524,25 @@ def _check_wb(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
                 "(re-introduces pre-call session-binding gate)"
             )
 
-
 def _check_dsh(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    if not (repo_dir / "scripts/component_mcp.py").is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
-        return
-    tree = _parse_ast("mindie-agent-dsh", repo_dir, "scripts/component_mcp.py", strict_files=strict_files, errors=errors)
-    if tree is not None:
+    scripts = repo_dir / "scripts"
+    component_rel = "scripts/component_mcp.py"
+    component = scripts / "component_mcp.py"
+    tree = None
+    if component.is_file() or not _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
+        tree = _parse_ast("mindie-agent-dsh", repo_dir, component_rel, strict_files=strict_files, errors=errors)
+    if tree is not None and not _thin_stub_allows(
+        "mindie-agent-dsh", component_rel, tree, component, scripts, frozenset({"handle", "serve", "serve_selected_serialized"}), errors
+    ):
         forbidden = {"claim_bind", "claim_nonce", "require_nonce", "ManagedTaskContextRequired"}
         used = (_called_names(tree) | _referenced_names(tree)) & forbidden
         if used:
             errors.append(
                 f"mindie-agent-dsh: scripts/component_mcp.py references session-binding gate symbol(s) {sorted(used)}"
             )
-    kmcp_path = repo_dir / "scripts/knowledge_mcp.py"
+        elif "component_tools" not in _referenced_names(tree):
+            errors.append("mindie-agent-dsh: scripts/component_mcp.py neither dispatches `component_tools` nor delegates to `mindie_harness`")
+    kmcp_path = scripts / "knowledge_mcp.py"
     if kmcp_path.is_file():
         kmcp_text = kmcp_path.read_text(encoding="utf-8")
         if _SLASH_CMD_RE.search(kmcp_text):
@@ -566,7 +550,9 @@ def _check_dsh(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None
                 "mindie-agent-dsh: scripts/knowledge_mcp.py exposes `/mindie-agent` gate text (violates silent default-on)"
             )
         kmcp_tree = _parse_ast("mindie-agent-dsh", repo_dir, "scripts/knowledge_mcp.py", strict_files=False, errors=errors)
-        if kmcp_tree is not None:
+        if kmcp_tree is not None and not _thin_stub_allows(
+            "mindie-agent-dsh", "scripts/knowledge_mcp.py", kmcp_tree, kmcp_path, scripts, frozenset({"session_identity", "discoverable_tools"}), errors
+        ):
             fn_map = _top_functions(kmcp_tree)
             sess_fn = fn_map.get("session_identity")
             if sess_fn is not None and "_CONNECTION_SESSION_ID" not in _referenced_names(sess_fn):
@@ -580,23 +566,21 @@ def _check_dsh(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None
                     "mindie-agent-dsh: scripts/knowledge_mcp.py `discoverable_tools` hides tools behind `knowledge_lease`"
                 )
 
-
 def _check_oc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     """Close AD-01 blindspot: OpenCode MCP tools must never require `_mindie_bind_id` or fail-closed session claims."""
-    if not (repo_dir / "plugins/mindie-agent/scripts/mcp_server.py").is_file() and _plugin_delegates_mcp_to_harness(
-        repo_dir, "plugins/mindie-agent/scripts"
-    ):
+    rel = "plugins/mindie-agent/scripts/mcp_server.py"
+    if not (repo_dir / rel).is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts"):
         return
-    tree = _parse_ast("mindie-agent-oc", repo_dir, "plugins/mindie-agent/scripts/mcp_server.py", strict_files=strict_files, errors=errors)
+    tree = _parse_ast("mindie-agent-oc", repo_dir, rel, strict_files=strict_files, errors=errors)
     if tree is None:
+        return
+    if _thin_stub_allows("mindie-agent-oc", rel, tree, repo_dir / rel, repo_dir / "plugins/mindie-agent/scripts", frozenset({"_resolve_session"}), errors):
         return
     fn_map = _top_functions(tree)
     if "_with_bind_property" in fn_map or "_with_bind_property" in _called_names(tree):
         errors.append(
             "mindie-agent-oc: mcp_server.py injects `_mindie_bind_id` via `_with_bind_property` (AD-01 / violates P2.7)"
         )
-    if _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts") and "_resolve_session" not in fn_map:
-        return
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
         errors.append("mindie-agent-oc: mcp_server.py missing `_CONNECTION_SESSION_ID` fallback (AD-01 / violates P2.7)")
@@ -672,13 +656,11 @@ _FORBIDDEN_SKILL_FILES: frozenset[str] = frozenset(
     {"workspace-setup.md", "github-authentication.md", "user-notice.md"}
 )
 
-
 def _extract_frontmatter(text: str) -> str:
     if not text.startswith("---\n"):
         return ""
     end = text.find("\n---\n", 4)
     return text[4:end] if end != -1 else ""
-
 
 def _iter_manifest_text_values(obj: object) -> list[str]:
     found: list[str] = []
@@ -695,7 +677,6 @@ def _iter_manifest_text_values(obj: object) -> list[str]:
         for item in obj:
             found.extend(_iter_manifest_text_values(item))
     return found
-
 
 def _check_prompt_and_guide_hygiene(
     siblings_roots: Sequence[Path],
@@ -783,32 +764,16 @@ def _check_prompt_and_guide_hygiene(
     if npu_top_dir is not None and (npu_top_dir / ".agents/skills/vaws-top").exists():
         errors.append("npu-top: legacy `.agents/skills/vaws-top` directory still present (violates Principle 1)")
 
-
-def verify_zero_session_binding_gates(
-    siblings_roots: Sequence[Path],
-    *,
-    require_siblings: bool = False,
-    required_repos: Sequence[str] = (),
-    explicit_repos: Mapping[str, Path] | None = None,
-) -> list[str]:
+def verify_zero_session_binding_gates(siblings_roots, *, require_siblings=False, required_repos=(), explicit_repos=None) -> list[str]:
     """Verify Iron Rule 5 & silent default-on boundaries across sibling repos."""
-    errors: list[str] = []
-    must_exist = set(required_repos)
-    strict_repos: set[str] = set()
+    errors, must_exist, strict_repos = [], set(required_repos), set()
     for repo_name in GATED_REPOS:
-        try:
-            repo_dir = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
-        except ValueError as exc:
-            errors.append(str(exc))
-            continue
+        try: repo_dir = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
+        except ValueError as exc: errors.append(str(exc)); continue
         strict_files = (repo_name in must_exist) or (require_siblings and repo_name not in _INDEPENDENT_EXEMPT)
-        if strict_files:
-            strict_repos.add(repo_name)
+        if strict_files: strict_repos.add(repo_name)
         if repo_dir is None:
-            if strict_files:
-                errors.append(
-                    f"{repo_name}: sibling checkout not found in {list(siblings_roots)} for zero-binding gate verification"
-                )
+            if strict_files: errors.append(f"{repo_name}: sibling checkout not found in {list(siblings_roots)} for zero-binding gate verification")
             continue
         _CHECKERS[repo_name](repo_dir, strict_files=strict_files, errors=errors)
     _check_prompt_and_guide_hygiene(siblings_roots, explicit_repos, strict_repos, errors)

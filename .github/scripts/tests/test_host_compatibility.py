@@ -390,7 +390,12 @@ class HostCompatibilityGateTests(unittest.TestCase):
         dsh = self._make_repo("mindie-agent-dsh")
         (dsh / "scripts").mkdir(parents=True)
         (dsh / "scripts" / "setup_process.py").write_text("subprocess.CREATE_NO_WINDOW\n", encoding="utf-8", newline="\n")
-        (dsh / "scripts" / "knowledge_mcp.py").write_text("subprocess.CREATE_NO_WINDOW\n", encoding="utf-8", newline="\n")
+        (dsh / "scripts" / "knowledge_mcp.py").write_text(
+            "_CONNECTION_SESSION_ID = 'dsh-mcp-1'\n\n"
+            "def session_identity():\n    return _CONNECTION_SESSION_ID\n",
+            encoding="utf-8",
+            newline="\n",
+        )
         (dsh / "host3.mjs").write_text("spawn('python', ['x'], { detached: true })\n", encoding="utf-8", newline="\n")
 
         # Even when mindie_knowledge is NOT importable, R4 still runs windowless_check and catches popup bug
@@ -706,6 +711,67 @@ class HostCompatibilityGateTests(unittest.TestCase):
             host_gate.verify_windows_windowless_spawns([empty_sibs], required_repos=["mindie-agent-dsh"]),
             [],
         )
+
+    def test_windows_popup_gate_inspects_main_repo_install_py(self) -> None:
+        main = self.root / "fake-main"
+        (main / ".github/scripts").mkdir(parents=True)
+        install_py = main / "install.py"
+        install_py.write_text("import subprocess\nsubprocess.run(['cmd'])\n", encoding="utf-8", newline="\n")
+        errors = host_gate.verify_windows_windowless_spawns([], main_repo=main)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("mindie-agent: install.py", errors[0])
+        install_py.write_text(
+            "import subprocess\nsubprocess.run(['cmd'], creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        self.assertEqual(host_gate.verify_windows_windowless_spawns([], main_repo=main), [])
+
+    def test_thin_host_plugin_delegation_and_floor_scope_enforcement(self) -> None:
+        cc = self._make_repo("mindie-agent-cc")
+        scripts = cc / "scripts"
+        scripts.mkdir()
+        hook = scripts / "hook_launcher.py"
+        hook.write_text("from mindie_harness import run_host\n", encoding="utf-8", newline="\n")
+        self.assertEqual(host_gate.verify_windows_windowless_spawns([self.root]), [])
+
+        # Importing `mindie_harness` cannot excuse an unguarded spawn in the same thin launcher
+        hook.write_text(
+            "import subprocess\nfrom mindie_harness import run_host\n\ndef launch():\n    return subprocess.run(['cmd'])\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        errors = host_gate.verify_windows_windowless_spawns([self.root])
+        self.assertTrue(any("mindie-agent-cc: scripts/hook_launcher.py" in e for e in errors), errors)
+
+        # Every present `any` candidate is inspected; a clean sibling cannot hide a bad one
+        hook.write_text("from mindie_harness import run_host\n", encoding="utf-8", newline="\n")
+        (scripts / "host_adapter.py").write_text(
+            "import subprocess\n\ndef launch():\n    return subprocess.run(['cmd'])\n", encoding="utf-8", newline="\n"
+        )
+        errors = host_gate.verify_windows_windowless_spawns([self.root])
+        self.assertTrue(any("mindie-agent-cc: scripts/host_adapter.py" in e for e in errors), errors)
+
+        # A present candidate with no spawn and no delegation fails the `any` requirement
+        hook.unlink()
+        (scripts / "host_adapter.py").unlink()
+        (scripts / "entry.py").write_text("VALUE = 1\n", encoding="utf-8", newline="\n")
+        errors = host_gate.verify_windows_windowless_spawns([self.root])
+        self.assertTrue(any("mindie-agent-cc" in e and "delegates to mindie_harness" in e for e in errors), errors)
+        (scripts / "entry.py").unlink()
+
+        # At/above the thin floor, unguarded spawns are enforced across ALL `.py` files in scope
+        hook.write_text("from mindie_harness import run_host\n", encoding="utf-8", newline="\n")
+        (scripts / "unrelated.py").write_text(
+            "import subprocess\n\ndef run():\n    return subprocess.run(['cmd'])\n", encoding="utf-8", newline="\n"
+        )
+        manifest = cc / ".claude-plugin/plugin.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({"version": "0.1.30"}), encoding="utf-8", newline="\n")
+        errors = host_gate.verify_windows_windowless_spawns([self.root])
+        self.assertTrue(any("mindie-agent-cc: scripts/unrelated.py" in e for e in errors), errors)
+        manifest.write_text(json.dumps({"version": "0.1.29"}), encoding="utf-8", newline="\n")
+        self.assertEqual(host_gate.verify_windows_windowless_spawns([self.root]), [])
 
 
 if __name__ == "__main__":

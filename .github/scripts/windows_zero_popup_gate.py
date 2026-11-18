@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 from typing import Mapping, Sequence
 from repo_roots import INDEPENDENT_COMPONENTS, INDEPENDENT_PLUGINS, resolve_repo
+from storage_lifecycle_gate import THIN_HOST_PLUGIN_FLOOR_VERSIONS, _parse_repo_semver
 from storage_pid_ast import analyze_module_platform_guards
 
 WINDOWS_NODE_WINDOWLESS_FILES: tuple[tuple[str, str], ...] = (("mindie-agent-dsh", "host3.mjs"), ("mindie-agent-oc", "plugins/mindie-agent/opencode_host.mjs"))
@@ -21,11 +22,13 @@ NODE_SCANNED_REPOS: tuple[str, ...] = ("mindie-agent-dsh", "mindie-agent-oc", "n
 NODE_SKIP_DIRS: frozenset[str] = frozenset({".git", "node_modules", "tests", ".venv", "dist", "build", "coverage", "static"})
 
 WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str | tuple[str, ...]], ...] = (
-    ("mindie-agent-dsh", ("any", ("scripts/setup_process.py", "scripts/mindie_launch.py", "scripts/hook_launcher.py"))), ("mindie-agent-dsh", ("any", ("scripts/knowledge_mcp.py", "scripts/mindie_launch.py", "scripts/hook_launcher.py"))),
-    ("mindie-agent-agy", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/mindie_launch.py"))), ("mindie-agent-agy", ("any", ("plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mindie_launch.py"))),
-    ("mindie-agent-wb", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/mindie_launch.py"))), ("mindie-agent-wb", ("any", ("plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mindie_launch.py"))),
-    ("mindie-agent-oc", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/mindie_launch.py"))), ("mindie-agent-cc", ("any", ("scripts/bounded_win32.py", "scripts/mindie_launch.py"))),
-    ("mindie-agent-codex", ("any", ("plugins/mindie-agent/scripts/windows_process.py", "plugins/mindie-agent/scripts/with_runtime.py"))), ("mindie-agent-kimi", ("any", ("scripts/bounded.py", "scripts/mindie_launch.py"))),
+    ("mindie-agent-codex", ("any", ("plugins/mindie-agent/scripts/windows_process.py", "plugins/mindie-agent/scripts/with_runtime.py", "plugins/mindie-agent/scripts/hook_launcher.py", "plugins/mindie-agent/scripts/mcp_entry.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
+    ("mindie-agent-cc", ("any", ("scripts/bounded_win32.py", "scripts/mindie_launch.py", "scripts/hook_launcher.py", "scripts/entry.py", "scripts/bridge.py", "scripts/host_adapter.py", "scripts/setup.py"))),
+    ("mindie-agent-kimi", ("any", ("scripts/bounded.py", "scripts/mindie_launch.py", "scripts/hook_launcher.py", "scripts/entry.py", "scripts/bridge.py", "scripts/host_adapter.py", "scripts/setup.py"))),
+    ("mindie-agent-dsh", ("any", ("scripts/setup_process.py", "scripts/knowledge_mcp.py", "scripts/mindie_launch.py", "scripts/hook_launcher.py", "scripts/entry.py", "scripts/bridge.py", "scripts/host_adapter.py", "scripts/setup.py"))),
+    ("mindie-agent-agy", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mindie_launch.py", "plugins/mindie-agent/scripts/bridge.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
+    ("mindie-agent-wb", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mindie_launch.py", "plugins/mindie-agent/scripts/bridge.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
+    ("mindie-agent-oc", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/mindie_launch.py", "plugins/mindie-agent/scripts/bridge.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
     ("mindie-bench", ("src/mindie_bench/runner/host_platform.py", "src/mindie_bench/runner/process.py")), ("knowledge", "mindie_knowledge/windows_process.py"),
     ("diagnostics", "mindie_diagnostics/platform_service.py"), ("remote-dev", "remote_dev/core/local_process.py"),
     ("diagnostics", ("mindie_diagnostics/github_transport.py", "mindie_diagnostics/reporter.py")), ("coordinator", "mindie_coordinator/service_client.py"),
@@ -114,10 +117,10 @@ def inspect_node_windowless_file(path: Path, *, require_spawns: bool) -> list[st
     return errors + (["expected >= 1 child_process spawn call with `windowsHide: true`, found 0"] if require_spawns and cnt == 0 else [])
 
 
-def _inspect_python_ast(path: Path) -> tuple[bool, bool, list[int], list[int], list[str], dict[str, set[str]], set[str]]:
+def _inspect_python_ast(path: Path) -> tuple[bool, bool, list[int], list[int], list[str], dict[str, set[str]], set[str], bool]:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     _, _, _, visited = analyze_module_platform_guards(tree)
-    cnw, wk, spawns, unguarded, bad_flags, imps, called = False, False, [], [], [], {}, set()
+    cnw, wk, spawns, unguarded, bad_flags, imps, called, delegates_harness = False, False, [], [], [], {}, set(), False
     docs = {id(n.body[0].value) for n in ast.walk(tree) if isinstance(n, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)) and n.body and isinstance(n.body[0], ast.Expr)}
     for node, _, posix in visited:
         if (isinstance(node, ast.Attribute) and "CREATE_NO_WINDOW" in node.attr) or (isinstance(node, ast.Name) and "CREATE_NO_WINDOW" in node.id) or (isinstance(node, ast.Constant) and node.value == 0x08000000):
@@ -135,13 +138,15 @@ def _inspect_python_ast(path: Path) -> tuple[bool, bool, list[int], list[int], l
                 spawns.append(node.lineno)
                 unguarded.extend((node.lineno,) if not any(kw.arg in ("creationflags", None) for kw in node.keywords) else ())
     for node in ast.walk(tree):
-        if isinstance(node, ast.ImportFrom) and node.module:
+        if isinstance(node, ast.Import):
+            delegates_harness = delegates_harness or any(al.name == "mindie_harness" or al.name.startswith("mindie_harness.") for al in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            delegates_harness = delegates_harness or node.module.startswith("mindie_harness")
             s = imps.setdefault(node.module.rsplit(".", 1)[-1], set())
-            cnw = cnw or node.module.startswith("mindie_harness")
             for al in node.names:
                 s.add(al.asname or al.name); cnw = cnw or "CREATE_NO_WINDOW" in al.name  # noqa: E702
                 bad_flags.extend((f"line {node.lineno} imports forbidden `{al.name}`",) if al.name in _BANNED_WIN_FLAGS else ())
-    return cnw, wk, spawns, unguarded, bad_flags, imps, called
+    return cnw, wk, spawns, unguarded, bad_flags, imps, called, delegates_harness
 
 
 def verify_windows_windowless_spawns(siblings_roots: Sequence[Path], *, main_repo: Path | None = None, require_siblings: bool = False, required_repos: Sequence[str] = (), explicit_repos: Mapping[str, Path] | None = None) -> list[str]:
@@ -151,9 +156,12 @@ def verify_windows_windowless_spawns(siblings_roots: Sequence[Path], *, main_rep
         if (r := _find(nm)) is None and nm not in reported and (nm in must or (require_siblings and nm not in INDEPENDENT_ONLY_GATED_REPOS)):
             reported.add(nm); errors.append(f"{nm}: sibling checkout not found in {list(siblings_roots)} for Windows zero-popup verification")  # noqa: E702
         return r
-    if main_repo is not None and (main_repo / ".github/scripts").is_dir():
-        for py in sorted((main_repo / ".github/scripts").glob("*.py")):
-            cnw, wk, sp, ug, bf, _, _ = _inspect_python_ast(py); rel = py.relative_to(main_repo).as_posix(); errors.extend(f"mindie-agent: {rel} {b}" for b in bf)  # noqa: E702
+    if main_repo is not None:
+        scan = list(sorted((main_repo / ".github/scripts").glob("*.py")))
+        if (main_repo / "install.py").is_file():
+            scan.append(main_repo / "install.py")
+        for py in scan:
+            cnw, wk, sp, ug, bf, _, _, _ = _inspect_python_ast(py); rel = py.relative_to(main_repo).as_posix(); errors.extend(f"mindie-agent: {rel} {b}" for b in bf)  # noqa: E702
             if sp and (ug or not (cnw or wk)):
                 errors.append(f"mindie-agent: {rel} spawns subprocesses without CREATE_NO_WINDOW (lines {ug or sp}; Windows console popup risk)")
     req_mjs: dict[str, set[str]] = {}
@@ -175,26 +183,39 @@ def verify_windows_windowless_spawns(siblings_roots: Sequence[Path], *, main_rep
         cands = spec[1] if any_mode else ((spec,) if isinstance(spec, str) else spec)  # type: ignore[index]
         if not (pres := [rel for rel in cands if (r / rel).is_file()]):
             errors.append(f"{repo}: missing expected subprocess wrapper {cands[0] if len(cands) == 1 else 'one of ' + ', '.join(cands)}"); continue  # noqa: E702
-        pcnw, pwk, _, _, pbf, _, _ = _inspect_python_ast(r / pres[0]); errors.extend(f"{repo}: {pres[0]} {b}" for b in pbf)  # noqa: E702
+        if any_mode:
+            satisfied = False
+            for rel in pres:
+                pcnw, pwk, psp, pug, pbf, _, _, pdh = _inspect_python_ast(r / rel); errors.extend(f"{repo}: {rel} {b}" for b in pbf)  # noqa: E702
+                if psp and (pug or not (pcnw or pwk)):
+                    errors.append(f"{repo}: {rel} spawns subprocesses without subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
+                satisfied = satisfied or pcnw or pwk or (not psp and pdh)
+            if not satisfied:
+                errors.append(f"{repo}: none of {', '.join(pres)} enforces subprocess.CREATE_NO_WINDOW or delegates to mindie_harness (missing subprocess.CREATE_NO_WINDOW; Windows console popup risk)")
+            continue
+        pcnw, pwk, _, _, pbf, _, _, _ = _inspect_python_ast(r / pres[0]); errors.extend(f"{repo}: {pres[0]} {b}" for b in pbf)  # noqa: E702
         if not (pcnw or pwk):
             errors.append(f"{repo}: {pres[0]} missing subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
-        for sec in ([] if any_mode else pres[1:]):
-            scnw, swk, ssp, sug, sbf, simp, scall = _inspect_python_ast(r / sec); errors.extend(f"{repo}: {sec} {b}" for b in sbf)  # noqa: E702
+        for sec in pres[1:]:
+            scnw, swk, ssp, sug, sbf, simp, scall, _ = _inspect_python_ast(r / sec); errors.extend(f"{repo}: {sec} {b}" for b in sbf)  # noqa: E702
             if ssp and (sug or not (scnw or swk)):
                 errors.append(f"{repo}: {sec} spawns subprocesses without subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
             elif not (scnw or swk or (not ssp and bool(simp.get(Path(pres[0]).stem, set()) & scall))):
                 errors.append(f"{repo}: {sec} neither enforces subprocess.CREATE_NO_WINDOW nor delegates to {pres[0]} (Windows console popup risk)")
     for repo, rel in WINDOWS_NO_WINDOW_COMPANION_FILES:
         if (r := _find(repo)) is not None and (r / rel).is_file():
-            ccnw, cwk, _, _, cbf, _, _ = _inspect_python_ast(r / rel); errors.extend(f"{repo}: {rel} {b}" for b in cbf)  # noqa: E702
+            ccnw, cwk, _, _, cbf, _, _, _ = _inspect_python_ast(r / rel); errors.extend(f"{repo}: {rel} {b}" for b in cbf)  # noqa: E702
             if not (ccnw or cwk):
                 errors.append(f"{repo}: {rel} missing subprocess.CREATE_NO_WINDOW (Windows console popup risk)")
     for repo, scope in _FLAG_SCOPES:
         if (r := _need(repo) if repo in {"harness", "debugger", "npu-top"} else _find(repo)) is not None and (r / scope).is_dir():
+            thin_floor = THIN_HOST_PLUGIN_FLOOR_VERSIONS.get(repo)
+            ver = _parse_repo_semver(r) if thin_floor is not None else None
+            enforce_all = repo in {"harness", "debugger", "npu-top"} or (thin_floor is not None and ver is not None and ver >= thin_floor)
             for dp, dns, fns in os.walk(r / scope):
                 dns[:] = sorted(d for d in dns if d not in NODE_SKIP_DIRS and d != "__pycache__" and not d.startswith("."))
                 for fn in sorted(f for f in fns if f.endswith(".py")):
-                    cnw, wk, sp, ug, bf, _, _ = _inspect_python_ast(py := Path(dp) / fn); rel = py.relative_to(r).as_posix(); errors.extend(f"{repo}: {rel} {b}" for b in bf)  # noqa: E702
-                    if repo in {"harness", "debugger", "npu-top"} and fn != "posix.py" and sp and (ug or not (cnw or wk)):
+                    cnw, wk, sp, ug, bf, _, _, _ = _inspect_python_ast(py := Path(dp) / fn); rel = py.relative_to(r).as_posix(); errors.extend(f"{repo}: {rel} {b}" for b in bf)  # noqa: E702
+                    if enforce_all and fn != "posix.py" and sp and (ug or not (cnw or wk)):
                         errors.append(f"{repo}: {rel} spawns subprocesses without CREATE_NO_WINDOW (Windows console popup risk)")
     return list(dict.fromkeys(errors))

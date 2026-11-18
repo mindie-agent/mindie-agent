@@ -23,11 +23,31 @@
 1. **本地有界结构化日志（默认开启）**：
    - 各组件在实际操作边界记录结构化本地日志。一旦工具执行失败，返回结果会附带一个随机诊断关联编号（Diagnostic ID）、静态错误类别和恢复提示，同时完整保留原始错误码与清理结果。
 2. **知识共享与故障上报共用唯一贡献开关**：
-   - 首次引导与配置入口同时说明两项出站行为：在已授权项目范围内贡献脱敏知识包，以及向产品仓库自动上报白名单内的工具故障元数据。**该开关默认关闭，仅在用户显式开启后生效**。
+   - 首次引导与配置入口同时说明两项出站行为：在已授权项目范围内贡献脱敏知识包，以及向产品仓库自动上报白名单内的工具故障元数据。**该开关默认关闭，仅在用户显式开启后生效**；只有 `contribute` 模式会外发，`local-only`（本地私有沉淀）与 `read-only`（仅只读检索）**零外网上传**，完全不需要 `gh`。
    - 当前安装配置目录中的 `mindie-consent.json` 是贡献授权的唯一权威来源。诊断上报配置文件保存目标仓库、日志根目录及对该授权文件的引用；故障记录、队列消费与最终外发均校验同一选择（`choice`）与授权修订号（`choice_revision`）。
    - **三态明确区分与 Scale-to-Zero 按需排空**：系统严格区分“配置已写入”、“按需 reporter 排空任务已触发”与“外部 GitHub Issue 已创建”三个状态。日常无待发故障时**零常驻空闲后台守护进程**（Scale-to-Zero）；仅当新增可上报故障入队或显式开启/刷新配置时按需拉起短期排空 Worker 处理完毕即退出，且在运行时代际升级时**先安全退役上报服务，再回收旧 `.venv` 目录**。关闭开关后，两条出站链路立即停止发送，本地诊断日志与查询保持可用。
    - **升级不自动扩大授权**：已有安装中的 `disabled`、`later` 或 `read-only` 状态在升级后保持关闭；旧版仅针对知识贡献开启的 `contribute` 配置若缺少统一授权修订号，在升级后**不会**自动获得故障上报权限，需由用户通过统一贡献入口显式确认开启一次。
-   - **复用已认证的 `gh` 通道**：自动上报复用安装时已验证的 GitHub CLI（`gh`）。插件打包的 `knowledge`、`remote-dev` 与后台 reporter 服务共享同一配置路径下的诊断状态；独立部署的 `remote-dev` 则沿用其显式配置的上报策略。
+   - **`gh` 仅服务于 `contribute` 出站**：自动上报仅在 `contribute` 模式下复用已认证的 GitHub CLI（`gh`）；`local-only` / `read-only` 下即使 `gh` 缺失或未登录也完全健康，不会产生任何出站请求。插件打包的 `knowledge`、`remote-dev` 与后台 reporter 服务共享同一配置路径下的诊断状态；独立部署的 `remote-dev` 则沿用其显式配置的上报策略。
+
+---
+
+## 2.1 统一只读健康自检（`mindie_doctor` / `mindie-doctor/1`）
+
+`mindie_doctor` 以**同一份 `mindie-doctor/1` 契约**暴露在三个入口，保证 Agent 与人类看到完全一致的事实：
+
+- **组件 CLI**：`mindie-diagnostics doctor`；
+- **共享底座 CLI**：`mindie-harness doctor`；
+- **7 大宿主 MCP 工具**：`mindie_doctor`（`readOnlyHint=True`，不修改任何持久状态）。
+
+**超时预算（严格外层 ≥ 内层之和）**：
+
+| 模式 | 预算 | 组成 |
+| --- | --- | --- |
+| 本地检查（默认） | `5s` | 读取运行时代际、隐私模式、`gh` 通道与默认远端配置 |
+| 远端探针（`probe_remote=True`） | `15s` | `5s` 本地 + `8s` 远端 NPU 连通探针 + `2s` 结果汇总清理 |
+
+- **空安装零副作用**：只读检查**不创建目录、不创建/初始化 SQLite、不写 WAL**；不存在的状态一律如实报告为未初始化，绝不为满足健康检查而冷启动采集或写库。
+- **`gh` 状态分级**：当隐私模式为 `local-only` 或 `read-only` 时，`gh` 缺失/未登录统一报告为 `"optional_unconfigured"`；该状态与真实探针错误（DNS/TLS/超时/权限）严格区分，**绝不计为不健康**。只有 `contribute` 模式下才把 `gh` 未认证视为需要处理的出站阻塞。
 
 ---
 
@@ -63,6 +83,8 @@
 
 `diagnostics` 为更新器提供统一的 `category="update"` 记录入口，同时支持跨组件 `category="contract_violation"` 确定性契约探针：根据异常类型、结构化 `error_code`/`reason_code`、契约名称（`contract_name`）和保留的异常原因分类，不分析异常自由文本。模块缺失、包内容或协议异常、以及自有权威状态损坏（如 `knowledge` 权威 SQLite 表结构损坏、`coordinator` `machines.json` 契约损坏、`remote-dev` 状态记录损坏、`debugger` 分诊输出契约异常）属于产品故障；网络、凭据、权限、取消和本地前置条件问题保留本地可见。
 
+**后台更新的瞬时故障严格 `reportable=False`**：传输抖动、DNS/TLS 失败、HTTP `429-5xx`、`uv`/解包错误、磁盘空间下限不足与锁竞争等瞬时环境故障只写入本地更新状态并进入本地 `1h -> 6h` 指数退避，**绝不创建 GitHub Issue**，当前活动代继续提供服务；只有真实内部缺陷、协议/契约损坏与安装包缺失才会进入上报队列。
+
 七端插件（`mindie-agent-codex`、`-cc`、`-kimi`、`-dsh`、`-agy`、`-wb`、`-oc`）均已统一接入，覆盖组件继承子进程启动失败、更新子进程崩溃以及自有组件 CLI（`profiler` / `sim` / `coordinator` / `debugger` / `npu-top`）进程级异常退出网关；子组件进程内已记录的故障通过一次性调用令牌核验并直接复用，避免重复记录。
 
 本地快速排障链路支持一步到位：
@@ -88,6 +110,7 @@
 为了防止同一个根因在日常小版本迭代中反复新建重复 Issue，同时不错过新版本中的真实复现或关闭后回归：
 
 1. **主仓统一投放 + 双层指纹去重（`fingerprint` vs `fault_signature`）**：
+   - **外发严格限定 `contribute` 模式**：所有出站 Issue 只在 `contribute` 下产生；`local-only` 与 `read-only` 永不向 GitHub 写入任何内容，队列只保留本地证据。
    - 所有自动诊断 Issue 统一投放在主仓 **`mindie-agent/mindie-agent`**，并在正文 Triage Card v2 中生成指向所属组件/插件仓库精确 Commit 的源码链接。
    - **构建级指纹（`fingerprint`）**：包含 `package_version` / `package_revision`，用于在本地 `Outbox` 合并同一构建下的重复触发。
    - **跨版本根因签名（`fault_signature`，`<!-- mindie-fault:<sha256> -->`）**：与版本号及代码行微调解耦，仅由 `(component, operation, stage, substage, category, error_code, reason_code, contract_name, error_type, 最内层自有栈帧 module + function)` 计算生成。

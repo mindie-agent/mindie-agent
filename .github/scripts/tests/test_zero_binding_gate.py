@@ -31,6 +31,21 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 import zero_binding_gate as zgate  # noqa: E402
 
+_LEGACY_MCP_FILES: dict[str, tuple[str, ...]] = {
+    "mindie-agent-codex": (
+        "plugins/mindie-agent/scripts/mcp_identity.py",
+        "plugins/mindie-agent/scripts/mcp_transport.py",
+        "plugins/mindie-agent/scripts/mcp_gate.py",
+    ),
+    "mindie-agent-cc": ("scripts/mcp_server.py",),
+    "mindie-agent-kimi": ("scripts/mcp_server.py",),
+    "mindie-agent-agy": ("plugins/mindie-agent/scripts/mcp_server.py",),
+    "mindie-agent-wb": ("plugins/mindie-agent/scripts/mcp_server.py",),
+    "mindie-agent-dsh": ("scripts/component_mcp.py", "scripts/knowledge_mcp.py"),
+    "mindie-agent-oc": ("plugins/mindie-agent/scripts/mcp_server.py",),
+}
+_THIN_STUB = "from mindie_harness.cli import main\n\nif __name__ == '__main__':\n    raise SystemExit(main())\n"
+
 
 class ZeroBindingGateTests(unittest.TestCase):
     """Enforces Iron Rule 5 & silent default-on across harness, coordinator, and all 7 host plugins."""
@@ -73,6 +88,8 @@ class ZeroBindingGateTests(unittest.TestCase):
         self._write(
             "mindie-agent-codex",
             "plugins/mindie-agent/scripts/mcp_identity.py",
+            "def native_identity(meta):\n    return None\n\n"
+            "def native_turn_identity(meta):\n    return None\n\n"
             "def optional_native_identity(meta):\n    return None\n\n"
             "def optional_turn_identity(meta):\n    return None\n",
         )
@@ -376,6 +393,48 @@ class ZeroBindingGateTests(unittest.TestCase):
             "from mindie_harness.mcp_gateway import dispatch\n\ndef main():\n    return dispatch('remote', 'ping', {})\n",
         )
         self.assertEqual(zgate.verify_zero_session_binding_gates([self.root], require_siblings=True), [])
+
+    def test_all_seven_plugins_pass_when_legacy_mcp_files_are_deleted(self) -> None:
+        for repo, rels in _LEGACY_MCP_FILES.items():
+            for rel in rels:
+                (self.root / repo / rel).unlink(missing_ok=True)
+            self._write(repo, f"{Path(rels[0]).parent.as_posix()}/hook_launcher.py", "from mindie_harness.cli import main\n")
+        self.assertEqual(zgate.verify_zero_session_binding_gates([self.root], require_siblings=True), [])
+
+    def test_all_seven_plugins_pass_with_thin_forwarding_stubs(self) -> None:
+        for repo, rels in _LEGACY_MCP_FILES.items():
+            for rel in rels:
+                if repo == "mindie-agent-codex" and not rel.endswith("mcp_gate.py"):
+                    (self.root / repo / rel).unlink(missing_ok=True)
+                else:
+                    self._write(repo, rel, _THIN_STUB)
+        self.assertEqual(zgate.verify_zero_session_binding_gates([self.root], require_siblings=True), [])
+
+    def test_thin_stubs_without_harness_delegation_fail_for_every_plugin(self) -> None:
+        for repo, rels in _LEGACY_MCP_FILES.items():
+            rel = next((item for item in rels if item.endswith("mcp_gate.py")), rels[0])
+            self._write(repo, rel, "def main():\n    return None\n")
+        errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
+        for repo in _LEGACY_MCP_FILES:
+            self.assertTrue(any(repo in error for error in errors), (repo, errors))
+
+    def test_thin_stubs_with_binding_gate_symbols_fail_even_when_delegating(self) -> None:
+        self._write(
+            "mindie-agent-cc", "scripts/mcp_server.py",
+            "from mindie_harness.cli import main\nVALUE = native_turn_identity\n",
+        )
+        self._write(
+            "mindie-agent-codex", "plugins/mindie-agent/scripts/mcp_gate.py",
+            "from mindie_harness.cli import main\n\ndef helper():\n    return require_nonce('x')\n",
+        )
+        self._write(
+            "mindie-agent-oc", "plugins/mindie-agent/scripts/mcp_server.py",
+            "from mindie_harness.cli import main\n\ndef helper():\n    return claim_bind('id', 'tool', {})\n",
+        )
+        errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
+        self.assertTrue(any("mindie-agent-cc" in error and "native_turn_identity" in error for error in errors), errors)
+        self.assertTrue(any("mindie-agent-codex" in error and "require_nonce" in error for error in errors), errors)
+        self.assertTrue(any("mindie-agent-oc" in error and "claim_bind" in error for error in errors), errors)
 
 
 if __name__ == "__main__":

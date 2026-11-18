@@ -2,7 +2,7 @@
 
 [English](release-compatibility-and-update.en.md) · [返回文档中心](README.md)
 
-本文说明 MindIE Agent 的双层版本演进架构（特性里程碑与主仓产品组合清单 `channels/0.1.json`）、组件与插件配套发布门禁、宿主 CLI 兼容性筛选规则，以及共享运行时组件的独立正式 Release 发现、旁路隔离 `uv` 环境构建与空闲切换机制。
+本文说明 MindIE Agent 的双层版本演进架构（特性里程碑与主仓产品组合清单 `channels/0.1.json`）、组件与插件配套发布门禁、宿主 CLI 兼容性筛选规则，以及 `mindie-harness` 零 Git 预构建 wheelhouse 的静态清单发现、SHA-256 校验解包与 `Active + Rollback` 空闲切换机制。
 
 > **历史验收说明**：2026-10-29 的知识 P0 演进补齐了独立组件绑定的后台更新覆盖与版本下界保护（详见 [P0 验收记录](audits/2026-10-29-knowledge-p0.md)），配套正式版本与四端实装结果见 [0.1.4 发布记录](releases/0.1.4.md) 与 [自动升级验收回执](releases/0.1.4/automatic-update-acceptance.json)。所有升级验收均严格区分“源码合入”、“正式 Release 发布”与“既有安装运行态切换”三个阶段，直接回读真实运行解释器中的包版本、Commit SHA 与新进程加载的工具目录，绝不用未发布的开发提交或静态注册版本号充当运行态生效证据；实测暴露的 DSH 发布异常与 Kimi 组件回退亦完整保留原始记录，并将自动升级路径与一次性手动恢复分开列明。
 
@@ -20,7 +20,7 @@ MindIE Agent 采用 **`0.Y.0` 特性里程碑 + `0.Y.Z` 维护补丁/组件独�
 | --- | --- | --- | --- |
 | **特性里程碑（Milestone Release）** | `0.Y.0`（如 `0.1.0` → `0.2.0`） | 重大功能演进或跨组件协议升级；配套全量代码仓基准验证与主仓 [`channels/0.1.json`](../channels/0.1.json) 里程碑清单 | **是**（7 款宿主插件对齐升级至新的 `0.Y.0` 里程碑基线） |
 | **宿主插件版本选择（Plugin Release Selection）** | 7 款宿主插件仓正式 GitHub Release（`mindie-plugin-release.json`） | 客户端按本机宿主 CLI 版本与 `harness-compatibility.json` 直接从对应插件官方仓库筛选最高兼容正式版 | 按插件自身变更独立发版 |
-| **共享底座与组件独立更新（Independent Component Release Update）** | 9 个共享组件加评测组件的正式 GitHub Release（`harness`、`knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`npu-top`、`coordinator`、`mindie-bench`） | 客户端**直接读取各官方组件仓库的正式 GitHub Release**，在旁路独立 `uv` 环境中构建并通过 API 探针后等待空闲切换 | **否**（组件独立发版即可被发现，无需仅因单组件补丁连坐重发宿主插件） |
+| **共享底座与组件独立更新（Independent Component Release Update）** | 9 个共享组件加评测组件的正式 GitHub Release（`harness`、`knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`npu-top`、`coordinator`、`mindie-bench`） | 客户端从静态 CDN 的 `release-channel.json` 与 `SHA256SUMS` 发现更新，解包预构建 wheelhouse 并通过 API 探针后，以 `.inuse` 租约空闲切换（零 `git clone`） | **否**（组件独立发版即可被发现，无需仅因单组件补丁连坐重发宿主插件） |
 | **主仓发布通道清单（Product Channel Manifest）** | [`channels/0.1.json`](../channels/0.1.json)（`schema: "mindie-release-channel/1"`） | 记录主产品里程碑（`0.Y.0`）与维护补丁（`0.Y.Z`）经过验证的代码仓与 9 大知识语料库版本及不可变 Commit SHA 组合，供发布流水线门禁与审计溯源使用；**不作为客户端运行时更新的选择源** | 随主产品里程碑或维护补丁汇总更新 |
 
 ### 1. 主仓通道清单（`channels/0.1.json`）的定位与字段身份
@@ -30,32 +30,35 @@ MindIE Agent 采用 **`0.Y.0` 特性里程碑 + `0.Y.Z` 维护补丁/组件独�
 - **十二仓精确组件条目（`components`）与七大语料库快照（`corpora`）**：登记 `diagnostics`、`profiler`、`sim`、`npu-top`、`remote-dev`、`knowledge`、`coordinator`、四个宿主插件（`mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi`、`mindie-agent-dsh`）与 `mindie-bench` 的验证版本号（`version`）、GitHub 仓库（`repository`）、Release 标签（`tag`）与 40 位不可变提交哈希（`commit` / `revision`），主仓发布流水线（`collect_product_benchmarks.py`）强制核对 `channels/0.1.json` 与 `benchmark-manifest.json` 完全一致；
 - **策略元数据与实现边界说明（`update_policy`）**：清单保留 `independent_update_allowed`、`require_plugin_republish_on_component_patch` 与 `implementation_status`（`verified_mechanism` 与 `known_boundaries`），明确说明客户端不下载 `channels/0.1.json` 选择更新，且已移除早期无人消费的假想轮询间隔与 `< 500ms` 整包切换配置字段。客户端运行时的真实发现源、HTTP 缓存 TTL、触发周期与切换实现以各仓源码为准（见下文第 2–3 节）。
 
-### 2. 共享组件正式 Release 直接发现与多重校验（`component_releases.py`）
+### 2. 零 Git 预构建 Wheelhouse、单次静态清单发现与多重校验
 
-客户端更新器不读取 `channels/0.1.json` 选择运行时组件，而是通过 `mindie_knowledge.component_releases` 与 `runtime_inventory.py` 直接查询各官方组件仓库（`mindie-agent/{knowledge,remote-dev,diagnostics,debugger,profiler,sim,npu-top,coordinator,mindie-bench}`）：
+客户端更新器在用户机器上**绝不执行 `git clone`，也不使用 `git+https://` 构建**。共享运行时由 `mindie-harness` 的预构建 wheelhouse 流水线统一供给：
 
-1. **单调不降级版本选择（`component_releases.select`）**：
-   - 通过 `python -I runtime_inventory.py` 只读提取当前运行环境中各第一方组件的已安装版本与 `direct_url.json` 中的 40 位不可变 Commit SHA（不导入业务引擎）；
-   - 对每个已安装组件，取 **已安装版本（`installed`）、插件声明基线版本（`baseline`，来自 `pyproject.toml` 或 `runtime-requirements.txt`）与组件仓最新正式 Release 版本（`latest`）三者的最大值**；
-   - 绝不自动降级，且一旦发现相同版本号对应的源码 Commit SHA 发生漂移，立即抛出校验错误拒绝采用。
-2. **正式 Release 与基准报告逐项核验（`Catalog.latest`）**：
-   - **正式版过滤与资产完整性检查**：仅接受 `draft=false`、`prerelease=false` 且不含预发布/构建后缀的稳定 SemVer 标签；强制校验 Release 资产列表中同时包含对应版本的 `.whl`、`.tar.gz`（sdist）、`SHA256SUMS`、`benchmark-results.json`、`benchmark-results.md` 与 `benchmark-SHA256SUMS`（且文件大小均 `> 0`）。历史 0.1.1 验收中的 8 个运行时与评测组件（`knowledge 0.13.3`、`remote-dev 0.10.6`、`diagnostics 0.5.2`、`profiler 0.5.0`、`sim 0.7.1`、`npu-top 0.2.1`、`coordinator 0.6.3`、`mindie-bench 0.4.4`）的正式 Release 均满足完整资产门禁（而缺少 wheel/sdist 的旧版 `mindie-bench 0.4.2` 会被该门禁自动拒绝）。
-   - **不可变 Tag 对象解引用**：通过 `/git/ref/tags/<tag>`（含 Annotated Tag 逐层解引用至 `type == "commit"`）获取真实的 40 位源码 Commit SHA（`revision`），不盲信可能指向分支名的 `target_commitish`。
-   - **源码 `pyproject.toml` 一致性核对**：按解引用得到的精确 Commit SHA 读取源码中的 `pyproject.toml`，校验 Git blob SHA-1 摘要与字节长度，并确认 `project.name` 与 `project.version` 与 Release Tag 完全一致。
-   - **基准门禁报告下载与 SHA256 校验**：实际下载 `SHA256SUMS` 与 `benchmark-results.json`，校验 `SHA256SUMS` 覆盖 wheel、sdist 与基准报告文件，核对 `benchmark-results.json` 的真实 SHA256 摘要，并确认报告内 `release_gate is True`、`version` 一致且测量前后工作区状态（`source` 与 `source_after`）均为同一 `revision` 且 `dirty is False`。
-   - **精确 Git SHA 安装边界**：组件运行时安装直接锁定经过上述校验的**精确 Git Commit SHA**（`git+https://github.com/mindie-agent/<repo>@<revision>`），在隔离环境中生成完整 `uv.lock`（并不宣称在客户端下载并逐字节校验全部 wheel/sdist 归档文件）。
+1. **单次静态 CDN 清单检查（`release-channel.json`）**：
+   - 后台更新只对静态 CDN 上的 `release-channel.json` 发起一次普通 HTTPS GET，命中后本地缓存 `6h`；同一窗口内不重复请求，且**完全不消耗 `api.github.com` 配额**（无 Token、无分页、无 Release API 扫描）。
+   - 清单只声明版本、精确 Commit SHA 与资产相对路径，客户端据此直接定位资产，不做动态协商。
+2. **SHA-256 校验的 `< 3 MB` 预构建包（`mindie-wheels-bundle.tar.gz`）**：
+   - 默认下载 `< 3 MB` 的 `mindie-wheels-bundle.tar.gz`，与同目录 `SHA256SUMS` 逐项核对通过后才解包；校验失败绝不触碰当前运行代。
+   - 单组件热修复按需发现各组件 `.whl` + `SHA256SUMS`，无需等待整包重建，也无需回到 Git 源码构建。
+3. **单命令 `install.py` bootstrap**：首次安装与修复升级共用同一条 `install.py` 入口，先预置共享 `mindie-harness` 运行时，再由 7 大宿主重复使用同一份底座。
+4. **`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换**：解包后的候选代先登记 `.inuse` 租约，指针切换通过 `os.replace` 原子发布；退役旧代前确认无在途租约，任何时刻最多保留 `Active + Rollback` 两代。
 
-### 3. 公共元数据 `ETag`/TTL 缓存与各宿主实际触发周期
+> **历史说明**：早期实现通过 `mindie_knowledge.component_releases` 直接查询各组件 GitHub Release，并以精确 Git SHA（`git+https://github.com/mindie-agent/<repo>@<revision>`）在旁路 `uv` 环境中构建。该路径已被上述零 Git 预构建 wheelhouse 取代；其历史验收记录完整保留在文末对应日期小节中。
 
-1. **有界公共 Release 元数据缓存（`release_http.py` / `releases_io.py`）**：
-   - 插件与组件更新器共享 `mindie_knowledge.release_http.read`（默认缓存目录 `~/.cache/mindie-agent/releases` 或 `MINDIE_RELEASE_CACHE`，上限 `128` 个条目、`64 MiB`，单次响应上限在组件目录读取为 `2 MiB`、插件元数据为 `1 MiB`、Release 分页为 `8 MiB`），仅允许访问 `github.com`、`api.github.com` 与 `release-assets.githubusercontent.com` 官方 HTTPS 源。
-   - 缓存保存公共响应体与公开响应头（`ETag`、`Link`、`Content-Length`、`Content-Type`、`Last-Modified`）：对不可变路径（`/git/`、`/contents/`、`/releases/download/`）采用 `86400s`（24 小时）TTL；对可变 Release 列表/最新接口采用 `300s`（有 GitHub Token 时）或 `900s`（无 Token 时）TTL，并在缓存过期后携带 `If-None-Match` 发起条件请求（命中 `304 Not Modified` 时直接复用本地响应体）。
-   - **离线与故障显式可见**：过期的缓存条目绝不会掩盖网络读取失败；断网、超时或超限响应会显式返回失败状态（如 `ReleaseFetchError` / `TimeoutError`），不会伪装成“无更新”静默成功。
-2. **四个宿主插件的实际触发器与冷却周期**：
+### 3. 静态 CDN `6h` 缓存与各宿主实际触发周期
+
+1. **单次静态 CDN 检查与 `6h` 本地缓存**：
+   - 后台更新只读取一次静态 CDN 上的 `release-channel.json`，成功结果按 `6h` 缓存；同一窗口内零重复请求、零 `api.github.com` 配额消耗，日常工具调用与短时 Hook 仅检查本地时间戳，零前台网络阻塞。
+   - **组件热修复的资产缓存（`release_http.py` / `releases_io.py`）**：仅在需要发现单组件 `.whl` 热修复时，才复用有界资产缓存（默认缓存目录 `~/.cache/mindie-agent/releases` 或 `MINDIE_RELEASE_CACHE`，上限 `128` 个条目、`64 MiB`，单次响应上限 `2 MiB`），缓存保存资产字节与 `ETag` / `Content-Length` 等公开响应头；不可变资产路径采用 `86400s` TTL，并在过期后携带 `If-None-Match` 发起条件请求（`304 Not Modified` 时直接复用本地字节）。
+   - **离线与故障显式可见**：过期的缓存条目绝不会掩盖网络读取失败；断网、超时、TLS 或超限响应会显式返回失败状态（如 `ReleaseFetchError` / `TimeoutError`），不会伪装成“无更新”静默成功。
+2. **四个宿主插件的实际触发器与冷却周期**（触发周期只决定是否检查本地清单缓存，真正的 CDN 请求由 `6h` TTL 节流）：
    - **OpenAI Codex CLI（`update_trigger.py` / `harness_update.py`）与 Claude Code（`release_update.py`）**：复用常驻 MCP 服务进程内的可取消后台维护线程（`mindie-release-check`）异步触发（不拉起独立知识守护进程），日常工具调用仅检查内存/本地时间戳，零前台网络阻塞；成功检查后的常规冷却周期为 `CHECK_INTERVAL = 300s`（5 分钟），失败退避为 `FAILURE_BACKOFF = 60s`，待激活候选重试间隔为 `ACTIVATION_BACKOFF = 5s`。
    - **Kimi Code（`updater.py` / `updater_check.py` / `updater_schedule.py`）**：通过系统定时任务（macOS `launchd` `agent.mindie.kimi-update` 或 Windows 计划任务 `MindIEKimiUpdate`，默认 `INTERVAL_SECONDS = 300s` / 5 分钟，单次检查预算 `CHECK_BUDGET = 1200.0s`）在后台独立运行 `updater check` 并切换 `current.json`（仅组件更新时 `update_native=False`）；失败后按指数退避（`300s` 起，最高 `6 小时`）推迟 `next_retry_at`。
    - **DeepSeek Harness（`host.mjs` / `updater.py`）**：在插件加载 `30s` 后及随后每隔 `interval_minutes`（默认 `5` 分钟），当检测当前无 `running` 状态的 Agent 会话时，在后台启动分离的 `updater.py check --silent` 子进程；`host.mjs` 的 `entryFor()` 优先读取 `paths.configFile`（`config.json`）中的 `package_dir` 作为权威适配器绑定（`current.json` 仅在无该字段的 legacy seed 情形下作兼容回退），并同代挂载 `./host3.mjs` 与 `remote-dev`。
-3. **公共知识流按需同步与后台版本检查严格解耦**：
+3. **瞬时故障严格 `reportable=False` 与本地指数退避**：
+   - 传输层抖动、DNS/TLS 失败、HTTP `429-5xx`、`uv`/解包错误、磁盘空间下限不足与锁竞争等**瞬时环境故障**，在后台更新路径中一律标记 `reportable=False`：只写入本地更新状态文件并进入本地 `1h -> 6h` 指数退避，**绝不创建 GitHub Issue**，也绝不让当前活动代停止服务。
+   - 只有真实的内部缺陷、协议/契约损坏与安装包缺失等产品故障才进入诊断上报队列；即使上报，也严格受 `contribute` 模式约束（详见[诊断日志与故障上报](diagnostics-and-reporting.md)）。
+4. **公共知识流按需同步与后台版本检查严格解耦**：
    - 昇腾公共知识语料库（`knowledge-*`）的拉取与热加载仅在遇到昇腾领域检索或同步调用时按需执行；**后台软件更新检查与组件环境构建绝不会主动启动知识 Worker、触发对话采集或发起知识语料同步**。
 
 ---
@@ -109,7 +112,7 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
 - [ ] **`R1. Channel Schema & Release Track`**：校验 `channels/0.1.json` 结构完整性、内部描述字段（`known_boundaries`、`patch_releases[-1]`）与当前版本说明（`docs/releases/<patch>.md` 及 `.en.md` 十三仓版本与 SHA 表）的一致性，并区分独立组件灵活发版（`flexible-component-update`）与插件锁步发版（`strict-lockstep`）；
 - [ ] **`R2. Knowledge Corpus Monotonic Revisions & Validator Floor`**：校验 7 个 `knowledge-*` 语料仓自上一通道版本以来所有内容变更单元的 `revision` 严格递增、`publication-contract.json` 的 `validator.revision <= channel knowledge version`，且插件 `verified_commit` 为通道语料 Commit 的合法祖先；
 - [ ] **`R3. Component & Plugin Tag/Commit/Release Integrity`**：校验历史通道及当前插件依赖的正式 Tag、源码和资产；开启远端校验时，使用生产客户端进一步验证全部共享与评测组件的实际最新正式 Release；
-- [ ] **`R4. Seven-Host Cross-Version Component Compatibility, Windows Zero-Popup & Bounded Storage Lifecycle`**：通过最新 `mindie-knowledge` 跨版本接口校验；组件 pin 的正式发布与产品组合范围由 R3 检查。全量宿主插件与共享组件同时满足 Windows 零控制台弹窗契约（`windows_zero_popup_gate.py`：Node.js `windowsHide: true` + Python `CREATE_NO_WINDOW`）与有界存储生命周期及零无主临时目录契约（`storage_lifecycle_gate.py`：`Active + Rollback` 存储 GC 接线、`mkstemp`/`mkdtemp` 清理归属、Windows 禁裸 `os.kill(pid, 0)` 及测试沙箱隔离）；
+- [ ] **`R4. Seven-Host Cross-Version Component Compatibility, Windows Zero-Popup, Zero-Binding & Bounded Storage Lifecycle`**：通过最新 `mindie-knowledge` 跨版本接口校验；组件 pin 的正式发布与产品组合范围由 R3 检查。全量宿主插件与共享组件同时满足 Windows 零控制台弹窗契约（`windows_zero_popup_gate.py`：Node.js `windowsHide: true` + Python `CREATE_NO_WINDOW`）、零前置会话绑定契约（`zero_binding_gate.py`：标准 `tools/call` 零 `_meta`/Nonce/`context_file` 直通）、**薄宿主插件 `<= 1,200` 行 LOC 静态门禁**（`storage_lifecycle_gate.py`）与有界存储生命周期及零无主临时目录契约（`storage_lifecycle_gate.py`：`Active + Rollback` 存储 GC 接线、`mkstemp`/`mkdtemp` 清理归属、Windows 禁裸 `os.kill(pid, 0)` 及测试沙箱隔离）；
 - [ ] **`R5. Local Active Host CLI Compatibility Coverage`**：自动探测本机已安装的 `codex`（含 `CODEX_APP_RUNTIME_CLI_PATH` 指向的当前桌面内核及安装配置 `native_context` 保存的二进制）、`claude`、`kimi` 版本，确认均被对应插件的 `harness-compatibility.json` 覆盖（杜绝宿主自动升级后报 `"no_compatible_release"`）；
 - [ ] **`R6. Scoped Release Documentation & Unix LF Hygiene`**：默认 independent，只校验 `--release-repo` 所选仓自身源码版本、README 徽章、wheel 链接和 LF，不读取其他仓 README 来要求同步。显式 product 才检查主仓通道内部字段、发行说明、版本表和全部组合仓 README 的一致性，并按产品发布流程同步组织首页。组件仓发布流水线继续要求自身徽章、wheel 链接和 Tag 版本一致；独立发布不因此触发产品全量同步。
 
@@ -162,39 +165,42 @@ python3 .github/scripts/sync_org_versions.py --release-scope product --write --o
    - 发布前按上面的 independent/product 命令选择文档范围，再执行 `--require-siblings --verify-local-hosts`（正式发布加 `--verify-github-releases`）。主仓 PR CI 对通道、产品版本表、产品发行输入及门禁/同步实现的变更显式检查 product 范围；检查路径与同步器共用同一份受管文档清单。其他改动执行 LF、发布范围回归和 PR 自查；这不要求独立组件另提主仓 PR。其余门禁继续覆盖以下维度：
      - **知识库语义版本单调性**：`mindie-knowledge` 的 `build_routing_index()` 在重建 `index/routing-manifest.json` 时自动将内容变更单元的 `revision` 递增 1，`publication_check.py` 在 `validate(..., base_revision=...)` 中强制拦截任何修改 `content_sha256` 却未推进 `revision` 的提交，且发版前脚本扫描全部 7 个 `knowledge-*` 仓库历史通道提交至 `HEAD` 的单调性及 `publication-contract.json` 的 `validator.revision` 对齐情况（允许 `validator.revision <= channel knowledge version`）；
      - **灵活组件独立升级下界校验（默认 `flexible-component-update` 模式）与锁步发版校验（`--strict-lockstep` 模式）**：
-       - **日常独立组件/语料发版（无需重发 5 款宿主插件）**：默认 independent 模式下，`check_auto_update_readiness.py` 校验宿主插件锁定的每个组件 SHA 均对应官方组件仓库的正式 Release Tag；开启远端核验时还检查实际依赖的正式 Release 与校验资产。历史 channel 不作为独立依赖版本上限；product 范围仍要求 `plugin_baseline_version <= channel_component_version`。同时校验 `product-contract.json` 的 `verified_commit` 是通道语料提交的合法祖先，并执行跨版本 API 兼容性检查（`verify_flexible_component_compatibility`）。单独发布共享组件（如 `knowledge`、`remote-dev`、`diagnostics`、`coordinator`、`profiler`、`sim`、`npu-top`）或推送 `knowledge-*` 语料时，无需重发宿主插件；已安装宿主通过各自的 `component_update.py`（`mindie_knowledge.component_runtime.discover` + `build`）独立发现并原子切换至最新组件正式版。原生工具目录或宿主代码变更仍需配套插件版本；
+       - **日常独立组件/语料发版（无需重发 5 款宿主插件）**：默认 independent 模式下，`check_auto_update_readiness.py` 校验宿主插件锁定的每个组件 SHA 均对应官方组件仓库的正式 Release Tag；开启远端核验时还检查实际依赖的正式 Release 与校验资产。历史 channel 不作为独立依赖版本上限；product 范围仍要求 `plugin_baseline_version <= channel_component_version`。同时校验 `product-contract.json` 的 `verified_commit` 是通道语料提交的合法祖先，并执行跨版本 API 兼容性检查（`verify_flexible_component_compatibility`）。单独发布共享组件（如 `knowledge`、`remote-dev`、`diagnostics`、`coordinator`、`profiler`、`sim`、`npu-top`）或推送 `knowledge-*` 语料时，无需重发宿主插件；已安装宿主通过各自的 `component_update.py` 从静态清单发现的预构建 wheelhouse 独立切换至最新组件正式版（零 `git clone`、零 `git+https://`）。原生工具目录或宿主代码变更仍需配套插件版本；
        - **插件同步重发（`--strict-lockstep`）**：当插件自身适配器代码、MCP Schema 或 `harness-compatibility.json` 发生变更需要重发插件时，传入 `--strict-lockstep` 额外强制插件源码基线 SHA 与通道最新版本完全相等；
      - **已验证宿主基线与本机活跃宿主 CLI 兼容覆盖率**：R4 同时保留最低验收版本（Codex `0.153.4`、`0.162.0-alpha.2`、`0.162.0-alpha.17.2`）与未来版本探针，防止只检查前向升级却漏掉较早的桌面内核。R5 自动探测本机已安装的 `codex`（含当前 `CODEX_APP_RUNTIME_CLI_PATH` 与保存的 `native_context`）、`claude`、`kimi` 等宿主版本，校验其均处于对应插件 `harness-compatibility.json` 的声明支持区间内，防止出现 `"no_compatible_release"`。
 
 ---
 
-## 旁路隔离环境构建、API 探针与空闲切换流程
+## 预构建 Wheelhouse 解包、API 探针与空闲切换流程
 
-不同于在活动虚拟环境中原地执行单包替换，MindIE Agent 的插件更新与共享组件更新均采用**旁路独立 Generation 构建 + 隔离进程探针校验 + 空闲服务退役 + 唯一指针文件原子替换（`os.replace`）**的四步安全流程：
+不同于在活动虚拟环境中原地执行单包替换，MindIE Agent 的插件更新与共享组件更新均采用**预构建 wheelhouse 解包 + 隔离进程探针校验 + `.inuse` 租约与空闲服务退役 + 唯一指针文件原子替换（`os.replace`）**的四步安全流程：
 
-- **日常调用零网络阻塞**：日常工具调用和短时 Hook 仅读取本地已激活绑定文件或检查时间戳，不在前台等待网络请求、扫描版本列表或运行 `uv` 构建。
-- **不主动拉起后台守护进程、不重置用户授权**：更新检查、旁路环境构建、API 探针与激活切换均在无模型（Model-Free）模式下运行，**绝不会主动启动知识后台服务或触发对话采集**，并完整保留用户已保存的知识贡献开关、项目范围与故障上报设置。
-- **失败可见与幂等复用**：若网络不可达、GitHub Release 资产不完整或探针校验失败，更新器将错误如实记录在本地更新状态文件（如 `status.json` / `release-update.json`）并进入退避窗口，绝不触碰当前正在运行的环境；同一组件组合（由插件源码摘要、目标组件修订集合与 Python/平台 ABI 共同计算的 `generation_key`）通过非阻塞 `prepare.lock` 去重，已完成校验的候选环境无需重复构建。
+- **零 Git、零源码构建**：用户机器只做「下载 → `SHA256SUMS` 校验 → 解包 → 探针 → 切换」，不执行 `git clone`、`git+https://` 或在线 `uv sync` 解析。
+- **日常调用零网络阻塞**：日常工具调用和短时 Hook 仅读取本地已激活绑定文件或检查时间戳，不在前台等待网络请求、扫描版本列表或解包构建。
+- **不主动拉起后台守护进程、不重置用户授权**：更新检查、wheelhouse 解包、API 探针与激活切换均在无模型（Model-Free）模式下运行，**绝不会主动启动知识后台服务或触发对话采集**，并完整保留用户已保存的隐私模式、项目范围与故障上报设置。
+- **失败可见、幂等复用与零 Issue 噪音**：若网络不可达、资产校验失败或探针不通过，更新器将错误如实记录在本地更新状态文件（如 `status.json` / `release-update.json`）并进入 `1h -> 6h` 退避窗口，绝不触碰当前正在运行的环境；同一组件组合（由插件源码摘要、目标组件修订集合与 Python/平台 ABI 共同计算的 `generation_key`）通过非阻塞 `prepare.lock` 去重，已校验的候选代无需重复解包。此类瞬时故障严格 `reportable=False`，不会创建 GitHub Issue。
 
 ### 四步安全准备与空闲切换流程
 
 ```mermaid
 flowchart LR
-    P["1. 旁路独立环境构建<br/>复制插件源码 -> 精确 Git SHA 锁定 -> uv sync 生成独立 .venv 与 uv.lock"] --> V["2. 隔离清单与 API 探针校验<br/>python -I runtime_inventory.py 核验 uv.lock 与 direct_url.json -> 原生无模型探针"]
-    V --> W["3. 排他锁与空闲服务退役<br/>获取排他更新锁 -> 有在途任务时推迟 (deferred) -> 空闲时退役旧服务"]
-    W --> S["4. 唯一绑定原子发布 (os.replace)<br/>原子替换配置文件指针 -> 后续调用自动解析新环境"]
+    P["1. 下载并校验预构建包<br/>单次静态 CDN 清单 -> SHA256SUMS 核对小于 3 MB 的 wheelhouse -> 解包到旁路 Generation"] --> V["2. 隔离清单与 API 探针校验<br/>python -I runtime_inventory.py 核验 components.json 与 wheel 摘要 -> 原生无模型探针"]
+    V --> W["3. .inuse 租约、排他锁与空闲服务退役<br/>登记 Active + Rollback 租约 -> 有在途任务时推迟 (deferred) -> 空闲时退役旧服务"]
+    W --> S["4. 唯一绑定原子发布 (os.replace)<br/>原子替换配置文件指针 -> 后续调用自动解析新代"]
 ```
 
-1. **旁路独立环境构建（`component_runtime.build`）**：
-   - 在活动环境之外创建独立的 Generation 目录（`component-runtimes/<generation_key>`），复制插件源码文件（上限 `16 MiB`），生成锁定目标组件精确 Git Commit SHA 的 `pyproject.toml`（通过 `[tool.uv] override-dependencies` 覆盖组件修订），并在有界超时预算（默认 `420s`）内执行 `uv sync --project <runtime> --no-editable --no-dev` 生成完整隔离 `.venv` 与 `uv.lock`，写入包含 `adapter_source_sha256`、`runtime` 与 `lock_sha256` 的 `components.json`（`schema: "mindie-component-runtime/1"`）。若准备失败，直接保留当前可用环境。
+1. **预构建 wheelhouse 解包到旁路 Generation（零 Git）**：
+   - 在活动环境之外创建独立的 Generation 目录（`component-runtimes/<generation_key>`），将已通过 `SHA256SUMS` 校验的 `mindie-wheels-bundle.tar.gz` 解包到该目录，只复制必要的插件适配源码（上限 `16 MiB`），写入包含 `adapter_source_sha256`、`bundle_sha256` 与 `runtime` 的 `components.json`（`schema: "mindie-component-runtime/1"`）。
+   - 全流程不执行 `git clone`、`git+https://` 或在线依赖解析；若下载、校验或解包失败，直接保留当前可用环境，并在本地状态文件记录失败原因。
 2. **隔离清单核验与原生 API 探针**：
-   - 在候选解释器中通过 `python -I runtime_inventory.py <components.json>` 校验 `uv.lock` 的 SHA256（`verify_lock`）以及每个第一方组件实际安装的 `direct_url.json` 提交哈希（`verify`），并核对保留的插件源码字节未被并发修改；
+   - 在候选解释器中通过 `python -I runtime_inventory.py <components.json>` 校验 wheel 摘要与每个第一方组件实际安装的版本/提交元数据，并核对保留的插件源码字节未被并发修改；
    - 随后执行宿主适配器的无模型候选校验与运行时 API 探针（如 `candidate_validate.py` / `runtime_probe.py`），在接触任何活动配置前确认新组件组合与当前插件脚本接口兼容。
-3. **等待服务空闲与有界退役**：
-   - 准备与探针全部通过后，激活器尝试获取宿主排他操作锁（`update_lock` / `OperationLock`），并检查当前知识服务与各领域 Worker 是否空闲（如 `retire_service` / `stop_if_idle`）。只要存在正在执行的工具调用、经验采集或索引任务，切换立即推迟（返回 `deferred` / `service_busy`），绝不强行中断在途任务；确认空闲后，在有界控制窗口（如 `30s`）内干净停止旧后台服务进程。
+3. **`.inuse` 租约、等待服务空闲与有界退役**：
+   - 准备与探针全部通过后，候选代先登记 `.inuse` 租约，再获取宿主排他操作锁（`update_lock` / `OperationLock`），并检查当前知识服务与各领域 Worker 是否空闲（如 `retire_service` / `stop_if_idle`）。只要存在正在执行的工具调用、经验采集或索引任务，切换立即推迟（返回 `deferred` / `service_busy`），绝不强行中断在途任务；确认空闲后，在有界控制窗口（如 `30s`）内干净停止旧后台服务进程。
+   - **`Active + Rollback`（`<= 2`）**：旧代只有在确认无任何 `.inuse` 租约后才允许回收到 `.trash/`；任意时刻最多同时存在 `Active + Rollback` 两代运行时。
 4. **唯一绑定指针原子发布（`os.replace`）**：
    - 旧服务确认退役（或原本未启动）后，激活器通过 `os.replace` 原子替换唯一安装绑定或当前 Generation 指针文件（如 `codex.json`、`cc.json` 或 `current.json`）。
-   - **耗时边界说明**：绑定切换阶段约 `10ms`（Codex `unavailable_seconds`）/ `15ms`（Claude Code `activate_binding.seconds`），不含前置构建，并由 `os.replace` 原子更新绑定配置；而包含前置旁路 `uv` 环境构建、隔离清单核验与候选 API 探针在内的完整流程运行在各自有界的秒级/分钟级超时预算内，**绝不将包含前置构建的全流程承诺为 `< 500ms`**。
+   - **耗时边界说明**：绑定切换阶段约 `10ms`（Codex `unavailable_seconds`）/ `15ms`（Claude Code `activate_binding.seconds`），不含前置下载与解包，并由 `os.replace` 原子更新绑定配置；而包含前置 wheelhouse 下载、`SHA256SUMS` 校验、解包与候选 API 探针在内的完整流程运行在各自有界的秒级/分钟级超时预算内，**绝不将包含前置准备的全流程承诺为 `< 500ms`**。
 
 ### 2026-10-27 远端参数缺失与自纠正验收
 
