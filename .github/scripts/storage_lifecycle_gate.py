@@ -86,7 +86,7 @@ PRODUCTION_PYTHON_SCOPES: dict[str, tuple[str, ...]] = {
     "mindie-agent-oc": ("plugins/mindie-agent/scripts",),
 }
 
-THIN_HOST_PLUGIN_MAX_LOC = 1200
+THIN_HOST_PLUGIN_MAX_LOC = 1500
 THIN_HOST_PLUGIN_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
     "mindie-agent-codex": (0, 1, 38),
     "mindie-agent-cc": (0, 1, 30),

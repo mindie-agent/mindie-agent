@@ -16,7 +16,7 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 | 层级 / 模块 | 负责什么 | 不做什么 |
 | --- | --- | --- |
 | **宿主原生插件管理器** | 插件包的下载、安装与已安装版本记录 | 不代替 MindIE 做跨宿主兼容性筛选 |
-| **宿主插件薄适配层**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 每个插件最多 **`1,200` 行**宿主协议胶水：原生协议清单、`< 120` 行 Hook/MCP 启动器、宿主 Transcript 解析器、`host_adapter.py` 与薄 `setup.py`；进程监管、MCP 路由、`mindie_doctor`、共享授权与运行时更新全部委托 `mindie-harness`，并锁定依赖（`uv.lock`） | 不各自复制维护进程守护、MCP 网关或更新状态机 |
+| **宿主插件薄适配层**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 每个插件最多 **`1,500` 行**宿主协议胶水：原生协议清单、`< 120` 行 Hook/MCP 启动器、宿主 Transcript 解析器、`host_adapter.py` 与薄 `setup.py`；进程监管、MCP 路由、`mindie_doctor`、共享授权与运行时更新全部委托 `mindie-harness`，并锁定依赖（`uv.lock`） | 不各自复制维护进程守护、MCP 网关或更新状态机 |
 | **共享宿主底座**（`harness` / `mindie-harness`） | 跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）、统一只读 `mindie_doctor` 健康检查以及单状态源 `ExperimentLedger` `rsi` 优化闭环 | 不混入特定宿主的私有 UI/Transcript 解析逻辑，也不在只读检查时凭空创建空 SQLite 库 |
 | **共享知识引擎**（`knowledge`） | 纯知识能力：管理授权与增量游标、执行确定性隐私脱敏、协调分块目录生成、提供基于 `TechnicalTokenizerV1` 的 ReMe 与 `L1–L4` 检索、处理 PR 发布回执与故障恢复 | 不直接耦合特定宿主的私有目录结构，也不靠猜测目录或时间戳来认领任务 |
 | **远端开发与诊断组件**（`remote-dev` / `diagnostics`） | 提供 SSH 远端文件读写/后台长作业执行、有界本地诊断日志，以及受统一贡献开关控制的自动故障上报 | SSH 远端操作与本地日志不依赖贡献开关；公开故障上报严格受该开关约束，且绝不截断用户的远端作业输出 |

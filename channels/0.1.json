@@ -3,16 +3,16 @@
   "schema_version": "mindie-release-channel/1",
   "track": "0.1",
   "milestone_version": "0.1.0",
-  "current_patch_version": "0.1.16",
-  "release_notes": "docs/releases/0.1.16.md",
-  "release_notes_en": "docs/releases/0.1.16.en.md",
+  "current_patch_version": "0.1.17",
+  "release_notes": "docs/releases/0.1.17.md",
+  "release_notes_en": "docs/releases/0.1.17.en.md",
   "independent_update_allowed": true,
   "update_policy": {
     "independent_update_allowed": true,
     "require_plugin_republish_on_component_patch": false,
     "implementation_status": {
-      "verified_mechanism": "channels/0.1.json records the product-verified 17-repository + 9-corpus combination for release pipeline gating, prebuilt wheelhouse assembly (mindie-wheels-bundle.tar.gz + release-channel.json), and audit provenance. Host plugins (each <= 1,200 production LOC) delegate runtime bootstrap, zero-Git prebuilt wheelhouse auto-updates (SHA256SUMS-verified --override install with 1h -> 6h non-reportable backoff), Active + Rollback .inuse-leased idle cutover, and zero-binding MCP routing to mindie-harness across all 7 native host plugins (Codex, Claude Code, Kimi, DSH, Google Antigravity, Tencent WorkBuddy, and OpenCode), while preserving independent GitHub Release floor discovery and user consent settings.",
-      "known_boundaries": "The 0.1.16 channel pins verified releases across the 10 shared substrate/runtime/evaluation components (harness 0.1.4, knowledge 0.13.24, remote-dev 0.11.14, profiler 0.5.16, sim 0.9.18, coordinator 0.7.13, npu-top 0.3.5, diagnostics 0.5.17, debugger 0.1.4, mindie-bench 0.4.14), 7 native host plugins (Codex 0.1.38, Claude Code 0.1.30, Kimi 0.1.31, DSH 0.1.26, Google Antigravity 0.1.21, Tencent WorkBuddy 0.1.19, OpenCode 0.1.11), and 9 public domain corpora. All seven host plugins run silently by default while enabled—exposing strict 1:1 per-harness remote NPU tools plus frictionless SSH onboarding (remote_auth), deterministic engineering/debugging tools (mindie_doctor, diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top), L1-L4 graded knowledge tools (knowledge_query, knowledge_explain, knowledge_feedback, knowledge_distill, knowledge_sync), and the mindie-harness single-state ExperimentLedger RSI loop (rsi_loop / experiment_ledger) over zero-pre-call-binding MCP (P2.7 / P2.8), with 3-tier gh-decoupled privacy (contribute / local-only / read-only), non-blocking task continuity SKILL.md rules, install guides isolated under docs/install/, and Stop capture strictly scoped to saved consent and authorized project_roots. See docs/release-compatibility-and-update.md for full update and reload boundaries."
+      "verified_mechanism": "channels/0.1.json records the product-verified 17-repository + 9-corpus combination for release pipeline gating, prebuilt wheelhouse assembly (mindie-wheels-bundle.tar.gz + release-channel.json), and audit provenance. Host plugins (each <= 1,500 production LOC) delegate runtime bootstrap, zero-Git prebuilt wheelhouse auto-updates (SHA256SUMS-verified --override install with 1h -> 6h non-reportable backoff), Active + Rollback .inuse-leased idle cutover, and zero-binding MCP routing to mindie-harness across all 7 native host plugins (Codex, Claude Code, Kimi, DSH, Google Antigravity, Tencent WorkBuddy, and OpenCode), while preserving independent GitHub Release floor discovery and user consent settings.",
+      "known_boundaries": "The 0.1.17 channel pins verified releases across the 10 shared substrate/runtime/evaluation components (harness 0.1.4, knowledge 0.13.24, remote-dev 0.11.14, profiler 0.5.16, sim 0.9.18, coordinator 0.7.13, npu-top 0.3.5, diagnostics 0.5.17, debugger 0.1.4, mindie-bench 0.4.14), 7 native host plugins (Codex 0.1.39, Claude Code 0.1.31, Kimi 0.1.32, DSH 0.1.27, Google Antigravity 0.1.21, Tencent WorkBuddy 0.1.19, OpenCode 0.1.11), and 9 public domain corpora. All seven host plugins run silently by default while enabled—exposing strict 1:1 per-harness remote NPU tools plus frictionless SSH onboarding (remote_auth), deterministic engineering/debugging tools (mindie_doctor, diagnostics_status, diagnostics_bundle, debugger, coordinator, profiler, sim, npu_top), L1-L4 graded knowledge tools (knowledge_query, knowledge_explain, knowledge_feedback, knowledge_distill, knowledge_sync), and the mindie-harness single-state ExperimentLedger RSI loop (rsi_loop / experiment_ledger) over zero-pre-call-binding MCP (P2.7 / P2.8), with 3-tier gh-decoupled privacy (contribute / local-only / read-only), non-blocking task continuity SKILL.md rules, install guides isolated under docs/install/, and Stop capture strictly scoped to saved consent and authorized project_roots. See docs/release-compatibility-and-update.md for full update and reload boundaries."
     }
   },
   "corpora": {
@@ -176,11 +176,11 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-codex",
       "package": "mindie-agent-codex",
-      "version": "0.1.38",
-      "tag": "v0.1.38",
-      "commit": "f0b1898a4a12bcaef17145e45d2408d7c642c25d",
-      "revision": "f0b1898a4a12bcaef17145e45d2408d7c642c25d",
-      "runner_revision": "3a321120c3eed899c57ebf058d87e779599e0da6",
+      "version": "0.1.39",
+      "tag": "v0.1.39",
+      "commit": "2a4af609c0ae5417a2e357016a1f9104a55b356e",
+      "revision": "2a4af609c0ae5417a2e357016a1f9104a55b356e",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
       "independent_update_allowed": true
     },
     "mindie-agent-cc": {
@@ -188,11 +188,11 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-cc",
       "package": "mindie-agent-cc",
-      "version": "0.1.30",
-      "tag": "v0.1.30",
-      "commit": "d20b0f88c4c683c253720aa54888cccef2cb13e0",
-      "revision": "d20b0f88c4c683c253720aa54888cccef2cb13e0",
-      "runner_revision": "3a321120c3eed899c57ebf058d87e779599e0da6",
+      "version": "0.1.31",
+      "tag": "v0.1.31",
+      "commit": "42c966ae5ef4266f82854a2a021f4572ac28ebf5",
+      "revision": "42c966ae5ef4266f82854a2a021f4572ac28ebf5",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
       "independent_update_allowed": true
     },
     "mindie-agent-kimi": {
@@ -200,11 +200,11 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-kimi",
       "package": "mindie-agent-kimi",
-      "version": "0.1.31",
-      "tag": "v0.1.31",
-      "commit": "ffdea6bb38681ac8c7b5a2d7ab90e5cacd0c317c",
-      "revision": "ffdea6bb38681ac8c7b5a2d7ab90e5cacd0c317c",
-      "runner_revision": "3a321120c3eed899c57ebf058d87e779599e0da6",
+      "version": "0.1.32",
+      "tag": "v0.1.32",
+      "commit": "8bdafd72f9a317c436f41de6064c67ba78a58904",
+      "revision": "8bdafd72f9a317c436f41de6064c67ba78a58904",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
       "independent_update_allowed": true
     },
     "mindie-agent-dsh": {
@@ -212,11 +212,11 @@
       "role": "harness_plugin",
       "repository": "mindie-agent/mindie-agent-dsh",
       "package": "mindie-agent-dsh",
-      "version": "0.1.26",
-      "tag": "v0.1.26",
-      "commit": "09add2a3fc1421fb61341bb810fd448b5c1e6051",
-      "revision": "09add2a3fc1421fb61341bb810fd448b5c1e6051",
-      "runner_revision": "3a321120c3eed899c57ebf058d87e779599e0da6",
+      "version": "0.1.27",
+      "tag": "v0.1.27",
+      "commit": "d6cb51c430715173c407c1a094ee91a812cd4a50",
+      "revision": "d6cb51c430715173c407c1a094ee91a812cd4a50",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
       "independent_update_allowed": true
     },
     "mindie-agent-agy": {
@@ -540,6 +540,18 @@
       ],
       "plugin_republish_required": true,
       "summary": "0.1.16 host-plugin Great Subtraction (<= 1,200 LOC ceiling), zero-Git prebuilt wheelhouse auto-update, single-command install.py, 3-tier gh-decoupled privacy, 1:1 native remote-dev profiles, remote_auth SSH onboarding & read-only mindie_doctor: updates harness 0.1.4 (14313b8ba58c888b20c9c216ec41d14f5e62f4f7), diagnostics 0.5.17 (7464cbb4381e9dc996871d192eb3f05f61dfdb28), remote-dev 0.11.14 (b33ca60baac81c237dd1bd6e7a8068945820727b), knowledge 0.13.24 (9f48272a3ba87248bfda0e4068692511aac4dfa4), mindie-bench 0.4.14 (1e4876956d34be36e538df65b135027b468e1beb), and all seven slimmed native host plugins (mindie-agent-codex 0.1.38, mindie-agent-cc 0.1.30, mindie-agent-kimi 0.1.31, mindie-agent-dsh 0.1.26, mindie-agent-agy 0.1.21, mindie-agent-wb 0.1.19, mindie-agent-oc 0.1.11)."
+    },
+    {
+      "patch_version": "0.1.17",
+      "type": "hotfix",
+      "updated_components": [
+        "mindie-agent-codex",
+        "mindie-agent-cc",
+        "mindie-agent-kimi",
+        "mindie-agent-dsh"
+      ],
+      "plugin_republish_required": true,
+      "summary": "0.1.17 seamless n-1 -> n native self-upgrade & in-flight live-session handoffs (resolving mindie-agent#378-#383) with <= 1,500 LOC thin-plugin calibration: updates mindie-agent-codex 0.1.39 (2a4af609c0ae5417a2e357016a1f9104a55b356e; harness_update.py, runtime_call.py, and admission_ops.py shims for open v0.1.34-v0.1.37 sessions, thread-safe remote_write_stdin session_id allowance, short %TEMP% staging, removed schannel override, symlink-safe old_rt retention, .whl floor restoration, and confirmed retire_service gate), mindie-agent-cc 0.1.31 (42c966ae5ef4266f82854a2a021f4572ac28ebf5; floor-preserving component_update.py, setup.py --source/--activate with operation.lock + CAS + confirmed retirement, bridge.py/mcp_server.py/release_update.py shims for open v0.1.29 sessions, and immutable staged cc.adapter.json guard), mindie-agent-kimi 0.1.32 (8bdafd72f9a317c436f41de6064c67ba78a58904; transcript.py shim, atomic current.json tuple resolution across generations/<sha> and component-runtimes, and updater check|status shim), and mindie-agent-dsh 0.1.27 (d6cb51c430715173c407c1a094ee91a812cd4a50; --prepare-only floor validation, leaf-symlink-safe mindie-harness-seed.pyz bootstrap, and legacy dsh consent migration)."
     }
   ]
 }
