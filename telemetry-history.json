@@ -360,7 +360,7 @@
         }
       },
       "latest_snapshot": {
-        "stars": 103,
+        "stars": 104,
         "forks": 61,
         "clones_14d": 2094,
         "clones_14d_uniques": 747,
@@ -369,9 +369,9 @@
         "views_14d": 1171,
         "views_14d_uniques": 418,
         "cumulative_views": 1944,
-        "pkg_downloads": 71,
-        "all_asset_downloads": 346,
-        "latest_release": "v0.1.13"
+        "pkg_downloads": 96,
+        "all_asset_downloads": 473,
+        "latest_release": "v0.1.14"
       }
     },
     "awesome-mindie-skills": {
@@ -1113,8 +1113,8 @@
         "views_14d": 115,
         "views_14d_uniques": 41,
         "cumulative_views": 167,
-        "pkg_downloads": 12603,
-        "all_asset_downloads": 13038,
+        "pkg_downloads": 12685,
+        "all_asset_downloads": 13127,
         "latest_release": "v0.1.36"
       }
     },
@@ -1485,8 +1485,8 @@
         "views_14d": 6,
         "views_14d_uniques": 6,
         "cumulative_views": 13,
-        "pkg_downloads": 596,
-        "all_asset_downloads": 986,
+        "pkg_downloads": 603,
+        "all_asset_downloads": 996,
         "latest_release": "v0.1.28"
       }
     },
@@ -1858,7 +1858,7 @@
         "views_14d_uniques": 5,
         "cumulative_views": 8,
         "pkg_downloads": 2581,
-        "all_asset_downloads": 3004,
+        "all_asset_downloads": 3007,
         "latest_release": "v0.1.29"
       }
     },
@@ -2229,8 +2229,8 @@
         "views_14d": 49,
         "views_14d_uniques": 28,
         "cumulative_views": 66,
-        "pkg_downloads": 267,
-        "all_asset_downloads": 628,
+        "pkg_downloads": 268,
+        "all_asset_downloads": 634,
         "latest_release": "v0.1.24"
       }
     },
@@ -2602,7 +2602,7 @@
         "views_14d_uniques": 21,
         "cumulative_views": 84,
         "pkg_downloads": 258,
-        "all_asset_downloads": 4026,
+        "all_asset_downloads": 4095,
         "latest_release": "v0.13.23"
       }
     },
@@ -2965,7 +2965,7 @@
       },
       "latest_snapshot": {
         "stars": 1,
-        "forks": 21,
+        "forks": 23,
         "clones_14d": 5097,
         "clones_14d_uniques": 1184,
         "cumulative_clones": 9988,
@@ -3346,7 +3346,7 @@
         "views_14d_uniques": 21,
         "cumulative_views": 53,
         "pkg_downloads": 225,
-        "all_asset_downloads": 3740,
+        "all_asset_downloads": 3809,
         "latest_release": "v0.11.13"
       }
     },
@@ -3718,7 +3718,7 @@
         "views_14d_uniques": 8,
         "cumulative_views": 130,
         "pkg_downloads": 188,
-        "all_asset_downloads": 3156,
+        "all_asset_downloads": 3227,
         "latest_release": "v0.7.13"
       }
     },
@@ -4090,7 +4090,7 @@
         "views_14d_uniques": 2,
         "cumulative_views": 36,
         "pkg_downloads": 727,
-        "all_asset_downloads": 2203,
+        "all_asset_downloads": 2262,
         "latest_release": "v0.3.5"
       }
     },
@@ -4462,7 +4462,7 @@
         "views_14d_uniques": 2,
         "cumulative_views": 2,
         "pkg_downloads": 235,
-        "all_asset_downloads": 3781,
+        "all_asset_downloads": 3848,
         "latest_release": "v0.5.16"
       }
     },
@@ -4834,7 +4834,7 @@
         "views_14d_uniques": 19,
         "cumulative_views": 69,
         "pkg_downloads": 133,
-        "all_asset_downloads": 560,
+        "all_asset_downloads": 563,
         "latest_release": "v0.4.11"
       }
     },
@@ -5110,7 +5110,7 @@
         "views_14d_uniques": 23,
         "cumulative_views": 64,
         "pkg_downloads": 170,
-        "all_asset_downloads": 2889,
+        "all_asset_downloads": 2958,
         "latest_release": "v0.5.16"
       }
     },
@@ -5376,7 +5376,7 @@
         }
       },
       "latest_snapshot": {
-        "stars": 2,
+        "stars": 3,
         "forks": 2,
         "clones_14d": 4291,
         "clones_14d_uniques": 2392,
@@ -5386,7 +5386,7 @@
         "views_14d_uniques": 42,
         "cumulative_views": 176,
         "pkg_downloads": 225,
-        "all_asset_downloads": 3158,
+        "all_asset_downloads": 3227,
         "latest_release": "v0.9.18"
       }
     },
@@ -7301,9 +7301,9 @@
         "views_14d": 21,
         "views_14d_uniques": 20,
         "cumulative_views": 26,
-        "pkg_downloads": 217,
-        "all_asset_downloads": 466,
-        "latest_release": "v0.1.19"
+        "pkg_downloads": 233,
+        "all_asset_downloads": 503,
+        "latest_release": "v0.1.20"
       }
     },
     "mindie-agent-wb": {
@@ -7546,7 +7546,7 @@
         "views_14d_uniques": 6,
         "cumulative_views": 6,
         "pkg_downloads": 173,
-        "all_asset_downloads": 382,
+        "all_asset_downloads": 385,
         "latest_release": "v0.1.17"
       }
     },
@@ -7798,7 +7798,7 @@
         "views_14d_uniques": 6,
         "cumulative_views": 10,
         "pkg_downloads": 61,
-        "all_asset_downloads": 2630,
+        "all_asset_downloads": 2695,
         "latest_release": "v0.1.4"
       }
     },
@@ -8442,7 +8442,7 @@
         "views_14d_uniques": 1,
         "cumulative_views": 40,
         "pkg_downloads": 179,
-        "all_asset_downloads": 351,
+        "all_asset_downloads": 354,
         "latest_release": "v0.1.9"
       }
     },
@@ -8503,6 +8503,10 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "daily_views": {
@@ -8561,6 +8565,10 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
@@ -8573,11 +8581,11 @@
         "views_14d": 0,
         "views_14d_uniques": 0,
         "cumulative_views": 0,
-        "pkg_downloads": 14,
-        "all_asset_downloads": 128,
-        "latest_release": "v0.1.0"
+        "pkg_downloads": 32,
+        "all_asset_downloads": 227,
+        "latest_release": "v0.1.1"
       }
     }
   },
-  "updated_at_cst": "2026-11-18 06:50"
+  "updated_at_cst": "2026-11-18 12:59"
 }
