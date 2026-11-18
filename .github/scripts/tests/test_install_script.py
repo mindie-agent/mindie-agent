@@ -82,7 +82,7 @@ if __name__ == "__main__":
 """
 RUNTIME_SOURCE = "VERSION = '0.1.0'\n\ndef main():\n    return {'runtime': 'mindie-harness', 'version': VERSION}\n"
 FAKE_UV_SOURCE = """
-import os, platform, shutil, sys, zipfile
+import os, sys, venv, zipfile
 from pathlib import Path
 
 def _site(target):
@@ -91,18 +91,7 @@ def _site(target):
     return target / "lib" / f"python{sys.version_info.major}.{sys.version_info.minor}" / "site-packages"
 
 def _venv(target):
-    target.mkdir(parents=True, exist_ok=True)
-    (target / "pyvenv.cfg").write_text(
-        f"home = {sys.base_prefix}\\ninclude-system-site-packages = false\\nversion = {platform.python_version()}\\n",
-        encoding="utf-8",
-    )
-    if os.name == "nt":
-        scripts = target / "Scripts"
-        scripts.mkdir()
-        shutil.copy2(sys.executable, scripts / "python.exe")
-    else:
-        (target / "bin").mkdir()
-        os.symlink(sys.executable, target / "bin" / "python")
+    venv.create(target, with_pip=False, clear=True)
     _site(target).mkdir(parents=True, exist_ok=True)
 
 def main():
@@ -180,7 +169,8 @@ class InstallScriptTests(unittest.TestCase):
         self.bin = self.root / "bin"
         self.bin.mkdir()
         env = {key: str(self.root / key) for key in ENV_KEYS}
-        env.update({"HOME": str(self.home), "TMPDIR": str(self.tmpdir), "TEMP": str(self.tmpdir), "TMP": str(self.tmpdir),
+        env.update({"HOME": str(self.home), "USERPROFILE": str(self.home),
+                    "TMPDIR": str(self.tmpdir), "TEMP": str(self.tmpdir), "TMP": str(self.tmpdir),
                     "MINDIE_CONFIG_HOME": str(self.cfg), "MINDIE_DATA_HOME": str(self.data),
                     "UV_CACHE_DIR": str(self.root / "uv-cache"),
                     "PATH": os.pathsep.join([str(self.tools_path), str(self.bin)]),
@@ -256,8 +246,9 @@ class InstallScriptTests(unittest.TestCase):
         return channel
 
     def test_detect_hosts_from_path_binaries_config_dirs_and_app_bundles(self) -> None:
+        ext = ".cmd" if os.name == "nt" else ""
         for name in ("codex", "claude", "kimi", "dsh", "agy", "wb", "opencode"):
-            self._write(self.bin / name, "", executable=True)
+            self._write(self.bin / f"{name}{ext}", "@echo off\n", executable=True)
         self.assertEqual(install.detect_installed_hosts(self.env), list(install.HOSTS))
 
         empty = self.root / "empty-bin"
