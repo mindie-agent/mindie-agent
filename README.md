@@ -1,6 +1,6 @@
 # 📊 MindIE Agent 开源仓库与下载统计
 
-> **最近更新**：`2026-11-18 21:21 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
+> **最近更新**：`2026-11-18 22:16 (UTC+8)` · 每 12 小时通过 GitHub Actions 自动同步。
 
 ![MindIE Agent Repository & Download Statistics](./dashboard.zh.svg)
 
@@ -8,25 +8,25 @@
 
 | 类型 | 仓库 | 最新版本 | Stars | Forks | 累计 Clone | 近 14 天 Clone (独立) | 近 14 天浏览 (独立) | Release 下载 (含附件) |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 产品入口 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | `v0.1.15` | 107 | 61 | **4,707** | 2,308 (797) | 1,134 (414) | 97 (480) |
+| 产品入口 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | `v0.1.15` | 107 | 61 | **4,707** | 2,308 (797) | 1,134 (414) | 100 (486) |
 | 技能目录 | [`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills) | `commit@13619351` | 5 | 8 | **347** | 91 (54) | 76 (27) | 0 (0) |
-| 客户端插件 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) | `v0.1.38` | 0 | 5 | **12,198** | 7,180 (568) | 97 (36) | 13,002 (13,488) |
-| 客户端插件 | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) | `v0.1.30` | 0 | 0 | **4,248** | 1,535 (381) | 13 (8) | 662 (1,105) |
-| 客户端插件 | [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) | `v0.1.31` | 0 | 0 | **4,932** | 1,817 (242) | 7 (7) | 2,619 (3,091) |
-| 客户端插件 | [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | `v0.1.26` | 0 | 0 | **2,892** | 991 (260) | 52 (31) | 311 (731) |
-| 客户端插件 | [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) | `v0.1.21` | 0 | 0 | **1,298** | 1,130 (250) | 21 (20) | 253 (551) |
-| 客户端插件 | [`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb) | `v0.1.19` | 0 | 0 | **1,089** | 1,021 (216) | 8 (8) | 209 (467) |
-| 客户端插件 | [`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | `v0.1.11` | 0 | 0 | **576** | 576 (133) | 40 (1) | 222 (443) |
-| 宿主底座 | [`harness`](https://github.com/mindie-agent/harness) | `v0.1.4` | 0 | 0 | **457** | 457 (310) | 2 (2) | 78 (537) |
-| 运行时组件 | [`knowledge`](https://github.com/mindie-agent/knowledge) | `v0.13.24` | 1 | 3 | **14,595** | 6,162 (2,571) | 37 (19) | 272 (4,343) |
-| 运行时组件 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | `v0.11.14` | 1 | 2 | **9,665** | 4,095 (2,743) | 26 (19) | 239 (4,052) |
-| 运行时组件 | [`coordinator`](https://github.com/mindie-agent/coordinator) | `v0.7.13` | 0 | 2 | **5,553** | 3,834 (2,339) | 18 (8) | 188 (3,373) |
-| 运行时组件 | [`profiler`](https://github.com/mindie-agent/profiler) | `v0.5.16` | 0 | 0 | **5,578** | 4,533 (2,462) | 40 (21) | 170 (3,105) |
-| 运行时组件 | [`sim`](https://github.com/mindie-agent/sim) | `v0.9.18` | 3 | 2 | **6,457** | 4,825 (2,663) | 143 (46) | 225 (3,374) |
-| NPU 监控 | [`npu-top`](https://github.com/mindie-agent/npu-top) | `v0.3.5` | 2 | 3 | **2,342** | 1,375 (884) | 4 (3) | 727 (2,369) |
-| 运行时组件 | [`diagnostics`](https://github.com/mindie-agent/diagnostics) | `v0.5.17` | 0 | 1 | **14,633** | 5,470 (3,175) | 2 (2) | 249 (4,107) |
-| 运行时组件 | [`debugger`](https://github.com/mindie-agent/debugger) | `v0.1.4` | 0 | 0 | **3,114** | 2,930 (2,268) | 9 (6) | 61 (2,842) |
-| 评测工具 | [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | `v0.4.13` | 0 | 0 | **3,824** | 2,256 (218) | 26 (20) | 165 (653) |
+| 客户端插件 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex) | `v0.1.38` | 0 | 5 | **12,198** | 7,180 (568) | 97 (36) | 13,024 (13,513) |
+| 客户端插件 | [`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc) | `v0.1.30` | 0 | 0 | **4,248** | 1,535 (381) | 13 (8) | 662 (1,108) |
+| 客户端插件 | [`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi) | `v0.1.31` | 0 | 0 | **4,932** | 1,817 (242) | 7 (7) | 2,619 (3,094) |
+| 客户端插件 | [`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh) | `v0.1.26` | 0 | 0 | **2,892** | 991 (260) | 52 (31) | 312 (736) |
+| 客户端插件 | [`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy) | `v0.1.21` | 0 | 0 | **1,298** | 1,130 (250) | 21 (20) | 253 (554) |
+| 客户端插件 | [`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb) | `v0.1.19` | 0 | 0 | **1,089** | 1,021 (216) | 8 (8) | 209 (470) |
+| 客户端插件 | [`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | `v0.1.11` | 0 | 0 | **576** | 576 (133) | 40 (1) | 222 (446) |
+| 宿主底座 | [`harness`](https://github.com/mindie-agent/harness) | `v0.1.4` | 0 | 0 | **457** | 457 (310) | 2 (2) | 81 (545) |
+| 运行时组件 | [`knowledge`](https://github.com/mindie-agent/knowledge) | `v0.13.24` | 1 | 3 | **14,595** | 6,162 (2,571) | 37 (19) | 275 (4,351) |
+| 运行时组件 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | `v0.11.14` | 1 | 2 | **9,665** | 4,095 (2,743) | 26 (19) | 242 (4,060) |
+| 运行时组件 | [`coordinator`](https://github.com/mindie-agent/coordinator) | `v0.7.13` | 0 | 2 | **5,553** | 3,834 (2,339) | 18 (8) | 191 (3,381) |
+| 运行时组件 | [`profiler`](https://github.com/mindie-agent/profiler) | `v0.5.16` | 0 | 0 | **5,578** | 4,533 (2,462) | 40 (21) | 173 (3,113) |
+| 运行时组件 | [`sim`](https://github.com/mindie-agent/sim) | `v0.9.18` | 3 | 2 | **6,457** | 4,825 (2,663) | 143 (46) | 228 (3,391) |
+| NPU 监控 | [`npu-top`](https://github.com/mindie-agent/npu-top) | `v0.3.5` | 2 | 3 | **2,342** | 1,375 (884) | 4 (3) | 729 (2,376) |
+| 运行时组件 | [`diagnostics`](https://github.com/mindie-agent/diagnostics) | `v0.5.17` | 0 | 1 | **14,633** | 5,470 (3,175) | 2 (2) | 252 (4,115) |
+| 运行时组件 | [`debugger`](https://github.com/mindie-agent/debugger) | `v0.1.4` | 0 | 0 | **3,114** | 2,930 (2,268) | 9 (6) | 64 (2,863) |
+| 评测工具 | [`mindie-bench`](https://github.com/mindie-agent/mindie-bench) | `v0.4.14` | 0 | 0 | **3,824** | 2,256 (218) | 26 (20) | 165 (656) |
 | 领域知识库 | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend) | `commit@9a614ccd` | 1 | 23 | **10,367** | 5,314 (1,229) | 110 (26) | 629 (629) |
 | 领域知识库 | [`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm) | `commit@23b7b063` | 0 | 0 | **50** | 19 (15) | 9 (8) | 0 (0) |
 | 领域知识库 | [`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd) | `commit@c23ba64a` | 0 | 0 | **47** | 22 (17) | 10 (9) | 0 (0) |
@@ -36,7 +36,7 @@
 | 领域知识库 | [`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability) | `commit@9288cbb1` | 0 | 0 | **260** | 50 (33) | 7 (2) | 0 (0) |
 | 领域知识库 | [`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat) | `commit@c37c9c0f` | 0 | 0 | **204** | 32 (26) | 0 (0) | 0 (0) |
 | 领域知识库 | [`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | `commit@3cf3f10c` | 0 | 0 | **225** | 44 (32) | 1 (1) | 0 (0) |
-| **合计** | **28 个公开仓库** | — | **120** | **110** | **110,586** | **58,263** | — | **20,378** (49,740) |
+| **合计** | **28 个公开仓库** | — | **120** | **110** | **110,586** | **58,263** | — | **20,430** (49,887) |
 
 ## 数据文件
 
