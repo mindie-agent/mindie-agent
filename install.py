@@ -19,8 +19,8 @@ import argparse, hashlib, json, os, re, shutil, subprocess, sys, tarfile, tempfi
 from pathlib import Path
 SCHEMA, DEFAULT_CHANNEL, HOSTS = "mindie-install/1", "https://github.com/mindie-agent/mindie-agent/releases/latest/download", ("codex", "cc", "kimi", "dsh", "agy", "wb", "oc")
 HOST_ALIASES = {"codex": "codex", "cc": "cc", "claude": "cc", "kimi": "kimi", "dsh": "dsh", "agy": "agy", "antigravity": "agy", "wb": "wb", "workbuddy": "wb", "codebuddy": "wb", "oc": "oc", "opencode": "oc"}
-MIN_FREE_BYTES, MAX_BUNDLE_BYTES, MAX_RELEASE_BYTES, MAX_SUMS_BYTES = 2_684_354_560, 3 * 1024 * 1024, 1024 * 1024, 256 * 1024
-MAX_MEMBERS, MAX_UNPACKED_BYTES, _CHUNK, _CREATE_NO_WINDOW = 64, 16 * 1024 * 1024, 64 * 1024, (0x08000000 if os.name == "nt" else 0)
+MIN_FREE_BYTES, MAX_BUNDLE_BYTES, MAX_RELEASE_BYTES, MAX_SUMS_BYTES = 2_684_354_560, 16 * 1024 * 1024, 1024 * 1024, 256 * 1024
+MAX_MEMBERS, MAX_UNPACKED_BYTES, _CHUNK, _CREATE_NO_WINDOW = 64, 32 * 1024 * 1024, 64 * 1024, (0x08000000 if os.name == "nt" else 0)
 _MARKERS = {"CODEX_THREAD_ID": "codex", "CODEX_CI": "codex", "CLAUDECODE": "cc", "KIMI_CODE_HOME": "kimi", "DSH_PROFILE": "dsh", "DSH_HOME": "dsh", "AGY_CONVERSATION_ID": "agy", "AGY_APP_DATA_DIR": "agy", "WORKBUDDY_CONFIG_DIR": "wb", "CODEBUDDY_CONFIG_DIR": "wb", "MINDIE_WB_BIN": "wb", "OPENCODE_SESSION_ID": "oc"}
 _BINARIES = {"codex": ("codex",), "cc": ("claude",), "kimi": ("kimi",), "dsh": ("dsh",), "agy": ("agy", "antigravity"), "wb": ("wb", "workbuddy", "codebuddy"), "oc": ("opencode",)}
 class _ChannelError(Exception):
