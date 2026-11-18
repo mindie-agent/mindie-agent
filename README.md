@@ -10,7 +10,7 @@
 
 <!-- mindie-org-versions:main-badges-zh:start -->
 <p align="center">
-  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.14.md"><img src="https://img.shields.io/badge/release-v0.1.14-7045F5.svg" alt="Release v0.1.14"></a>
+  <a href="https://github.com/mindie-agent/mindie-agent/blob/main/docs/releases/0.1.15.md"><img src="https://img.shields.io/badge/release-v0.1.15-7045F5.svg" alt="Release v0.1.15"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-cc"><img src="https://img.shields.io/badge/Claude_Code-Plugin-D97757.svg" alt="Claude Code Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-codex"><img src="https://img.shields.io/badge/OpenAI_Codex-Plugin-10A37F.svg" alt="OpenAI Codex Plugin"></a>
   <a href="https://github.com/mindie-agent/mindie-agent-kimi"><img src="https://img.shields.io/badge/Kimi_Code-Plugin-2563EB.svg" alt="Kimi Code Plugin"></a>
@@ -23,7 +23,7 @@
 <!-- mindie-org-versions:main-badges-zh:end -->
 
 <p align="center">
-  <strong>中文</strong> · <a href="./README.en.md">English</a> · <a href="#-一句话无感安装仅接受-agent-安装-">⚡ 一句话安装</a> · <a href="#-为什么选择-mindie-agent">✨ 核心能力</a> · <a href="#️-架构全景与经验飞轮">🏗️ 架构全景</a> · <a href="#-装好之后怎么用触发方式与使用示例">🔥 实战用法</a> · <a href="#-组件与仓库生态">📦 仓库生态</a> · <a href="#-如何参与贡献也是交给-agent">🤝 参与贡献</a> · <a href="#-010-里程碑与实测记录">🚀 v0.1.0 实测</a> · <a href="./docs/README.md">📚 文档中心</a>
+  <strong>中文</strong> · <a href="./README.en.md">English</a> · <a href="#-一句话无感安装仅接受-agent-安装-">⚡ 一句话安装</a> · <a href="#-为什么选择-mindie-agent">✨ 核心能力</a> · <a href="#️-架构全景与经验飞轮">🏗️ 架构全景</a> · <a href="#-装好之后怎么用零口令静默自启与使用示例">🔥 实战用法</a> · <a href="#-组件与仓库生态">📦 仓库生态</a> · <a href="#-如何参与贡献也是交给-agent">🤝 参与贡献</a> · <a href="#-010-里程碑与实测记录">🚀 v0.1.0 实测</a> · <a href="./docs/README.md">📚 文档中心</a>
 </p>
 
 ---
@@ -61,7 +61,7 @@
 > 社区贡献默认关闭。仅当用户明确开启目标知识库 `<owner/repo>` 的社区贡献后，`setup.py sharing --enable` 才会自动创建或复用该知识库的个人 Fork，并将 `<GH_USER>/<repo>` 绑定为推送目标；切勿在安装阶段预先 Fork 主仓、插件仓或全部领域知识库。
 >
 > #### 第三步：识别你所在的宿主客户端并安装对应插件
-> 仅安装当前宿主对应的单个插件：打开对应适配器仓库的安装说明页，按页面内的 Agent 自动安装协议执行。本页负责维护宿主识别顺序、正式版本锁定与安装页入口；当前插件版本为 Codex `v0.1.36`、Claude Code `v0.1.28`、Kimi Code `v0.1.29`、DSH `v0.1.24`、Google Antigravity `v0.1.19`、Tencent WorkBuddy `v0.1.17` 与 OpenCode `v0.1.9`，与 [`channels/0.1.json`](./channels/0.1.json) 及各宿主安装页锁定的正式 Release tag 一致。共享运行时组件由各插件从官方 GitHub Release 自动发现并拉取。
+> 仅安装当前宿主对应的单个插件：打开对应适配器仓库的安装说明页，按页面内的 Agent 自动安装协议执行。本页负责维护宿主识别顺序、正式版本锁定与安装页入口；当前插件版本为 Codex `v0.1.37`、Claude Code `v0.1.29`、Kimi Code `v0.1.30`、DSH `v0.1.25`、Google Antigravity `v0.1.20`、Tencent WorkBuddy `v0.1.18` 与 OpenCode `v0.1.10`，与 [`channels/0.1.json`](./channels/0.1.json) 及各宿主安装页锁定的正式 Release tag 一致。共享运行时组件由各插件从官方 GitHub Release 自动发现并拉取。
 >
 > 请严格按以下优先级匹配唯一分支，命中即停止。当前进程的会话环境变量优先于本机已安装的 CLI（例如当前进程存在 `CODEX_THREAD_ID` 或 `CODEX_CI` 时，即使本机 `claude --version` 可正常执行，也必须选择分支 B；切勿按列表顺序盲目选取第一个 `--version` 返回 0 的客户端）：
 >
@@ -73,13 +73,13 @@
 > 6. 当前进程存在 `KIMI_CODE_HOME` → 选择分支 C（仅认当前进程环境变量，切勿将磁盘上残留的 `~/.kimi-code` 目录误判为活跃会话）。
 > 7. 若以上会话特征均未命中，再依次探测 `codex --version`、`claude --version`、`opencode --version`、`kimi --version`、`dsh --version` 及下方应用包路径；若同时存在多个可用宿主客户端，先向用户询问目标宿主。
 >
-> - **分支 A — Claude Code**：安装页：[mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.28/README.md#快速开始)。Claude Code 成功标准：`v0.1.28`（`claude plugin list --json` 中 `mindie-agent@mindie-agent-cc` 已启用）。
-> - **分支 B — OpenAI Codex CLI**：安装页：[mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.36/README.md#快速开始)。Codex 安装 ref 与成功标准：`v0.1.36`（`codex plugin list --json` 中 `mindie-agent@mindie-agent` 已启用，并运行 `setup.py` 完成同会话运行时初始化）。
-> - **分支 C — Kimi Code CLI**：安装页：[mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.29/README.md#快速开始)。
-> - **分支 D — DeepSeek Harness（DSH）**：安装页：[mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.24/README.md#快速开始)。
-> - **分支 E — Google Antigravity**：检查 macOS 应用包 `/Applications/Antigravity.app`（或 `~/Applications/Antigravity.app`）及用户数据目录 `~/.gemini/antigravity`（或 `~/.gemini/antigravity-cli`、`~/.gemini/antigravity-ide`、`AGY_APP_DATA_DIR`）。安装页：[mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.19/README.md#快速开始交给-agent-一句话自动安装)。检出钉住的 `v0.1.19` tag，将 `plugins/mindie-agent` 复制到 `~/.gemini/config/plugins/mindie-agent`，并执行 `uv run --no-project --python 3.13 ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$(pwd)"` 初始化持久化源码基线（`agy-source`）与运行时环境（`agy-venv`）。
-> - **分支 F — Tencent WorkBuddy / CodeBuddy**：定位应用包内置的 `codebuddy` 可执行文件（`/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`、`~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`，或已存在的绝对路径 `MINDIE_WB_BIN`）；配置目录默认为 `~/.workbuddy`（若设置了绝对路径 `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` 则优先采用）。在锁定的 tag 检出目录中通过 `uv run --no-project --python 3.13` 执行安装页给出的 `setup.py init --install-wb`，并使用 `codebuddy plugin validate` 完成校验。安装页：[mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.17/README.md#3-快速安装与验证)。
-> - **分支 G — OpenCode（`v2.2.x+`）**：安装页：[mindie-agent-oc 安装、升级与初始化](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.9/README.md#3-安装升级与初始化)。执行 `opencode plugin add github:mindie-agent/mindie-agent-oc`（或双通道 npm 包 `@mindie-agent/oc@0.1.9`），并初始化受管 Python 运行环境（`mindie-agent-oc v0.1.9`）。
+> - **分支 A — Claude Code**：安装页：[mindie-agent-cc 快速开始](https://github.com/mindie-agent/mindie-agent-cc/blob/v0.1.29/README.md#快速开始)。Claude Code 成功标准：`v0.1.29`（`claude plugin list --json` 中 `mindie-agent@mindie-agent-cc` 已启用）。
+> - **分支 B — OpenAI Codex CLI**：安装页：[mindie-agent-codex 快速开始](https://github.com/mindie-agent/mindie-agent-codex/blob/v0.1.37/README.md#快速开始)。Codex 安装 ref 与成功标准：`v0.1.37`（`codex plugin list --json` 中 `mindie-agent@mindie-agent` 已启用，并运行 `setup.py` 完成同会话运行时初始化）。
+> - **分支 C — Kimi Code CLI**：安装页：[mindie-agent-kimi 快速开始](https://github.com/mindie-agent/mindie-agent-kimi/blob/v0.1.30/README.md#快速开始)。
+> - **分支 D — DeepSeek Harness（DSH）**：安装页：[mindie-agent-dsh 快速开始](https://github.com/mindie-agent/mindie-agent-dsh/blob/v0.1.25/README.md#快速开始)。
+> - **分支 E — Google Antigravity**：检查 macOS 应用包 `/Applications/Antigravity.app`（或 `~/Applications/Antigravity.app`）及用户数据目录 `~/.gemini/antigravity`（或 `~/.gemini/antigravity-cli`、`~/.gemini/antigravity-ide`、`AGY_APP_DATA_DIR`）。安装页：[mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.20/README.md#快速开始交给-agent-一句话自动安装)。检出钉住的 `v0.1.20` tag，将 `plugins/mindie-agent` 复制到 `~/.gemini/config/plugins/mindie-agent`，并执行 `uv run --no-project --python 3.13 ~/.gemini/config/plugins/mindie-agent/scripts/setup.py init --workspace-root "$(pwd)"` 初始化持久化源码基线（`agy-source`）与运行时环境（`agy-venv`）。
+> - **分支 F — Tencent WorkBuddy / CodeBuddy**：定位应用包内置的 `codebuddy` 可执行文件（`/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`、`~/Applications/WorkBuddy.app/Contents/Resources/app.asar.unpacked/cli/bin/codebuddy`，或已存在的绝对路径 `MINDIE_WB_BIN`）；配置目录默认为 `~/.workbuddy`（若设置了绝对路径 `WORKBUDDY_CONFIG_DIR` / `CODEBUDDY_CONFIG_DIR` 则优先采用）。在锁定的 tag 检出目录中通过 `uv run --no-project --python 3.13` 执行安装页给出的 `setup.py init --install-wb`，并使用 `codebuddy plugin validate` 完成校验。安装页：[mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.18/README.md#3-快速安装与验证)。
+> - **分支 G — OpenCode（`v2.2.x+`）**：安装页：[mindie-agent-oc 安装、升级与初始化](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.10/README.md#3-安装升级与初始化)。执行 `opencode plugin add github:mindie-agent/mindie-agent-oc`（或双通道 npm 包 `@mindie-agent/oc@0.1.10`），并初始化受管 Python 运行环境（`mindie-agent-oc v0.1.10`）。
 > - **分支 H — Cursor 或其他通用 MCP 客户端**（仅需接入 SSH 远端底座 `remote-dev`）：按 [`remote-dev` README](https://github.com/mindie-agent/remote-dev/blob/v0.11.13/README.md) 注册 stdio 服务，版本锁定为 `remote-dev@v0.11.13`。
 >
 > 选定唯一分支后，按该安装页的协议安装上面钉住的 tag，随后立即进入第四步与第五步完成原生交互式引导。
@@ -93,7 +93,7 @@
 > - [DSH 工作区引导](https://github.com/mindie-agent/mindie-agent-dsh/blob/main/docs/install/workspace-setup.md)
 > - [Google Antigravity 工作区引导](https://github.com/mindie-agent/mindie-agent-agy/blob/main/docs/install/workspace-setup.md)
 > - [Tencent WorkBuddy 工作区引导](https://github.com/mindie-agent/mindie-agent-wb/blob/main/docs/install/workspace-setup.md)
-> - [OpenCode 工作区引导](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.9/docs/install/workspace-setup.md)
+> - [OpenCode 工作区引导](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.10/docs/install/workspace-setup.md)
 >
 > #### 第五步：弹出宿主原生交互式提问（开发工作区、社区共享与顺手点个 Star ⭐）并完成绑定
 > 插件安装与校验完成后，先通过 `setup.py sharing --status` 检查当前配置状态；若尚未记录用户授权选择（`needs_onboarding_prompt: true`），**必须立即调用当前宿主的原生提问工具弹出交互卡片**（不要只输出纯文本让用户自己敲命令）：
@@ -124,7 +124,7 @@
 >    ```bash
 >    gh api --hostname github.com --silent -X PUT /user/starred/mindie-agent/mindie-agent && gh api --hostname github.com --silent /user/starred/mindie-agent/mindie-agent
 >    ```
-> 4. **向用户汇报最终结果**：简要汇总已验证的 `gh` 账号、已安装的插件及版本、工作区路径、`setup.py sharing --status` 的共享/上报状态及 Star 状态，并提醒：支持手动触发的客户端（Claude Code / Codex / Kimi / DSH / WorkBuddy / OpenCode）日常通过 `/mindie-agent` 唤醒领域知识与 Skill（确定性工具默认自动可用），而 Google Antigravity 插件启用后默认开放全部功能。
+> 4. **向用户汇报最终结果**：简要汇总已验证的 `gh` 账号、已安装的插件及版本、工作区路径、`setup.py sharing --status` 的共享/上报状态及 Star 状态，并提醒插件启用后全部工具与昇腾领域知识均默认静默就绪，日常直接用自然语言提问即可（无需输入任何斜杠唤醒命令）。
 
 </details>
 
@@ -218,13 +218,13 @@ sequenceDiagram
   participant NPU as remote-dev (远端昇腾容器)
   participant Repo as 公共工程知识库 (knowledge-vllm-ascend 等)
 
-  Dev->>Agent: 输入 /mindie-agent + 研发需求（特性设计 / 算子开发 / 测试构建 / 调优排障）
+  Dev->>Agent: 直接输入自然语言研发需求（特性设计 / 算子开发 / 测试构建 / 调优排障）
   Agent->>Know: 1. 携带已知环境检索 (query)，按精确引用读取 (explain)
   Agent->>NPU: 2. 在选定容器内编写代码、同步补丁并运行测试
   NPU-->>Agent: 返回编译、正确性与性能结果以及日志引用
   Agent-->>Dev: 3. 交付实现和实际验证范围，可提交具体修订的有用性反馈
-  Note over Agent,Know: 采集需当前会话已手动调用 /mindie-agent 且满足贡献授权与项目范围
-  Agent->>Know: 4. 已启用会话结束时按授权采集并脱敏任务记录
+  Note over Agent,Know: 仅当开启社区共享授权且当前工作目录命中授权项目范围时运行
+  Agent->>Know: 4. 会话回合结束时按授权静默采集并脱敏任务记录
   Agent->>Know: 5. 从已验证的排障/调优结果提炼并审核新知识单元
   Note over Know,Repo: 公开贡献另需开启并配置目标仓库
   Know->>Repo: 6. 按需提交社区 PR；远端合并与本地同步分别确认
@@ -232,33 +232,33 @@ sequenceDiagram
 
 ---
 
-## 🔥 装好之后怎么用？（触发方式与使用示例）
+## 🔥 装好之后怎么用？（零口令静默自启与使用示例）
 
-MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progressive Disclosure）**——对用户而言，**从头到尾只需要知道 `/mindie-agent` 这一个入口**，不需要记忆任何复杂的子命令（如 `:init`、`:status` 等），底层上下文只在 Agent 需要时按需向 Agent 渐进式披露：
+MindIE Agent 的核心交互理念是**开箱即用与渐进式披露（Progressive Disclosure）**——插件安装并启用后**无需记忆或输入任何斜杠命令**，直接像平时一样用自然语言向 Agent 提问即可；底层工具与分级知识由主代理和子代理（Subagent）按任务上下文静默按需调用：
 
 | 能力模块 | 触发方式 | 极简使用方式说明 |
 | --- | --- | --- |
-| **🧠 昇腾 Infra 知识库、经验与 Skill 系统**<br/>（`mindie-knowledge` + 领域 Skills） | **当前会话手动触发**<br/>（统一入口 `/mindie-agent`） | 在开展昇腾 AI Infra 方案设计、`vLLM-Ascend` 特性开发、`AscendC` / `Triton` 算子实现、测试验证或性能调优时，在当前聊天显式输入一次 **`/mindie-agent` + 你的需求描述**（Codex 中也可输入 `$mindie-agent`），本会话后续轮次即持续启用知识检索、反馈、蒸馏与同步。首次配置、查看状态或开关共享同样只需输入 `/mindie-agent` 加自然语言。 |
-| **⚡ 远端昇腾服务器开发与确定性工具**<br/>（`remote-dev` / `coordinator` / `profiler` / `sim` / `diagnostics`） | **默认自动触发**<br/>（常驻可用，无需 `/mindie-agent`） | `remote-dev` 及确定性工程工具默认处于就绪状态。日常对话中只要提到远端服务器、容器、NPU 探测/监控、Profiling 解析、Roofline 仿真或事实状态查询，Agent 就会**默认自动调用**对应工具，无需先输入 `/mindie-agent`。 |
-| **🔄 研发经验沉淀与社区共建**<br/>（授权采集、脱敏、提炼与审核） | **授权一次配置，在 `/mindie-agent` 会话中自动运行** | 贡献授权（`mindie-consent.json`）一次配置跨会话持久有效。在已通过 `/mindie-agent` 启用的会话中，`Stop` 事件自动采集并脱敏授权项目范围内的公开对话（未调用 `/mindie-agent` 的普通会话不触发采集）；新知识从显式选定的已验证证据提炼并经审核入库与发布。 |
+| **🧠 昇腾 Infra 知识库、经验与 Skill 系统**<br/>（`mindie-knowledge` + 领域 Skills） | **默认静默就绪**<br/>（按昇腾任务语义自动加载） | 开展昇腾 AI Infra 方案设计、`vLLM-Ascend` 特性开发、`AscendC` / `Triton` 算子实现、精度验证或性能调优时，直接用自然语言描述目标，主代理与子代理自动按需检索 `L1–L4` 知识单元、精读引用、记录反馈与蒸馏沉淀；日常非昇腾常规编码不会加载领域 Skill 正文。 |
+| **⚡ 远端昇腾服务器开发与确定性工具**<br/>（`remote-dev` / `coordinator` / `profiler` / `sim` / `debugger` / `diagnostics`） | **默认静默就绪**<br/>（零前置绑定常驻可用） | 只要对话中涉及远端服务器、容器、NPU 探测/选卡租约、Profiling 解析、Roofline 仿真、CANN/`ACLGraph` 故障调试或事实状态查询，Agent（含子代理与自动化任务）即直接调用对应 MCP 工具。 |
+| **🔄 研发经验沉淀与社区共建**<br/>（授权采集、脱敏、提炼与审核） | **一次授权，在授权目录内后台静默运行** | 贡献授权（`mindie-consent.json`）一次配置跨会话持久有效。仅当开启共享开关且当前目录位于显式授权的 `project_roots` 范围内时，`Stop` 事件才在后台自动采集并双层脱敏（非授权目录 `< 100ms` 零动作直接跳过）。 |
 
 ### 实战对话示例（直接复制即可体验）
 
-#### 💡 示例 1：手动输入 `/mindie-agent` 辅助特性设计、算子开发与测试构建
+#### 💡 示例 1：特性设计、自定义融合算子开发与测试构建
 ```text
-/mindie-agent 我准备在 vllm-ascend 中为新模型实现一个自定义融合算子（提供 Triton / AscendC 实现）并补齐单元与精度测试，请结合知识库里的现有设计规范、算子适配经验帮我制定实现方案。
+我准备在 vllm-ascend 中为新模型实现一个自定义融合算子（提供 Triton / AscendC 实现）并补齐单元与精度测试，请结合现有设计规范与昇腾算子适配经验帮我制定实现方案。
 ```
-> **背后发生的事**：Agent 根据任务选择领域，携带实际环境条件检索，再按精确引用读取相关单元及其继承规则。知识中的来源、适用前提和验证范围会随内容保留，供实现与测试时核对。
+> **背后发生的事**：Agent 自动匹配昇腾领域上下文，携带实际硬件与框架条件检索 `L1–L4` 知识单元并按精确引用精读继承规则，将来源、适用前提和验证范围融入设计与代码实现。
 
-#### 💡 示例 2：日常对话默认触发 `remote-dev`，在远端昇腾容器内开发编译与跑测
+#### 💡 示例 2：在远端昇腾容器内同步代码、编译与实机跑测
 ```text
-连上远端机器 192.0.2.21（端口 22）上的 vllm-dev 容器，把我本地新写的算子实现和 tests/ 下的单测同步到 /workspace/vllm-ascend，在 NPU 上跑一下完整的 pytest 精度与性能测试。
+连上远端机器 192.0.2.21（端口 22）上的 vllm-dev 容器，把我本地新写的算子实现和 tests/ 下的单测同步到 /workspace/vllm-ascend，申请空闲 NPU 卡跑一下完整的 pytest 精度与性能测试。
 ```
-> **背后发生的事**：无需输入任何斜杠命令，Agent 默认自动调用 `remote-dev` 的 `remote_read`、`remote_edit` 与 `remote_bash` 在远端 `vllm-dev` 容器内完成代码同步、编译与 NPU 实机单测；长耗时编译或测试会自动转为受管后台作业并支持实时看日志。
+> **背后发生的事**：Agent 自动通过 `coordinator` 核验空闲 NPU 租约，并调用 `remote-dev` 在远端 `vllm-dev` 容器内完成代码同步、编译与实机单测；长耗时任务自动转为受管后台作业并支持增量查看日志。
 
-#### 💡 示例 3：`/mindie-agent` + `remote-dev` 联动调优，研发经验后台静默沉淀
+#### 💡 示例 3：知识检索 + Profiling + 远端验证联动调优，经验静默沉淀
 ```text
-/mindie-agent 结合昇腾推理与算子调优经验，帮我在远端 NPU 开发机上分析当前 decode 阶段的时延瓶颈，拉取 Profiling 关键指标并验证优化补丁。
+帮我在远端 NPU 开发机上分析当前 decode 阶段的时延瓶颈，拉取 msprof 关键指标对照 Roofline 模型定位根因，并验证优化补丁。
 ```
 > **背后发生的事**：Agent 结合领域知识和远端执行结果定位瓶颈，分别验证正确性与固定条件下的性能。授权采集保留该任务的脱敏材料；后续可以选择其中的证据提炼知识，经审核后用于新的任务或公开贡献。
 
@@ -273,8 +273,8 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 
 | 仓库 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- |
-| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | [`v0.1.14`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.14) | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
-| **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.11`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.11) | 独立评测框架与真机基准套件：20 个行为级验证任务（109 项三态与辅助变体对照）、预置准入脚手架（Gate Runner）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、组件级基准、跨任务知识复用及端到端总工程成本校验 |
+| **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | [`v0.1.15`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.15) | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
+| **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.12`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.12) | 独立评测框架与真机基准套件：20 个行为级验证任务（109 项三态与辅助变体对照）、预置准入脚手架（Gate Runner）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、组件级基准、跨任务知识复用及端到端总工程成本校验 |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | [`main`](https://github.com/mindie-agent/awesome-mindie-skills) | 面向昇腾 NPU AI Infra 全流程的高质量开源 Agent Skills 精选目录（现已覆盖 `vLLM-Ascend`、`AscendC`/`Triton` 算子开发、精度测试与性能调优，持续扩展中） |
 | **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | [`main`](https://github.com/mindie-agent/vllm-ascend-workspace) | 轻量可定制的 `vLLM` + `vLLM-Ascend` 本地多任务开发工作区，支持独立 Git Worktree 隔离与 MindIE Agent 集成 |
 
@@ -282,19 +282,19 @@ MindIE Agent 的核心交互理念是**极简易用与渐进式披露（Progress
 
 | 仓库 | 适用宿主 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- | --- |
-| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.28`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.28) | Claude Code 原生插件：生命周期 Hook、MCP 服务桥接与运行时版本锁定 |
-| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.36`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.36) | OpenAI Codex CLI 原生插件：Marketplace 安装、会话记录增量脱敏采集与 MCP 服务管理 |
-| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.29`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.29) | Kimi Code 原生插件：运行时原子版本切换、会话记录脱敏采集与 MCP 桥接 |
-| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.24`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.24) | DSH 原生插件：`/mindie-agent` Skill、知识检索工具、生命周期桥接与 `remote-dev` 集成 |
-| **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.19`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.19) | Google Antigravity 原生插件：默认开放全功能（含知识检索与共享组件 MCP）、原生远端工具别名与授权范围内的 Brain Transcript 脱敏采集 |
-| **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.17`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.17) | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、`/mindie-agent` 会话门控与共享组件 MCP 桥接 |
-| **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.9`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.9) | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、`/mindie-agent` 会话租约门控、共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |
+| **[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)** | **Claude Code** | [`v0.1.29`](https://github.com/mindie-agent/mindie-agent-cc/releases/tag/v0.1.29) | Claude Code 原生插件：生命周期 Hook、MCP 服务桥接与运行时版本锁定 |
+| **[`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)** | **OpenAI Codex CLI** | [`v0.1.37`](https://github.com/mindie-agent/mindie-agent-codex/releases/tag/v0.1.37) | OpenAI Codex CLI 原生插件：Marketplace 安装、会话记录增量脱敏采集与 MCP 服务管理 |
+| **[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)** | **Kimi Code CLI** | [`v0.1.30`](https://github.com/mindie-agent/mindie-agent-kimi/releases/tag/v0.1.30) | Kimi Code 原生插件：运行时原子版本切换、会话记录脱敏采集与 MCP 桥接 |
+| **[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)** | **DeepSeek Harness (DSH)** | [`v0.1.25`](https://github.com/mindie-agent/mindie-agent-dsh/releases/tag/v0.1.25) | DSH 原生插件：默认静默挂载昇腾 Skill、分级知识检索工具、确定性组件与 `remote-dev` 集成 |
+| **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.20`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.20) | Google Antigravity 原生插件：默认静默开放全功能（知识检索与共享组件 MCP）、原生远端工具别名与授权范围内的 Brain Transcript 脱敏采集 |
+| **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.18`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.18) | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、全功能静默自启与共享组件 MCP 桥接 |
+| **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.10`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.10) | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、全功能静默自启、共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |
 
 ### 3. 共享宿主底座与运行时组件（Shared Harness Substrate & Runtime Components）
 
 | 仓库 | Python 包 / 入口 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- | --- |
-| **[`harness`](https://github.com/mindie-agent/harness)** | `mindie-harness` / `mindie_harness` | [`v0.1.0`](https://github.com/mindie-agent/harness/releases/tag/v0.1.0) | 7 大原生宿主插件共享底座：跨平台无窗进程与嵌套 Win32 Job 监管、确定性冷启动 Seed、单活双代（`Active + Rollback`）`.inuse` 租约原子更新、长驻并发 MCP 网关（`P2.7` 零绑定直通 / `P2.1` 知识准入分流）与单状态源 `ExperimentLedger` RSI 优化闭环 |
+| **[`harness`](https://github.com/mindie-agent/harness)** | `mindie-harness` / `mindie_harness` | [`v0.1.2`](https://github.com/mindie-agent/harness/releases/tag/v0.1.2) | 7 大原生宿主插件共享底座：跨平台无窗进程与嵌套 Win32 Job 监管、确定性冷启动 Seed、单活双代（`Active + Rollback`）`.inuse` 租约原子更新、长驻并发零绑定 MCP 网关与单状态源 `ExperimentLedger` RSI 优化闭环 |
 | **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | [`v0.13.23`](https://github.com/mindie-agent/knowledge/releases/tag/v0.13.23) | 结构化分级知识单元（L1–L4）管理、按信息缺口条件检索、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、双层脱敏采集与社区 PR 发布 |
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | [`v0.11.13`](https://github.com/mindie-agent/remote-dev/releases/tag/v0.11.13) | SSH 远端文件读写与命令执行、共享用户私有 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁、Docker 容器直连、跨连接句柄后台长作业与产物同步 |
 | **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | [`v0.7.13`](https://github.com/mindie-agent/coordinator/releases/tag/v0.7.13) | 远端昇腾环境与多 Agent 资源协调器：SSH 主机/多机互通配置、容器开通与绑定、NPU 拓扑探测（兼容 A2/A3 双 Die/A5）、`HostQueue` 物理卡显存租约预算与并发编译槽位控制及端口防冲突 |
@@ -359,9 +359,9 @@ MindIE Agent 在持续演进中沉淀了 **18 条务实的[工程设计原则](.
 
 - **当前 `0.1` 轨道近期演进摘要**（精确版本锁定见 [`channels/0.1.json`](./channels/0.1.json)）：
   - **`0.1.12` / `0.1.11` / `0.1.10` / `0.1.8` 维护与闭环增强补丁**：[**0.1.12**](./docs/releases/0.1.12.md)（[English](./docs/releases/0.1.12.en.md)）加固 Windows 计划任务启动入口（在 `knowledge 0.13.14` 与 `diagnostics 0.5.8` 中校验真实 PE GUI 子系统，杜绝控制台启动器弹窗）；[**0.1.11**](./docs/releases/0.1.11.md)（[English](./docs/releases/0.1.11.en.md)）修复 Google Antigravity 与 Tencent WorkBuddy 原生插件目录覆盖升级时的解释器与保留脚本代际绑定；[**0.1.10**](./docs/releases/0.1.10.md)（[English](./docs/releases/0.1.10.en.md)）打通 `remote_auth(action="setup")` 首次 SSH 密码装钥闭环并落实跨宿主任务连续性契约；[**0.1.8**](./docs/releases/0.1.8.md)（[English](./docs/releases/0.1.8.en.md)）将 RSI 闭环收敛至单一权威状态源 `ExperimentLedger`、翻倍默认分级检索 Token 预算并完成六大宿主 `G4` 真题全通验证。
-  - **`0.1.7` 补丁：新增 Tencent WorkBuddy 原生插件、独立 `mindie-debugger` 组件、`mindie-sim` 可配置仿真、9 大公共知识库与 100% 真实 `vllm-ascend` 八组件 `G0–G5` 全矩阵实测（[0.1.7 发布说明](./docs/releases/0.1.7.md) · [English](./docs/releases/0.1.7.en.md) · [V2 实测报告](./docs/releases/0.1.7/g0-g5-vllm-ascend-v2-report.md) · [144 场 Trial 汇总 JSON](./docs/releases/0.1.7/g0-g5-vllm-ascend-v2-summary.json)）**：正式发布第六款官方原生宿主插件 [`mindie-agent-wb v0.1.17`](https://github.com/mindie-agent/mindie-agent-wb)（Tencent WorkBuddy / CodeBuddy Agent CLI，同时支持 WorkBuddy Connector 与 CodeBuddy 原生插件双入口挂接），并上线第八个独立共享运行时组件 [`mindie-debugger v0.1.0`](https://github.com/mindie-agent/debugger)（提供目标昇腾 NPU 业务的 `npu_fault_triage` CANN/`plog` 故障根因分诊、`precision` 三原语精度/内存踩踏定位与 `aclgraph` 零同步图内重放 Dump / 捕获守卫调试，职责与负责 Agent 自身日志和故障上报的 [`diagnostics v0.5.5`](https://github.com/mindie-agent/diagnostics) 清晰解耦）；同步发布 [`mindie-sim v0.9.2`](https://github.com/mindie-agent/sim)（网络分层有效带宽利用率、DeepEP 低时延/高吞吐模式、AFD 注意力—FFN 分离、多级 KV/专家 Offload、昇腾 950PR/950DT 硬件规格与在线服务到达过程建模）、[`mindie-profiler v0.5.6`](https://github.com/mindie-agent/profiler)（`export-calibration` 一键导出仿真校准包）、[`knowledge v0.13.10`](https://github.com/mindie-agent/knowledge)、[`coordinator v0.7.3`](https://github.com/mindie-agent/coordinator)、[`remote-dev v0.11.4`](https://github.com/mindie-agent/remote-dev)、[`npu-top v0.3.1`](https://github.com/mindie-agent/npu-top) 与 [`mindie-bench v0.4.6`](https://github.com/mindie-agent/mindie-bench)，将全部 6 款宿主插件（`Codex v0.1.17`、`Claude Code v0.1.13`、`Kimi v0.1.13`、`DSH v0.1.12`、`Google Antigravity v0.1.3`、`Tencent WorkBuddy v0.1.2`）升级为向前兼容宿主区间，将公共知识库扩展至 9 大领域（新增 `knowledge-xllm` 与 `knowledge-mindie-sd`，共 `493` 个分级知识单元）；并在 **100% 真实 `vllm_ascend/...` 生产模块场景（34 道真题、144 场 Trial，三道门禁 100% 通过）** 上完成跨 Codex (`gpt-6.1-sol`, `xhigh`) 与 DSH (`deepseek-flash`, `max`) 的全组件实测：`mindie-debugger` 专项将 DSH 通过率从 **`80.0% -> 100.0%`**（`D4` ACLGraph `0.0 -> 1.0`）、Codex 均耗缩短 **`-33.8%` (`1.51x`)** 且输出 Token 节省 **`-39.5%`**；`mindie-sim` + `mindie-profiler` 在 MLA Decode 结构优化上节省 **`-17.5%` Token**；`coordinator` + `npu-top` 将双 Die 绑核与 ModelSlim 预检 TTFE 提速 **`1.86x–2.46x`**；6 道 `vllm-ascend` 核心 L2 题总通过率从 **`25.0% -> 50.0%`（DSH `16.7% -> 50.0%`，`3.0x` 跃升）**；`G3` 跨任务蒸馏在新增 KDA Varlen Chunk 对上实现 DSH **`1.30x` 提速（`-23.2%`）** 与 Codex **`-35.7%` 轮次 / `-36.5%` Token**；`G4` 新增 MLA Prolog 融合题实现 DSH **`G0 = 0.0 -> G2 = 1.0 -> G4 = 1.0`（`G4` 较 `G2` 提速 `1.19x`、节省 `-20.4%` Token）**。
+  - **`0.1.7` 补丁：新增 Tencent WorkBuddy 原生插件、独立 `mindie-debugger` 组件、`mindie-sim` 可配置仿真、9 大公共知识库与 100% 真实 `vllm-ascend` 八组件 `G0–G5` 全矩阵实测（[0.1.7 发布说明](./docs/releases/0.1.7.md) · [English](./docs/releases/0.1.7.en.md) · [V2 实测报告](./docs/releases/0.1.7/g0-g5-vllm-ascend-v2-report.md) · [144 场 Trial 汇总 JSON](./docs/releases/0.1.7/g0-g5-vllm-ascend-v2-summary.json)）**：正式发布第六款官方原生宿主插件 [`mindie-agent-wb v0.1.18`](https://github.com/mindie-agent/mindie-agent-wb)（Tencent WorkBuddy / CodeBuddy Agent CLI，同时支持 WorkBuddy Connector 与 CodeBuddy 原生插件双入口挂接），并上线第八个独立共享运行时组件 [`mindie-debugger v0.1.0`](https://github.com/mindie-agent/debugger)（提供目标昇腾 NPU 业务的 `npu_fault_triage` CANN/`plog` 故障根因分诊、`precision` 三原语精度/内存踩踏定位与 `aclgraph` 零同步图内重放 Dump / 捕获守卫调试，职责与负责 Agent 自身日志和故障上报的 [`diagnostics v0.5.5`](https://github.com/mindie-agent/diagnostics) 清晰解耦）；同步发布 [`mindie-sim v0.9.2`](https://github.com/mindie-agent/sim)（网络分层有效带宽利用率、DeepEP 低时延/高吞吐模式、AFD 注意力—FFN 分离、多级 KV/专家 Offload、昇腾 950PR/950DT 硬件规格与在线服务到达过程建模）、[`mindie-profiler v0.5.6`](https://github.com/mindie-agent/profiler)（`export-calibration` 一键导出仿真校准包）、[`knowledge v0.13.10`](https://github.com/mindie-agent/knowledge)、[`coordinator v0.7.3`](https://github.com/mindie-agent/coordinator)、[`remote-dev v0.11.4`](https://github.com/mindie-agent/remote-dev)、[`npu-top v0.3.1`](https://github.com/mindie-agent/npu-top) 与 [`mindie-bench v0.4.6`](https://github.com/mindie-agent/mindie-bench)，将全部 6 款宿主插件（`Codex v0.1.17`、`Claude Code v0.1.13`、`Kimi v0.1.13`、`DSH v0.1.12`、`Google Antigravity v0.1.3`、`Tencent WorkBuddy v0.1.2`）升级为向前兼容宿主区间，将公共知识库扩展至 9 大领域（新增 `knowledge-xllm` 与 `knowledge-mindie-sd`，共 `493` 个分级知识单元）；并在 **100% 真实 `vllm_ascend/...` 生产模块场景（34 道真题、144 场 Trial，三道门禁 100% 通过）** 上完成跨 Codex (`gpt-6.1-sol`, `xhigh`) 与 DSH (`deepseek-flash`, `max`) 的全组件实测：`mindie-debugger` 专项将 DSH 通过率从 **`80.0% -> 100.0%`**（`D4` ACLGraph `0.0 -> 1.0`）、Codex 均耗缩短 **`-33.8%` (`1.51x`)** 且输出 Token 节省 **`-39.5%`**；`mindie-sim` + `mindie-profiler` 在 MLA Decode 结构优化上节省 **`-17.5%` Token**；`coordinator` + `npu-top` 将双 Die 绑核与 ModelSlim 预检 TTFE 提速 **`1.86x–2.46x`**；6 道 `vllm-ascend` 核心 L2 题总通过率从 **`25.0% -> 50.0%`（DSH `16.7% -> 50.0%`，`3.0x` 跃升）**；`G3` 跨任务蒸馏在新增 KDA Varlen Chunk 对上实现 DSH **`1.30x` 提速（`-23.2%`）** 与 Codex **`-35.7%` 轮次 / `-36.5%` Token**；`G4` 新增 MLA Prolog 融合题实现 DSH **`G0 = 0.0 -> G2 = 1.0 -> G4 = 1.0`（`G4` 较 `G2` 提速 `1.19x`、节省 `-20.4%` Token）**。
   - **`0.1.6` 补丁：自动更新就绪门禁、三芯片样本内校准与五端兼容升级（[0.1.6 发布说明](./docs/releases/0.1.6.md) · [English](./docs/releases/0.1.6.en.md)）**：交付 `mindie-knowledge v0.13.8` 单调修订号推进与容错修复、`mindie-coordinator v0.7.1` 原生 Antigravity 会话识别、`mindie-sim v0.9.1` `async_scheduling` 显存延迟释放与 `compose` 合成器，以及 `mindie-profiler v0.5.5` 跨 A2/A3/A5 1,653 份实测 Profile 100% `<= 10%` 样本内多工况校准。
-  - **`0.1.5` 补丁：新增 Google Antigravity 原生插件与 `G0–G5` 全矩阵基准验证（[0.1.5 发布说明](./docs/releases/0.1.5.md) · [English](./docs/releases/0.1.5.en.md)）**：正式发布第五款官方原生宿主插件 [`mindie-agent-agy v0.1.19`](https://github.com/mindie-agent/mindie-agent-agy)（Google Antigravity），完成与共享组件的双向契约对齐、原生工具别名映射、`AGY_CONVERSATION_ID` 会话租约透传与 Brain Transcript 双层脱敏采集；同时在完全无剧透的真实口语化报障语料（一句话模型+配置+报错现象 + 原始堆栈/日志路径）上完成 DSH（`deepseek-flash` / `max`）与 Codex（`gpt-6.1-sol` / `xhigh`）的 `G0–G5` 全矩阵基准验证：L2 主矩阵（48 场）通过率从 `G0/G1` 的 **`12.5% (2/16)` 跃升至 `G2` `50.0% (8/16，4.0 倍提升)`** 且通过任务耗时下降 **`21.2%–47.1%`**（`vllm-ascend` 核心任务 `0.0% → 37.5%`/DSH `50.0%`，四大组件任务 `25.0% → 62.5%`/Codex `75.0%`）；L3 昇腾真机 `G1` (`remote-dev`) 打通真机闭环（`0.0 → 1.0`）；`G3` 跨任务蒸馏飞轮在 DSH Partial RoPE 上实现 **`0.0 → 1.0` 破零**、在 Codex SFA MTP 上减少 **`58.5%–63.4%` 工具调用与 `-19.8%` 耗时**；`G4` RSI 探索在 Codex 上实现 `dsv4-sparse-mla` **`0.0 → 1.0` (`-27.8%`)** 与 `triton-spatial-norm` **`-30.9%` 提速**；`G5` 连续 5 轮演进（`82 → 83 → 84` units）验证同子域连续蒸馏正向/负向边界后回测前序任务**零退化且耗时再降 `-19.8%`（`153.29s`）**。
+  - **`0.1.5` 补丁：新增 Google Antigravity 原生插件与 `G0–G5` 全矩阵基准验证（[0.1.5 发布说明](./docs/releases/0.1.5.md) · [English](./docs/releases/0.1.5.en.md)）**：正式发布第五款官方原生宿主插件 [`mindie-agent-agy v0.1.20`](https://github.com/mindie-agent/mindie-agent-agy)（Google Antigravity），完成与共享组件的双向契约对齐、原生工具别名映射、`AGY_CONVERSATION_ID` 会话租约透传与 Brain Transcript 双层脱敏采集；同时在完全无剧透的真实口语化报障语料（一句话模型+配置+报错现象 + 原始堆栈/日志路径）上完成 DSH（`deepseek-flash` / `max`）与 Codex（`gpt-6.1-sol` / `xhigh`）的 `G0–G5` 全矩阵基准验证：L2 主矩阵（48 场）通过率从 `G0/G1` 的 **`12.5% (2/16)` 跃升至 `G2` `50.0% (8/16，4.0 倍提升)`** 且通过任务耗时下降 **`21.2%–47.1%`**（`vllm-ascend` 核心任务 `0.0% → 37.5%`/DSH `50.0%`，四大组件任务 `25.0% → 62.5%`/Codex `75.0%`）；L3 昇腾真机 `G1` (`remote-dev`) 打通真机闭环（`0.0 → 1.0`）；`G3` 跨任务蒸馏飞轮在 DSH Partial RoPE 上实现 **`0.0 → 1.0` 破零**、在 Codex SFA MTP 上减少 **`58.5%–63.4%` 工具调用与 `-19.8%` 耗时**；`G4` RSI 探索在 Codex 上实现 `dsv4-sparse-mla` **`0.0 → 1.0` (`-27.8%`)** 与 `triton-spatial-norm` **`-30.9%` 提速**；`G5` 连续 5 轮演进（`82 → 83 → 84` units）验证同子域连续蒸馏正向/负向边界后回测前序任务**零退化且耗时再降 `-19.8%`（`153.29s`）**。
   - **`0.1.4` 补丁与核心组件升级（[0.1.4 发布说明](./docs/releases/0.1.4.md) · [English](./docs/releases/0.1.4.en.md) · [自动升级验收记录](./docs/releases/0.1.4/automatic-update-acceptance.json) · [知识检索与双宿主收敛实测](./docs/audits/2026-10-29-knowledge-p0.md)）**：交付四端按信息缺口按需检索、统一精读预算、准确前置引用与受管组件绑定自动升级；在自然语言重写后的 `mindie-bench` 测试语料上，**DSH（`deepseek-flash` / `max`）与 Codex（`gpt-6.1-sol` / `xhigh`）在单点 SFA、双点 DSpark 与复杂 Profiler 归因任务上实现 `6/6` 全部自然收敛通过**（DSH 复杂任务从 50 轮预算耗尽收敛至 **17 轮 / `67.05s`**，Codex 从 `410.30s` 降至 **16 轮 / `132.97s`**）；同时同步独立组件正式版 `mindie-sim v0.8.1`（五层统一因果建模、4D 效率拆解、30ms SLA 硬件配比求解，280 个 Decode + 15 个 Prefill 真实用例收敛）、`mindie-profiler v0.5.3`（`mindie-model-structure/1` 模型结构对齐与 Decode 自动切分，856 例 DSH 集群回放整体 `841/856 = 98.25%`、其中 561 例独立盲测集 `546/561 = 97.33%` 误差 `<= 15%`）与 `remote-dev v0.11.2`。
   - **`0.1.3` / `0.1.2` / `0.1.1` 补丁记录**：[**0.1.3**](./docs/releases/0.1.3.md) 统一四端三服务 MCP 注册（`knowledge`、`remote`、`components`）；[**0.1.2**](./docs/releases/0.1.2.md) 交付跨进程共享用户私有 SSH 凭据与密钥维护（[SSH 验收记录](./docs/releases/0.1.2/ssh-auth-acceptance.json)）；[**0.1.1**](./docs/releases/0.1.1.md) 交付按会话显式 `/mindie-agent` 激活、整包 Token 预算估算、双 Die 物理放置及 `G5` 开发试点报告（[试点报告](./docs/releases/0.1.1/benchmark-pilot.md) · [原生更新验收](./docs/releases/0.1.1/native-update-acceptance.json)）。
 
@@ -400,7 +400,8 @@ MindIE Agent 在持续演进中沉淀了 **18 条务实的[工程设计原则](.
 
 | 文档主题 | 中文 | English |
 | --- | --- | --- |
-| **`v0.1.14` 补丁发布说明：七宿主触发能力对齐与运行时 `SKILL.md` 安装向导剥离（当前版本）** | [docs/releases/0.1.14.md](./docs/releases/0.1.14.md) | [docs/releases/0.1.14.en.md](./docs/releases/0.1.14.en.md) |
+| **`v0.1.15` 补丁发布说明：全七端零口令静默自启与全表面零会话绑定（当前版本）** | [docs/releases/0.1.15.md](./docs/releases/0.1.15.md) | [docs/releases/0.1.15.en.md](./docs/releases/0.1.15.en.md) |
+| **`v0.1.14` 补丁发布说明：运行时 `SKILL.md` 安装向导剥离与 Antigravity 默认全功能** | [docs/releases/0.1.14.md](./docs/releases/0.1.14.md) | [docs/releases/0.1.14.en.md](./docs/releases/0.1.14.en.md) |
 | **`v0.1.13` 补丁发布说明：全栈洁净架构收敛、`mindie-harness` 公共底座抽离与 7 宿主统一对齐** | [docs/releases/0.1.13.md](./docs/releases/0.1.13.md) | [docs/releases/0.1.13.en.md](./docs/releases/0.1.13.en.md) |
 | **`v0.1.12` 补丁发布说明：Windows 后台知识与诊断服务入口修复** | [docs/releases/0.1.12.md](./docs/releases/0.1.12.md) | [docs/releases/0.1.12.en.md](./docs/releases/0.1.12.en.md) |
 | **`v0.1.11` / `v0.1.10` 补丁发布说明：运行时原位升级连续性与首次 SSH 密码认证** | [0.1.11](./docs/releases/0.1.11.md) · [0.1.10](./docs/releases/0.1.10.md) | [0.1.11](./docs/releases/0.1.11.en.md) · [0.1.10](./docs/releases/0.1.10.en.md) |

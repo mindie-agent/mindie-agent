@@ -1,32 +1,61 @@
 #!/usr/bin/env python3
-"""AST gate enforcing zero pre-call session-binding gates on deterministic tools (R4 / Iron Rule 5 / P2.7).
+"""R4 AST & Guide Static Gate: Zero Pre-Call Session Binding & Silent Default-On Across All Surfaces.
 
 [Role]
-Verifies across `coordinator`, `harness` (`mindie_harness`), and all 7 native host plugins
-(`codex`, `cc`, `kimi`, `agy`, `wb`, `dsh`, `oc`) that deterministic MCP/CLI surfaces
-(`remote`, `components`/`tools`, and `coordinator`) never enforce mandatory pre-call
-chat-session identity, `PreToolUse`/`execute.before` SQLite nonces/binds, `_mindie_bind_id`
-injection, or `context_file` gates—while preserving strict session/consent admission on
-`knowledge` (`P2.1`).
+Prevents regression of two classes of historical anti-patterns (`P2.7` & `P2.8`):
+1. Pre-call host-session / `PreToolUse` nonce / `context_file` fail-closed gates on ANY
+   single-user MCP or CLI tool (`remote-dev`, `coordinator`, `profiler`, `sim`, `debugger`,
+   `diagnostics`, `npu-top`, and `knowledge_*`).
+2. Manual `/mindie-agent` / `$mindie-agent` activation ceremonies, `disable-model-invocation`
+   blocks, or install/onboarding documentation inside runtime `skills/`.
 
 [Invariants]
-- Deterministic surfaces execute over standard JSON-RPC `tools/call` with zero `_meta`, zero
-  `PreToolUse` hooks, zero required `request_nonce`/`_mindie_bind_id`/`context_file` fields,
-  and connection or auto-attached fallbacks when host metadata is absent.
-- Supports both standalone plugin `mcp_server.py` implementations and thin plugins delegating
-  deterministic/knowledge MCP routing to `mindie_harness`.
+- Pure Python 3.11+ standard library (`ast`, `json`, `pathlib`, `re`).
+- Uses structural AST inspection (never fragile line-number regexes) and path-safe command
+  token matching (never false-positiving `${PLUGIN_ROOT}/mindie-agent/...` or `/mindie-agent-*`):
+  * `harness`: MCP router never marks `request_nonce`, `_mindie_bind_id`, or `context_file`
+    required, never hides `knowledge_*` in `list_tools`, and never raises
+    `session_identity_required` on `knowledge_*`.
+  * `coordinator`: `task_server.py` resolves MCP callers via `_resolve_mcp_caller` (never
+    `native_turn_context`), `agent_session.py` provides `ensure_context` and
+    `context_for_execution`, and `ops.py` never marks `context_file` required.
+  * `mindie-agent-codex`: `mcp_transport.py` and `mcp_gate.py` use optional turn/session
+    identity (`optional_turn_identity` / `optional_native_identity`), never fail-closed
+    `native_identity` / `native_turn_identity` / `turn_identity`; `openai.yaml` enables
+    implicit invocation (`allow_implicit_invocation: true`) without `$mindie-agent`.
+  * `mindie-agent-cc`: `scripts/mcp_server.py` falls back to `_CONNECTION_SESSION_ID`
+    without fail-closed `claim_bind`.
+  * `mindie-agent-kimi`: `scripts/mcp_server.py` never requires `request_nonce`
+    (`_nonce_tools(..., require=False)` and no `require_nonce` gate in `handle`), falling
+    back to `_CONNECTION_SESSION_ID`.
+  * `mindie-agent-agy`: `plugins/mindie-agent/scripts/mcp_server.py` `_resolve_session`
+    falls back to `_CONNECTION_SESSION_ID` and never raises fail-closed exceptions.
+  * `mindie-agent-wb`: `plugins/mindie-agent/scripts/mcp_server.py` `_resolve_claim`
+    falls back to `_CONNECTION_SESSION_ID` without fail-closed raises (allowing `TimeoutError`
+    propagation per Principle 14), and no surface passes `require=True`.
+  * `mindie-agent-dsh`: `scripts/component_mcp.py` has zero session/nonce gate imports and
+    `scripts/knowledge_mcp.py` (when present) exposes tools unconditionally with
+    `_CONNECTION_SESSION_ID` fallback and zero `/mindie-agent` gate strings.
+  * `mindie-agent-oc`: `plugins/mindie-agent/scripts/mcp_server.py` never injects
+    `_mindie_bind_id` and `_resolve_session` falls back to `_CONNECTION_SESSION_ID` without
+    uncaught `claim_bind` / `require_session`.
+  * Runtime `skills/` & plugin manifests: zero `disable-model-invocation: true`, zero
+    user-facing `/mindie-agent` or `$mindie-agent` commands, and zero install docs in `skills/`.
 
 [Timeouts & Locks]
-- Pure synchronous local AST parsing (`< 25ms`) with zero subprocesses, network I/O, or locks.
+- Pure local file reads and in-memory AST parsing (`< 50ms` across all repositories); zero
+  subprocesses, zero network calls, zero file locks.
 
 [Side-Effect Policy]
-- Strictly read-only static inspection of repository checkouts.
+- Strictly read-only; returns human-actionable error strings.
 """
 
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
+import re
 from typing import Mapping, Sequence
 
 from repo_roots import INDEPENDENT_COMPONENTS, INDEPENDENT_PLUGINS, resolve_repo
@@ -44,6 +73,12 @@ GATED_REPOS: tuple[str, ...] = (
 )
 
 _INDEPENDENT_EXEMPT: frozenset[str] = frozenset({*INDEPENDENT_COMPONENTS, *INDEPENDENT_PLUGINS})
+# Matches standalone `/mindie-agent`, `/mindie-agent:mindie-agent`, `$mindie-agent`, etc.,
+# while never matching `${VAR}/mindie-agent/...`, `plugins/mindie-agent`, or `/mindie-agent-*`.
+_SLASH_CMD_RE = re.compile(r"(?<![A-Za-z0-9_./:-])(?<!\})[/\$]mindie-agent(?::mindie-agent)?(?![A-Za-z0-9_./-])")
+_DISABLED_MODEL_INVOCATION_RE = re.compile(
+    r"(?m)^[ \t]*(?:disable-model-invocation|disableModelInvocation)[ \t]*:[ \t]*true\b"
+)
 
 
 def _parse_ast(
@@ -61,10 +96,11 @@ def _parse_ast(
         return None
 
 
-def _top_functions(tree: ast.Module) -> dict[str, ast.FunctionDef | ast.AsyncFunctionDef]:
+def _top_functions(tree: ast.AST) -> dict[str, ast.FunctionDef | ast.AsyncFunctionDef]:
+    body = getattr(tree, "body", ())
     return {
         node.name: node
-        for node in tree.body
+        for node in body
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
     }
 
@@ -120,11 +156,104 @@ def _all_functions(tree: ast.AST) -> dict[str, ast.FunctionDef | ast.AsyncFuncti
     }
 
 
+def _is_allowed_reraise(stmt: ast.Raise, *, in_except_handler: bool) -> bool:
+    if stmt.exc is None:
+        return in_except_handler
+    if isinstance(stmt.exc, ast.Name) and stmt.exc.id == "TimeoutError":
+        return True
+    if isinstance(stmt.exc, ast.Call) and isinstance(stmt.exc.func, ast.Name):
+        return stmt.exc.func.id == "TimeoutError"
+    return False
+
+
+def _has_fail_closed_raise(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> bool:
+    """Return True if `fn_node` has an explicit non-`TimeoutError` `raise <Exc>` gate."""
+
+    def _walk_stmts(stmts: Sequence[ast.stmt], *, in_except_handler: bool = False) -> bool:
+        for stmt in stmts:
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                continue
+            if isinstance(stmt, ast.Raise):
+                if not _is_allowed_reraise(stmt, in_except_handler=in_except_handler):
+                    return True
+                continue
+            if isinstance(stmt, ast.Try):
+                for handler in stmt.handlers:
+                    if _walk_stmts(handler.body, in_except_handler=True):
+                        return True
+                if _walk_stmts(stmt.orelse, in_except_handler=in_except_handler):
+                    return True
+                if _walk_stmts(stmt.finalbody, in_except_handler=in_except_handler):
+                    return True
+                continue
+            for attr in ("body", "orelse", "finalbody"):
+                sub = getattr(stmt, attr, None)
+                if isinstance(sub, list) and _walk_stmts(sub, in_except_handler=in_except_handler):
+                    return True
+        return False
+
+    return _walk_stmts(fn_node.body)
+
+
+def _unconditional_calls(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    """Return function/method call names executed unconditionally at function body / `try` body level."""
+    names: set[str] = set()
+
+    def _walk_expr(node: ast.AST) -> None:
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                names.add(node.func.id)
+            elif isinstance(node.func, ast.Attribute):
+                names.add(node.func.attr)
+        for child in ast.iter_child_nodes(node):
+            _walk_expr(child)
+
+    def _walk_stmts(stmts: Sequence[ast.stmt]) -> None:
+        for stmt in stmts:
+            if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.If)):
+                continue
+            if isinstance(stmt, ast.Try):
+                _walk_stmts(stmt.body)
+                _walk_stmts(stmt.finalbody)
+                continue
+            _walk_expr(stmt)
+
+    _walk_stmts(fn_node.body)
+    return names
+
+
+def _calls_outside_try(fn_node: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    """Return function/method call names executed outside `try:` blocks."""
+    names: set[str] = set()
+
+    def _walk_node(node: ast.AST) -> None:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and node is not fn_node:
+            return
+        if isinstance(node, ast.Try):
+            for handler in node.handlers:
+                for st in handler.body:
+                    _walk_node(st)
+            for st in node.orelse:
+                _walk_node(st)
+            for st in node.finalbody:
+                _walk_node(st)
+            return
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Name):
+                names.add(node.func.id)
+            elif isinstance(node.func, ast.Attribute):
+                names.add(node.func.attr)
+        for child in ast.iter_child_nodes(node):
+            _walk_node(child)
+
+    _walk_node(fn_node)
+    return names
+
+
 def _plugin_delegates_mcp_to_harness(repo_dir: Path, scripts_rel: str) -> bool:
     scripts_dir = repo_dir / scripts_rel
     if not scripts_dir.is_dir():
         return False
-    imports_harness = False
     for py_path in sorted(scripts_dir.rglob("*.py")):
         if "__pycache__" in py_path.parts:
             continue
@@ -136,54 +265,10 @@ def _plugin_delegates_mcp_to_harness(repo_dir: Path, scripts_rel: str) -> bool:
             if isinstance(node, ast.Import) and any(
                 al.name == "mindie_harness" or al.name.startswith("mindie_harness.") for al in node.names
             ):
-                imports_harness = True
-            elif isinstance(node, ast.ImportFrom) and (node.module or "").startswith("mindie_harness"):
-                imports_harness = True
-    return imports_harness
-
-
-def _is_surface_var(node: ast.AST) -> bool:
-    if isinstance(node, ast.Name) and node.id == "surface":
-        return True
-    return (
-        isinstance(node, ast.Attribute)
-        and isinstance(node.value, ast.Name)
-        and node.value.id == "self"
-        and node.attr == "surface"
-    )
-
-
-def _is_surface_eq(test: ast.AST, target_surface: str) -> bool:
-    if not isinstance(test, ast.Compare) or len(test.ops) != 1 or not isinstance(test.ops[0], ast.Eq):
-        return False
-    left, right = test.left, test.comparators[0]
-    if _is_surface_var(left) and isinstance(right, ast.Constant) and right.value == target_surface:
-        return True
-    if _is_surface_var(right) and isinstance(left, ast.Constant) and left.value == target_surface:
-        return True
+                return True
+            if isinstance(node, ast.ImportFrom) and (node.module or "").startswith("mindie_harness"):
+                return True
     return False
-
-
-def _stmts_called_names(stmts: Sequence[ast.stmt]) -> set[str]:
-    out: set[str] = set()
-    for stmt in stmts:
-        out |= _called_names(stmt)
-    return out
-
-
-def _stmts_referenced_names(stmts: Sequence[ast.stmt]) -> set[str]:
-    out: set[str] = set()
-    for stmt in stmts:
-        out |= _referenced_names(stmt)
-    return out
-
-
-def _surface_eq_branches(node: ast.AST, target_surface: str) -> list[tuple[list[ast.stmt], list[ast.stmt]]]:
-    return [
-        (item.body, item.orelse)
-        for item in ast.walk(node)
-        if isinstance(item, ast.If) and _is_surface_eq(item.test, target_surface)
-    ]
 
 
 def _check_harness(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
@@ -214,9 +299,17 @@ def _check_harness(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> 
                         errors.append(
                             f"harness: {router_rel} marks {sorted(bad_req)} as required in MCP schema (violates P2.7)"
                         )
-    src_text = (repo_dir / router_rel).read_text(encoding="utf-8")
-    if "knowledge" not in src_text:
-        errors.append(f"harness: {router_rel} must distinguish `knowledge` admission (P2.1) from deterministic surfaces (P2.7)")
+        elif isinstance(item, ast.Constant) and item.value == "session_identity_required":
+            errors.append(
+                f"harness: {router_rel} enforces fail-closed `session_identity_required` gate (violates silent default-on)"
+            )
+    router_cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "MCPRouter"), None)
+    if router_cls is not None:
+        list_fn = _top_functions(router_cls).get("list_tools")
+        if list_fn is not None and "_verify_knowledge_admission" in _called_names(router_cls):
+            errors.append(
+                f"harness: {router_rel} `MCPRouter` still calls fail-closed `_verify_knowledge_admission`"
+            )
 
 
 def _check_coordinator(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
@@ -281,61 +374,44 @@ def _check_codex(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> No
     gate_tree = _parse_ast("mindie-agent-codex", repo_dir, "plugins/mindie-agent/scripts/mcp_gate.py", strict_files=strict_files, errors=errors)
     if id_tree is not None:
         fn_map = _top_functions(id_tree)
-        for name in ("native_identity", "optional_native_identity", "optional_turn_identity"):
+        for name in ("optional_native_identity", "optional_turn_identity"):
             if name not in fn_map:
                 errors.append(f"mindie-agent-codex: mcp_identity.py missing `{name}`")
     if tr_tree is not None:
-        branches = _surface_eq_branches(tr_tree, "knowledge")
-        branches += [
-            ([node.body], [node.orelse])  # type: ignore[list-item]
-            for node in ast.walk(tr_tree)
-            if isinstance(node, ast.IfExp) and _is_surface_eq(node.test, "knowledge")
-        ]
-        strict = {"native_identity", "native_turn_identity"}
-        if not any(
-            (_stmts_called_names(body) & strict)
-            and "optional_turn_identity" not in _stmts_called_names(body)
-            and "optional_turn_identity" in _stmts_called_names(other)
-            and not (_stmts_called_names(other) & strict)
-            for body, other in branches
-        ):
+        tr_called = _called_names(tr_tree)
+        strict_tr = tr_called & {"native_identity", "native_turn_identity"}
+        if strict_tr or "optional_turn_identity" not in tr_called:
             errors.append(
-                "mindie-agent-codex: mcp_transport.py must branch `surface == 'knowledge'` to strict turn identity and deterministic surfaces to `optional_turn_identity`"
+                "mindie-agent-codex: mcp_transport.py must use `optional_turn_identity` across all MCP surfaces "
+                "(never fail-closed `native_identity` / `native_turn_identity`)"
             )
     if gate_tree is not None:
         gate_cls = next((n for n in gate_tree.body if isinstance(n, ast.ClassDef) and n.name == "Gate"), None)
         if gate_cls is None:
             errors.append("mindie-agent-codex: mcp_gate.py missing `Gate`")
         else:
-            methods = _top_functions(gate_cls)  # type: ignore[arg-type]
+            methods = _top_functions(gate_cls)
             call_fn = methods.get("call")
             remote_fn = methods.get("_remote_call")
             if call_fn is None:
                 errors.append("mindie-agent-codex: mcp_gate.py missing `Gate.call`")
             else:
-                comp_branches = _surface_eq_branches(call_fn, "components")
-                know_branches = _surface_eq_branches(call_fn, "knowledge")
-                comp_ok = any(
-                    "optional_native_identity" in _stmts_called_names(body)
-                    and "native_identity" not in _stmts_called_names(body)
-                    for body, _ in comp_branches
-                )
-                if not comp_ok:
+                call_names = _called_names(call_fn)
+                if call_names & {"native_identity", "native_turn_identity", "turn_identity"}:
                     errors.append(
-                        "mindie-agent-codex: `Gate.call` `components` branch must use `optional_native_identity` (never strict `native_identity`)"
+                        "mindie-agent-codex: `Gate.call` invokes strict `native_identity` / `native_turn_identity` / "
+                        "`turn_identity` (all MCP surfaces must use `optional_native_identity` / `optional_turn_identity`)"
                     )
-                if know_branches:
-                    know_ok = any(
-                        "native_identity" in _stmts_called_names(body)
-                        and "optional_native_identity" not in _stmts_called_names(body)
-                        for body, _ in know_branches
+                if "optional_native_identity" not in call_names and "optional_turn_identity" not in call_names:
+                    errors.append(
+                        "mindie-agent-codex: `Gate.call` must resolve optional identity via `optional_native_identity`"
                     )
-                else:
-                    know_ok = "native_identity" in _called_names(call_fn)
-                if not know_ok:
-                    errors.append("mindie-agent-codex: `Gate.call` `knowledge` path must enforce strict `native_identity`")
             rem_target = remote_fn or call_fn
-            if rem_target is None or "optional_turn_identity" not in _called_names(rem_target) or "turn_identity" in _called_names(rem_target):
+            if (
+                rem_target is None
+                or "optional_turn_identity" not in _called_names(rem_target)
+                or bool(_called_names(rem_target) & {"turn_identity", "native_turn_identity"})
+            ):
                 errors.append("mindie-agent-codex: `Gate` remote path must use `optional_turn_identity` (never strict `turn_identity`)")
 
 
@@ -345,27 +421,26 @@ def _check_cc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     tree = _parse_ast("mindie-agent-cc", repo_dir, "scripts/mcp_server.py", strict_files=strict_files, errors=errors)
     if tree is None:
         return
-    if _plugin_delegates_mcp_to_harness(repo_dir, "scripts") and "claim_bind" not in _called_names(tree):
+    fn_map = _top_functions(tree)
+    if _plugin_delegates_mcp_to_harness(repo_dir, "scripts") and "handle" not in fn_map:
         return
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
         errors.append("mindie-agent-cc: scripts/mcp_server.py missing `_CONNECTION_SESSION_ID` fallback")
-    handle_fn = _top_functions(tree).get("handle")
+    handle_fn = fn_map.get("handle")
     if handle_fn is None:
         errors.append("mindie-agent-cc: scripts/mcp_server.py missing `handle`")
         return
-    branches = _surface_eq_branches(handle_fn, "knowledge")
-    valid = any(
-        "claim_bind" in _stmts_called_names(body)
-        and "_CONNECTION_SESSION_ID" not in _stmts_referenced_names(body)
-        and "_CONNECTION_SESSION_ID" in _stmts_referenced_names(orelse)
-        for body, orelse in branches
-    )
-    if not valid:
+    if "claim_bind" in _calls_outside_try(handle_fn):
         errors.append(
-            "mindie-agent-cc: `handle` must branch on `surface == 'knowledge'` with strict `claim_bind` "
-            "(no `_CONNECTION_SESSION_ID` fallback) and fall back to `_CONNECTION_SESSION_ID` on deterministic surfaces"
+            "mindie-agent-cc: `handle` calls uncaught strict `claim_bind` (violates silent default-on zero-binding MCP)"
         )
+    refs = set(_referenced_names(handle_fn))
+    for callee in _called_names(handle_fn):
+        if callee in fn_map:
+            refs |= _referenced_names(fn_map[callee])
+    if "_CONNECTION_SESSION_ID" not in refs:
+        errors.append("mindie-agent-cc: `handle` must fall back to `_CONNECTION_SESSION_ID` across all surfaces")
 
 
 def _check_kimi(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
@@ -374,40 +449,39 @@ def _check_kimi(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> Non
     tree = _parse_ast("mindie-agent-kimi", repo_dir, "scripts/mcp_server.py", strict_files=strict_files, errors=errors)
     if tree is None:
         return
-    if _plugin_delegates_mcp_to_harness(repo_dir, "scripts") and "require_nonce" not in _called_names(tree):
+    fn_map = _top_functions(tree)
+    if _plugin_delegates_mcp_to_harness(repo_dir, "scripts") and "handle" not in fn_map:
         return
     assigns = _top_assign_names(tree)
     if "_CONNECTION_SESSION_ID" not in assigns:
         errors.append("mindie-agent-kimi: scripts/mcp_server.py missing `_CONNECTION_SESSION_ID` fallback")
-    fn_map = _top_functions(tree)
-    for det_fn_name in ("remote_tools", "component_tools"):
-        det_fn = fn_map.get(det_fn_name)
-        if det_fn is None:
-            errors.append(f"mindie-agent-kimi: scripts/mcp_server.py missing `{det_fn_name}`")
+    for fn_name in ("remote_tools", "component_tools", "knowledge_tools"):
+        fn = fn_map.get(fn_name)
+        if fn is None:
+            if fn_name in ("remote_tools", "component_tools"):
+                errors.append(f"mindie-agent-kimi: scripts/mcp_server.py missing `{fn_name}`")
             continue
-        if "_nonce_tools" in _called_names(det_fn):
-            req_vals = _call_keyword_const(det_fn, "_nonce_tools", "require")
-            if req_vals != [False]:
+        if "_nonce_tools" in _called_names(fn):
+            req_vals = _call_keyword_const(fn, "_nonce_tools", "require")
+            if not req_vals or any(v is not False for v in req_vals):
                 errors.append(
-                    f"mindie-agent-kimi: scripts/mcp_server.py `{det_fn_name}` must call "
-                    "`_nonce_tools(..., require=False)` so `request_nonce` is never required on deterministic tools"
+                    f"mindie-agent-kimi: scripts/mcp_server.py `{fn_name}` must call "
+                    "`_nonce_tools(..., require=False)` so `request_nonce` is never required"
                 )
     handle_fn = fn_map.get("handle")
     if handle_fn is None:
         errors.append("mindie-agent-kimi: scripts/mcp_server.py missing `handle`")
         return
-    branches = _surface_eq_branches(handle_fn, "knowledge")
-    valid = any(
-        {"require_nonce", "claim_nonce"} <= _stmts_called_names(body)
-        and "_CONNECTION_SESSION_ID" not in _stmts_referenced_names(body)
-        and "_CONNECTION_SESSION_ID" in _stmts_referenced_names(orelse)
-        for body, orelse in branches
-    )
-    if not valid:
+    if _unconditional_calls(handle_fn) & {"require_nonce", "strip_nonce"}:
         errors.append(
-            "mindie-agent-kimi: `handle` must branch on `surface == 'knowledge'` with strict `require_nonce` + `claim_nonce` "
-            "and fall back to `_CONNECTION_SESSION_ID` on deterministic surfaces"
+            "mindie-agent-kimi: `handle` calls strict `require_nonce` (violates silent default-on zero-binding MCP)"
         )
+    refs = set(_referenced_names(handle_fn))
+    for callee in _called_names(handle_fn):
+        if callee in fn_map:
+            refs |= _referenced_names(fn_map[callee])
+    if "_CONNECTION_SESSION_ID" not in refs:
+        errors.append("mindie-agent-kimi: `handle` must fall back to `_CONNECTION_SESSION_ID` across all surfaces")
 
 
 def _check_agy(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
@@ -429,20 +503,11 @@ def _check_agy(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None
         return
     if "_CONNECTION_SESSION_ID" not in _referenced_names(resolve_fn):
         errors.append("mindie-agent-agy: `_resolve_session` must fall back to `_CONNECTION_SESSION_ID`")
-    for item in ast.walk(resolve_fn):
-        if isinstance(item, ast.Raise) and item.exc is not None:
-            if isinstance(item.exc, ast.Call) and isinstance(item.exc.func, ast.Name) and item.exc.func.id == "RuntimeError":
-                errors.append(
-                    "mindie-agent-agy: `_resolve_session` raises `RuntimeError` on missing session identity "
-                    "(violates Iron Rule 5 zero-binding deterministic surface)"
-                )
-
-
-def _has_knowledge_guard(resolve_fn: ast.AST) -> bool:
-    for body, _ in _surface_eq_branches(resolve_fn, "knowledge"):
-        if any(isinstance(n, ast.Raise) for n in body) and "_CONNECTION_SESSION_ID" not in _stmts_referenced_names(body):
-            return True
-    return False
+    if _has_fail_closed_raise(resolve_fn):
+        errors.append(
+            "mindie-agent-agy: `_resolve_session` raises fail-closed exception on missing session identity "
+            "(violates Iron Rule 5 zero-binding surface)"
+        )
 
 
 def _check_wb(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
@@ -464,44 +529,60 @@ def _check_wb(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
         errors.append("mindie-agent-wb: mcp_server.py missing `_resolve_claim`")
         return
     if "_CONNECTION_SESSION_ID" not in _referenced_names(resolve_fn):
-        errors.append("mindie-agent-wb: `_resolve_claim` must fall back to `_CONNECTION_SESSION_ID` on deterministic surfaces")
-    for det_fn_name in ("call_remote_surface", "call_tools_surface"):
-        det_fn = fn_map.get(det_fn_name)
-        if det_fn is None:
-            errors.append(f"mindie-agent-wb: mcp_server.py missing `{det_fn_name}`")
-            continue
-        if True in _call_keyword_const(det_fn, "_resolve_claim", "require"):
-            errors.append(
-                f"mindie-agent-wb: `{det_fn_name}` passes `require=True` to `_resolve_claim` "
-                "(re-introduces pre-call session-binding gate on deterministic surface)"
-            )
-    know_fn = fn_map.get("call_knowledge_surface")
-    know_guarded = know_fn is not None and (
-        _call_keyword_const(know_fn, "_resolve_claim", "require") == [True]
-        or (_has_knowledge_guard(resolve_fn) and "_resolve_claim" in _called_names(know_fn))
-    )
-    if not know_guarded:
+        errors.append("mindie-agent-wb: `_resolve_claim` must fall back to `_CONNECTION_SESSION_ID`")
+    if _has_fail_closed_raise(resolve_fn):
         errors.append(
-            "mindie-agent-wb: `call_knowledge_surface` / `_resolve_claim` must strictly fail closed on `knowledge`"
+            "mindie-agent-wb: `_resolve_claim` raises fail-closed exception instead of falling back to `_CONNECTION_SESSION_ID`"
         )
+    for fn_name in ("call_remote_surface", "call_tools_surface", "call_knowledge_surface"):
+        fn = fn_map.get(fn_name)
+        if fn is None:
+            if fn_name in ("call_remote_surface", "call_tools_surface"):
+                errors.append(f"mindie-agent-wb: mcp_server.py missing `{fn_name}`")
+            continue
+        if True in _call_keyword_const(fn, "_resolve_claim", "require"):
+            errors.append(
+                f"mindie-agent-wb: `{fn_name}` passes `require=True` to `_resolve_claim` "
+                "(re-introduces pre-call session-binding gate)"
+            )
 
 
 def _check_dsh(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     if not (repo_dir / "scripts/component_mcp.py").is_file() and _plugin_delegates_mcp_to_harness(repo_dir, "scripts"):
         return
     tree = _parse_ast("mindie-agent-dsh", repo_dir, "scripts/component_mcp.py", strict_files=strict_files, errors=errors)
-    if tree is None:
-        return
-    forbidden = {"claim_bind", "claim_nonce", "require_nonce", "ManagedTaskContextRequired"}
-    used = (_called_names(tree) | _referenced_names(tree)) & forbidden
-    if used:
-        errors.append(
-            f"mindie-agent-dsh: scripts/component_mcp.py references session-binding gate symbol(s) {sorted(used)}"
-        )
+    if tree is not None:
+        forbidden = {"claim_bind", "claim_nonce", "require_nonce", "ManagedTaskContextRequired"}
+        used = (_called_names(tree) | _referenced_names(tree)) & forbidden
+        if used:
+            errors.append(
+                f"mindie-agent-dsh: scripts/component_mcp.py references session-binding gate symbol(s) {sorted(used)}"
+            )
+    kmcp_path = repo_dir / "scripts/knowledge_mcp.py"
+    if kmcp_path.is_file():
+        kmcp_text = kmcp_path.read_text(encoding="utf-8")
+        if _SLASH_CMD_RE.search(kmcp_text):
+            errors.append(
+                "mindie-agent-dsh: scripts/knowledge_mcp.py exposes `/mindie-agent` gate text (violates silent default-on)"
+            )
+        kmcp_tree = _parse_ast("mindie-agent-dsh", repo_dir, "scripts/knowledge_mcp.py", strict_files=False, errors=errors)
+        if kmcp_tree is not None:
+            fn_map = _top_functions(kmcp_tree)
+            sess_fn = fn_map.get("session_identity")
+            if sess_fn is not None and "_CONNECTION_SESSION_ID" not in _referenced_names(sess_fn):
+                errors.append(
+                    "mindie-agent-dsh: scripts/knowledge_mcp.py `session_identity` raises on missing env session "
+                    "instead of falling back to `_CONNECTION_SESSION_ID`"
+                )
+            disc_fn = fn_map.get("discoverable_tools")
+            if disc_fn is not None and "knowledge_lease" in _called_names(disc_fn):
+                errors.append(
+                    "mindie-agent-dsh: scripts/knowledge_mcp.py `discoverable_tools` hides tools behind `knowledge_lease`"
+                )
 
 
 def _check_oc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
-    """Close AD-01 blindspot: OpenCode deterministic tools must never require `_mindie_bind_id` or `execute.before`."""
+    """Close AD-01 blindspot: OpenCode MCP tools must never require `_mindie_bind_id` or fail-closed session claims."""
     if not (repo_dir / "plugins/mindie-agent/scripts/mcp_server.py").is_file() and _plugin_delegates_mcp_to_harness(
         repo_dir, "plugins/mindie-agent/scripts"
     ):
@@ -512,7 +593,7 @@ def _check_oc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     fn_map = _top_functions(tree)
     if "_with_bind_property" in fn_map or "_with_bind_property" in _called_names(tree):
         errors.append(
-            "mindie-agent-oc: mcp_server.py injects `_mindie_bind_id` via `_with_bind_property` on deterministic tools (AD-01 / violates P2.7)"
+            "mindie-agent-oc: mcp_server.py injects `_mindie_bind_id` via `_with_bind_property` (AD-01 / violates P2.7)"
         )
     if _plugin_delegates_mcp_to_harness(repo_dir, "plugins/mindie-agent/scripts") and "_resolve_session" not in fn_map:
         return
@@ -523,13 +604,17 @@ def _check_oc(repo_dir: Path, *, strict_files: bool, errors: list[str]) -> None:
     if resolve_fn is None:
         errors.append("mindie-agent-oc: mcp_server.py missing `_resolve_session`")
         return
-    called = _called_names(resolve_fn)
-    if "require_session" in called and "_CONNECTION_SESSION_ID" not in _referenced_names(resolve_fn):
+    uncaught_calls = _calls_outside_try(resolve_fn)
+    if "claim_bind" in uncaught_calls:
+        errors.append("mindie-agent-oc: `_resolve_session` calls uncaught fail-closed `claim_bind`")
+    if "require_session" in uncaught_calls and "_CONNECTION_SESSION_ID" not in _referenced_names(resolve_fn):
         errors.append(
             "mindie-agent-oc: `_resolve_session` calls strict `require_session` without `_CONNECTION_SESSION_ID` fallback (AD-01)"
         )
+    if _has_fail_closed_raise(resolve_fn):
+        errors.append("mindie-agent-oc: `_resolve_session` raises fail-closed exception on missing session")
     if "_CONNECTION_SESSION_ID" not in _referenced_names(resolve_fn):
-        errors.append("mindie-agent-oc: `_resolve_session` must fall back to `_CONNECTION_SESSION_ID` on deterministic surfaces")
+        errors.append("mindie-agent-oc: `_resolve_session` must fall back to `_CONNECTION_SESSION_ID`")
 
 
 _CHECKERS = {
@@ -554,9 +639,24 @@ _SKILL_PATHS: tuple[tuple[str, str], ...] = (
     ("mindie-agent-oc", "plugins/mindie-agent/skills/mindie-agent/SKILL.md"),
 )
 
+_MANIFEST_PATHS: tuple[tuple[str, str], ...] = (
+    ("mindie-agent-codex", "plugins/mindie-agent/.codex-plugin/plugin.json"),
+    ("mindie-agent-cc", ".claude-plugin/plugin.json"),
+    ("mindie-agent-kimi", "kimi.plugin.json"),
+    ("mindie-agent-dsh", "package.json"),
+    ("mindie-agent-agy", "plugins/mindie-agent/plugin.json"),
+    ("mindie-agent-wb", "plugins/mindie-agent/plugin.json"),
+    ("mindie-agent-oc", "plugins/mindie-agent/plugin.json"),
+    ("mindie-agent-oc", "package.json"),
+)
+
+_MANIFEST_TEXT_KEYS: frozenset[str] = frozenset(
+    {"description", "shortDescription", "defaultPrompt", "suggestedPrompts", "systemPrompt"}
+)
+
 _FORBIDDEN_SKILL_SNIPPETS: tuple[tuple[str, str], ...] = (
     ("Native call identity still applies to plugin tools", "re-introduces pre-call session-binding prompt"),
-    ("remote, and components MCP call must include a fresh request_nonce", "requires request_nonce on deterministic tools"),
+    ("remote, and components MCP call must include a fresh request_nonce", "requires request_nonce on MCP tools"),
     ("(out_tensor, metrics_dict)", "leaks benchmark-specific verifier tuple signature into production SKILL.md (AD-10)"),
     ("brute-force test capture hashes", "leaks benchmark anti-cheat rule into production SKILL.md (AD-10)"),
     ("Non-Intrusive First-Use Onboarding", "mixes install/onboarding prompts into runtime SKILL.md"),
@@ -565,21 +665,11 @@ _FORBIDDEN_SKILL_SNIPPETS: tuple[tuple[str, str], ...] = (
     ("github-authentication.md", "references install-only GitHub login guide inside runtime SKILL.md"),
     ("user-notice.md", "references install-only consent notice inside runtime SKILL.md"),
     ("starred/mindie-agent", "mixes install-time GitHub star prompt into runtime SKILL.md"),
+    ("Manually enable MindIE knowledge", "re-introduces manual activation prompt in silent default-on SKILL.md"),
 )
 
 _FORBIDDEN_SKILL_FILES: frozenset[str] = frozenset(
     {"workspace-setup.md", "github-authentication.md", "user-notice.md"}
-)
-
-_MANUAL_TRIGGER_REPOS: frozenset[str] = frozenset(
-    {
-        "mindie-agent-codex",
-        "mindie-agent-cc",
-        "mindie-agent-kimi",
-        "mindie-agent-dsh",
-        "mindie-agent-wb",
-        "mindie-agent-oc",
-    }
 )
 
 
@@ -590,47 +680,101 @@ def _extract_frontmatter(text: str) -> str:
     return text[4:end] if end != -1 else ""
 
 
+def _iter_manifest_text_values(obj: object) -> list[str]:
+    found: list[str] = []
+    if isinstance(obj, Mapping):
+        for k, v in obj.items():
+            if k in _MANIFEST_TEXT_KEYS:
+                if isinstance(v, str):
+                    found.append(v)
+                elif isinstance(v, list):
+                    found.extend(item for item in v if isinstance(item, str))
+            else:
+                found.extend(_iter_manifest_text_values(v))
+    elif isinstance(obj, list):
+        for item in obj:
+            found.extend(_iter_manifest_text_values(item))
+    return found
+
+
 def _check_prompt_and_guide_hygiene(
     siblings_roots: Sequence[Path],
     explicit_repos: Mapping[str, Path] | None,
+    strict_repos: set[str],
     errors: list[str],
 ) -> None:
     for repo_name, rel_skill in _SKILL_PATHS:
         repo_dir = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
-        if repo_dir is None or not (repo_dir / rel_skill).is_file():
+        if repo_dir is None:
             continue
         skill_file = repo_dir / rel_skill
+        if not skill_file.is_file():
+            if repo_name in strict_repos:
+                errors.append(f"{repo_name}: missing expected runtime skill file {rel_skill}")
+            continue
         text = skill_file.read_text(encoding="utf-8")
-        for snippet, reason in _FORBIDDEN_SKILL_SNIPPETS:
-            if snippet in text:
-                errors.append(f"{repo_name}: {rel_skill} contains `{snippet}` ({reason})")
         fm = _extract_frontmatter(text)
-        if repo_name in _MANUAL_TRIGGER_REPOS:
-            if "disable-model-invocation: true" not in fm and "disableModelInvocation: true" not in fm:
+        if not fm:
+            errors.append(f"{repo_name}: {rel_skill} missing valid `---` YAML frontmatter")
+        for fm_line in fm.splitlines():
+            stripped = fm_line.strip()
+            if not stripped or stripped.startswith("#") or ":" not in stripped:
+                continue
+            _key, raw_val = stripped.split(":", 1)
+            val = raw_val.strip()
+            if val and not val.startswith(('"', "'", "|", ">", "[", "{")) and ": " in val:
                 errors.append(
-                    f"{repo_name}: {rel_skill} missing `disable-model-invocation: true` / `disableModelInvocation: true` in YAML frontmatter"
+                    f"{repo_name}: {rel_skill} YAML frontmatter has unquoted `: ` in scalar `{_key.strip()}` "
+                    "(invalid YAML; wrap in quotes)"
                 )
-        elif repo_name == "mindie-agent-agy":
-            if "Manually enable MindIE knowledge" in text or "Use this skill only when the user explicitly invokes /mindie-agent" in text:
-                errors.append(
-                    f"{repo_name}: {rel_skill} enforces manual `/mindie-agent` gate on a host without manual-only skill invocation"
-                )
+        if _DISABLED_MODEL_INVOCATION_RE.search(fm):
+            errors.append(
+                f"{repo_name}: {rel_skill} sets `disable-model-invocation: true` / `disableModelInvocation: true` "
+                "(violates silent default-on skill routing)"
+            )
         for child in sorted(skill_file.parent.rglob("*.md")):
             rel_child = child.relative_to(repo_dir).as_posix()
             if child.name in _FORBIDDEN_SKILL_FILES:
                 errors.append(
                     f"{repo_name}: {rel_child} places installation/onboarding documentation inside runtime `skills/` directory"
                 )
-            elif child != skill_file:
-                child_text = child.read_text(encoding="utf-8")
-                for snippet, reason in _FORBIDDEN_SKILL_SNIPPETS:
-                    if snippet in child_text:
-                        errors.append(f"{repo_name}: {rel_child} contains `{snippet}` ({reason})")
-    kimi_dir = resolve_repo("mindie-agent-kimi", siblings_roots, explicit_repos=explicit_repos)
-    if kimi_dir is not None and (kimi_dir / "kimi.plugin.json").is_file():
-        manifest_text = (kimi_dir / "kimi.plugin.json").read_text(encoding="utf-8")
-        if "MindIE tools use a fresh request_nonce" in manifest_text:
-            errors.append("mindie-agent-kimi: kimi.plugin.json systemPrompt mandates request_nonce on all MindIE tools")
+                continue
+            child_text = text if child == skill_file else child.read_text(encoding="utf-8")
+            for snippet, reason in _FORBIDDEN_SKILL_SNIPPETS:
+                if snippet in child_text:
+                    errors.append(f"{repo_name}: {rel_child} contains `{snippet}` ({reason})")
+            if _SLASH_CMD_RE.search(child_text):
+                errors.append(
+                    f"{repo_name}: {rel_child} exposes `/mindie-agent` or `$mindie-agent` command "
+                    "(violates silent default-on invariant)"
+                )
+    codex_dir = resolve_repo("mindie-agent-codex", siblings_roots, explicit_repos=explicit_repos)
+    if codex_dir is not None:
+        openai_yaml = codex_dir / "plugins/mindie-agent/skills/mindie-agent/agents/openai.yaml"
+        if openai_yaml.is_file():
+            yaml_text = openai_yaml.read_text(encoding="utf-8")
+            if re.search(r"(?m)^[ \t]*allow_implicit_invocation[ \t]*:[ \t]*false\b", yaml_text):
+                errors.append("mindie-agent-codex: agents/openai.yaml sets `allow_implicit_invocation: false` (violates silent default-on)")
+            if _SLASH_CMD_RE.search(yaml_text):
+                errors.append("mindie-agent-codex: agents/openai.yaml exposes `/mindie-agent` or `$mindie-agent`")
+    for repo_name, rel_manifest in _MANIFEST_PATHS:
+        m_repo = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
+        if m_repo is None or not (m_repo / rel_manifest).is_file():
+            continue
+        raw_manifest = (m_repo / rel_manifest).read_text(encoding="utf-8")
+        if repo_name == "mindie-agent-kimi" and (
+            "MindIE tools use a fresh request_nonce" in raw_manifest
+            or "fresh PreToolUse-bound request_nonce" in raw_manifest
+        ):
+            errors.append("mindie-agent-kimi: kimi.plugin.json systemPrompt mandates request_nonce on MindIE tools")
+        try:
+            parsed_manifest = json.loads(raw_manifest)
+        except ValueError:
+            continue
+        for val in _iter_manifest_text_values(parsed_manifest):
+            if _SLASH_CMD_RE.search(val):
+                errors.append(f"{repo_name}: {rel_manifest} exposes `/mindie-agent` or `$mindie-agent` command")
+                break
     diag_dir = resolve_repo("diagnostics", siblings_roots, explicit_repos=explicit_repos)
     if diag_dir is not None and (diag_dir / "AGENTS.md").is_file():
         if "Can be vendored as a single file" in (diag_dir / "AGENTS.md").read_text(encoding="utf-8"):
@@ -647,9 +791,10 @@ def verify_zero_session_binding_gates(
     required_repos: Sequence[str] = (),
     explicit_repos: Mapping[str, Path] | None = None,
 ) -> list[str]:
-    """Verify Iron Rule 5 (zero pre-call session-binding gates on deterministic surfaces) across sibling repos."""
+    """Verify Iron Rule 5 & silent default-on boundaries across sibling repos."""
     errors: list[str] = []
     must_exist = set(required_repos)
+    strict_repos: set[str] = set()
     for repo_name in GATED_REPOS:
         try:
             repo_dir = resolve_repo(repo_name, siblings_roots, explicit_repos=explicit_repos)
@@ -657,6 +802,8 @@ def verify_zero_session_binding_gates(
             errors.append(str(exc))
             continue
         strict_files = (repo_name in must_exist) or (require_siblings and repo_name not in _INDEPENDENT_EXEMPT)
+        if strict_files:
+            strict_repos.add(repo_name)
         if repo_dir is None:
             if strict_files:
                 errors.append(
@@ -664,5 +811,5 @@ def verify_zero_session_binding_gates(
                 )
             continue
         _CHECKERS[repo_name](repo_dir, strict_files=strict_files, errors=errors)
-    _check_prompt_and_guide_hygiene(siblings_roots, explicit_repos, errors)
+    _check_prompt_and_guide_hygiene(siblings_roots, explicit_repos, strict_repos, errors)
     return errors

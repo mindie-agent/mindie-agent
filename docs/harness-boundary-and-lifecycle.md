@@ -17,20 +17,14 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 | --- | --- | --- |
 | **宿主原生插件管理器** | 插件包的下载、安装与已安装版本记录 | 不代替 MindIE 做跨宿主兼容性筛选 |
 | **宿主插件薄适配层**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 宿主协议清单、生命周期 Hook 转发、可信 Transcript 脱敏提取、宿主原生小模型桥接及锁定依赖（`uv.lock`） | 不各自复制维护进程守护、MCP 网关或更新状态机 |
-| **共享宿主底座**（`harness` / `mindie-harness`） | 跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换、长驻并发 MCP 网关（`P2.7` 零绑定确定性直通 vs. `P2.1` `knowledge_*` 准入）以及单状态源 `ExperimentLedger` `rsi` 优化闭环 | 不混入特定宿主的私有 UI/Transcript 解析逻辑，也不在只读检查时凭空创建空 SQLite 库 |
+| **共享宿主底座**（`harness` / `mindie-harness`） | 跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）以及单状态源 `ExperimentLedger` `rsi` 优化闭环 | 不混入特定宿主的私有 UI/Transcript 解析逻辑，也不在只读检查时凭空创建空 SQLite 库 |
 | **共享知识引擎**（`knowledge`） | 纯知识能力：管理授权与增量游标、执行确定性隐私脱敏、协调分块目录生成、提供基于 `TechnicalTokenizerV1` 的 ReMe 与 `L1–L4` 检索、处理 PR 发布回执与故障恢复 | 不直接耦合特定宿主的私有目录结构，也不靠猜测目录或时间戳来认领任务 |
 | **远端开发与诊断组件**（`remote-dev` / `diagnostics`） | 提供 SSH 远端文件读写/后台长作业执行、有界本地诊断日志，以及受统一贡献开关控制的自动故障上报 | SSH 远端操作与本地日志不依赖贡献开关；公开故障上报严格受该开关约束，且绝不截断用户的远端作业输出 |
 
-日常开发中的能力触发边界严格贴合宿主原生机制：
-- **知识飞轮按宿主原生触发能力对齐（支持手动触发的客户端手动唤醒，不支持的默认开放）**：
-  - **六款支持手动触发的客户端（Claude Code / Codex / Kimi / DSH / WorkBuddy / OpenCode）**：通过 `disable-model-invocation: true` / `disableModelInvocation: true` / `allow_implicit_invocation: false` 禁止模型隐式自动调用 Skill；需要检索昇腾领域知识、复用历史排障经验或加载 Skill 引导时，在当前会话显式输入一次 `/mindie-agent <问题描述>`（Codex 亦支持 `$mindie-agent`）。启用状态仅在当前会话（Session）后续轮次内延续直至显式停用，新建会话、分支会话（Fork）与子代理（Subagent）不会隐式继承启用状态。
-  - **Google Antigravity（`mindie-agent-agy`）**：宿主以插件整体为单位启用/停用，且 `SKILL.md` 语义路由不支持 `disable-model-invocation`；因此插件启用期间**默认直接开放全部功能**（含 `knowledge_*` 工具、`knowledge_cli.py` 与授权项目范围内的 `Stop` 脱敏采集，亦可通过 `/mindie-agent deactivate` 按当前会话静默停用）。
-  - **运行时 `skills/` 严禁混入安装文档**：所有七端插件的一次性安装引导、GitHub 认证与工作区初始化文档均独立存放在 `docs/install/`，绝不放入运行时 `SKILL.md` 或 `skills/` 目录。
-- **确定性工程工具全端默认就绪（零前置会话绑定门禁）**：已安装配置的 `remote-dev`、`coordinator`（含环境拓扑探测/租约及基于 `execution_id` 句柄的任务编排）、`profiler` 采集解析、`sim` 性能建模、`debugger` 负载调试，以及 `diagnostics` 本地诊断与状态查询均通过标准原生 MCP 直接暴露并随时可用——**既无需输入 `/mindie-agent`，也不强绑宿主私有 `_meta`、`PreToolUse` Hook Nonce 或 `context_file`**（主对话、子代理 Subagent、定时 Automation 及无本地目录的纯集群运维调用均直接放行；物理 NPU/端口互斥由远端 `HostQueue` `lease_id` + `fence_token` 保障，`npu-top` 作为面向开发者的监控看板独立运行）。
-
-划分两类能力的唯一标准在于**是否消费或沉淀知识与经验上下文**：直接读取硬件规格、解析实测 Trace、运行机理仿真或查询本地状态属于全端无条件开放的确定性工具；而检索注入 `L1–L4` 知识条目、精读引用、投票反馈、经验提炼、语料同步以及后台 `Stop` 对话采集属于知识飞轮（在六款手动触发客户端上由 `/mindie-agent` 按会话门控，在 Google Antigravity 上随插件启用默认开放）。确定性状态查询仅如实返回客观运行状态，绝不夹带知识引导或贡献提示。
-
-在六款手动触发客户端未调用 `/mindie-agent` 的普通聊天中，默认 MCP 工具发现列表彻底剔除 `knowledge` 工具名称、描述与参数 Schema，也不注入知识 Skill、飞轮指令或“尚未启用”的打扰提示（单靠调用时报错拦截不足以满足零打扰边界，默认工具目录本身即不包含知识接口）。即便同一机器上的另一个会话启用了 `/mindie-agent`，运行时仍会在每次执行前独立校验当前会话的授权记录，绝不跨会话泄露共享知识目录（详见 [Codex 0.1.8 原生验收记录](releases/codex-0.1.8-native-acceptance.json)）。
+日常开发中的能力启用与隐私边界极简清晰：
+- **插件启用即全功能静默就绪（零斜杠唤醒口令）**：在全部七款客户端（Claude Code / Codex / Kimi / DSH / Google Antigravity / WorkBuddy / OpenCode）中，启用插件即默认开放 `remote-dev`、确定性工程工具（`coordinator`、`profiler`、`sim`、`debugger`、`diagnostics`、`npu-top`）与分级知识工具（`knowledge_query`、`knowledge_explain`、`knowledge_feedback`、`knowledge_distill`、`knowledge_sync`）；主对话、子代理（Subagent）、分支会话（Fork）与定时 Automation 均直接通过标准零绑定 MCP `tools/call` 调用——**既无需输入任何唤醒口令，也不强绑宿主私有 `_meta`、`PreToolUse` Hook Nonce 或 `context_file`**（物理 NPU/端口互斥由远端 `HostQueue` `lease_id` + `fence_token` 保障）。
+- **运行时 `SKILL.md` 纯净按需路由**：全端运行时 `SKILL.md` 仅在遇到昇腾领域任务时按语义静默加载，日常非昇腾编码零打扰；所有一次性安装引导、GitHub 认证与工作区初始化文档独立存放在 `docs/install/`，绝不混入运行时 `skills/` 目录。
+- **后台经验采集严格受共享总开关与授权目录双重约束**：确定性状态查询仅如实返回客观运行状态；后台 `Stop` 对话采集仅在用户开启社区共享总开关**且**当前目录命中显式授权的 `project_roots` 范围时运行（未开启共享或不在授权目录内 `< 100ms` 零 SQLite 冷路径直接跳过）。
 
 ---
 
@@ -43,7 +37,7 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 
 ### 2.2 精确的任务身份与采集时间边界
 - **不靠猜测认领会话**：每个原生任务或子任务（Fork）的材料归属均来自宿主提供的可信会话 ID 与 Transcript 头部元数据，绝不靠“最新修改的文件”“相同的当前目录（`cwd`）”或“相似的提问内容”去瞎猜。
-- **清晰的采集起点**：系统只采集知识功能生效会话（六款手动触发客户端需已调用 `/mindie-agent` 激活，Google Antigravity 插件启用且当前会话未静默停用）中、用户开启贡献授权且在已授权项目范围内产生的新增对话；关闭授权会立即取消尚未发送的队列任务，重新开启后也只采集新产生的对话，不会回头把关闭期间或未激活期间的历史聊天记录补扫上传。
+- **清晰的采集起点**：系统只采集用户已开启贡献授权且工作目录位于已授权 `project_roots` 范围内产生的新增对话；关闭授权会立即取消尚未发送的队列任务，重新开启后也只采集新产生的对话，不会回头把关闭期间或非授权目录的历史聊天记录补扫上传。
 
 ### 2.3 稳定 GitHub 交互通道（`gh`）与外部写入的 `unknown` 对账保护
 - **统一的 `gh` 认证通道（硬性要求）与两阶段按需 Fork**：所有 GitHub API 读写与远端 Git 分支推送统一经由已认证的 `gh` CLI（`GhTransport` 调用 `gh api`，Git 凭据辅助器绑定 `!gh auth git-credential`）执行，访问令牌仅保留在 `gh` 受管凭据存储或环境变量中，绝不写入命令行参数、本地日志或公开配置文件。日常安装插件既不要求点 Star，也不会提前创建仓库 Fork；仅当用户显式开启知识贡献时，系统才按需为目标知识库创建或复用个人 Fork（绑定为 `<GH_USER>/<repo>`），是否点 Star 完全由用户自愿决定。若本机缺失 `gh` 或登录态失效，系统会显式报错并阻断未授权外发，绝不静默吞错。
@@ -53,8 +47,8 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 ### 2.4 Shell 输入编码、原生会话身份、领域租约与 Windows 服务启动器
 
 - **Shell 传输不等于原生授权（UTF-8 管道与原子代际绑定）**：PowerShell 的 `$OutputEncoding` 与 `Out-File` / `>` 重定向只决定 CLI 收到的字节；Windows PowerShell 调用本地 CLI 传输非 ASCII JSON 时应显式设置 `[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)` 并走 `stdin` 管道（避免 UTF-16LE 重定向损坏载荷）。同时，已激活运行时的 `(python, runtime_scripts)` 必须同代原子绑定，严禁新旧两代脚本与解释器混搭加载。
-- **原生会话身份与会话授权**：`CODEX_THREAD_ID` 等原生会话标识必须由当前宿主工具环境提供；不得伪造、跨会话复制或拼装内部字段。会话授权按当前会话独立校验，不跨 Fork 或子代理继承。
-- **领域租约独立存在**：公共检索可凭当前会话在默认引擎上的授权完成所选领域路由；但面向所选领域的蒸馏与会话采集绑定还必须具备该领域自身的有效租约，缺少该租约时蒸馏返回 `lease_required`；`knowledge_inactive` 也可能在查询阶段出现。
+- **原生会话身份与零绑定 MCP 协作**：所有单机 MCP 工具（含确定性工程组件与 `knowledge_*`）均支持在无私有 `_meta`、无前置 Nonce 的标准 `tools/call` 下开箱直通运行（缺省回退至连接级确定性会话标识并按需自动建立默认租约）；当宿主提供 `CODEX_THREAD_ID` 等原生可信会话标识时仅用于精确关联当前会话记录与 `Stop` 脱敏采集归属，绝不伪造、跨会话复制或猜认领。
+- **领域租约按需独立管理**：公共检索与日常工程调用在插件启用期间默认开箱可用并按需自动建立默认引擎租约；面向指定领域的蒸馏与授权采集绑定则按目标领域独立维护租约状态，互不串写。
 - **持久贡献授权与范围独立**：贡献开关、目标仓库与授权项目范围跨升级持久保存（`mindie-consent.json` 在代际切换与 GC 期间永不改写或删除），独立于会话授权和领域租约；共享关闭或采集超出范围时，不应为满足健康检查而冷启动采集。
 - **Windows 服务启动器能力独立（双层 PE `Subsystem == 2` 核验）**：知识 API 可用不等于后台计划任务入口可用。注册与恢复启动前必须同时校验虚拟环境 `.venv\Scripts\pythonw.exe` 及其 `pyvenv.cfg` 所指向基底 `home\pythonw.exe` 的真实 PE 头 `OptionalHeader.Subsystem == 2`（`IMAGE_SUBSYSTEM_WINDOWS_GUI`），拒绝任何改名伪装的控制台二进制；API 通过但服务启动器不可用应如实报告为服务未就绪，绝不通过修补二进制绕过。
 
