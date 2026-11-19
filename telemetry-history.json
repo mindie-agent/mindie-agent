@@ -183,6 +183,10 @@
         "2026-11-17": {
           "count": 265,
           "uniques": 80
+        },
+        "2026-11-18": {
+          "count": 134,
+          "uniques": 49
         }
       },
       "daily_views": {
@@ -365,20 +369,24 @@
         "2026-11-17": {
           "count": 159,
           "uniques": 47
+        },
+        "2026-11-18": {
+          "count": 65,
+          "uniques": 46
         }
       },
       "latest_snapshot": {
-        "stars": 107,
+        "stars": 108,
         "forks": 61,
-        "clones_14d": 2308,
-        "clones_14d_uniques": 797,
-        "cumulative_clones": 4707,
-        "cumulative_clone_uniques": 1992,
-        "views_14d": 1134,
-        "views_14d_uniques": 414,
-        "cumulative_views": 2103,
-        "pkg_downloads": 152,
-        "all_asset_downloads": 604,
+        "clones_14d": 2281,
+        "clones_14d_uniques": 785,
+        "cumulative_clones": 4841,
+        "cumulative_clone_uniques": 2041,
+        "views_14d": 1059,
+        "views_14d_uniques": 343,
+        "cumulative_views": 2168,
+        "pkg_downloads": 196,
+        "all_asset_downloads": 666,
         "latest_release": "v0.1.17"
       }
     },
@@ -563,6 +571,10 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 3
+        },
+        "2026-11-18": {
+          "count": 2,
+          "uniques": 2
         }
       },
       "daily_views": {
@@ -745,18 +757,22 @@
         "2026-11-17": {
           "count": 9,
           "uniques": 4
+        },
+        "2026-11-18": {
+          "count": 4,
+          "uniques": 2
         }
       },
       "latest_snapshot": {
         "stars": 5,
         "forks": 8,
-        "clones_14d": 91,
-        "clones_14d_uniques": 54,
-        "cumulative_clones": 347,
-        "cumulative_clone_uniques": 197,
-        "views_14d": 76,
-        "views_14d_uniques": 27,
-        "cumulative_views": 356,
+        "clones_14d": 78,
+        "clones_14d_uniques": 47,
+        "cumulative_clones": 349,
+        "cumulative_clone_uniques": 199,
+        "views_14d": 78,
+        "views_14d_uniques": 26,
+        "cumulative_views": 360,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
         "latest_release": "commit@13619351"
@@ -943,6 +959,10 @@
         "2026-11-17": {
           "count": 825,
           "uniques": 116
+        },
+        "2026-11-18": {
+          "count": 1583,
+          "uniques": 134
         }
       },
       "daily_views": {
@@ -1125,20 +1145,24 @@
         "2026-11-17": {
           "count": 10,
           "uniques": 4
+        },
+        "2026-11-18": {
+          "count": 21,
+          "uniques": 5
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 5,
-        "clones_14d": 7180,
-        "clones_14d_uniques": 568,
-        "cumulative_clones": 12198,
-        "cumulative_clone_uniques": 2467,
-        "views_14d": 97,
-        "views_14d_uniques": 36,
-        "cumulative_views": 177,
-        "pkg_downloads": 13182,
-        "all_asset_downloads": 13700,
+        "clones_14d": 8115,
+        "clones_14d_uniques": 604,
+        "cumulative_clones": 13781,
+        "cumulative_clone_uniques": 2601,
+        "views_14d": 108,
+        "views_14d_uniques": 35,
+        "cumulative_views": 198,
+        "pkg_downloads": 13333,
+        "all_asset_downloads": 13853,
         "latest_release": "v0.1.39"
       }
     },
@@ -1323,6 +1347,10 @@
         "2026-11-17": {
           "count": 351,
           "uniques": 134
+        },
+        "2026-11-18": {
+          "count": 143,
+          "uniques": 29
         }
       },
       "daily_views": {
@@ -1505,17 +1533,21 @@
         "2026-11-17": {
           "count": 7,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 1535,
-        "clones_14d_uniques": 381,
-        "cumulative_clones": 4248,
-        "cumulative_clone_uniques": 1072,
-        "views_14d": 13,
-        "views_14d_uniques": 8,
+        "clones_14d": 1538,
+        "clones_14d_uniques": 368,
+        "cumulative_clones": 4391,
+        "cumulative_clone_uniques": 1101,
+        "views_14d": 12,
+        "views_14d_uniques": 7,
         "cumulative_views": 20,
         "pkg_downloads": 686,
         "all_asset_downloads": 1161,
@@ -1703,6 +1735,10 @@
         "2026-11-17": {
           "count": 200,
           "uniques": 49
+        },
+        "2026-11-18": {
+          "count": 185,
+          "uniques": 34
         }
       },
       "daily_views": {
@@ -1885,18 +1921,22 @@
         "2026-11-17": {
           "count": 2,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 21,
+          "uniques": 1
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 1817,
-        "clones_14d_uniques": 242,
-        "cumulative_clones": 4932,
-        "cumulative_clone_uniques": 1007,
-        "views_14d": 7,
-        "views_14d_uniques": 7,
-        "cumulative_views": 10,
+        "clones_14d": 1874,
+        "clones_14d_uniques": 246,
+        "cumulative_clones": 5117,
+        "cumulative_clone_uniques": 1041,
+        "views_14d": 25,
+        "views_14d_uniques": 5,
+        "cumulative_views": 31,
         "pkg_downloads": 2655,
         "all_asset_downloads": 3165,
         "latest_release": "v0.1.32"
@@ -2083,6 +2123,10 @@
         "2026-11-17": {
           "count": 148,
           "uniques": 48
+        },
+        "2026-11-18": {
+          "count": 149,
+          "uniques": 41
         }
       },
       "daily_views": {
@@ -2265,20 +2309,24 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 3
+        },
+        "2026-11-18": {
+          "count": 2,
+          "uniques": 2
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 991,
-        "clones_14d_uniques": 260,
-        "cumulative_clones": 2892,
-        "cumulative_clone_uniques": 981,
-        "views_14d": 52,
-        "views_14d_uniques": 31,
-        "cumulative_views": 69,
-        "pkg_downloads": 335,
-        "all_asset_downloads": 791,
+        "clones_14d": 1009,
+        "clones_14d_uniques": 264,
+        "cumulative_clones": 3041,
+        "cumulative_clone_uniques": 1022,
+        "views_14d": 47,
+        "views_14d_uniques": 26,
+        "cumulative_views": 71,
+        "pkg_downloads": 338,
+        "all_asset_downloads": 799,
         "latest_release": "v0.1.27"
       }
     },
@@ -2463,6 +2511,10 @@
         "2026-11-17": {
           "count": 702,
           "uniques": 386
+        },
+        "2026-11-18": {
+          "count": 760,
+          "uniques": 443
         }
       },
       "daily_views": {
@@ -2645,20 +2697,24 @@
         "2026-11-17": {
           "count": 2,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 16,
+          "uniques": 1
         }
       },
       "latest_snapshot": {
         "stars": 1,
         "forks": 3,
-        "clones_14d": 6162,
-        "clones_14d_uniques": 2571,
-        "cumulative_clones": 14595,
-        "cumulative_clone_uniques": 6062,
-        "views_14d": 37,
-        "views_14d_uniques": 19,
-        "cumulative_views": 86,
+        "clones_14d": 6471,
+        "clones_14d_uniques": 2748,
+        "cumulative_clones": 15355,
+        "cumulative_clone_uniques": 6505,
+        "views_14d": 48,
+        "views_14d_uniques": 15,
+        "cumulative_views": 102,
         "pkg_downloads": 278,
-        "all_asset_downloads": 4405,
+        "all_asset_downloads": 4428,
         "latest_release": "v0.13.24"
       }
     },
@@ -2843,6 +2899,10 @@
         "2026-11-17": {
           "count": 379,
           "uniques": 160
+        },
+        "2026-11-18": {
+          "count": 275,
+          "uniques": 117
         }
       },
       "daily_views": {
@@ -3025,18 +3085,22 @@
         "2026-11-17": {
           "count": 1,
           "uniques": 1
+        },
+        "2026-11-18": {
+          "count": 5,
+          "uniques": 2
         }
       },
       "latest_snapshot": {
         "stars": 1,
         "forks": 24,
-        "clones_14d": 5314,
-        "clones_14d_uniques": 1229,
-        "cumulative_clones": 10367,
-        "cumulative_clone_uniques": 3317,
-        "views_14d": 110,
-        "views_14d_uniques": 26,
-        "cumulative_views": 216,
+        "clones_14d": 5144,
+        "clones_14d_uniques": 1203,
+        "cumulative_clones": 10642,
+        "cumulative_clone_uniques": 3434,
+        "views_14d": 103,
+        "views_14d_uniques": 24,
+        "cumulative_views": 221,
         "pkg_downloads": 629,
         "all_asset_downloads": 629,
         "latest_release": "commit@9a614ccd"
@@ -3223,6 +3287,10 @@
         "2026-11-17": {
           "count": 687,
           "uniques": 468
+        },
+        "2026-11-18": {
+          "count": 572,
+          "uniques": 409
         }
       },
       "daily_views": {
@@ -3405,20 +3473,24 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 1,
         "forks": 2,
-        "clones_14d": 4095,
-        "clones_14d_uniques": 2743,
-        "cumulative_clones": 9665,
-        "cumulative_clone_uniques": 6041,
-        "views_14d": 26,
-        "views_14d_uniques": 19,
+        "clones_14d": 4370,
+        "clones_14d_uniques": 2879,
+        "cumulative_clones": 10237,
+        "cumulative_clone_uniques": 6450,
+        "views_14d": 21,
+        "views_14d_uniques": 15,
         "cumulative_views": 53,
         "pkg_downloads": 245,
-        "all_asset_downloads": 4112,
+        "all_asset_downloads": 4136,
         "latest_release": "v0.11.14"
       }
     },
@@ -3603,6 +3675,10 @@
         "2026-11-17": {
           "count": 419,
           "uniques": 347
+        },
+        "2026-11-18": {
+          "count": 530,
+          "uniques": 411
         }
       },
       "daily_views": {
@@ -3785,20 +3861,24 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 2,
-        "clones_14d": 3834,
-        "clones_14d_uniques": 2339,
-        "cumulative_clones": 5553,
-        "cumulative_clone_uniques": 3311,
-        "views_14d": 18,
-        "views_14d_uniques": 8,
+        "clones_14d": 4208,
+        "clones_14d_uniques": 2568,
+        "cumulative_clones": 6083,
+        "cumulative_clone_uniques": 3722,
+        "views_14d": 12,
+        "views_14d_uniques": 3,
         "cumulative_views": 130,
         "pkg_downloads": 194,
-        "all_asset_downloads": 3452,
+        "all_asset_downloads": 3470,
         "latest_release": "v0.7.13"
       }
     },
@@ -3983,6 +4063,10 @@
         "2026-11-17": {
           "count": 293,
           "uniques": 179
+        },
+        "2026-11-18": {
+          "count": 156,
+          "uniques": 146
         }
       },
       "daily_views": {
@@ -4165,20 +4249,24 @@
         "2026-11-17": {
           "count": 1,
           "uniques": 1
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 2,
         "forks": 3,
-        "clones_14d": 1375,
-        "clones_14d_uniques": 884,
-        "cumulative_clones": 2342,
-        "cumulative_clone_uniques": 1217,
-        "views_14d": 4,
-        "views_14d_uniques": 3,
+        "clones_14d": 1499,
+        "clones_14d_uniques": 996,
+        "cumulative_clones": 2498,
+        "cumulative_clone_uniques": 1363,
+        "views_14d": 1,
+        "views_14d_uniques": 1,
         "cumulative_views": 37,
         "pkg_downloads": 732,
-        "all_asset_downloads": 2416,
+        "all_asset_downloads": 2424,
         "latest_release": "v0.3.5"
       }
     },
@@ -4363,6 +4451,10 @@
         "2026-11-17": {
           "count": 872,
           "uniques": 546
+        },
+        "2026-11-18": {
+          "count": 667,
+          "uniques": 485
         }
       },
       "daily_views": {
@@ -4545,20 +4637,24 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 1,
-        "clones_14d": 5470,
-        "clones_14d_uniques": 3175,
-        "cumulative_clones": 14633,
-        "cumulative_clone_uniques": 8003,
-        "views_14d": 2,
-        "views_14d_uniques": 2,
+        "clones_14d": 5721,
+        "clones_14d_uniques": 3365,
+        "cumulative_clones": 15300,
+        "cumulative_clone_uniques": 8488,
+        "views_14d": 1,
+        "views_14d_uniques": 1,
         "cumulative_views": 2,
         "pkg_downloads": 255,
-        "all_asset_downloads": 4172,
+        "all_asset_downloads": 4194,
         "latest_release": "v0.5.17"
       }
     },
@@ -4743,6 +4839,10 @@
         "2026-11-17": {
           "count": 322,
           "uniques": 25
+        },
+        "2026-11-18": {
+          "count": 410,
+          "uniques": 32
         }
       },
       "daily_views": {
@@ -4925,17 +5025,21 @@
         "2026-11-17": {
           "count": 7,
           "uniques": 1
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 2256,
-        "clones_14d_uniques": 218,
-        "cumulative_clones": 3824,
-        "cumulative_clone_uniques": 659,
-        "views_14d": 26,
-        "views_14d_uniques": 20,
+        "clones_14d": 2592,
+        "clones_14d_uniques": 237,
+        "cumulative_clones": 4234,
+        "cumulative_clone_uniques": 691,
+        "views_14d": 12,
+        "views_14d_uniques": 6,
         "cumulative_views": 76,
         "pkg_downloads": 183,
         "all_asset_downloads": 714,
@@ -5075,6 +5179,10 @@
         "2026-11-17": {
           "count": 519,
           "uniques": 352
+        },
+        "2026-11-18": {
+          "count": 577,
+          "uniques": 431
         }
       },
       "daily_views": {
@@ -5209,20 +5317,24 @@
         "2026-11-17": {
           "count": 5,
           "uniques": 4
+        },
+        "2026-11-18": {
+          "count": 6,
+          "uniques": 2
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 4533,
-        "clones_14d_uniques": 2462,
-        "cumulative_clones": 5578,
-        "cumulative_clone_uniques": 3238,
-        "views_14d": 40,
-        "views_14d_uniques": 21,
-        "cumulative_views": 69,
-        "pkg_downloads": 194,
-        "all_asset_downloads": 3229,
+        "clones_14d": 4979,
+        "clones_14d_uniques": 2704,
+        "cumulative_clones": 6155,
+        "cumulative_clone_uniques": 3669,
+        "views_14d": 41,
+        "views_14d_uniques": 17,
+        "cumulative_views": 75,
+        "pkg_downloads": 196,
+        "all_asset_downloads": 3243,
         "latest_release": "v0.5.17"
       }
     },
@@ -5359,6 +5471,10 @@
         "2026-11-17": {
           "count": 659,
           "uniques": 363
+        },
+        "2026-11-18": {
+          "count": 642,
+          "uniques": 439
         }
       },
       "daily_views": {
@@ -5493,20 +5609,24 @@
         "2026-11-17": {
           "count": 24,
           "uniques": 8
+        },
+        "2026-11-18": {
+          "count": 21,
+          "uniques": 8
         }
       },
       "latest_snapshot": {
         "stars": 3,
         "forks": 2,
-        "clones_14d": 4825,
-        "clones_14d_uniques": 2663,
-        "cumulative_clones": 6457,
-        "cumulative_clone_uniques": 3722,
-        "views_14d": 143,
-        "views_14d_uniques": 46,
-        "cumulative_views": 200,
-        "pkg_downloads": 250,
-        "all_asset_downloads": 3504,
+        "clones_14d": 5318,
+        "clones_14d_uniques": 2878,
+        "cumulative_clones": 7099,
+        "cumulative_clone_uniques": 4161,
+        "views_14d": 145,
+        "views_14d_uniques": 39,
+        "cumulative_views": 221,
+        "pkg_downloads": 252,
+        "all_asset_downloads": 3518,
         "latest_release": "v0.9.19"
       }
     },
@@ -5643,6 +5763,10 @@
         "2026-11-17": {
           "count": 5,
           "uniques": 4
+        },
+        "2026-11-18": {
+          "count": 1,
+          "uniques": 1
         }
       },
       "daily_views": {
@@ -5777,17 +5901,21 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 107,
-        "clones_14d_uniques": 64,
-        "cumulative_clones": 411,
-        "cumulative_clone_uniques": 226,
-        "views_14d": 16,
-        "views_14d_uniques": 9,
+        "clones_14d": 90,
+        "clones_14d_uniques": 54,
+        "cumulative_clones": 412,
+        "cumulative_clone_uniques": 227,
+        "views_14d": 14,
+        "views_14d_uniques": 7,
         "cumulative_views": 26,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
@@ -5927,6 +6055,10 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 1,
+          "uniques": 1
         }
       },
       "daily_views": {
@@ -6061,15 +6193,19 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 39,
-        "clones_14d_uniques": 29,
-        "cumulative_clones": 256,
-        "cumulative_clone_uniques": 141,
+        "clones_14d": 25,
+        "clones_14d_uniques": 20,
+        "cumulative_clones": 257,
+        "cumulative_clone_uniques": 142,
         "views_14d": 8,
         "views_14d_uniques": 1,
         "cumulative_views": 19,
@@ -6211,6 +6347,10 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "daily_views": {
@@ -6345,13 +6485,17 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 50,
-        "clones_14d_uniques": 32,
+        "clones_14d": 42,
+        "clones_14d_uniques": 25,
         "cumulative_clones": 261,
         "cumulative_clone_uniques": 148,
         "views_14d": 17,
@@ -6495,6 +6639,10 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 1,
+          "uniques": 1
         }
       },
       "daily_views": {
@@ -6629,15 +6777,19 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 50,
-        "clones_14d_uniques": 33,
-        "cumulative_clones": 260,
-        "cumulative_clone_uniques": 151,
+        "clones_14d": 44,
+        "clones_14d_uniques": 28,
+        "cumulative_clones": 261,
+        "cumulative_clone_uniques": 152,
         "views_14d": 7,
         "views_14d_uniques": 2,
         "cumulative_views": 9,
@@ -6779,6 +6931,10 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "daily_views": {
@@ -6913,18 +7069,22 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 2,
+          "uniques": 1
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 32,
-        "clones_14d_uniques": 26,
+        "clones_14d": 23,
+        "clones_14d_uniques": 18,
         "cumulative_clones": 204,
         "cumulative_clone_uniques": 116,
-        "views_14d": 0,
-        "views_14d_uniques": 0,
-        "cumulative_views": 6,
+        "views_14d": 2,
+        "views_14d_uniques": 1,
+        "cumulative_views": 8,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
         "latest_release": "commit@c37c9c0f"
@@ -7063,6 +7223,10 @@
         "2026-11-17": {
           "count": 3,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "daily_views": {
@@ -7197,13 +7361,17 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 44,
-        "clones_14d_uniques": 32,
+        "clones_14d": 23,
+        "clones_14d_uniques": 18,
         "cumulative_clones": 225,
         "cumulative_clone_uniques": 127,
         "views_14d": 1,
@@ -7339,6 +7507,10 @@
         "2026-11-17": {
           "count": 177,
           "uniques": 36
+        },
+        "2026-11-18": {
+          "count": 155,
+          "uniques": 37
         }
       },
       "daily_views": {
@@ -7465,18 +7637,22 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 1,
+          "uniques": 1
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 1130,
-        "clones_14d_uniques": 250,
-        "cumulative_clones": 1298,
-        "cumulative_clone_uniques": 370,
-        "views_14d": 21,
-        "views_14d_uniques": 20,
-        "cumulative_views": 26,
+        "clones_14d": 1179,
+        "clones_14d_uniques": 244,
+        "cumulative_clones": 1453,
+        "cumulative_clone_uniques": 407,
+        "views_14d": 17,
+        "views_14d_uniques": 17,
+        "cumulative_views": 27,
         "pkg_downloads": 253,
         "all_asset_downloads": 560,
         "latest_release": "v0.1.21"
@@ -7599,6 +7775,10 @@
         "2026-11-17": {
           "count": 189,
           "uniques": 35
+        },
+        "2026-11-18": {
+          "count": 141,
+          "uniques": 37
         }
       },
       "daily_views": {
@@ -7717,17 +7897,21 @@
         "2026-11-17": {
           "count": 2,
           "uniques": 2
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 1021,
-        "clones_14d_uniques": 216,
-        "cumulative_clones": 1089,
-        "cumulative_clone_uniques": 297,
-        "views_14d": 8,
-        "views_14d_uniques": 8,
+        "clones_14d": 1054,
+        "clones_14d_uniques": 207,
+        "cumulative_clones": 1230,
+        "cumulative_clone_uniques": 334,
+        "views_14d": 7,
+        "views_14d_uniques": 7,
         "cumulative_views": 8,
         "pkg_downloads": 209,
         "all_asset_downloads": 476,
@@ -7855,6 +8039,10 @@
         "2026-11-17": {
           "count": 425,
           "uniques": 342
+        },
+        "2026-11-18": {
+          "count": 509,
+          "uniques": 402
         }
       },
       "daily_views": {
@@ -7977,20 +8165,24 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 2930,
-        "clones_14d_uniques": 2268,
-        "cumulative_clones": 3114,
-        "cumulative_clone_uniques": 2564,
-        "views_14d": 9,
-        "views_14d_uniques": 6,
+        "clones_14d": 3322,
+        "clones_14d_uniques": 2501,
+        "cumulative_clones": 3623,
+        "cumulative_clone_uniques": 2966,
+        "views_14d": 8,
+        "views_14d_uniques": 5,
         "cumulative_views": 10,
         "pkg_downloads": 67,
-        "all_asset_downloads": 2922,
+        "all_asset_downloads": 2940,
         "latest_release": "v0.1.4"
       }
     },
@@ -8111,6 +8303,10 @@
         "2026-11-17": {
           "count": 4,
           "uniques": 3
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "daily_views": {
@@ -8229,17 +8425,21 @@
         "2026-11-17": {
           "count": 1,
           "uniques": 1
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 19,
-        "clones_14d_uniques": 15,
+        "clones_14d": 15,
+        "clones_14d_uniques": 12,
         "cumulative_clones": 50,
         "cumulative_clone_uniques": 39,
-        "views_14d": 9,
-        "views_14d_uniques": 8,
+        "views_14d": 5,
+        "views_14d_uniques": 4,
         "cumulative_views": 9,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
@@ -8363,6 +8563,10 @@
         "2026-11-17": {
           "count": 4,
           "uniques": 3
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "daily_views": {
@@ -8481,17 +8685,21 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 0,
+          "uniques": 0
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 22,
-        "clones_14d_uniques": 17,
+        "clones_14d": 18,
+        "clones_14d_uniques": 14,
         "cumulative_clones": 47,
         "cumulative_clone_uniques": 37,
-        "views_14d": 10,
-        "views_14d_uniques": 9,
+        "views_14d": 6,
+        "views_14d_uniques": 5,
         "cumulative_views": 10,
         "pkg_downloads": 0,
         "all_asset_downloads": 0,
@@ -8571,6 +8779,10 @@
         "2026-11-17": {
           "count": 118,
           "uniques": 33
+        },
+        "2026-11-18": {
+          "count": 112,
+          "uniques": 39
         }
       },
       "daily_views": {
@@ -8645,18 +8857,22 @@
         "2026-11-17": {
           "count": 0,
           "uniques": 0
+        },
+        "2026-11-18": {
+          "count": 2,
+          "uniques": 1
         }
       },
       "latest_snapshot": {
         "stars": 0,
         "forks": 0,
-        "clones_14d": 576,
-        "clones_14d_uniques": 133,
-        "cumulative_clones": 576,
-        "cumulative_clone_uniques": 151,
-        "views_14d": 40,
-        "views_14d_uniques": 1,
-        "cumulative_views": 40,
+        "clones_14d": 688,
+        "clones_14d_uniques": 166,
+        "cumulative_clones": 688,
+        "cumulative_clone_uniques": 190,
+        "views_14d": 42,
+        "views_14d_uniques": 2,
+        "cumulative_views": 42,
         "pkg_downloads": 222,
         "all_asset_downloads": 452,
         "latest_release": "v0.1.11"
@@ -8721,8 +8937,8 @@
           "uniques": 310
         },
         "2026-11-18": {
-          "count": 0,
-          "uniques": 0
+          "count": 780,
+          "uniques": 441
         }
       },
       "daily_views": {
@@ -8789,19 +9005,19 @@
       },
       "latest_snapshot": {
         "stars": 0,
-        "forks": 0,
-        "clones_14d": 457,
-        "clones_14d_uniques": 310,
-        "cumulative_clones": 457,
-        "cumulative_clone_uniques": 310,
+        "forks": 1,
+        "clones_14d": 1237,
+        "clones_14d_uniques": 711,
+        "cumulative_clones": 1237,
+        "cumulative_clone_uniques": 751,
         "views_14d": 2,
         "views_14d_uniques": 2,
         "cumulative_views": 2,
         "pkg_downloads": 84,
-        "all_asset_downloads": 567,
+        "all_asset_downloads": 569,
         "latest_release": "v0.1.4"
       }
     }
   },
-  "updated_at_cst": "2026-11-19 12:53"
+  "updated_at_cst": "2026-11-20 03:42"
 }
