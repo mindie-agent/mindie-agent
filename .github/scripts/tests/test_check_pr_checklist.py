@@ -132,6 +132,129 @@ class CheckPrChecklistTests(unittest.TestCase):
         self.assertEqual(rc_fail, 1)
         self.assertIn("HAR-ABI", err.getvalue())
 
+    def test_blank_verification_command_result_is_rejected(self) -> None:
+        body = _render_valid_pr("hub").replace(
+            "- `python3 -m pytest .github/scripts/tests -q` passed across all 8 profiles.",
+            "- `python3 .github/scripts/check_lf_eol.py`: ",
+        )
+        errors = pr_gate.validate_pr_body(body, profile="hub")
+        self.assertTrue(any("needs a concrete non-placeholder result" in e for e in errors), errors)
+
+    def test_template_placeholders_are_rejected_but_comparisons_are_allowed(self) -> None:
+        placeholder = _render_valid_pr("hub").replace(
+            "- `python3 -m pytest .github/scripts/tests -q` passed across all 8 profiles.",
+            "- `python3 .github/scripts/check_lf_eol.py`: <reason>",
+        )
+        errors = pr_gate.validate_pr_body(placeholder, profile="hub")
+        self.assertTrue(any("Unreplaced template placeholder '<reason>'" in e for e in errors), errors)
+        bounded = _render_valid_pr("hub").replace(
+            "- `python3 -m pytest .github/scripts/tests -q` passed across all 8 profiles.",
+            "- `python3 .github/scripts/check_lf_eol.py`: passed under < 800 lines, <= 2 retries, <5s.",
+        )
+        self.assertEqual(pr_gate.validate_pr_body(bounded, profile="hub"), [])
+
+    def test_echoed_checkbox_prompt_evidence_is_rejected(self) -> None:
+        prompt = "职责与仓库路由边界：本 PR 未混入任何运行时业务代码或宿主适配器实现"
+        body = (
+            "## 变更摘要 (Summary)\n"
+            "- Concrete summary explaining why the hub documentation and gates changed.\n\n"
+            "## 设计原则 Review (Pre-PR Checklist)\n"
+            f"- [x] **`HUB-ROUTE`** — {prompt}\n"
+            f"  - HUB-ROUTE: verified: {prompt}\n"
+            "- [x] `HUB-DOC`: verified against isolated unit suite and LF hygiene check\n"
+            "- [x] `HUB-RELEASE`: verified against isolated unit suite and LF hygiene check\n"
+            "- [x] `HUB-GATE`: verified against isolated unit suite and LF hygiene check\n\n"
+            "## 验证结果 (Verification)\n"
+            "- `python3 .github/scripts/check_lf_eol.py`: passed.\n"
+        )
+        errors = pr_gate.validate_pr_body(body, profile="hub")
+        self.assertTrue(any("only echoes the checkbox prompt" in e for e in errors), errors)
+
+    def test_todo_markers_outside_inline_code_are_rejected(self) -> None:
+        body = _render_valid_pr("hub").replace(
+            "- `python3 -m pytest .github/scripts/tests -q` passed across all 8 profiles.",
+            "- `python3 .github/scripts/check_lf_eol.py`: passed.\n- TODO finish the remaining checks",
+        )
+        errors = pr_gate.validate_pr_body(body, profile="hub")
+        self.assertTrue(any("Unresolved 'TODO'" in e for e in errors), errors)
+        literal = _render_valid_pr("hub").replace(
+            "- `python3 -m pytest .github/scripts/tests -q` passed across all 8 profiles.",
+            "- `python3 .github/scripts/check_lf_eol.py`: passed with literal `TODO` marker.",
+        )
+        self.assertEqual(pr_gate.validate_pr_body(literal, profile="hub"), [])
+
+    def test_real_hub_pr_template_fails_raw_and_passes_when_filled(self) -> None:
+        template_path = SCRIPTS.parents[0] / "pull_request_template.md"
+        raw = template_path.read_text(encoding="utf-8")
+        raw_errors = pr_gate.validate_pr_body(raw, profile="hub")
+        self.assertTrue(raw_errors)
+        self.assertFalse(any("Unreplaced template placeholder" in e for e in raw_errors), raw_errors)
+
+        filled = (
+            raw.replace("- \n", "- Add lean code/doc hygiene gate and tighten PR checklist validation.\n", 1)
+            .replace("- [ ]", "- [x]")
+            .replace("  - `HUB-ROUTE`: ", "  - `HUB-ROUTE`: Verified changes stay in .github/scripts/ and docs/; zero runtime code.")
+            .replace("  - `HUB-DOC`: ", "  - `HUB-DOC`: Synced bilingual docs and verified symmetric H2 headings + LF endings.")
+            .replace("  - `HUB-RELEASE`: ", "  - `HUB-RELEASE`: not-applicable: gate and living-doc update without channel bump.")
+            .replace("  - `HUB-GATE`: ", "  - `HUB-GATE`: Pure Python 3.11+ stdlib gate (<800 lines) with isolated Tier-0 unit tests.")
+            .replace("- `python3 .github/scripts/check_lf_eol.py`: ", "- `python3 .github/scripts/check_lf_eol.py`: passed (0 CRLF files)")
+            .replace("- `python3 .github/scripts/code_doc_hygiene_gate.py --main-repo .`: ", "- `python3 .github/scripts/code_doc_hygiene_gate.py --main-repo .`: passed (18/18 repos clean)")
+            .replace("- `python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v`: ", "- `python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v`: all tests passed")
+        )
+        self.assertEqual(pr_gate.validate_pr_body(filled, profile="hub"), [])
+
+        # Deleting all separate evidence rows must NOT pass via stock '—' checkbox prompts
+        stripped_evidence = "\n".join(ln for ln in filled.splitlines() if not ln.startswith("  - `HUB-"))
+        self.assertTrue(pr_gate.validate_pr_body(stripped_evidence, profile="hub"))
+
+        # Multi-comparison runtime notes and echoed/backticked-placeholder verification commands
+        multi_cmp = filled.replace("all tests passed", "12 passed in <5s (>3s on CI)")
+        self.assertEqual(pr_gate.validate_pr_body(multi_cmp, profile="hub"), [])
+        echo_cmd = filled.replace("passed (0 CRLF files)", "`python3 .github/scripts/check_lf_eol.py`")
+        self.assertTrue(any("needs a concrete non-placeholder result" in e for e in pr_gate.validate_pr_body(echo_cmd, profile="hub")))
+        na_backtick = filled.replace("passed (0 CRLF files)", "`N/A`")
+        self.assertTrue(any("needs a concrete non-placeholder result" in e for e in pr_gate.validate_pr_body(na_backtick, profile="hub")))
+
+    def test_fenced_pr_closing_html_control_plane_prompts_and_colon_commands(self) -> None:
+        valid = _render_valid_pr("hub") + "\n<details><summary>Logs</summary>\nAll green.\n</details>\n"
+        self.assertEqual(pr_gate.validate_pr_body(valid, profile="hub"), [])
+        self.assertTrue(pr_gate.validate_pr_body(f"~~~\r\n{valid}\r\n~~~~\r\n", profile="hub"))
+        for bad_cmd in ("- pytest tests/test_api.py::test_read:", r"- C:\Python311\python.exe -m pytest:", "- `pytest -q`: not-applicable:"):
+            bad = _render_valid_pr("hub").replace("- `python3 -m pytest .github/scripts/tests -q` passed across all 8 profiles.", bad_cmd)
+            self.assertTrue(any("needs a concrete non-placeholder result" in e for e in pr_gate.validate_pr_body(bad, profile="hub")), bad_cmd)
+        ctrl_stock = (
+            "## 变更摘要 (Summary)\n- Refactored SSH handle tracking.\n\n"
+            "## 设计原则 Review (Pre-PR Checklist)\n"
+            "- [x] **CTRL-LEASE-OR-AUTH**: Shared `remote-dev` SSH auth/credential profiles remain intact.\n"
+            "- [x] **CTRL-HANDLE**: Standard zero-`_meta` MCP `tools/call` executes without blocks.\n"
+            "- [x] **CTRL-STREAM-IO**: All standalone remote worker scripts remain 100% pure Python stdlib.\n"
+            "- [x] **CTRL-RECEIPT**: External mutations distinguish `not_sent` / `acknowledged` / `uncertain`.\n\n"
+            "## 验证结果 (Verification)\n- `pytest -q`: 42 passed.\n"
+        )
+        self.assertTrue(pr_gate.validate_pr_body(ctrl_stock, profile="control-plane"))
+
+    def test_summary_evidence_field_rejects_blank_and_accepts_concrete_notes(self) -> None:
+        base = (
+            "## 变更摘要 (Summary)\n"
+            "- Harden process tree supervision and atomic upgrade handoff.\n\n"
+            "## 底座架构核查清单 (Pre-PR Checklist — `harness`)\n"
+            "- [x] **HAR-ABI（纯标准库零重依赖与根包契约）**：确认根包路径保持一致。\n"
+            "- [x] **HAR-UPGRADE（双代原子切流）**：确认候选构建遵守磁盘下限。\n"
+            "- [x] **HAR-PROC（跨平台受管进程树）**：确认无裸调 Popen。\n"
+            "- [x] **HAR-STATE（SQLite WAL 防护）**：确认只读检查不创建空库。\n"
+            "- **自查结论与证据**：{evidence}\n\n"
+            "## 验证结果 (Verification)\n"
+            "- `pytest -q`: 84 passed in 2.1s.\n"
+        )
+        self.assertTrue(pr_gate.validate_pr_body(base.format(evidence=""), profile="harness"))
+        self.assertEqual(
+            pr_gate.validate_pr_body(
+                base.format(evidence="Verified seed build, WAL guard, and zero conhost popups across Tier-0/1 tests."),
+                profile="harness",
+            ),
+            [],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -643,6 +643,7 @@ def verify_flexible_component_compatibility(
 
     return verify_flexible_component_compatibility_impl(
         siblings_roots,
+        main_repo=main_repo,
         ensure_knowledge_importable=lambda r: _ensure_knowledge_importable(r, explicit_repos),
         windowless_check=_run_windowless,
         zero_binding_check=lambda roots: verify_zero_session_binding_gates(

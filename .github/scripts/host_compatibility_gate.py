@@ -44,6 +44,7 @@ from repo_roots import (
     resolve_repo,
     summarize_repo_coverage,
 )
+from code_doc_hygiene_gate import verify_code_doc_hygiene
 from storage_lifecycle_gate import (
     STORAGE_LIFECYCLE_FLOOR_VERSIONS,
     inspect_python_temp_hygiene,
@@ -211,6 +212,7 @@ def extract_semver(raw: str) -> str | None:
 def verify_flexible_component_compatibility_impl(
     siblings_roots: Sequence[Path],
     *,
+    main_repo: Path | None = None,
     ensure_knowledge_importable: Callable[[list[Path]], bool],
     windowless_check: Callable[[list[Path]], list[str]],
     zero_binding_check: Callable[[list[Path]], list[str]] | None = None,
@@ -221,6 +223,15 @@ def verify_flexible_component_compatibility_impl(
     """Verify that the latest shared component code is API-compatible with all 7 host plugins."""
     roots_list = list(siblings_roots)
     errors: list[str] = list(windowless_check(roots_list))
+    errors.extend(
+        verify_code_doc_hygiene(
+            roots_list,
+            main_repo=main_repo,
+            require_siblings=require_siblings,
+            required_repos=required_repos,
+            explicit_repos=explicit_repos,
+        )
+    )
     if zero_binding_check is not None:
         errors.extend(zero_binding_check(roots_list))
     else:
@@ -547,6 +558,7 @@ def main(argv: list[str] | None = None) -> int:
 
     errors = verify_flexible_component_compatibility_impl(
         roots,
+        main_repo=main_repo,
         ensure_knowledge_importable=lambda _r: _can_import_knowledge(),
         windowless_check=lambda r: [
             *verify_windows_windowless_spawns(

@@ -9,7 +9,7 @@
 | 文档 | English | 核心内容 |
 |---|---|---|
 | [工程设计原则与演进准则](design-principles.md) | [Engineering Design Principles](design-principles.en.md) | 指导 MindIE Agent 工具边界、用户体验、机制复用与容错语义的工程准则 |
-| [参与贡献指南（Agent-First 贡献规范）](../CONTRIBUTING.md) | [Contributing Guide](../CONTRIBUTING.en.md) | 面向 Agent 的两阶段贡献门禁：开发前先读设计原则、提交 PR 后完成 Pre-PR Checklist 自检 |
+| [参与贡献指南（Agent-First 贡献规范）](../CONTRIBUTING.md) | [Contributing Guide](../CONTRIBUTING.en.md) | 面向 Agent 的两阶段贡献门禁：开发前先读设计原则，提交 PR 时通过代码/文档卫生门禁与 Pre-PR Checklist 自检 |
 | [系统架构与模块分工](architecture.md) | [Architecture & Module Boundaries](architecture.en.md) | 7 端宿主薄插件、共享宿主底座 `harness`、纯知识引擎、远端执行、集群观测与诊断组件协同 |
 | [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | `L1–L4` 分级知识检索、按信息缺口精读、脱敏沉淀与社区公共知识库双向流转 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 就地只读解析、纳秒区间归因、Host-Device 异步关联、跨 Run 对比与稳态按需采集设计 |
@@ -33,6 +33,8 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
+| [**`0.1.17` 补丁发布说明（当前版本）**](releases/0.1.17.md) | [**`0.1.17` Patch Notes (Current)**](releases/0.1.17.en.md) | 系统性加固 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi` 与 `mindie-agent-dsh` 的 `n-1 -> n` 在线平滑自升级与未重启活跃会话交接兼容桩，并将薄宿主插件代码上限校准为 `<= 1,500` 行 |
+| [**`0.1.16` 补丁发布说明**](releases/0.1.16.md) | [**`0.1.16` Patch Notes**](releases/0.1.16.en.md) | 全七端宿主插件大减法收敛至 `mindie-harness` 共享底座、零 Git 预构建 wheelhouse 自动更新与单命令 `install.py`、`gh` 解耦三档隐私模式（`contribute` / `local-only` / `read-only`）、1:1 远端原生工具面与 `remote_auth` 静默配钥及只读 `mindie_doctor` |
 | [**`0.1.15` 补丁发布说明**](releases/0.1.15.md) | [**`0.1.15` Patch Notes**](releases/0.1.15.en.md) | 全七端统一收敛为“启用即全功能静默自启（Silent Default-On）”：移除全部 `/mindie-agent` 口令暴露、`disable-model-invocation` 阻断及 `knowledge_*` 会话绑定门禁，经验采集仅受共享开关与授权目录约束 |
 | [**`0.1.14` 补丁发布说明**](releases/0.1.14.md) | [**`0.1.14` Patch Notes**](releases/0.1.14.en.md) | 彻底剥离全端运行时 `skills/` 中的安装向导至 `docs/install/`，并在 Google Antigravity（`v0.1.19`）率先切换为默认全功能开放 |
 | [**`0.1.13` 补丁发布说明**](releases/0.1.13.md) | [**`0.1.13` Patch Notes**](releases/0.1.13.en.md) | 全栈洁净架构收敛：抽离公共宿主底座 `mindie-harness v0.1.0`、`mindie-knowledge v0.13.23` 回归纯知识引擎、确定性工具零前置会话绑定（`P2.7`）与 7 宿主统一对齐 |
