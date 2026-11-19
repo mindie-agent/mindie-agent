@@ -9,7 +9,7 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 | Document (English) | 中文 | What It Covers |
 |---|---|---|
 | [Engineering Design Principles](design-principles.en.md) | [工程设计原则与演进准则](design-principles.md) | The core product and engineering principles governing tool boundaries, developer experience, mechanism reuse, and error visibility |
-| [Contributing Guide (Agent-First Workflow)](../CONTRIBUTING.en.md) | [参与贡献指南（Agent-First 贡献规范）](../CONTRIBUTING.md) | Two-gate Agent contributing workflow: read design principles before coding, and complete the Pre-PR Checklist self-review after PR submission |
+| [Contributing Guide (Agent-First Workflow)](../CONTRIBUTING.en.md) | [参与贡献指南（Agent-First 贡献规范）](../CONTRIBUTING.md) | Two-gate Agent contributing workflow: read design principles before coding, and pass code/doc hygiene plus the Pre-PR Checklist self-review on PR submission |
 | [Architecture & Module Boundaries](architecture.en.md) | [系统架构与模块分工](architecture.md) | How the 7 thin host plugins, shared `harness` substrate, pure knowledge engine, remote execution, NPU observability, and diagnostics fit together |
 | [Knowledge & Experience System](knowledge-system.en.md) | [知识与经验闭环设计](knowledge-system.md) | Graded `L1–L4` retrieval, information-gap citation inspection, redacted capture, and community corpus publishing |
 | [Profiler System Design](profiler-system.en.md) | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | In-place Ascend profiling analysis, nanosecond interval accounting, Host-to-Device correlation, cross-run comparison, and controlled online capture |
@@ -33,6 +33,8 @@ Welcome to the MindIE Agent documentation center. Here you will find the system 
 
 | Document (English) | 中文 | What It Covers |
 |---|---|---|
+| [**`0.1.17` Patch Notes (Current)**](releases/0.1.17.en.md) | [**`0.1.17` 补丁发布说明（当前版本）**](releases/0.1.17.md) | Hardens pre-Great-Subtraction `n-1 -> n` native plugin self-upgrade handoffs and in-flight active-session shims across `mindie-agent-codex`, `mindie-agent-cc`, `mindie-agent-kimi`, and `mindie-agent-dsh`, paired with a calibrated `<= 1,500` LOC thin-plugin ceiling |
+| [**`0.1.16` Patch Notes**](releases/0.1.16.en.md) | [**`0.1.16` 补丁发布说明**](releases/0.1.16.md) | 7-host Great Subtraction delegating runtime/update/GC to `mindie-harness`, zero-Git prebuilt wheelhouse auto-update & single-command `install.py`, `gh`-decoupled 3-tier privacy (`contribute` / `local-only` / `read-only`), 1:1 native `remote-dev` surfaces + silent `remote_auth` SSH onboarding, and read-only `mindie_doctor` |
 | [**`0.1.15` Patch Notes**](releases/0.1.15.en.md) | [**`0.1.15` 补丁发布说明**](releases/0.1.15.md) | Unifies all seven host plugins on Silent Default-On: removes all `/mindie-agent` command exposure, `disable-model-invocation` blocks, and `knowledge_*` session-binding gates while scoping `Stop` capture strictly to saved consent + authorized `project_roots` |
 | [**`0.1.14` Patch Notes**](releases/0.1.14.en.md) | [**`0.1.14` 补丁发布说明**](releases/0.1.14.md) | Moves all install/onboarding docs out of runtime `skills/` into `docs/install/` across all seven plugins and enables all features by default on Google Antigravity (`v0.1.19`) |
 | [**`0.1.13` Patch Notes**](releases/0.1.13.en.md) | [**`0.1.13` 补丁发布说明**](releases/0.1.13.md) | Full-stack clean-architecture convergence: extracts shared substrate `mindie-harness v0.1.0`, slims `mindie-knowledge v0.13.23` to pure knowledge, enforces zero pre-call binding on deterministic tools (`P2.7`), and aligns all 7 hosts |

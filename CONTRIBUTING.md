@@ -17,7 +17,7 @@
 请严格按照 https://github.com/mindie-agent/mindie-agent/blob/main/CONTRIBUTING.md 的流程执行：
 1. 先读 AGENTS.md 的仓库路由表，定位单一职责目标仓库；若本地尚未检出，按平铺兄弟目录 ../<repo> 懒加载克隆并在 ../.worktrees/<repo>-<topic> 创建独立 Git Worktree；
 2. 进入目标仓库后立即读取其 AGENTS.md 与 CONTRIBUTING.md（及主仓 docs/design-principles.md）；
-3. 完成实现与隔离分层测试后提交 PR，并按该仓库对应的 --profile 完成 Pre-PR Checklist 自检与证据回填。
+3. 完成实现、清理被替代冗余代码、同步中英活文档并通过隔离分层测试后提交 PR，按该仓库对应的 --profile 完成 Pre-PR Checklist 自检与验证结果回填。
 ```
 
 ---
@@ -47,7 +47,7 @@
 git -C ../coordinator worktree add ../.worktrees/coordinator-my-fix -b fix/my-fix
 ```
 
-> **目标仓接力原则（Immediate Handoff）**：一旦路由到 `../<repo>` 或 `../.worktrees/<repo>-<topic>`，Agent **必须立即读取该目标仓自身的 `AGENTS.md` 与 `CONTRIBUTING.md`**，遵循该仓的领域不变量、测试套件与 PR Checklist Profile，保持 `mindie-agent` 主仓干净。
+> **目标仓接力与分片子代理边界（Immediate Handoff & Scoped-Worker Rule）**：一旦路由到 `../<repo>` 或 `../.worktrees/<repo>-<topic>`，Agent **必须立即读取该目标仓自身的 `AGENTS.md` 与 `CONTRIBUTING.md`**，遵循该仓的领域不变量、测试套件与 PR Checklist Profile，保持 `mindie-agent` 主仓干净。在多 Agent 协同（如 `/joint-dev`、Swarm 或受限 Subagent）中，若子任务提示词限定了文件归属（如仅负责代码/测试，由专职文档 Agent 负责 Markdown），子代理**必须严守其受权文件边界**、在职责范围内删净废弃代码，并在交接摘要中列出范围外需同步的文档项（`目标文档 + 章节`、`旧表述 -> 新契约`、`源码/单测依据`），交由后续文档环节在提 PR 前闭环。
 
 ### 2. 沙盒化 Agent 的跨目录写权限配置（为什么需要同时挂载两个目录？）
 
@@ -63,11 +63,11 @@ git -C ../coordinator worktree add ../.worktrees/coordinator-my-fix -b fix/my-fi
   ```
 - **Google Antigravity / Tencent WorkBuddy / OpenCode / Kimi Code / DSH / 多根 IDE**：将 `../<repo>` 与 `../.worktrees/<repo>-<topic>` 同时加入当前多根工作区（Multi-Root Workspace），或直接在 `../.worktrees/<repo>-<topic>` 目录下启动会话。
 - **沙盒只读诚实回退（Read-Only Fallback）**：如果当前 Agent 会话的沙盒仅允许写入 `mindie-agent`，Agent 应先以只读方式完成定位与方案设计，并向用户给出上述一行重开命令以授予目标仓写权限——**严禁把兄弟仓业务代码塞进 `mindie-agent` 充数**。
-- **跨 Worktree 运行主仓门禁**：`mindie-agent/.github/scripts/repo_roots.py` 原生识别 `.git` 链接文件与 `--git-common-dir`，支持直接通过 `--siblings-root ../.worktrees` 或精确覆盖 `--repo coordinator=/abs/path/to/worktree` 运行 `check_auto_update_readiness.py` 等跨仓门禁，并且每次执行都会显式打印 `selected / exercised / missing / unselected` 仓库覆盖率。
+- **跨 Worktree 运行主仓门禁**：`mindie-agent/.github/scripts/repo_roots.py` 原生识别 `.git` 链接文件与 `--git-common-dir`，支持直接通过 `--siblings-root ../.worktrees` 或精确覆盖 `--repo coordinator=/abs/path/to/worktree` 运行 `code_doc_hygiene_gate.py`、`host_compatibility_gate.py`、`check_auto_update_readiness.py` 等跨仓门禁，并且每次执行都会显式打印 `selected / exercised / missing / unselected` 仓库覆盖率。
 
 ---
 
-## 🗺️ 全量仓库分工与 PR 门禁 Profile 速查（17 个代码/主仓 + 9 个领域知识库）
+## 🗺️ 全量仓库分工与 PR 门禁 Profile 速查（1 个主仓 + 17 个代码仓 + 9 个领域知识库）
 
 | 仓库类别与 `--profile` | 仓库名称（`github.com/mindie-agent/<repo>`） | 单一职责与边界 |
 | --- | --- | --- |
@@ -89,7 +89,7 @@ flowchart LR
   A["💡 提出需求<br/>定位单一职责仓库"] --> B["🌳 切出隔离 Worktree<br/>读取目标仓 AGENTS.md 与设计原则"]
   B --> C["🛠️ 原地精炼演进<br/>&lt;800 行 · 五大铁律 · 有界资源"]
   C --> D["🧪 隔离分层测试<br/>Tier 0–3 · 宿主机环境零污染"]
-  D --> E["✅ 按 Profile 完成 PR 自检<br/>LF 校验 + check_pr_checklist.py"]
+  D --> E["✅ 按 Profile 完成 PR 自检<br/>LF + 代码文档卫生 + check_pr_checklist.py"]
 ```
 
 ### 第一关：动手写代码前 —— 对齐 18 条设计原则与反过度防御五大铁律
@@ -98,23 +98,26 @@ flowchart LR
 
 | 核心设计维度 | 写代码前必须对齐的不变量 |
 | --- | --- |
-| **🎯 总成本与职责边界（原则 1–8）** | 以降低完成用户目标的**端到端总成本**为唯一标尺；封闭确定性问题做成工具，开放判断留在 Skill 引导；优先复用成熟组件（如 `mindie-harness`），替代旧实现时**验证可达性后直接删除旧代码**，不留双轨兼容包袱。 |
+| **🎯 总成本、减法清理与活文档同步（原则 1–8 & 10）** | 以降低完成用户目标的**端到端总成本**为唯一标尺；封闭确定性问题做成工具，开放判断留在 Skill 引导；优先复用成熟组件（如 `mindie-harness`）。每个合入级 PR 必须直接删净被替代模块与孤立 `.py` 文件（无条件禁用 `*_legacy`/`*_old`/`*_backup`/`*_fallback` 及同目录影子 `*_copy`；同目录并存的多版本硬件/CANN 算子模块如 `fia_v1.py`..`fia_v4.py` 仅在被真实引用且顶部模块 Docstring 声明互异、AST 可核实的 `Upstream-ABI: <符号>` 如 `Upstream-ABI: aclnnFusedInferAttentionScoreV2` 时放行），并同步更新活跃活文档（`AGENTS.md`、`README*`、`CONTRIBUTING*`、`docs/`，保持双语配对与 `##` 二级标题数对称）。 |
 | **🔍 状态诚实与回执诚实（原则 9 & 14）** | 严格区分 `completed`、`failed` 与不可逆外部写 `unknown`；严禁 `except Exception:` 返回 `{}` / `"active"` / `exit 0` 掩盖错误，严禁 `except OSError:` 误吞 `TimeoutError`；远端/组件主操作成功后，本地回执异常必须保持 `isError=False` 并附带 `receipt_warning` + `receipt_unconfirmed=True`。 |
 | **⏱️ 超时算术与五大铁律（原则 10 & 15）** | 强制 `outer_timeout >= sum(inner_budgets) + cleanup_grace`；严格遵守**五大铁律**：(1) SQLite WAL + `busy_timeout=5000` 在 `open_database` 一次性配置（只读探测不建空库、禁跑在 WSL2 DrvFS 上）；(2) `unknown` 仅限不可逆外部写，禁止本地永久自锁死（`needs_repair`/`fault`/`suppressed`/`TaskRootBusy`）；(3) 禁止复制 `*_fallback.py` 影子状态机或手写 Win32 ACL 仪式（统一用 `os.replace()`）；(4) 禁止 `inspect.signature` 锁死私有签名或内嵌巨型 Python `-c` 字符串；(5) **全表面零前置会话绑定与静默自启（`P2.7` / `P2.8`）**，所有本地工具（含 `knowledge_*`）开箱直通且零口令门禁，外发采集/导出严格受用户授权与 `project_roots` 范围约束。 |
 | **🧪 分级测试与零污染（原则 16）** | 拒绝凑数测试与源码文本 grep 锁；测试全流程隔离 `HOME`、`USERPROFILE`、`APPDATA`、`LOCALAPPDATA`、`XDG_*`、`MINDIE_CONFIG_HOME`、`MINDIE_DATA_HOME`、`MINDIE_DIAGNOSTICS_ROOT`、`REMOTE_DEV_AUTH_DIR`、`UV_CACHE_DIR` 与 `TMPDIR`。 |
 | **🤖 模块内聚、有界资源与 `P8` 存储（原则 17 & 18）** | 核心模块 `< 800` 行且前 30 行声明 `[Role]` / `[Invariants]` / `[Timeouts & Locks]` / `[Side-Effect Policy]`；常驻内存保持 $O(\text{活跃状态})$（控制面峰值 `<= 512 MiB`、零权重/零设备上下文）；运行时代际最多保留 `Active + Rollback`（`<= 2`），Windows 路径零裸 `os.kill(pid, 0)` 且零弹窗（`CREATE_NO_WINDOW` / `windowsHide: true`）。 |
 
-### 第二关：提交 PR 时 —— 运行 LF 格式与参数化 PR Checklist 门禁
+### 第二关：提交 PR 时 —— 运行 LF、代码/文档卫生与参数化 PR Checklist 门禁
 
-提交或更新 PR 时，请按对应仓库的 [`.github/pull_request_template.md`](./.github/pull_request_template.md) 勾选该类别稳定 Checklist ID 并填写核验证据（对于纯文档 PR 等不适用项，支持填写 `not-applicable: <具体原因>`，CI 会拒绝裸 `N/A` 或 `TODO`）：
+提交或更新 PR 时，请按对应仓库的 [`.github/pull_request_template.md`](./.github/pull_request_template.md) 勾选该类别稳定 Checklist ID 并填写实质核验证据与命令实际运行结果（对于纯文档 PR 等不适用项支持填写 `not-applicable: <具体原因>`；门禁会直接拦截裸 `N/A`/`TODO`、未替换的 `<占位符>`、照抄条目原文以及冒号后留空的验证命令）：
 
 ```bash
 # 1. 校验全仓文本文件严格使用 Unix LF (\n) 换行，零 Windows CRLF (\r\n)
 python3 .github/scripts/check_lf_eol.py
 
-# 2. 运行主仓门禁单测套件（修改 .github/scripts/ 时必跑）
+# 2. 校验代码/文档卫生（禁冗余后缀与孤立模块、活文档链接/锚点有效、双语配对与 ## 章节对称）
+python3 .github/scripts/code_doc_hygiene_gate.py --main-repo .
+
+# 3. 运行主仓门禁单测套件（修改 .github/scripts/ 时必跑）
 python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
 
-# 3. 按仓库类别校验 PR 描述（支持 hub / harness / host-plugin / control-plane / state-service / device-tool / bench / corpus）
+# 4. 按仓库类别校验 PR 描述（支持 hub / harness / host-plugin / control-plane / state-service / device-tool / bench / corpus）
 python3 .github/scripts/check_pr_checklist.py --profile hub --body-file <pr_body.md>
 ```

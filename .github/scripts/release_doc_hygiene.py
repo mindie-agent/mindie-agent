@@ -218,6 +218,7 @@ def product_inputs_changed(base: str, *, repository: Path, head: str = "HEAD") -
         ".github/workflows/release.yml",
         ".github/workflows/pr-checklist.yml",
         ".github/scripts/repo_roots.py",
+        ".github/scripts/code_doc_hygiene_gate.py",
         ".github/scripts/check_auto_update_readiness.py",
         ".github/scripts/host_compatibility_gate.py",
         ".github/scripts/windows_zero_popup_gate.py",

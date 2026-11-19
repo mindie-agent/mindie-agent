@@ -87,7 +87,7 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > ```
 > It will:
 > - probe active/installed hosts (`codex | cc | kimi | dsh | agy | wb | oc`; or pass `--host <host>` to target only the active session host);
-> - verify `release-channel.json` and the `< 3 MB` prebuilt `mindie-wheels-bundle.tar.gz` against `SHA256SUMS` (**zero `git clone`**);
+> - verify `release-channel.json` and the ~`5.6 MiB` prebuilt `mindie-wheels-bundle.tar.gz` (`MAX_BUNDLE_BYTES = 16 MiB` download ceiling in `install.py`) against `SHA256SUMS` (**zero `git clone`**);
 > - provision the shared `mindie-harness` runtime in the shared data directory (later updates only cut over generations, never reinstall);
 > - probe `gh` inside a disposable `GH_CONFIG_DIR` copy, never mutating or polluting the user's global `~/.config/gh`;
 > - emit machine-readable `detected_hosts`, `configured_hosts`, `gh_authenticated`, `gh_account`, `recommended_tier`, and `next_questions` for the next step.
@@ -365,18 +365,18 @@ MindIE Agent is guided by **18 pragmatic [Engineering Design Principles](./docs/
 
 Just like installation, contributing new features, bugfixes, or Ascend domain knowledge to MindIE Agent is **designed to be handed directly to your coding Agent** (every repository under `@mindie-agent` is 100% written, tested, and maintained by Agents).
 
-To keep 13+ repositories clean, fast, and free of over-defensive bloat or host pollution, contributing Agents follow **two mandatory gates** (see **[`CONTRIBUTING.en.md`](./CONTRIBUTING.en.md)** · **[中文](./CONTRIBUTING.md)**):
+To keep all repositories (1 Hub + 17 code repositories + 9 domain corpora) clean, fast, and free of over-defensive bloat, stale living docs, or host pollution, contributing Agents follow **two mandatory gates** (see **[`CONTRIBUTING.en.md`](./CONTRIBUTING.en.md)** · **[中文](./CONTRIBUTING.md)**):
 
-1. **📖 Before Coding: Read the Design Principles First** — Before touching code, your Agent must read [`AGENTS.md`](./AGENTS.md) and [`docs/design-principles.en.md`](./docs/design-principles.en.md) to align on single-purpose boundaries, fail-visible semantics, timeout arithmetic, the four anti-over-defensive iron rules, `< 800`-line modules with top headers, and bounded memory/VRAM design rules.
-2. **✅ After PR Submission: Complete the Pre-PR Checklist Self-Review (Including Format Hygiene)** — After submitting a PR, your Agent must audit its final `git diff` against [`.github/pull_request_template.md`](./.github/pull_request_template.md) (checking all items `1–8` through `15`, including repository formatting hygiene such as mandatory Unix `LF` `\n` line endings, and filling in concrete review evidence and executed test results) and pass the automated CI gates ([`check_lf_eol.py`](./.github/scripts/check_lf_eol.py) + [`check_pr_checklist.py`](./.github/scripts/check_pr_checklist.py)).
+1. **📖 Before Coding: Read the Design Principles First** — Before touching code, your Agent must read [`AGENTS.md`](./AGENTS.md) and [`docs/design-principles.en.md`](./docs/design-principles.en.md) to align on single-purpose boundaries, PR-level subtraction & bilingual living-doc sync, fail-visible semantics, timeout arithmetic, the **Five Anti-Over-Defensive Iron Rules**, `< 800`-line modules with top headers, and bounded memory/VRAM design rules.
+2. **✅ On PR Submission: Pass Parameterized Checklist & Hub Code/Doc Hygiene Gates** — When opening a PR, your Agent must fill out [`.github/pull_request_template.md`](./.github/pull_request_template.md) for the target repository's `--profile` (checking every stable checklist ID, supplying concrete review evidence, and recording real execution results after `:` for every command—including Unix `LF` `\n` line endings, zero orphan/shadow modules, and bilingual `##` section symmetry): each repository's PR workflow runs [`check_lf_eol.py`](./.github/scripts/check_lf_eol.py) plus its `--profile` [`check_pr_checklist.py`](./.github/scripts/check_pr_checklist.py) gate, while cross-repo code/doc hygiene ([`code_doc_hygiene_gate.py`](./.github/scripts/code_doc_hygiene_gate.py)) is enforced centrally by Hub `R4`/release gates ([`host_compatibility_gate.py`](./.github/scripts/host_compatibility_gate.py) and [`check_auto_update_readiness.py`](./.github/scripts/check_auto_update_readiness.py)).
 
 To contribute, simply copy and send this prompt to your Agent:
 
 ```text
 I want to contribute a change to MindIE Agent: <describe your feature, bugfix, or Ascend knowledge addition in one sentence>.
 Please follow https://github.com/mindie-agent/mindie-agent/blob/main/CONTRIBUTING.en.md:
-1. Read AGENTS.md and docs/design-principles.en.md before writing any code;
-2. Implement the change with tiered tests, open a PR, and complete the Pre-PR Checklist self-review and verification evidence in .github/pull_request_template.md.
+1. Read AGENTS.md and docs/design-principles.en.md first, route to the single-owner repository, and create an isolated Git worktree;
+2. Implement the change, delete superseded obsolete code, sync bilingual living docs, run tiered tests, open a PR, and complete the --profile Pre-PR Checklist and verification outputs in .github/pull_request_template.md.
 ```
 
 ---
@@ -426,7 +426,9 @@ See **[`docs/README.en.md`](./docs/README.en.md)** (**[中文文档中心](./doc
 
 | Topic | 中文 | English |
 | --- | --- | --- |
-| **`v0.1.15` Patch Notes: Silent Default-On Across All 7 Hosts & Zero-Binding Knowledge MCP (Current)** | [docs/releases/0.1.15.md](./docs/releases/0.1.15.md) | [docs/releases/0.1.15.en.md](./docs/releases/0.1.15.en.md) |
+| **`v0.1.17` Patch Notes: Seamless `n-1 -> n` Native Self-Upgrade & In-Flight Session Handoffs (Current)** | [docs/releases/0.1.17.md](./docs/releases/0.1.17.md) | [docs/releases/0.1.17.en.md](./docs/releases/0.1.17.en.md) |
+| **`v0.1.16` Patch Notes: 7-Host Great Subtraction, Zero-Git Prebuilt Auto-Update, 3-Tier Privacy & 1:1 Remote Profiles** | [docs/releases/0.1.16.md](./docs/releases/0.1.16.md) | [docs/releases/0.1.16.en.md](./docs/releases/0.1.16.en.md) |
+| **`v0.1.15` Patch Notes: Silent Default-On Across All 7 Hosts & Zero-Binding Knowledge MCP** | [docs/releases/0.1.15.md](./docs/releases/0.1.15.md) | [docs/releases/0.1.15.en.md](./docs/releases/0.1.15.en.md) |
 | **`v0.1.14` Patch Notes: Clean Runtime `SKILL.md` Boundary & Antigravity Default-Enabled Mode** | [docs/releases/0.1.14.md](./docs/releases/0.1.14.md) | [docs/releases/0.1.14.en.md](./docs/releases/0.1.14.en.md) |
 | **`v0.1.13` Patch Notes: Clean-Architecture Convergence, Shared `mindie-harness` Substrate & 7-Host Alignment** | [docs/releases/0.1.13.md](./docs/releases/0.1.13.md) | [docs/releases/0.1.13.en.md](./docs/releases/0.1.13.en.md) |
 | **`v0.1.12` Patch Notes: Windows Background Knowledge & Diagnostics Service Entry Fixes** | [docs/releases/0.1.12.md](./docs/releases/0.1.12.md) | [docs/releases/0.1.12.en.md](./docs/releases/0.1.12.en.md) |

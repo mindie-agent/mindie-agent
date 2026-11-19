@@ -87,7 +87,7 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > ```
 > 它会：
 > - 探测活跃/已安装宿主（`codex | cc | kimi | dsh | agy | wb | oc`；也可显式传入 `--host <宿主>` 仅预置当前会话宿主）；
-> - 校验 `release-channel.json` 与 `< 3 MB` 预构建 `mindie-wheels-bundle.tar.gz` 的 `SHA256SUMS`（**零 `git clone`**）；
+> - 校验 `release-channel.json` 与约 `5.6 MiB`（`install.py` 下载上限 `MAX_BUNDLE_BYTES = 16 MiB`）预构建 `mindie-wheels-bundle.tar.gz` 的 `SHA256SUMS`（**零 `git clone`**）；
 > - 在共享数据目录预置 `mindie-harness` 运行时（后续只做代际切换，不重复安装）；
 > - 在一次性 `GH_CONFIG_DIR` 副本中探测 `gh`，绝不修改或污染用户全局 `~/.config/gh`；
 > - 输出机器可读的 `detected_hosts`、`configured_hosts`、`gh_authenticated`、`gh_account`、`recommended_tier` 与 `next_questions`，供下一步直接消费。
@@ -365,18 +365,18 @@ MindIE Agent 在持续演进中沉淀了 **18 条务实的[工程设计原则](.
 
 和安装一样，给 MindIE Agent 贡献新特性、修 Bug 或补充昇腾领域知识，**同样推荐直接把需求甩给你的编程 Agent**（`@mindie-agent` 旗下全部仓库 100% 由 Agent 编写、测试与维护）。
 
-为了保证多仓库演进不写出过度防御的冗余代码、不污染宿主机环境，我们为参与贡献的 Agent 设定了**两道硬性门禁**（完整说明见 **[`CONTRIBUTING.md`](./CONTRIBUTING.md)** · **[English](./CONTRIBUTING.en.md)**）：
+为了保证全栈仓库（1 个主仓 + 17 个代码仓 + 9 个领域知识库）不堆积过度防御的冗余代码、不遗留陈旧活文档且不污染宿主机环境，我们为参与贡献的 Agent 设定了**两道硬性门禁**（完整说明见 **[`CONTRIBUTING.md`](./CONTRIBUTING.md)** · **[English](./CONTRIBUTING.en.md)**）：
 
-1. **📖 开发特性前：先读设计原则** —— 动手写代码前，Agent 必须先阅读 [`AGENTS.md`](./AGENTS.md) 与 [`docs/design-principles.md`](./docs/design-principles.md)，对齐单一职责边界、反静默回退、超时算术、反过度防御四大铁律、`< 800` 行与顶部契约头以及有界内存/显存规格分流等架构与设计准则。
-2. **✅ 提交 PR 后：完成 Checklist 逐项自检（含开发格式规范）** —— PR 提交后，Agent 必须对照 [`.github/pull_request_template.md`](./.github/pull_request_template.md) 逐项复核最终 `git diff`（勾选 `1–8` ~ `15` 全部检查项，包含全仓强制 Unix `LF` `\n` 换行格式等开发规范，如实填写具体的**`自查结论与证据`**与**`验证结果`**），并通过 CI 自动门禁（[`check_lf_eol.py`](./.github/scripts/check_lf_eol.py) + [`check_pr_checklist.py`](./.github/scripts/check_pr_checklist.py)）核验后合入。
+1. **📖 开发特性前：先读设计原则** —— 动手写代码前，Agent 必须先阅读 [`AGENTS.md`](./AGENTS.md) 与 [`docs/design-principles.md`](./docs/design-principles.md)，对齐单一职责边界、PR 级减法与中英活文档同步、反静默回退、超时算术、反过度防御**五大铁律**、`< 800` 行与顶部契约头以及有界内存/显存规格分流等架构与设计准则。
+2. **✅ 提交 PR 时：通过参数化 Checklist 与主仓代码/文档卫生门禁** —— 提交 PR 时，Agent 必须按目标仓所属 `--profile` 对照 [`.github/pull_request_template.md`](./.github/pull_request_template.md) 勾选稳定 Checklist ID、填写具体核验证据及每条验证命令冒号后的真实运行结果（强制全仓 Unix `LF` `\n` 换行、零孤立模块/影子文件与中英活文档 `##` 章节对称）：各仓库自身 PR 工作流自动校验 [`check_lf_eol.py`](./.github/scripts/check_lf_eol.py) 与对应 `--profile` 的 [`check_pr_checklist.py`](./.github/scripts/check_pr_checklist.py)，而跨仓代码/文档卫生门禁（[`code_doc_hygiene_gate.py`](./.github/scripts/code_doc_hygiene_gate.py)）由主仓 `R4`/发版门禁（[`host_compatibility_gate.py`](./.github/scripts/host_compatibility_gate.py) 与 [`check_auto_update_readiness.py`](./.github/scripts/check_auto_update_readiness.py)）统一强制守门。
 
 想贡献改动时，直接复制下面这段话发给你的 Agent 即可：
 
 ```text
 我想给 MindIE Agent 贡献一个改动：<在这里一句话描述你想加的特性、修复的 Bug 或补充的昇腾知识>。
 请严格按照 https://github.com/mindie-agent/mindie-agent/blob/main/CONTRIBUTING.md 的流程推进：
-1. 动手写代码前，先阅读 AGENTS.md 与 docs/design-principles.md 对齐设计原则；
-2. 完成代码与分层测试后提交 PR，并对照 .github/pull_request_template.md 完成 Pre-PR Checklist 逐项自检与验证证据回填。
+1. 动手写代码前，先阅读 AGENTS.md 与 docs/design-principles.md，按路由表定位单一职责仓库并切出独立 Git Worktree；
+2. 完成实现、删净冗余代码、同步中英活文档并通过分层测试后提交 PR，按对应 --profile 完成 .github/pull_request_template.md 自检与验证结果回填。
 ```
 
 ---
@@ -426,7 +426,9 @@ MindIE Agent 在持续演进中沉淀了 **18 条务实的[工程设计原则](.
 
 | 文档主题 | 中文 | English |
 | --- | --- | --- |
-| **`v0.1.15` 补丁发布说明：全七端零口令静默自启与全表面零会话绑定（当前版本）** | [docs/releases/0.1.15.md](./docs/releases/0.1.15.md) | [docs/releases/0.1.15.en.md](./docs/releases/0.1.15.en.md) |
+| **`v0.1.17` 补丁发布说明：历史 `n-1 -> n` 原生平滑自升级与在线活跃会话交接（当前版本）** | [docs/releases/0.1.17.md](./docs/releases/0.1.17.md) | [docs/releases/0.1.17.en.md](./docs/releases/0.1.17.en.md) |
+| **`v0.1.16` 补丁发布说明：全七端宿主大减法、零 Git 预构建自动更新、三档隐私解耦与 1:1 远端工具面** | [docs/releases/0.1.16.md](./docs/releases/0.1.16.md) | [docs/releases/0.1.16.en.md](./docs/releases/0.1.16.en.md) |
+| **`v0.1.15` 补丁发布说明：全七端零口令静默自启与全表面零会话绑定** | [docs/releases/0.1.15.md](./docs/releases/0.1.15.md) | [docs/releases/0.1.15.en.md](./docs/releases/0.1.15.en.md) |
 | **`v0.1.14` 补丁发布说明：运行时 `SKILL.md` 安装向导剥离与 Antigravity 默认全功能** | [docs/releases/0.1.14.md](./docs/releases/0.1.14.md) | [docs/releases/0.1.14.en.md](./docs/releases/0.1.14.en.md) |
 | **`v0.1.13` 补丁发布说明：全栈洁净架构收敛、`mindie-harness` 公共底座抽离与 7 宿主统一对齐** | [docs/releases/0.1.13.md](./docs/releases/0.1.13.md) | [docs/releases/0.1.13.en.md](./docs/releases/0.1.13.en.md) |
 | **`v0.1.12` 补丁发布说明：Windows 后台知识与诊断服务入口修复** | [docs/releases/0.1.12.md](./docs/releases/0.1.12.md) | [docs/releases/0.1.12.en.md](./docs/releases/0.1.12.en.md) |

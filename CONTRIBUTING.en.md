@@ -17,7 +17,7 @@ I want to contribute a change to MindIE Agent: <describe your feature, bugfix, o
 Please follow https://github.com/mindie-agent/mindie-agent/blob/main/CONTRIBUTING.en.md:
 1. Check the Repository Routing Map in AGENTS.md to locate the single-owner target repository; if missing locally, lazy-clone it to ../<repo> and create an isolated Git worktree at ../.worktrees/<repo>-<topic>;
 2. Immediately read ../<repo>/AGENTS.md and ../<repo>/CONTRIBUTING.md (plus docs/design-principles.en.md) before editing code;
-3. Implement the change with isolated tiered tests, open a PR, and pass the repository's --profile Pre-PR Checklist gate.
+3. Implement the change, delete superseded obsolete code, sync bilingual living docs, run isolated tiered tests, open a PR, and pass the repository's --profile Pre-PR Checklist gate.
 ```
 
 ---
@@ -47,7 +47,7 @@ Never clone all 25+ repositories upfront—lazy-clone only the repository your t
 git -C ../coordinator worktree add ../.worktrees/coordinator-my-fix -b fix/my-fix
 ```
 
-> **Immediate Handoff Rule**: As soon as your Agent routes to `../<repo>` or `../.worktrees/<repo>-<topic>`, it **must immediately read that target repository's own `AGENTS.md` and `CONTRIBUTING.md`**, run its local test suite, and keep `mindie-agent` clean.
+> **Immediate Handoff & Scoped-Worker Rule**: As soon as your Agent routes to `../<repo>` or `../.worktrees/<repo>-<topic>`, it **must immediately read that target repository's own `AGENTS.md` and `CONTRIBUTING.md`**, run its local test suite, and keep `mindie-agent` clean. In multi-agent workflows (`/joint-dev`, swarms, or subagents) where a worker's prompt restricts file ownership (e.g., code/test-only while a dedicated docs agent owns Markdown), the scoped worker **must stay strictly within its assigned files**, delete obsolete code inside that scope, and list any out-of-scope doc deltas (`target doc + section`, `old claim -> replacement`, `source/test`) in its handoff summary for the downstream docs pass before PR submission.
 
 ### 2. Sandboxed-Agent Write Access (Why Both Directories Are Needed)
 
@@ -63,11 +63,11 @@ Inside a linked worktree (`../.worktrees/<repo>-<topic>`), `.git` is a pointer f
   ```
 - **Google Antigravity / Tencent WorkBuddy / OpenCode / Kimi Code / DSH / Multi-Root IDEs**: Add both `../<repo>` and `../.worktrees/<repo>-<topic>` as workspace folders, or launch the session directly rooted at `../.worktrees/<repo>-<topic>`.
 - **Honest Read-Only Fallback**: If the active sandbox blocks writes outside `mindie-agent`, inspect read-only and give the user the exact one-line relaunch command above—**never dump sibling runtime source files into `mindie-agent`**.
-- **Worktree-Native Hub Gates**: `.github/scripts/repo_roots.py` natively resolves `.git` worktree pointer files and `--git-common-dir`. You can pass `--siblings-root ../.worktrees` or authoritative `--repo coordinator=/abs/path/to/worktree` to any hub gate (`check_auto_update_readiness.py`, `host_compatibility_gate.py`, `release_doc_hygiene.py`, `sync_org_versions.py`), and every gate prints explicit `selected / exercised / missing / unselected` repository coverage.
+- **Worktree-Native Hub Gates**: `.github/scripts/repo_roots.py` natively resolves `.git` worktree pointer files and `--git-common-dir`. You can pass `--siblings-root ../.worktrees` or authoritative `--repo coordinator=/abs/path/to/worktree` to any hub gate (`code_doc_hygiene_gate.py`, `host_compatibility_gate.py`, `check_auto_update_readiness.py`, `release_doc_hygiene.py`, `sync_org_versions.py`), and every gate prints explicit `selected / exercised / missing / unselected` repository coverage.
 
 ---
 
-## 🗺️ Repository Routing Map & Checklist Profiles (17 Code/Hub Repos + 9 Corpora)
+## 🗺️ Repository Routing Map & Checklist Profiles (1 Hub + 17 Code Repos + 9 Corpora)
 
 | Class & `--profile` | Repositories (`github.com/mindie-agent/<repo>`) | Owned Responsibility |
 | --- | --- | --- |
@@ -89,7 +89,7 @@ flowchart LR
   A["💡 Your Idea<br/>Route to Single-Owner Repo"] --> B["🌳 Isolated Git Worktree<br/>Read Target AGENTS.md & Principles"]
   B --> C["🛠️ Clean-Core Implementation<br/>&lt;800 Lines · Five Iron Rules · Bounded RAM"]
   C --> D["🧪 Isolated Tiered Tests<br/>Tier 0–3 · Zero Host Pollution"]
-  D --> E["✅ Profiled PR Self-Review<br/>LF Check + check_pr_checklist.py"]
+  D --> E["✅ Profiled PR Self-Review<br/>LF + Code/Doc Hygiene + check_pr_checklist.py"]
 ```
 
 ### Gate 1: Before Coding — Align with the 18 Design Principles & Five Iron Rules
@@ -98,23 +98,26 @@ Before touching code, read the target repository's `AGENTS.md` and [`docs/design
 
 | Dimension | Core Invariants Required Before Writing Code |
 | --- | --- |
-| **🎯 Total Cost & Boundaries (Principles 1–8)** | Optimize for **end-to-end user goal cost**; toolify closed deterministic problems while keeping open judgment advisory in Skills; reuse mature substrates (`mindie-harness`) and **delete superseded code directly** after verifying reachability instead of retaining dual-track shims. |
+| **🎯 Total Cost, Subtraction & Living-Doc Sync (Principles 1–8 & 10)** | Optimize for **end-to-end user goal cost**; toolify closed deterministic problems while keeping open judgment advisory in Skills; reuse mature substrates (`mindie-harness`). Every merge-ready PR must delete superseded modules and orphan `.py` files directly (`*_legacy`/`*_old`/`*_backup`/`*_fallback` and coexisting `*_copy` shadow files are unconditionally banned; coexisting `<base>_v<N>.py` hardware/CANN operator modules such as `fia_v1.py`..`fia_v4.py` are permitted ONLY when actively imported and declaring distinct, AST-grounded `Upstream-ABI: <symbol>` headers like `Upstream-ABI: aclnnFusedInferAttentionScoreV2` in the top module docstring), and keep active living docs (`AGENTS.md`, `README*`, `CONTRIBUTING*`, `docs/`, with matching `##` H2 section counts across bilingual pairs) synchronized. |
 | **🔍 State & Receipt Honesty (Principles 9 & 14)** | Distinguish `completed`, `failed`, and uncertain external writes (`unknown`); never mask errors as `{}` / `"active"` / `exit 0` and always precede `except OSError:` with `except TimeoutError: raise`; once a primary remote/component call succeeds, local receipt errors must keep `isError=False` and attach `receipt_warning` + `receipt_unconfirmed=True`. |
 | **⏱️ Timeout Math & Five Iron Rules (Principles 10 & 15)** | Enforce `outer_timeout >= sum(inner_budgets) + cleanup_grace` and obey all **Five Iron Rules**: (1) configure SQLite WAL + `busy_timeout=5000` once in `open_database` (never on absent read-only checks, never on WSL2 DrvFS); (2) reserve `unknown` strictly for irreversible external writes—zero local permanent self-bricking (`needs_repair`/`fault`/`suppressed`/`TaskRootBusy`); (3) no copy-pasted `*_fallback.py` shadow state machines or Win32 ACL ceremonies (use `os.replace()`); (4) no `inspect.signature` locks or giant inline Python `-c` blobs; (5) **zero pre-call session-binding gates & silent default-on across all tools (`P2.7` / `P2.8`)**, reserving user consent + authorized `project_roots` strictly for `Stop` capture and outbound exports. |
 | **🧪 Tiered Tests & Host Isolation (Principle 16)** | No filler or prose-grep tests; isolate `HOME`, `USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `XDG_*`, `MINDIE_CONFIG_HOME`, `MINDIE_DATA_HOME`, `MINDIE_DIAGNOSTICS_ROOT`, `REMOTE_DEV_AUTH_DIR`, `UV_CACHE_DIR`, and `TMPDIR` in all tests. |
 | **🤖 Cohesive Modules, Bounded RAM & `P8` Storage (Principles 17 & 18)** | Keep core modules `< 800` lines with `[Role]` / `[Invariants]` / `[Timeouts & Locks]` / `[Side-Effect Policy]` in the top 30 lines; keep control-plane working sets $O(\text{active state})$ (`<= 512 MiB` peak, zero weight/device context); retain at most `Active + Rollback` (`<= 2`) generations and enforce zero Windows console popups (`CREATE_NO_WINDOW` / `windowsHide: true`) and zero unguarded `os.kill(pid, 0)`. |
 
-### Gate 2: On PR Submission — Run LF Hygiene & Parameterized PR Checklist Validation
+### Gate 2: On PR Submission — Run LF, Code/Doc Hygiene & Parameterized PR Checklist Validation
 
-Fill out [`.github/pull_request_template.md`](./.github/pull_request_template.md) with concrete evidence for each profile ID (for docs-only PRs, non-applicable items accept `not-applicable: <specific reason>`; bare `N/A` or `TODO` is rejected):
+Fill out [`.github/pull_request_template.md`](./.github/pull_request_template.md) with concrete evidence for each profile ID and real command outputs after `:` in `Verification` (for docs-only PRs, non-applicable items accept `not-applicable: <specific reason>`; bare `N/A`/`TODO`, unreplaced `<placeholder>` tokens, echoed checkbox descriptions, and blank command results are rejected):
 
 ```bash
 # 1. Verify all text files strictly use Unix LF (\n) line endings and zero CRLF (\r\n)
 python3 .github/scripts/check_lf_eol.py
 
-# 2. Run the isolated gate unit suite (mandatory when touching .github/scripts/)
+# 2. Verify code/doc hygiene (zero legacy/shadow/orphan modules, valid living-doc links/anchors, bilingual ## symmetry)
+python3 .github/scripts/code_doc_hygiene_gate.py --main-repo .
+
+# 3. Run the isolated gate unit suite (mandatory when touching .github/scripts/)
 python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
 
-# 3. Validate the PR body against its repository class profile
+# 4. Validate the PR body against its repository class profile
 python3 .github/scripts/check_pr_checklist.py --profile hub --body-file <pr_body.md>
 ```

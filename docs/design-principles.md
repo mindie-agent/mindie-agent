@@ -50,7 +50,7 @@ MindIE Agent 的目标是**让通用编程 Agent 在昇腾（Ascend）NPU 与大
 
 ### 10. 按真实缺口自研，以核心业务逻辑为唯一基准直接重构清理
 - **先验证再动手**：在重构更新、进程管理或 Hook 机制前，先用不消耗模型 Token 的最小实验核对宿主和操作系统原语的真实行为（包括超时、取消和异常退出表现）。
-- **以业务逻辑正确为唯一基准，直接删掉重写不合理设计**：遇到过度防御的假想敌检查、影子状态机或历史兼容包袱时，直接破坏性重构、删掉重写，不保留冗余双轨（但必须妥善保留用户已有的知识正文、游标和授权设置）。
+- **以业务逻辑正确为唯一基准，直接删掉重写不合理设计（PR 级减法与活文档同步）**：遇到过度防御的假想敌检查、影子状态机或历史兼容包袱时，直接破坏性重构、删掉重写（不设人为净减行配额，但绝不留冗余双轨，同时妥善保留用户已有的知识正文、游标和授权设置）。生产代码无条件禁止孤立未引用的 `.py` 模块、`*_legacy`/`*_old`/`*_backup`/`*_fallback` 以及同目录影子 `*_copy` 文件；同目录并存的多版本硬件/CANN 算子模块（如 `fia_v1.py`..`fia_v4.py`）仅在被真实引用且顶部模块 Docstring 声明互异、AST 可核实的 `Upstream-ABI: <符号>`（如 `Upstream-ABI: aclnnFusedInferAttentionScoreV2`）时允许共存，并随 PR 同步更新活跃活文档（`AGENTS.md`、`README*`、`CONTRIBUTING*`、`docs/`，保持双语配对及 `##` 二级章节数对称），由 `code_doc_hygiene_gate.py` 自动守门。
 - **按真实数据格式做兼容**：正式发布前不保留累赘的开发期兼容分支；正式发布后，根据实际变化的数据字段、存储 Schema 和接口契约设计兼容逻辑，不单纯拿版本号数字去猜测数据格式。
 - **默认信任 Agent 与内部组件契约**：内部模块间直接按既定接口契约消费返回结果，绝不怀着“上游可能造假或传错”的假想敌心态层层叠加证明材料、哈希交叉比对或重复重跑。开放性判断交给 Agent，确定性计算交给对应专业组件。
 - **本职验证一次闭环，下游直接复用**：数值精度比对、任务判分与性能计时分别由各自归属组件一次性验证闭环；后续分析、经验提炼与报告渲染直接消费已有结论，不另建平行事实副本或无故重跑同一检查（仅在输入条件变化或出现实测矛盾时定向补验）。
@@ -144,7 +144,7 @@ MindIE Agent 旗下全部代码与知识仓库均为 **100% 由编程 Agent 阅�
 
 ## 三、开发 PR 提交前自查清单（Pre-PR Review）
 
-MindIE Agent 旗下所有仓库的代码、配置、依赖、CI 与文档改动，在提交开发 PR 前均需对照核心原则完成自查（这是开发者的交付质量门禁，不增加终端用户的任何操作步骤）：
+MindIE Agent 旗下所有仓库的代码、配置、依赖、CI 与文档改动，在提交开发 PR 前均需对照核心原则完成自查（这是开发者的交付质量门禁，不增加终端用户的任何操作步骤）。每个合入级 PR 对删净冗余代码与同步中英活文档负最终责任；在多 Agent 分片协作（如 `/joint-dev`、Swarm 或受限 Subagent）中，若子代理被提示词限定了文件范围（如仅负责代码/单测），子代理必须严守边界、清理受权文件内的废弃代码，并在交接摘要中列出范围外需同步的文档项（`目标文档 + 章节`、`旧表述 -> 新契约`、`源码/单测依据`）供下游文档环节闭环：
 
 | 检查维度 | 自查问题 |
 |---|---|
@@ -155,13 +155,13 @@ MindIE Agent 旗下所有仓库的代码、配置、依赖、CI 与文档改动�
 | **5. Skill 定位** | Skill 是否保持为清晰的引导说明？有没有把提示性建议写成强制工作流？ |
 | **6. 知识参考性** | 知识与反馈是否保持“仅供参考”？有没有强制要求检索、强制留存或把历史经验当成绝对权威？ |
 | **7. 按需介入** | 是否做到了按需触发？有没有未经请求自动激活、跨会话串扰或强制收尾步骤？ |
-| **8. 机制复用与配套** | 是否优先复用了宿主/系统/成熟组件能力？替代后旧代码是否已直接删掉重写？用户数据、授权与外部副作用 `unknown` 回执是否完好保留？ |
+| **8. 机制复用、减法与活文档同步** | 是否优先复用了宿主/系统/成熟组件能力？替代后旧模块、孤立 `.py` 文件与影子副本是否已彻底删净（合法并存的多版本硬件算子是否声明了互异且 AST 可核实的 `Upstream-ABI:` 头）？活跃活文档链接、锚点与中英双语 `##` 章节结构是否已同步对齐？用户数据、授权与外部副作用 `unknown` 回执是否完好保留？ |
 | **9. 错误可见性与反静默回退** | 失败路径是否真实、清晰地报错？是否存在 `except Exception:` 静默吞错返回 `{}` / `"active"` / `exit 0` 假成功、Python `except OSError:` 误吞 `TimeoutError`、对 `unknown` 写操作盲目重试，或因本地记账/清理超时反杀已成功的远端主结果？ |
 | **10. 超时预算与算术一致性** | 新增或修改的超时是否满足**“外层预算 ≥ 内层步骤总和 + 收尾排水宽限期（如 `SIGTERM->SIGKILL` / `inventory`）”**？是否消除了热路径亚秒级（`<1s`）SQLite 锁误杀、外部子进程 `timeout=None` 无限等待、握手脱离 `deadline` 以及 `timeout N cmd \|\| cmd` 超时二次裸跑？ |
 | **11. 反过度防御性编程（五大铁律）** | 是否严格遵守反过度防御五大铁律：（1）零热路径 SQL `.owner`/Schema 反射自检；（2）仅不可逆外部写用 `unknown`，本地状态零单向自锁死（无永久 `fault`/`suppressed`/`TaskRootBusy`）；（3）零跨仓复制 `*_fallback.py`/`*_bootstrap.py` 与 Win32 ACL 繁文缛节（统一 `os.replace()`）；（4）零 `inspect.signature` 内部签名锁死与巨型内嵌 Python 字符串（远端 worker 独立 `.py` 模块）；（5）确定性工具零前置宿主会话/Hook/Nonce/`context_file` 绑定门禁（支持无 `_meta` 标准 MCP 直调，通过 `zero_binding_gate.py` 校验）？ |
 | **12. 分级测试有效性** | 新增测试是否验证真实核心业务与领域质量，而非测防御性 `chmod`/`symlink`/`ValueError` 假想敌、替静默吞错背书、覆写生产脚本或 grep 文档？测试是否通过 `conftest.py` / 临时目录严格隔离 `MINDIE_DIAGNOSTICS_ROOT`、`MINDIE_DIAGNOSTICS_CONFIG` 与 `$HOME`（零污染宿主机 `~/.local`、`~/.config` 或系统级 LaunchAgent/systemd 服务）？是否符合 Tier 0 (`<5s`) ~ Tier 3 耗时预算与常备 A2/A3 真机无损验证要求？ |
 | **13. Agent-Native 代码与注释规范** | 核心模块是否保持精炼（单次 `view_file` 800 行友好、无多层子进程蹦床）并在顶部前 30 行声明 `[Role]`/`[Invariants]`/`[Timeouts & Locks]`/`[Side-Effect Policy]` 契约头？注释是否聚焦业务不变量与硬件/协议边界（如 A3 双 Die `Phy-ID`），而非替防御性假想敌代码写借口？ |
 | **14. 性能、内存/显存/存储有界性与规格分流** | 内存工作集是否严格保持 $O(\text{活跃状态})$ 而非无界累加全量历史或一次性展开 `>50MB` 大文件（控制/分析组件单进程常规峰值 `<= 512 MiB`，严禁 `> 1 GiB` 膨胀）？热循环内是否消除了 `deepcopy`/起子进程/逐行 Commit，并发 Worker 数同时受可用内存与核数约束？运行时环境、日志、SQLite、Spool 与远端工作区是否满足 `Active + Rollback` 有界保留、静默历史包袱回收与零无主 `mkstemp`/`mkdtemp` 临时泄漏（Windows 禁裸 `os.kill(pid, 0)`）？控制面是否保持零权重/零设备上下文，且重计算或显存（HBM/VRAM）操作按本机与远端真实规格自动分流（无 `sys.platform` 硬编码特判）？ |
-| **15. 自动更新就绪、Windows 零弹窗与存储门禁必检及行尾规范** | Windows 下的 Node.js 子进程是否配置 `windowsHide: true`、Python 子进程是否配置 `CREATE_NO_WINDOW`？是否已按实际发布范围通过 `check_auto_update_readiness.py`（含 `R4` Windows 零弹窗与 `P8` 存储生命周期/临时文件门禁 `storage_lifecycle_gate.py`；独立发版传 `--release-repo <仓库>`，产品组合发版传 `--release-scope product`，按需附带 `--require-siblings --verify-local-hosts`，正式发版加 `--verify-github-releases`）及 `check_lf_eol.py`？独立发版时 `R6` 是否仅核对目标仓自身源码版本与 README/LF（无需为了过门禁被迫修改主仓版本、历史通道或其他仓 README，将全量文档同步严格留给产品组合发版）？ |
+| **15. 自动更新就绪、代码文档卫生、Windows 零弹窗与存储门禁必检及行尾规范** | Windows 下的 Node.js 子进程是否配置 `windowsHide: true`、Python 子进程是否配置 `CREATE_NO_WINDOW`？是否已按实际发布范围通过 `code_doc_hygiene_gate.py`、`check_auto_update_readiness.py`（含 `R4` 代码/文档卫生门禁 `code_doc_hygiene_gate.py`、Windows 零弹窗 `windows_zero_popup_gate.py`、零前置绑定 `zero_binding_gate.py` 与 `P8` 存储生命周期门禁 `storage_lifecycle_gate.py`；独立发版传 `--release-repo <仓库>`，产品组合发版传 `--release-scope product`，按需附带 `--require-siblings --verify-local-hosts`，正式发版加 `--verify-github-releases`）及 `check_lf_eol.py`？独立发版时 `R6` 是否仅核对目标仓自身源码版本与 README/LF（无需为了过门禁被迫修改主仓版本、历史通道或其他仓 README，将全量文档同步严格留给产品组合发版）？ |
 
-提交开发 PR 时，必须在 PR 描述中按所属仓库类别完整勾选并填写 [`.github/pull_request_template.md`](../.github/pull_request_template.md)（包含 `## 变更摘要 (Summary)`、该仓库 `--profile` 对应的稳定 Checklist ID 核验结论与证据——纯文档等不适用项须填写 `not-applicable: <具体原因>`——以及 `## 验证结果 (Verification)`）。CI 门禁工作流（`.github/workflows/pr-checklist.yml` + `.github/scripts/check_pr_checklist.py --profile <class>`）会在每次 PR 创建/编辑/同步时自动核验，未完成勾选或未填写实质证据的 PR 将被 CI 拦截禁止合入。
+提交开发 PR 时，必须在 PR 描述中按所属仓库类别完整勾选并填写 [`.github/pull_request_template.md`](../.github/pull_request_template.md)（包含 `## 变更摘要 (Summary)`、该仓库 `--profile` 对应的稳定 Checklist ID 实质核验证据——纯文档等不适用项须填写 `not-applicable: <具体原因>`——以及 `## 验证结果 (Verification)` 中每条命令冒号后的真实运行结果）。CI 门禁工作流（`.github/workflows/pr-checklist.yml` + `.github/scripts/check_pr_checklist.py --profile <class>`）会在每次 PR 创建/编辑/同步时自动拦截未勾选条目、未替换 `<占位符>`、照抄条目描述或留空的验证命令输出。
