@@ -16,8 +16,8 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 | 层级 / 模块 | 负责什么 | 不做什么 |
 | --- | --- | --- |
 | **宿主原生插件管理器** | 插件包的下载、安装与已安装版本记录 | 不代替 MindIE 做跨宿主兼容性筛选 |
-| **宿主插件薄适配层**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 每个插件最多 **`1,500` 行**宿主协议胶水：原生协议清单、`< 120` 行 Hook/MCP 启动器、宿主 Transcript 解析器、`host_adapter.py` 与薄 `setup.py`；进程监管、MCP 路由、`mindie_doctor`、共享授权与运行时更新全部委托 `mindie-harness`，并锁定依赖（`uv.lock`） | 不各自复制维护进程守护、MCP 网关或更新状态机 |
-| **共享宿主底座**（`harness` / `mindie-harness`） | 跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）、统一只读 `mindie_doctor` 健康检查以及单状态源 `ExperimentLedger` `rsi` 优化闭环 | 不混入特定宿主的私有 UI/Transcript 解析逻辑，也不在只读检查时凭空创建空 SQLite 库 |
+| **宿主插件薄适配层**（`mindie-agent-cc` / `-codex` / `-kimi` / `-dsh` / `-agy` / `-wb` / `-oc`） | 每个插件最多 **`1,500` 行**宿主协议胶水：原生协议清单、`< 120` 行 Hook/MCP 启动器、宿主 Transcript 解析器、`host_adapter.py` 与薄 `setup.py`；七端统一声明全部 **9 个第一方运行时包**（`mindie-harness`、`mindie-knowledge`、`remote-dev`、`mindie-diagnostics`、`mindie-debugger`、`mindie-profiler`、`mindie-sim`、`mindie-coordinator` 与 `npu-top`），并将进程监管、MCP 路由、`mindie_doctor`、九域知识绑定、自检与运行时更新全部委托 `mindie-harness` | 不各自复制维护进程守护、知识 RPC 影子路由、MCP 网关或更新状态机 |
+| **共享宿主底座**（`harness` / `mindie-harness`） | 跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子切换、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）、九域内容寻址知识绑定与 `Stop` 采集编排（`mindie_harness.runtime.knowledge_binding`）、候选/全栈零 Mock stdio 自检（`mindie_harness.selftest`）、统一只读 `mindie_doctor` 健康检查以及单状态源 `ExperimentLedger` `rsi` 优化闭环 | 不混入特定宿主的私有 UI/Transcript 解析逻辑，也不在只读检查时凭空创建空 SQLite 库 |
 | **共享知识引擎**（`knowledge`） | 纯知识能力：管理授权与增量游标、执行确定性隐私脱敏、协调分块目录生成、提供基于 `TechnicalTokenizerV1` 的 ReMe 与 `L1–L4` 检索、处理 PR 发布回执与故障恢复 | 不直接耦合特定宿主的私有目录结构，也不靠猜测目录或时间戳来认领任务 |
 | **远端开发与诊断组件**（`remote-dev` / `diagnostics`） | 提供 SSH 远端文件读写/后台长作业执行、有界本地诊断日志，以及受统一贡献开关控制的自动故障上报 | SSH 远端操作与本地日志不依赖贡献开关；公开故障上报严格受该开关约束，且绝不截断用户的远端作业输出 |
 
@@ -51,8 +51,10 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 ### 2.4 Shell 输入编码、原生会话身份、领域租约与 Windows 服务启动器
 
 - **Shell 传输不等于原生授权（UTF-8 管道与原子代际绑定）**：PowerShell 的 `$OutputEncoding` 与 `Out-File` / `>` 重定向只决定 CLI 收到的字节；Windows PowerShell 调用本地 CLI 传输非 ASCII JSON 时应显式设置 `[Console]::InputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)` 并走 `stdin` 管道（避免 UTF-16LE 重定向损坏载荷）。同时，已激活运行时的 `(python, runtime_scripts)` 必须同代原子绑定，严禁新旧两代脚本与解释器混搭加载。
-- **原生会话身份与零绑定 MCP 协作**：所有单机 MCP 工具（含确定性工程组件与 `knowledge_*`）均支持在无私有 `_meta`、无前置 Nonce 的标准 `tools/call` 下开箱直通运行（缺省回退至连接级确定性会话标识并按需自动建立默认租约）；当宿主提供 `CODEX_THREAD_ID` 等原生可信会话标识时仅用于精确关联当前会话记录与 `Stop` 脱敏采集归属，绝不伪造、跨会话复制或猜认领。
-- **领域租约按需独立管理**：公共检索与日常工程调用在插件启用期间默认开箱可用并按需自动建立默认引擎租约；面向指定领域的蒸馏与授权采集绑定则按目标领域独立维护租约状态，互不串写。
+- **原生会话身份与零绑定 MCP 协作**：所有单机 MCP 工具（含确定性工程组件与 `knowledge_*`）均支持在无私有 `_meta`、无前置 Nonce 的标准 `tools/call` 下开箱直通运行（只读/状态调用直接跳过 `BindStore.claim_bind` 锁竞争，缺失宿主元数据时回退至连接级 `{host}-conn-<12hex>` 标识）；当宿主提供 `CODEX_THREAD_ID` 等原生可信会话标识时仅用于精确关联当前会话记录与 `Stop` 脱敏采集归属，绝不伪造、跨会话复制或猜认领。
+- **九域内容寻址知识绑定与 `Stop` 采集编排（`mindie_harness.runtime.knowledge_binding`）**：
+  - **`ensure_knowledge_binding` 九域预置与单锁退役**：通过 `mindie_knowledge.loop.domain_catalog.prepare(...)` 为全部 **9 个公开领域**（`vllm-ascend`、`operators`、`xllm`、`mindie-sd`、`infer-core`、`infer-distributed`、`infer-observability`、`infer-ops-compat`、`agent-engineering`）生成内容寻址配置 `<config_home>/engines/<host>/<20hex>/<domain>.engine.json`（绝不原地改写活动引擎文件字节）。它按 `plugin_root` 自动解析七端原生 Transcript 解析器（`codex_transcript.py`、`transcript.py`、`kimi_transcript.py`、`dsh_transcript.py`、`agy_transcript.py`、`wb_transcript.py`、`opencode_transcript.py`），在无插件根目录的独立安装/自检或本地尚未安装 `gitleaks` 脱敏器时自动回退至 `noop_transcript_adapter.py` 与 `capture_mode="disabled"`，使公开 `knowledge_*` 检索首轮即可开箱成功，并在后续挂载完整插件与脱敏器时自动升级。代际切换（`activate_generation`）期间通过 `already_locked=True` 复用外层单把 `.<host>.json.update.lock` 事务锁，调用 `domain_catalog.retire_changed(..., include_default=True)` 统一退役变更的默认域与次级域服务属主，同时自动自愈历史遗留 `.retired` 或已回收代际路径。
+  - **`run_stop_capture` 冷路径跳出、永久撤销保护与事件身份区分**：当同意书为 `read-only`/`disabled`/缺失或 `cwd` 不在已授权 `project_roots` 内时，纯标准库路径在 **`< 100ms`** 内零 SQLite、零子进程直接返回 `inert`；进入受权范围后先调用 `Admission.inspect(session_id)`，一旦状态为 `inactive`（用户已显式撤销该会话）则**永久保持 `revoked` 绝不复活**；仅在状态为 `missing` 且同意书与 `project_roots` 校验通过时按需签发租约（`not_before=0.0`），并严格区分轮次级 `identity_kind="turn"`（含 `turn_id` 且无 `event_id`）与通知级 `identity_kind="notification"`（含 `event_id` 时剥离 `last_assistant_message`）后在单一 `Deadline(timeout_sec)` 预算内交接 `accept_stop`。
 - **持久贡献授权与范围独立**：贡献开关、目标仓库与授权项目范围跨升级持久保存（`mindie-consent.json` 在代际切换与 GC 期间永不改写或删除），独立于会话授权和领域租约；共享关闭或采集超出范围时，不应为满足健康检查而冷启动采集。
 - **统一只读健康自检（`mindie_doctor`）**：`mindie_doctor`（`mindie-doctor/1`）以纯只读方式检查运行时代际、隐私模式、默认远端 NPU 与 `gh` 通道状态；**空安装下零目录与零 SQLite 创建**（不在只读检查中初始化数据库或写入 WAL），`local-only` / `read-only` 下 `gh` 缺失如实报告为 `optional_unconfigured` 而非故障。
 - **Windows 服务启动器能力独立（双层 PE `Subsystem == 2` 核验）**：知识 API 可用不等于后台计划任务入口可用。注册与恢复启动前必须同时校验虚拟环境 `.venv\Scripts\pythonw.exe` 及其 `pyvenv.cfg` 所指向基底 `home\pythonw.exe` 的真实 PE 头 `OptionalHeader.Subsystem == 2`（`IMAGE_SUBSYSTEM_WINDOWS_GUI`），拒绝任何改名伪装的控制台二进制；API 通过但服务启动器不可用应如实报告为服务未就绪，绝不通过修补二进制绕过。
@@ -87,6 +89,6 @@ MindIE Agent 不另建一套封闭的“大一统对话平台”，而是直接�
 - **Markdown 正文是唯一权威**：
   - 本地磁盘上的 Markdown 文件（`tasks/<32位任务哈希>/index.md` 与 `blocks/<64位块哈希>.md`，配合 `current.json` 双通道指针）是唯一权威正文；SQLite 保存游标、队列与回执；ReMe（基于 `TechnicalTokenizerV1` BM25 + `StrictFileGraph` + 引用谱系归并，`blocks.sqlite3` 增量 Checkpoint）是可随时重建的派生索引。
   - 如果启动时发现 SQLite 数据库缺失或损坏，系统会明确报告故障并完整保留所有已有的 Markdown 正文和 `unknown` 回执，绝不会将其当作“全新安装”去清空知识目录。
-- **单安装绑定与空闲原子切换**：
-  - 插件运行环境通过 `uv sync --locked --no-editable` 安装在宿主易失缓存目录之外的稳定应用数据目录中，维护唯一的当前激活绑定（Canonical Binding）。
-  - 后台静默更新在锁外准备好新版本环境后，等待当前服务无在途业务时获取排他锁，安全退役旧服务并原子切换绑定，无需用户手动 Reload。详见[版本兼容与无感更新](release-compatibility-and-update.md)。
+- **候选环境内建自检（`mindie_harness.selftest`）与单安装绑定空闲原子切换**：
+  - 插件运行环境安装在宿主易失缓存目录之外的稳定应用数据目录（`generations/<generation_key>/.venv`）中，`prepare_candidate_runtime` 在落盘 `runtime.json`（`validated`）前自动执行 **`mindie-harness selftest --mode candidate`**（`schema: "mindie-selftest/1"`：无后台守护进程，`< 2.5s` 内完成 Windows `pythonw.exe` PE `Subsystem == 2` 校验、`Content-Length` + `jsonl` 双帧 MCP stdio 握手、内存线程临时 `knowledge` 空库回环检索、`mindie_doctor`/`diagnostics_status`/`remote_auth(status)` 及并发组件快速 CLI 探针）；同时提供 **`mindie-harness selftest --mode full`** 零 Mock 双拓扑实进程 stdio 验收（拓扑 1 `.venv` 常驻服务 + 拓扑 2 纯标准库引导子进程 IPC 回退，完整跑通本地 Git `knowledge_sync -> query -> explain -> feedback -> distill` 未租约/租约/永久撤销闭环与全量兄弟组件调用）。
+  - 后台静默更新在锁外完成候选准备与自检后，在单把 `.<host>.json.update.lock` 排他锁事务内完成九域服务空闲退役（`ensure_knowledge_binding(..., retire_previous=True, already_locked=True)`）并通过 `os.replace` 原子切换 `<host>.json` 唯一激活绑定，无需用户手动 Reload。详见[版本兼容与无感更新](release-compatibility-and-update.md)。

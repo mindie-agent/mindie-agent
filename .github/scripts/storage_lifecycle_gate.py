@@ -178,7 +178,8 @@ _SKIP_PARTS: frozenset[str] = frozenset({"tests", "test", "__pycache__", "node_m
 _PLUGIN_CODE_SKIP_DIRS: frozenset[str] = frozenset(
     {
         "tests", "test", "__pycache__", "node_modules", "dist", "build", "benchmarks", "docs",
-        ".git", ".local", ".mindie-local", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+        ".git", ".local", ".mindie-local", ".uv-cache", ".cache", ".tox", ".nox",
+        ".pytest_cache", ".mypy_cache", ".ruff_cache",
     }
 )
 _PLUGIN_CODE_SUFFIXES: frozenset[str] = frozenset({".py", ".mjs", ".cjs", ".js"})

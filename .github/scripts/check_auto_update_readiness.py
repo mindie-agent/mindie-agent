@@ -36,6 +36,7 @@ import subprocess
 import sys
 from typing import Mapping, Sequence
 
+from functional_smoke_gate import verify_functional_smoke
 from host_compatibility_gate import (
     BASELINE_HOST_PROBES,
     FORWARD_HOST_PROBES,
@@ -515,17 +516,37 @@ def verify_components_and_plugins(
                     f"is not an ancestor of knowledge-vllm-ascend {expected_vllm_corpus_sha[:8]}"
                 )
 
-    base_seven = ("knowledge", "remote-dev", "diagnostics", "debugger", "profiler", "sim", "coordinator")
+    base_eight = ("knowledge", "remote-dev", "diagnostics", "debugger", "profiler", "sim", "coordinator", "npu-top")
     channel_has_harness = "harness" in comp_entries
+    channel_has_npu_top = "npu-top" in comp_entries
 
     def _active_core_for(pyp_text: str, *, uses_uv_sources: bool = False) -> tuple[str, ...]:
         has_h = channel_has_harness or (_extract_default_dep_pin(pyp_text, "harness", uses_uv_sources=uses_uv_sources) is not None)
-        return ("harness", *base_seven) if has_h else base_seven
+        has_n = channel_has_npu_top or (_extract_default_dep_pin(pyp_text, "npu-top", uses_uv_sources=uses_uv_sources) is not None)
+        core = base_eight if has_n else base_eight[:-1]
+        return ("harness", *core) if has_h else core
 
-    for plugin_name, sub_dir, uses_uv in (
-        ("mindie-agent-codex", "plugins/mindie-agent", True),
-        ("mindie-agent-cc", ".", False),
-    ):
+    def _check_pc_components(plugin_name: str, comps: Mapping[str, object]) -> None:
+        expected_map = {
+            dist_by_component[c]: comp_entries[c]["version"] for c in ("harness", *base_eight) if c in comp_entries
+        }
+        for pkg, ch_ver in expected_map.items():
+            pin_ver = str(comps.get(pkg) or "")
+            if not pin_ver:
+                errors.append(f"{plugin_name}: product-contract.json missing {pkg}")
+            elif strict_lockstep and pin_ver != ch_ver:
+                errors.append(f"{plugin_name}: product-contract.json {pkg}={pin_ver!r} != {ch_ver!r}")
+            elif not independent and _parse_semver(pin_ver) > _parse_semver(ch_ver):
+                errors.append(f"{plugin_name}: product-contract.json baseline {pkg}={pin_ver!r} > channel {ch_ver!r}")
+
+    def _check_optional_pc(plugin_name: str, pc_doc: Mapping[str, object]) -> None:
+        if "components" in pc_doc:
+            if not isinstance(pc_doc["components"], Mapping):
+                errors.append(f"{plugin_name}: product-contract.json `components` must be a JSON object")
+            else:
+                _check_pc_components(plugin_name, pc_doc["components"])
+
+    for plugin_name, sub_dir, uses_uv in (("mindie-agent-codex", "plugins/mindie-agent", True), ("mindie-agent-cc", ".", False)):
         p_dir = _resolve_repo(plugin_name, siblings_roots, explicit_repos)
         if p_dir is None:
             continue
@@ -538,16 +559,20 @@ def verify_components_and_plugins(
         _check_uv_lock_default_deps(plugin_name, base / "uv.lock", plugin_name, p_core, p_pins)
         pc = json.loads((base / "product-contract.json").read_text(encoding="utf-8"))
         _check_verified_commit(plugin_name, pc["publication"]["verified_commit"])
+        _check_optional_pc(plugin_name, pc)
 
     kimi_dir = _resolve_repo("mindie-agent-kimi", siblings_roots, explicit_repos)
     if kimi_dir is not None:
         ao = (kimi_dir / "runtime/active-overrides.txt").read_text(encoding="utf-8")
         tr = (kimi_dir / "test-requirements.txt").read_text(encoding="utf-8")
-        kimi_core = ("harness", *base_seven) if (channel_has_harness or _extract_pinned_sha(ao, "harness")) else base_seven
+        kimi_base = base_eight if (channel_has_npu_top or _extract_pinned_sha(ao, "npu-top")) else base_eight[:-1]
+        kimi_core = ("harness", *kimi_base) if (channel_has_harness or _extract_pinned_sha(ao, "harness")) else kimi_base
         for comp_name in kimi_core:
             _check_pin_floor("mindie-agent-kimi", comp_name, _extract_pinned_sha(ao, comp_name), "runtime/active-overrides.txt")
         for comp_name in ("debugger", "profiler", "sim", "coordinator"):
             _check_pin_floor("mindie-agent-kimi", comp_name, _extract_pinned_sha(tr, comp_name), "test-requirements.txt")
+        if (kimi_dir / "product-contract.json").is_file():
+            _check_optional_pc("mindie-agent-kimi", json.loads((kimi_dir / "product-contract.json").read_text(encoding="utf-8")))
 
     dsh_dir = _resolve_repo("mindie-agent-dsh", siblings_roots, explicit_repos)
     if dsh_dir is not None:
@@ -559,49 +584,27 @@ def verify_components_and_plugins(
             _check_pin_floor("mindie-agent-dsh", comp_name, dsh_pins[comp_name], "pyproject.toml")
             _check_pin_floor("mindie-agent-dsh", comp_name, _extract_pinned_sha(rr, comp_name), "runtime-requirements.txt")
         _check_uv_lock_default_deps("mindie-agent-dsh", dsh_dir / "uv.lock", "mindie-agent-dsh-runtime", dsh_core, dsh_pins)
+        if (dsh_dir / "product-contract.json").is_file():
+            _check_optional_pc("mindie-agent-dsh", json.loads((dsh_dir / "product-contract.json").read_text(encoding="utf-8")))
 
     for plugin_name in ("mindie-agent-agy", "mindie-agent-wb", "mindie-agent-oc"):
         p_dir = _resolve_repo(plugin_name, siblings_roots, explicit_repos)
         if p_dir is None:
             continue
         pyp = (p_dir / "pyproject.toml").read_text(encoding="utf-8")
-        p_core = (*_active_core_for(pyp, uses_uv_sources=True), "npu-top")
-        p_pins = {
-            comp_name: _extract_default_dep_pin(pyp, comp_name, uses_uv_sources=True)
-            for comp_name in p_core
-        }
+        p_core = tuple(dict.fromkeys((*_active_core_for(pyp, uses_uv_sources=True), "npu-top")))
+        p_pins = {comp_name: _extract_default_dep_pin(pyp, comp_name, uses_uv_sources=True) for comp_name in p_core}
         for comp_name in p_core:
             _check_pin_floor(plugin_name, comp_name, p_pins[comp_name], "pyproject.toml")
         if plugin_name == "mindie-agent-oc":
             _check_uv_lock_default_deps(plugin_name, p_dir / "uv.lock", plugin_name, p_core, p_pins)
         pc = json.loads((p_dir / "product-contract.json").read_text(encoding="utf-8"))
-        pub_vc = ((pc.get("publication") or {}).get("verified_commit") or "")
-        if pub_vc:
+        if pub_vc := ((pc.get("publication") or {}).get("verified_commit") or ""):
             _check_verified_commit(plugin_name, pub_vc)
-        comps = pc.get("components") or {}
-        expected_map = {
-            "mindie-knowledge": comp_entries["knowledge"]["version"],
-            "remote-dev": comp_entries["remote-dev"]["version"],
-            "mindie-diagnostics": comp_entries["diagnostics"]["version"],
-            "mindie-coordinator": comp_entries["coordinator"]["version"],
-            "mindie-profiler": comp_entries["profiler"]["version"],
-            "mindie-sim": comp_entries["sim"]["version"],
-            "npu-top": comp_entries["npu-top"]["version"],
-        }
-        if channel_has_harness:
-            expected_map["mindie-harness"] = comp_entries["harness"]["version"]
-        if plugin_name in {"mindie-agent-wb", "mindie-agent-oc"} or "mindie-debugger" in comps:
-            expected_map["mindie-debugger"] = comp_entries["debugger"]["version"]
-        for pkg, ch_ver in expected_map.items():
-            pin_ver = str(comps.get(pkg) or "")
-            if not pin_ver:
-                errors.append(f"{plugin_name}: product-contract.json missing {pkg}")
-            elif strict_lockstep and pin_ver != ch_ver:
-                errors.append(f"{plugin_name}: product-contract.json {pkg}={pin_ver!r} != {ch_ver!r}")
-            elif not independent and _parse_semver(pin_ver) > _parse_semver(ch_ver):
-                errors.append(
-                    f"{plugin_name}: product-contract.json baseline {pkg}={pin_ver!r} > channel {ch_ver!r}"
-                )
+        if "components" not in pc or not isinstance(pc["components"], Mapping):
+            errors.append(f"{plugin_name}: product-contract.json `components` must be a JSON object")
+        else:
+            _check_pc_components(plugin_name, pc["components"])
 
     if independent and verify_formal_releases and independent_dependencies:
         errors.extend(verify_github_releases({"components": independent_dependencies}, verify_commits=True))
@@ -683,6 +686,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--strict-lockstep", action="store_true")
     parser.add_argument("--verify-local-hosts", action="store_true")
     parser.add_argument("--verify-github-releases", action="store_true")
+    parser.add_argument("--verify-functional-smoke", action="store_true")
     args = parser.parse_args(argv)
     if args.release_scope == "independent" and not args.release_repo:
         parser.error("independent releases require --release-repo; use --release-scope product for a product combination")
@@ -745,6 +749,14 @@ def main(argv: list[str] | None = None) -> int:
         release_repos=args.release_repo, require_siblings=args.require_siblings,
         run=_run_cmd, explicit_repos=explicit_repos,
     )
+    r7_errors = (
+        verify_functional_smoke(
+            main_repo, siblings_roots, release_scope=args.release_scope,
+            release_repos=args.release_repo, explicit_repos=explicit_repos,
+        )
+        if args.verify_functional_smoke
+        else []
+    )
 
     r6_suffix = ": " + ", ".join(args.release_repo) if args.release_repo else ""
     checklist_rows = [
@@ -754,11 +766,12 @@ def main(argv: list[str] | None = None) -> int:
         ("R4", "Seven-Host + Harness Cross-Version Component Compatibility", r4_errors),
         ("R5", "Local Active Host CLI Compatibility Coverage" + ("" if args.verify_local_hosts else " (skipped; pass --verify-local-hosts)"), r5_errors),
         ("R6", f"Release Documentation & LF Hygiene ({args.release_scope}{r6_suffix})", r6_errors),
+        ("R7", "End-to-End Functional Smoke & 7-Host Wire Readiness" + ("" if args.verify_functional_smoke else " (skipped; pass --verify-functional-smoke)"), r7_errors),
     ]
     for code, label, item_errors in checklist_rows:
         print(f"- [{'x' if not item_errors else ' '}] **{code}. {label}**")
 
-    errors = r1_errors + r2_errors + r3_errors + r4_errors + r5_errors + r6_errors
+    errors = r1_errors + r2_errors + r3_errors + r4_errors + r5_errors + r6_errors + r7_errors
     if errors:
         for err in errors:
             print(f"[auto-update-readiness:FAIL] {err}", file=sys.stderr)

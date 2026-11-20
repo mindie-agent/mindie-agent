@@ -2,7 +2,7 @@
 
 [English](testing-architecture.en.md) · [返回文档中心](README.md)
 
-本文定义 MindIE Agent 各仓库（`knowledge`、`remote-dev`、`coordinator`、`profiler`、`sim`、`npu-top`、`diagnostics`、`debugger`、各原生宿主插件与评测仓 `mindie-bench`）统一的**用例有效性红线**与**四级测试金字塔（Tier 0 ~ Tier 3）**。
+本文定义 MindIE Agent 各仓库（共享底座 `harness`、`knowledge`、`remote-dev`、`coordinator`、`profiler`、`sim`、`npu-top`、`diagnostics`、`debugger`、全部七款原生宿主插件与评测仓 `mindie-bench`）统一的**用例有效性红线**、**四级测试金字塔（Tier 0 ~ Tier 3）**与**三层全栈发版可用性纵深防御体系**。
 
 > **说明**：表中的四级分类与耗时预算是工程测试体系的设计目标；每次版本发布实际覆盖的源码 SHA、测试范围、运行环境、实测耗时与已知限制均在对应版本的[版本发布记录](README.md#版本记录与路线图)中如实记录。
 
@@ -93,3 +93,15 @@ flowchart TB
 | **本地单元与合同测试（Tier 0/1）** | 授权状态机、协议转换、数据脱敏与错误传播符合代码契约 | 不替代真实宿主客户端或昇腾 NPU 硬件运行验证 |
 | **A2/A3 实机无损集成（Tier 2）** | 常备昇腾集群与容器拓扑下的真实硬件探测、远端执行与租约协调 | 不替代完整宿主 CLI 端到端会话回路 |
 | **真实宿主与任务实测（Tier 3）** | 固定任务集与组件场景下的端到端闭环、解题率与并发协调表现 | 按实测宿主、模型与对照条件记录 |
+
+---
+
+## 五、三层全栈发版可用性纵深防御体系（Gate Layers 1–3）
+
+为杜绝“单仓单测全绿但跨仓 wheelhouse 组装、宿主原生协议挂载或 `n-1 -> n` 升级切换断链”，所有共享组件、七大宿主插件与主仓产品组合统一实施三层递进的全栈可用性门禁：
+
+| 防御层 | 入口与契约 Schema | 覆盖范围与强制失败边界 |
+| --- | --- | --- |
+| **Gate Layer 1**<br/>底座与全栈零 Mock stdio 自检 | `mindie-harness selftest --mode candidate\|full --json`<br/>（`schema: "mindie-selftest/1"`） | 1. **`--mode candidate`**（典型 `< 2.5s`，无守护进程）：嵌入 `prepare_candidate_runtime` 在写入 `runtime.json`（`validated`）前自动执行，验证 Windows `pythonw.exe` PE `Subsystem == 2`、`Content-Length` + `jsonl` 双帧 MCP stdio 握手、内存线程零 SQLite 副作用 `knowledge` 空库检索、`mindie_doctor` / `diagnostics_status` / `remote_auth(status)` 及并发组件快速 CLI；<br/>2. **`--mode full`**（典型 `< 25s`，零 Mock 实进程 stdio）：同时拉起拓扑 1（`.venv` 常驻 MCP 服务）与拓扑 2（剥离 `site-packages` 的纯标准库引导解释器 -> `.venv` 子进程 IPC 回退），在临时本地 Git 分级语料上完整跑通 `knowledge_sync -> query -> explain(refs=...) -> feedback -> distill`（覆盖未租约拒绝、按需租约成功与 `inactive` 撤销后永不复活）、全部 8 个兄弟运行时组件（含 `debugger` `stdin_text`、RSI `stdin_json` / `experiment_ledger`）与 `remote_write_stdin(session_id=...)`；`MINDIE_REQUIRE_FULLSTACK=1` 下任一第一方包缺失立即失败，零静默跳过。 |
+| **Gate Layer 2**<br/>七端原生协议、采集与升级验收 | `mindie-bench host-accept (--host <id> \| --all-hosts)`<br/>（`schema: "mindie-host-acceptance/1"`）及 `mindie-bench` 复用工作流 `fullstack-smoke.yml` / `verify-host-plugin.yml` | 对全部 7 款宿主插件（`codex`、`cc`、`kimi`、`dsh`、`agy`、`wb`、`oc`）在隔离沙箱中并发运行四项端到端场景：`cold_native_launch`（冷启动 Seed 与原生清单/MCP 挂载）、`public_install_py`（零 Git `install.py` wheelhouse 安装与九域知识绑定校验）、`hooks_and_capture`（未授权 `< 100ms` 零 SQLite 跳过、受权 `Stop` 脱敏采集与撤销永久生效）与 `upgrade_cutover`（`n-1 -> n` 运行时升级原子切换）；遵循 `BENCH-VERDICT` 结算后清理告警不篡改主结论。共享组件 PR/CI 接入 3-OS `fullstack-smoke.yml`（含拦截联网克隆的 `git` trap + `selftest --mode full`），七端插件 PR/CI 接入 3-OS `verify-host-plugin.yml`。 |
+| **Gate Layer 3**<br/>组件发版、产品 21 格矩阵与主仓 `R7` 门禁 | `publish-release.yml`（`usability-gate`）、`publish-product.yml`（`qualify-product`）与 `functional_smoke_gate.py`（主仓 `R7` `--verify-functional-smoke`） | 1. **单仓正式发版（`publish-release.yml`）**：在创建公开 Release 前强制跑通 Ubuntu / macOS / Windows 三平台 `usability-gate`（产出 `usability-acceptance.json`），对共享组件执行 `n-1 -> n` wheelhouse 升级 + `selftest --mode full`（`harness` / `knowledge` / `remote-dev` 额外执行全七端 `host-accept --all-hosts`），对宿主插件执行对应 `--host` 验收；<br/>2. **主产品组合发版（`publish-product.yml`）**：强制跑通 **`3 OS × 7 hosts = 21` 格**全量资格矩阵（`qualify-product`，校验 `git` trap 下 `install.py`、`selftest --mode full` 与精确 7 个插件 Commit 的 `host-accept --all-hosts`），必须 `21/21` `completed_pass` 并绑定 `product-usability-acceptance.json` 后才允许创建正式 Release；<br/>3. **主仓开发与发版前门禁（`R7`）**：`check_auto_update_readiness.py --verify-functional-smoke` 在 `TemporaryDirectory(prefix="mindie-r7-")` 全隔离沙箱与 `MINDIE_REQUIRE_FULLSTACK=1` 下本地构建全部第一方 wheel、组装带 `SHA256SUMS` 的暂存 wheelhouse、通过 `--override` 安装干净 `smoke-venv`，先执行 Layer 1 `selftest --mode full` 快速失败校验，再以 `660s` 外层预算执行 Layer 2 `host-accept`。 |

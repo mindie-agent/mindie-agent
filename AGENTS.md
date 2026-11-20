@@ -57,12 +57,12 @@ Read only the reference triggered by your current task:
   python3 -m unittest discover -s .github/scripts/tests -p 'test_*.py' -v
   python3 .github/scripts/check_pr_checklist.py --profile hub --body-file <pr_body.md>
   ```
-- **Gate — Component, Corpus, or Product Release (`R1–R6` — see [`docs/release-compatibility-and-update.md`](docs/release-compatibility-and-update.md))**:
+- **Gate — Component, Corpus, or Product Release (`R1–R7` — see [`docs/release-compatibility-and-update.md`](docs/release-compatibility-and-update.md))**:
   ```bash
-  # Independent release (supports flat siblings, --siblings-root ../.worktrees, or --repo name=/abs/path):
-  python3 .github/scripts/check_auto_update_readiness.py --release-repo harness --require-siblings --verify-local-hosts --verify-github-releases
+  # Independent release (supports flat siblings, --siblings-root ../.worktrees, or --repo name=/abs/path; R7 runs end-to-end functional smoke & 7-host wire readiness):
+  python3 .github/scripts/check_auto_update_readiness.py --release-repo harness --require-siblings --verify-local-hosts --verify-github-releases --verify-functional-smoke
 
-  # Product combination release / channels/0.1.json update (explicitly synchronizes managed docs):
+  # Product combination release / channels/0.1.json update (explicitly synchronizes managed docs + R7 full-stack smoke):
   python3 .github/scripts/sync_org_versions.py --release-scope product --write
-  python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases
+  python3 .github/scripts/check_auto_update_readiness.py --release-scope product --require-siblings --verify-local-hosts --verify-github-releases --verify-functional-smoke
   ```

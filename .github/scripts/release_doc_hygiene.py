@@ -223,6 +223,8 @@ def product_inputs_changed(base: str, *, repository: Path, head: str = "HEAD") -
         ".github/scripts/host_compatibility_gate.py",
         ".github/scripts/windows_zero_popup_gate.py",
         ".github/scripts/zero_binding_gate.py",
+        ".github/scripts/iron_rule_ast_gate.py",
+        ".github/scripts/functional_smoke_gate.py",
         ".github/scripts/storage_lifecycle_gate.py",
         ".github/scripts/storage_temp_ast.py",
         ".github/scripts/storage_pid_ast.py",

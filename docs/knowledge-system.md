@@ -99,7 +99,7 @@ flowchart LR
 
 ### 4.1 触发时机与输入脱敏
 
-`knowledge_distill(inputs, task_state, domain=...)` 在所选证据包含可提炼发现时调用；`task_state` 描述更广的任务状态（`in_flight`、`verified_milestone` 或 `completed`），当存在实质且已验证的里程碑时也可保持为 `in_flight`。每个 `inputs` 项必须提供 `kind`（如 `experiment`、`commit`、`diagnosis`、`hardware_doc`）、`outcome`（`verified`、`refuted`、`observed`）、`source_locator`、`content` 与 `evidence_refs`，可选 `repetitions`（整数且 ≥ 1）；历史恢复案例存档见 [历史归档：Windows 知识调用与恢复](archive/knowledge-invocation-recovery.md)。`prepare_request` 先执行确定性隐私脱敏与 Gitleaks 扫描。
+`knowledge_distill(inputs, task_state, domain=...)` 在所选证据包含可提炼发现时调用；`task_state` 描述更广的任务状态（`in_flight`、`verified_milestone` 或 `completed`），当存在实质且已验证的里程碑时也可保持为 `in_flight`。当调用方尚未持有会话租约时，知识路由先检查 `Admission.inspect(session_id)`：仅在状态为 `missing` 且已保存的同意书与 `project_roots` 放行当前 `cwd` 时按需自动签发租约；若会话已被用户撤销（`status == "inactive"`）或超出授权目录，则直接返回 `knowledge_authorization_required` 且绝不复活已撤销会话。每个 `inputs` 项必须提供 `kind`（如 `experiment`、`commit`、`diagnosis`、`hardware_doc`）、`outcome`（`verified`、`refuted`、`observed`）、`source_locator`、`content` 与 `evidence_refs`，可选 `repetitions`（整数且 ≥ 1）；历史恢复案例存档见 [历史归档：Windows 知识调用与恢复](archive/knowledge-invocation-recovery.md)。`prepare_request` 先执行确定性隐私脱敏与 Gitleaks 扫描。
 
 因此，`task_state="in_flight"` 并不无条件返回 `noop`：未完成任务中**有实质证据且已验证的里程碑**仍可被准入；空输入、未验证或琐碎输入才可能产生 `noop`。`Stop` 事件本身不代表任务完成。不要把“任务尚未结束”当成拒绝提炼的唯一理由，也不要把 `noop` 当作已经发布知识变更。
 
@@ -154,7 +154,8 @@ flowchart LR
 - **不可回填的 `origin_tier="local-only"` 溯源保护**：在 `local-only` 下产生的任务材料与蒸馏单元都会携带 `origin_tier="local-only"`，并在合并、再蒸馏时被继承；即使用户之后切换为 `contribute`，此前的私有项目经验也绝不会出现在任何出站 PR 中。
 - **凭据洁净的匿名 HTTPS `knowledge_sync`**：公开语料 Git 同步以 `GIT_TERMINAL_PROMPT=0` 与 `-c credential.helper= -c core.askPass= -c http.extraHeader=` 启动，同时保留企业 `HTTPS_PROXY` 与自定义 CA 证书；缺失或过期的 `gh`、凭据助手绝不会阻塞同步。
 - **首边界密码脱敏**：`remote_auth` / `remote.auth` 的敏感字段、任意长度的 `password` / `passphrase` 键（含转义 JSON 形态）与自然语言密码短语，都会在写入 SQLite / WAL / blocks 之前被确定性清洗，绝不进入知识库或蒸馏输入。
-- **显式领域路由**：各知识领域绑定独立的本地存储与配置；注册新领域不会自动开启会话采集或跨领域复制授权。
+- **九域内容寻址引擎预置与首轮只读开箱就绪（`ensure_knowledge_binding`）**：`mindie_harness.runtime.knowledge_binding.ensure_knowledge_binding` 通过 `mindie_knowledge.loop.domain_catalog.prepare(...)` 为全部 **9 个公开领域语料库**开箱生成内容寻址配置 `<config_home>/engines/<host>/<20hex>/<domain>.engine.json` 与独立次级域权限目录，彻底消除原地覆写活动引擎文件引发的 `.retired` 竞态，并在代际切换时通过 `domain_catalog.retire_changed(..., include_default=True)` 统一退役变更的默认域与次级域服务属主、自愈失效历史路径；注册新领域不会自动开启会话采集或跨领域复制授权。当本机尚未安装 `gitleaks` 脱敏器（或处于无宿主 Transcript 解析器的独立安装/自检阶段，回退至 `noop_transcript_adapter.py` 与确定性缓存路径 `<data_home>/cache/gitleaks/8.30.1/...`）时，自动设置 `capture_mode="disabled"`，使公开 `knowledge_*` 只读调用在第 1 轮对话即可开箱直通且零 `admission.sqlite3` 副作用，待宿主 `plugin_root` 与 `gitleaks` 就绪后再无感升级为 `public-transcript`。
+- **按需受权租约与永久撤销保护（`run_stop_capture` & `knowledge_distill`）**：公开检索无需会话租约；后台 `run_stop_capture`（在未开启共享或超出 `project_roots` 时 `< 100ms` 零 SQLite 直接返回）与 `knowledge_distill` 均先核查 `Admission.inspect(session_id)`，仅当状态为 `missing` 且持久化同意书与 `project_roots` 放行 `cwd` 时按需签发租约；一旦会话被用户显式撤销（`status == "inactive"`），永久保持 `revoked` 绝不复活。
 - **双层隐私脱敏**：所有任务记录切片、经验提炼输入与公开知识条目在落盘或外发前，均经过确定性隐私规则与 Gitleaks 扫描，确保内网 IP、本机路径、容器凭据与敏感命令参数零泄漏。
 - **可控社区投递**：知识库正文以 Git 仓库中的 Markdown 文件为唯一权威来源，本地检索索引可随时从 Markdown 重建。仅当 `choice == "contribute"` 时，发布器才会通过 `gh` 向目标知识库提交 PR；`local-only` 与 `read-only` 永不外发。
 

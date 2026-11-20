@@ -37,6 +37,8 @@ if str(SCRIPTS) not in sys.path:
 import check_auto_update_readiness as gate  # noqa: E402
 import host_compatibility_gate as host_gate  # noqa: E402
 
+gate._ensure_knowledge_importable(gate.infer_default_siblings_roots(SCRIPTS.parents[1]))
+
 
 class HostCompatibilityTests(unittest.TestCase):
     """Retains verified Codex Desktop compatibility baselines, profile discovery, and timeout honesty."""
@@ -772,6 +774,17 @@ class HostCompatibilityGateTests(unittest.TestCase):
         self.assertTrue(any("mindie-agent-cc: scripts/unrelated.py" in e for e in errors), errors)
         manifest.write_text(json.dumps({"version": "0.1.29"}), encoding="utf-8", newline="\n")
         self.assertEqual(host_gate.verify_windows_windowless_spawns([self.root]), [])
+
+    def test_host_runtime_dependencies_enforces_all_nine_packages_across_manifests(self) -> None:
+        all_nine = sorted(host_gate.REQUIRED_RUNTIME_PACKAGES)
+        codex = self._make_repo("mindie-agent-codex")
+        pyp = codex / "plugins/mindie-agent/pyproject.toml"
+        pyp.parent.mkdir(parents=True)
+        pyp.write_text(f'[project]\nname = "mindie-agent-codex"\nversion = "0.1.40"\ndependencies = {json.dumps(all_nine)}\n', encoding="utf-8", newline="\n")
+        self.assertEqual(host_gate.verify_host_runtime_dependencies([self.root]), [])
+        pyp.write_text(f'[project]\nname = "mindie-agent-codex"\nversion = "0.1.40"\ndependencies = {json.dumps([p for p in all_nine if p != "npu-top"])}\n', encoding="utf-8", newline="\n")
+        errs = host_gate.verify_host_runtime_dependencies([self.root])
+        self.assertTrue(any("mindie-agent-codex" in e and "npu-top" in e for e in errs), errs)
 
 
 if __name__ == "__main__":
