@@ -9,11 +9,12 @@ without unconditional `detached: true`, and Python launches enforce `CREATE_NO_W
 """
 from __future__ import annotations
 import ast
+import json
 import os
 from pathlib import Path
 import re
-from typing import Mapping, Sequence
-from repo_roots import INDEPENDENT_COMPONENTS, INDEPENDENT_PLUGINS, resolve_repo
+from typing import Any, Mapping, Sequence
+from repo_roots import ALL_PLUGINS, INDEPENDENT_COMPONENTS, INDEPENDENT_PLUGINS, resolve_repo
 from storage_lifecycle_gate import THIN_HOST_PLUGIN_FLOOR_VERSIONS, _parse_repo_semver
 from storage_pid_ast import analyze_module_platform_guards
 
@@ -49,6 +50,182 @@ _BANNED_WIN_FLAGS: frozenset[str] = frozenset({"CREATE_NEW_CONSOLE", "DETACHED_P
 _JS_RX_KW: frozenset[str] = frozenset({"return", "throw", "case", "typeof", "void", "delete", "in", "instanceof", "new", "await", "yield", "of"})
 _JS_RX_CH: frozenset[str] = frozenset("=(,[{:;!&|?+-~^%<>")
 _JS_CALL_RE = re.compile(r"(?:(?<!\.)\b(?:spawn|spawnSync|exec|execSync|execFile|execFileSync|fork)|\b(?:child_process|cp)\.(?:spawn|spawnSync|exec|execSync|execFile|execFileSync|fork))\s*\(")
+_MANIFEST_JSON_NAMES: frozenset[str] = frozenset(
+    {".mcp.json", "mcp.json", "mcp_config.json", "hooks.json", "kimi.plugin.json", "plugin.json"}
+)
+_MANIFEST_SKIP_DIRS: frozenset[str] = frozenset(
+    {"tests", "test", "docs", "node_modules", "dist", "build", ".git", ".venv", ".uv-cache", ".cache", ".local", ".mindie-local", ".tox", ".nox"}
+)
+_BARE_PYTHON_NAMES: frozenset[str] = frozenset(
+    {"python", "python3", "python.exe", "python3.exe", "pythonw", "pythonw.exe"}
+)
+_PS_BINARIES: frozenset[str] = frozenset({"powershell", "powershell.exe", "pwsh", "pwsh.exe"})
+_PS_VALUE_FLAGS: frozenset[str] = frozenset(
+    {"-executionpolicy", "-ep", "-windowstyle", "-w", "-outputformat", "-of", "-inputformat", "-if", "-configurationname", "-version"}
+)
+
+
+def _is_bare_python_token(token: str) -> bool:
+    clean = token.strip().strip("\"'")
+    return (
+        bool(clean)
+        and "/" not in clean
+        and "\\" not in clean
+        and "${" not in clean
+        and clean.lower() in _BARE_PYTHON_NAMES
+    )
+
+
+def _split_cmd_tokens(raw_cmd: str) -> list[str]:
+    return [tok.strip("\"'") for tok in raw_cmd.strip().split() if tok.strip("\"'")]
+
+
+def _detect_bare_python_argv(tokens: Sequence[str]) -> str | None:
+    if not tokens:
+        return None
+    tok0 = tokens[0].strip().strip("\"'")
+    if not tok0:
+        return None
+    if _is_bare_python_token(tok0):
+        return tok0
+    low0 = tok0.lower()
+    base0 = Path(tok0.replace("\\", "/")).name.lower()
+    if low0 in {"env", "/usr/bin/env"}:
+        for item in tokens[1:]:
+            clean = item.strip().strip("\"'")
+            if not clean or clean.startswith("-") or ("=" in clean and not clean.startswith(("/", "\\"))):
+                continue
+            return f"{tok0} {clean}" if _is_bare_python_token(clean) else None
+        return None
+    if base0 in {"cmd", "cmd.exe"}:
+        idx = 1
+        while idx < len(tokens):
+            sw = tokens[idx].strip().lower()
+            if sw in {"/c", "/k"} and idx + 1 < len(tokens):
+                sub_tokens = _split_cmd_tokens(" ".join(tokens[idx + 1 :]))
+                if sub_tokens and (sub_bad := _detect_bare_python_argv(sub_tokens)) is not None:
+                    return f"{tok0} {tokens[idx].strip()} {sub_bad}"
+                return None
+            if sw.startswith("/"):
+                idx += 1
+                continue
+            break
+        return None
+    if base0 in _PS_BINARIES:
+        idx = 1
+        while idx < len(tokens):
+            arg = tokens[idx].strip()
+            alow = arg.lower()
+            if alow in {"-encodedcommand", "-ec", "-e"} or alow.startswith("-enc") or alow in {"-file", "-f"}:
+                return None
+            if alow in _PS_VALUE_FLAGS:
+                idx += 2
+                continue
+            if alow in {"-command", "-c"}:
+                sub = [t for t in _split_cmd_tokens(" ".join(tokens[idx + 1 :])) if t != "&"]
+                return f"{tok0} {arg} {sub[0]}" if (sub and _is_bare_python_token(sub[0])) else None
+            if alow.startswith("-"):
+                idx += 1
+                continue
+            sub = [t for t in _split_cmd_tokens(" ".join(tokens[idx:])) if t != "&"]
+            return f"{tok0} {sub[0]}" if (sub and _is_bare_python_token(sub[0])) else None
+    return None
+
+
+def verify_windows_static_manifest_commands(plugin_name: str, plugin_dir: Path) -> list[str]:
+    """Ban bare `python`/`python3` executables in Windows-enabled MCP & hook JSON manifests."""
+    if not plugin_dir.is_dir():
+        return []
+    errors: list[str] = []
+    manifests: list[Path] = []
+    for dpath, dnames, fnames in os.walk(plugin_dir):
+        dnames[:] = sorted(
+            d for d in dnames if d not in _MANIFEST_SKIP_DIRS and not d.startswith((".venv", ".pytest", ".mypy", ".ruff"))
+        )
+        for fname in sorted(fnames):
+            if fname in _MANIFEST_JSON_NAMES:
+                manifests.append(Path(dpath) / fname)
+
+    def _check_mcp_map(rel: str, servers: Mapping[str, Any]) -> None:
+        for srv_name, srv_cfg in servers.items():
+            if not isinstance(srv_cfg, Mapping) or "command" not in srv_cfg:
+                continue
+            cmd_val, args_val = srv_cfg.get("command"), srv_cfg.get("args")
+            extra = [str(a) for a in args_val if isinstance(a, str)] if isinstance(args_val, list) else []
+            if isinstance(cmd_val, str):
+                s = cmd_val.strip()
+                head = _split_cmd_tokens(s) if (" " in s and "/" not in s and "\\" not in s) else ([s] if s else [])
+                tokens = [*head, *extra]
+            elif isinstance(cmd_val, list):
+                tokens = [*(str(x) for x in cmd_val if isinstance(x, str)), *extra]
+            else:
+                tokens = []
+            if (bad := _detect_bare_python_argv(tokens)) is not None:
+                errors.append(
+                    f"{plugin_name}: {rel} MCP server `{srv_name}` invokes bare `{bad}` "
+                    "(Windows Store stub / console popup risk; use `uv` or `node`)"
+                )
+
+    def _walk_hooks(rel: str, node: Any, seen_handlers: set[int]) -> None:
+        if isinstance(node, list):
+            for item in node:
+                _walk_hooks(rel, item, seen_handlers)
+            return
+        if not isinstance(node, Mapping):
+            return
+        if ("command" in node or "commandWindows" in node) and id(node) not in seen_handlers:
+            seen_handlers.add(id(node))
+            cmd_win = node.get("commandWindows")
+            if isinstance(cmd_win, str) and cmd_win.strip():
+                tokens = _split_cmd_tokens(cmd_win)
+            else:
+                raw_cmd = node.get("command")
+                if isinstance(raw_cmd, str) and raw_cmd.strip():
+                    tokens = _split_cmd_tokens(raw_cmd)
+                elif isinstance(raw_cmd, list):
+                    tokens = [str(x) for x in raw_cmd if isinstance(x, str)]
+                else:
+                    tokens = []
+            if (bad := _detect_bare_python_argv(tokens)) is not None:
+                errors.append(
+                    f"{plugin_name}: {rel} hook handler invokes bare `{bad}` on Windows "
+                    "(Windows Store stub / console popup risk; use `uv`, `powershell.exe`, or `commandWindows`)"
+                )
+        for val in node.values():
+            if isinstance(val, (Mapping, list)):
+                _walk_hooks(rel, val, seen_handlers)
+
+    def _walk_manifest(rel: str, fname: str, obj: Any, *, root: bool = False, seen_handlers: set[int]) -> None:
+        if isinstance(obj, list):
+            for item in obj:
+                _walk_manifest(rel, fname, item, seen_handlers=seen_handlers)
+            return
+        if not isinstance(obj, Mapping):
+            return
+        if isinstance(obj.get("mcpServers"), Mapping):
+            _check_mcp_map(rel, obj["mcpServers"])
+        mcp_sub = obj.get("mcp")
+        if isinstance(mcp_sub, Mapping) and isinstance(mcp_sub.get("servers"), Mapping):
+            _check_mcp_map(rel, mcp_sub["servers"])
+        if root and fname in {".mcp.json", "mcp.json", "mcp_config.json"} and "mcpServers" not in obj and "mcp" not in obj:
+            _check_mcp_map(rel, obj)
+        if isinstance(obj.get("hooks"), (Mapping, list)):
+            _walk_hooks(rel, obj["hooks"], seen_handlers)
+        for key, val in obj.items():
+            if key not in {"mcpServers", "hooks"} and isinstance(val, (Mapping, list)):
+                _walk_manifest(rel, fname, val, seen_handlers=seen_handlers)
+
+    for manifest_path in manifests:
+        rel = manifest_path.relative_to(plugin_dir).as_posix()
+        try:
+            parsed = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except TimeoutError:
+            raise
+        except (OSError, ValueError) as exc:
+            errors.append(f"{plugin_name}: {rel} invalid JSON during Windows manifest check: {exc}")
+            continue
+        _walk_manifest(rel, manifest_path.name, parsed, root=True, seen_handlers=set())
+    return list(dict.fromkeys(errors))
 
 
 def _resolve_repo(repo_name: str, siblings_roots: Sequence[Path], extra_repos: Mapping[str, Path] | None = None) -> Path | None:
@@ -218,4 +395,7 @@ def verify_windows_windowless_spawns(siblings_roots: Sequence[Path], *, main_rep
                     cnw, wk, sp, ug, bf, _, _, _ = _inspect_python_ast(py := Path(dp) / fn); rel = py.relative_to(r).as_posix(); errors.extend(f"{repo}: {rel} {b}" for b in bf)  # noqa: E702
                     if enforce_all and fn != "posix.py" and sp and (ug or not (cnw or wk)):
                         errors.append(f"{repo}: {rel} spawns subprocesses without CREATE_NO_WINDOW (Windows console popup risk)")
+    for plugin_name in ALL_PLUGINS:
+        if (r := _find(plugin_name)) is not None:
+            errors.extend(verify_windows_static_manifest_commands(plugin_name, r))
     return list(dict.fromkeys(errors))

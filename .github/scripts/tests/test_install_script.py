@@ -53,7 +53,7 @@ ENV_KEYS = (
     "MINDIE_DIAGNOSTICS_ROOT", "REMOTE_DEV_AUTH_DIR", "UV_CACHE_DIR", "TMPDIR", "TEMP", "TMP",
 )
 CLI_SOURCE = """
-import argparse, json, os
+import argparse, json, os, sys
 from pathlib import Path
 from mindie_harness import runtime
 
@@ -69,8 +69,9 @@ def main():
     data = Path(os.environ.get("MINDIE_DATA_HOME") or (Path.home() / ".local/share/mindie-agent"))
     banner = runtime.main()
     cfg.mkdir(parents=True, exist_ok=True)
+    py_val = "" if os.environ.get("MINDIE_TEST_OMIT_PYTHON") == "1" else sys.executable
     (cfg / f"{args.host}.json").write_text(
-        json.dumps({"host": args.host, "channel_base_url": args.channel_base_url, "runtime": banner}), encoding="utf-8"
+        json.dumps({"host": args.host, "python": py_val, "channel_base_url": args.channel_base_url, "runtime": banner}), encoding="utf-8"
     )
     cache = data / "state" / args.host
     cache.mkdir(parents=True, exist_ok=True)
@@ -143,7 +144,7 @@ class InstallScriptTests(unittest.TestCase):
             script.write_text(source, encoding="utf-8", newline="\n")
             if os.name == "nt":
                 wrapper = cls.tools_path / f"{name}.cmd"
-                wrapper.write_text(f'@echo off\r\n"{sys.executable}" "{script}" %*\r\n', encoding="utf-8")
+                wrapper.write_text(f'@echo off\r\n"{sys.executable}" "{script}" %*\r\n', encoding="utf-8", newline="")
                 warm = [str(wrapper)]
             else:
                 wrapper = cls.tools_path / name
@@ -169,6 +170,9 @@ class InstallScriptTests(unittest.TestCase):
         self.bin = self.root / "bin"
         self.bin.mkdir()
         env = {key: str(self.root / key) for key in ENV_KEYS}
+        for win_key in ("SystemRoot", "SYSTEMROOT", "ComSpec", "COMSPEC", "WINDIR"):
+            if os.environ.get(win_key):
+                env[win_key] = os.environ[win_key]
         env.update({"HOME": str(self.home), "USERPROFILE": str(self.home),
                     "TMPDIR": str(self.tmpdir), "TEMP": str(self.tmpdir), "TMP": str(self.tmpdir),
                     "MINDIE_CONFIG_HOME": str(self.cfg), "MINDIE_DATA_HOME": str(self.data),
@@ -333,17 +337,21 @@ class InstallScriptTests(unittest.TestCase):
         self.assertEqual(list(self.tmpdir.glob("mindie-gh-cfg-*")), [])
 
     def test_dry_run_and_empty_auto_create_no_state_directories(self) -> None:
-        code, payload = self._run(["--dry-run", "--json"])
-        self.assertEqual(code, 0)
-        for key in ("detected_hosts", "configured_hosts", "gh_authenticated", "gh_account", "recommended_tier", "next_questions"):
-            self.assertIn(key, payload)
-        self.assertFalse(self.cfg.exists())
-        self.assertFalse(self.data.exists())
-        with patch.object(install, "detect_installed_hosts", return_value=[]):
-            code, payload = self._run(["--json"])
-        self.assertEqual((code, payload["status"], payload["detected_hosts"]), (0, "no_hosts", []))
-        self.assertFalse(self.cfg.exists())
-        self.assertFalse(self.data.exists())
+        gh_marker = self.root / "gh-should-not-run"
+        with patch.dict(os.environ, {"MINDIE_TEST_GH_MARKER": str(gh_marker)}):
+            code, payload = self._run(["--dry-run", "--json"])
+            self.assertEqual(code, 0)
+            for key in ("detected_hosts", "configured_hosts", "gh_authenticated", "gh_account", "recommended_tier", "next_questions"):
+                self.assertIn(key, payload)
+            self.assertFalse(gh_marker.exists())
+            self.assertFalse(self.cfg.exists())
+            self.assertFalse(self.data.exists())
+            with patch.object(install, "detect_installed_hosts", return_value=[]):
+                code, payload = self._run(["--json"])
+            self.assertEqual((code, payload["status"], payload["detected_hosts"]), (0, "no_hosts", []))
+            self.assertFalse(gh_marker.exists())
+            self.assertFalse(self.cfg.exists())
+            self.assertFalse(self.data.exists())
 
     def test_preflight_and_channel_rejections(self) -> None:
         code, payload = self._run(["--host", "codex", "--channel-base-url", "http://example.test", "--json"])
@@ -437,6 +445,94 @@ class InstallScriptTests(unittest.TestCase):
         self.assertIn("cc", payload["failed_hosts"])
         self.assertTrue(payload["receipt_unconfirmed"])
         self.assertEqual(payload["receipt_warning"]["codex"], "local_bind_warn")
+
+    def test_harness_015_provisions_engine_and_nine_domains_and_fails_closed(self) -> None:
+        domains = (
+            "vllm-ascend", "operators", "xllm", "mindie-sd", "infer-core",
+            "infer-distributed", "infer-observability", "infer-ops-compat", "agent-engineering",
+        )
+        paths_src = (
+            "from dataclasses import dataclass\n"
+            "from pathlib import Path\n\n"
+            "@dataclass(frozen=True)\n"
+            "class ProfileRef:\n"
+            "    host: str\n"
+            "    config_path: Path\n"
+            "    @classmethod\n"
+            "    def resolve(cls, host: str, *, config_path=None, **_kw):\n"
+            "        return cls(host=host, config_path=Path(config_path))\n"
+        )
+        kb_src = (
+            "import json, os\n"
+            f"DOMAINS = {domains!r}\n\n"
+            "def ensure_knowledge_binding(profile, **_kw):\n"
+            "    mode = os.environ.get('MINDIE_TEST_BINDING_MODE', 'configured')\n"
+            "    if mode == 'raise':\n"
+            "        raise RuntimeError('simulated knowledge binding failure')\n"
+            "    if mode == 'deferred':\n"
+            "        return {'status': 'deferred', 'reason': 'lock_timeout', 'reportable': False}\n"
+            "    if mode == 'skipped':\n"
+            "        return {'status': 'skipped', 'reason': 'knowledge_not_installed'}\n"
+            "    eng_dir = profile.config_path.parent / 'engines' / profile.host / ('a' * 20)\n"
+            "    eng_dir.mkdir(parents=True, exist_ok=True)\n"
+            "    domain_cfgs = {}\n"
+            "    for dom in DOMAINS:\n"
+            "        p = eng_dir / f'{dom}.engine.json'\n"
+            "        p.write_text(json.dumps({'domain': dom}), encoding='utf-8')\n"
+            "        domain_cfgs[dom] = str(p)\n"
+            "    doc = json.loads(profile.config_path.read_text(encoding='utf-8'))\n"
+            "    doc['engine_config'] = domain_cfgs['vllm-ascend']\n"
+            "    doc['domain_configs'] = domain_cfgs\n"
+            "    profile.config_path.write_text(json.dumps(doc), encoding='utf-8')\n"
+            "    return {'status': 'configured', 'engine_config': doc['engine_config'], 'domain_configs': domain_cfgs}\n"
+        )
+        channel = self.root / "channel-015"
+        channel.mkdir(parents=True, exist_ok=True)
+        self._write(channel / "release-channel.json", json.dumps({"current_patch_version": "0.1.18"}))
+        wheel = channel / "mindie_harness-0.1.5-py3-none-any.whl"
+        with zipfile.ZipFile(wheel, "w") as archive:
+            archive.writestr("mindie_harness/__init__.py", "__version__ = '0.1.5'\n")
+            archive.writestr("mindie_harness/paths.py", paths_src)
+            archive.writestr("mindie_harness/runtime/__init__.py", RUNTIME_SOURCE.replace("0.1.0", "0.1.5"))
+            archive.writestr("mindie_harness/runtime/knowledge_binding.py", kb_src)
+            archive.writestr("mindie_harness/cli.py", CLI_SOURCE)
+            archive.writestr("mindie_harness-0.1.5.dist-info/METADATA", "Metadata-Version: 2.1\nName: mindie-harness\nVersion: 0.1.5\n")
+            archive.writestr("mindie_harness-0.1.5.dist-info/WHEEL", "Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n")
+            archive.writestr("mindie_harness-0.1.5.dist-info/RECORD", "")
+        with tarfile.open(channel / "mindie-wheels-bundle.tar.gz", "w:gz") as bundle:
+            bundle.add(wheel, arcname=wheel.name)
+            req = b"mindie-harness==0.1.5\n"
+            info = tarfile.TarInfo("requirements.lock")
+            info.size = len(req)
+            bundle.addfile(info, io.BytesIO(req))
+        r_sum = hashlib.sha256((channel / "release-channel.json").read_bytes()).hexdigest()
+        b_sum = hashlib.sha256((channel / "mindie-wheels-bundle.tar.gz").read_bytes()).hexdigest()
+        self._write(channel / "SHA256SUMS", f"{r_sum}  release-channel.json\n{b_sum}  mindie-wheels-bundle.tar.gz\n")
+
+        code, payload = self._run(["--host", "codex", "--channel-base-url", str(channel), "--offline", "--json"])
+        self.assertEqual(code, 0, payload)
+        self.assertEqual(payload["configured_hosts"], ["codex"])
+        cfg_doc = json.loads((self.cfg / "codex.json").read_text(encoding="utf-8"))
+        self.assertEqual(cfg_doc["channel_base_url"], str(channel))
+        self.assertTrue(Path(cfg_doc["engine_config"]).is_file())
+        self.assertEqual(set(cfg_doc["domain_configs"]), set(domains))
+
+        with patch.dict(os.environ, {"MINDIE_TEST_BINDING_MODE": "raise"}):
+            fail_code, fail_payload = self._run(["--host", "cc", "--channel-base-url", str(channel), "--offline", "--json"])
+        self.assertEqual((fail_code, fail_payload["status"], fail_payload["configured_hosts"]), (1, "error", []))
+        self.assertEqual(fail_payload["failed_hosts"]["cc"]["reason"], "knowledge_binding_failed")
+
+        with patch.dict(os.environ, {"MINDIE_TEST_BINDING_MODE": "deferred"}):
+            def_code, def_payload = self._run(["--host", "kimi", "--channel-base-url", str(channel), "--offline", "--json"])
+        self.assertEqual((def_code, def_payload["configured_hosts"], def_payload["failed_hosts"]["kimi"]["reason"]), (1, [], "lock_timeout"))
+
+        with patch.dict(os.environ, {"MINDIE_TEST_BINDING_MODE": "skipped"}):
+            sk_code, sk_payload = self._run(["--host", "dsh", "--channel-base-url", str(channel), "--offline", "--json"])
+        self.assertEqual((sk_code, sk_payload["configured_hosts"], sk_payload["failed_hosts"]["dsh"]["reason"]), (1, [], "knowledge_not_installed"))
+
+        with patch.dict(os.environ, {"MINDIE_TEST_OMIT_PYTHON": "1"}):
+            np_code, np_payload = self._run(["--host", "agy", "--channel-base-url", str(channel), "--offline", "--json"])
+        self.assertEqual((np_code, np_payload["configured_hosts"], np_payload["failed_hosts"]["agy"]["reason"]), (1, [], "runtime_python_missing"))
 
 
 if __name__ == "__main__":

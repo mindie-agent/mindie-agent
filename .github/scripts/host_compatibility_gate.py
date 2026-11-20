@@ -31,6 +31,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tomllib
 from typing import Callable, Mapping, Sequence
 
 from repo_roots import (
@@ -39,6 +40,7 @@ from repo_roots import (
     ALL_SHARED_COMPONENTS,
     BENCH_REPO,
     HUB_REPO,
+    INDEPENDENT_PLUGINS,
     infer_default_siblings_roots,
     parse_repo_overrides,
     resolve_repo,
@@ -47,6 +49,7 @@ from repo_roots import (
 from code_doc_hygiene_gate import verify_code_doc_hygiene
 from storage_lifecycle_gate import (
     STORAGE_LIFECYCLE_FLOOR_VERSIONS,
+    _parse_repo_semver,
     inspect_python_temp_hygiene,
     inspect_storage_module_windows_pid_safety,
     verify_storage_lifecycle_hygiene,
@@ -56,12 +59,27 @@ from windows_zero_popup_gate import (
     WINDOWS_NO_WINDOW_COMPANION_FILES,
     WINDOWS_NO_WINDOW_REQUIRED_FILES,
     inspect_node_windowless_file,
+    verify_windows_static_manifest_commands,
     verify_windows_windowless_spawns,
 )
 from zero_binding_gate import verify_zero_session_binding_gates
 
 WINDOWS_MOUNT_RE = re.compile(r"^/mnt/[a-zA-Z](?:/|$)")
 WINDOWS_SHIM_SUFFIXES = frozenset({".exe", ".cmd", ".bat", ".ps1"})
+
+REQUIRED_RUNTIME_PACKAGES: frozenset[str] = frozenset(
+    {
+        "mindie-harness",
+        "mindie-knowledge",
+        "remote-dev",
+        "mindie-coordinator",
+        "mindie-profiler",
+        "mindie-sim",
+        "npu-top",
+        "mindie-diagnostics",
+        "mindie-debugger",
+    }
+)
 
 BASELINE_HOST_PROBES: dict[str, tuple[str, ...]] = {
     "codex": ("0.153.4", "0.162.0-alpha.2", "0.162.0-alpha.17.2"),
@@ -209,6 +227,130 @@ def extract_semver(raw: str) -> str | None:
     return match.group(1) if match else None
 
 
+def _norm_pkg_name(raw: str) -> str:
+    return re.sub(r"[-_.]+", "-", str(raw or "").strip()).lower()
+
+
+def _extract_req_pkg_name(raw_line: str) -> str | None:
+    line = raw_line.split(" #", 1)[0].strip()
+    if not line or line.startswith(("#", "-")):
+        return None
+    if egg := re.search(r"#egg=([A-Za-z0-9._-]+)", line):
+        return _norm_pkg_name(egg.group(1))
+    first = line.split()[0]
+    if "://" in first and "@" not in first.split("://", 1)[0]:
+        tail = first.split("?", 1)[0].split("#", 1)[0].rsplit("/", 1)[-1]
+        return _norm_pkg_name(tail.split("-", 1)[0]) if tail.lower().endswith(".whl") else None
+    match = re.match(r"^([A-Za-z0-9][A-Za-z0-9._-]*)", line)
+    return _norm_pkg_name(match.group(1)) if match else None
+
+
+def verify_host_runtime_dependencies(
+    siblings_roots: Sequence[Path],
+    *,
+    require_siblings: bool = False,
+    required_repos: Sequence[str] = (),
+    explicit_repos: Mapping[str, Path] | None = None,
+) -> list[str]:
+    """Verify every present host plugin dependency/contract manifest declares all 9 runtime packages."""
+    roots_list = list(siblings_roots)
+    must_exist = set(required_repos)
+    errors: list[str] = []
+    pyp_rels = ("pyproject.toml", "plugins/mindie-agent/pyproject.toml")
+    req_rels = ("runtime-requirements.txt", "plugins/mindie-agent/runtime-requirements.txt", "runtime/active-overrides.txt")
+    pc_rels = ("product-contract.json", "plugins/mindie-agent/product-contract.json")
+
+    for plugin_name in ALL_PLUGINS:
+        try:
+            plugin_dir = resolve_repo(plugin_name, roots_list, explicit_repos=explicit_repos)
+        except ValueError as exc:
+            errors.append(str(exc))
+            continue
+        must_have = (plugin_name in must_exist) or (require_siblings and plugin_name not in INDEPENDENT_PLUGINS)
+        if plugin_dir is None:
+            if must_have:
+                errors.append(
+                    f"{plugin_name}: sibling checkout not found in {roots_list} for runtime dependency verification"
+                )
+            continue
+
+        dep_manifests_found = 0
+        for rel in pyp_rels:
+            path = plugin_dir / rel
+            if not path.is_file():
+                continue
+            dep_manifests_found += 1
+            try:
+                data = tomllib.loads(path.read_text(encoding="utf-8"))
+            except TimeoutError:
+                raise
+            except (OSError, ValueError) as exc:
+                errors.append(f"{plugin_name}: {rel} invalid TOML: {exc}")
+                continue
+            raw_deps = (data.get("project") or {}).get("dependencies")
+            declared = (
+                {pkg for item in raw_deps if isinstance(item, str) and (pkg := _extract_req_pkg_name(item))}
+                if isinstance(raw_deps, list)
+                else set()
+            )
+            missing = sorted(REQUIRED_RUNTIME_PACKAGES - declared)
+            if missing:
+                errors.append(f"{plugin_name}: {rel} [project].dependencies missing {missing}")
+            uv_sources = ((data.get("tool") or {}).get("uv") or {}).get("sources")
+            if isinstance(uv_sources, Mapping):
+                src_keys = {_norm_pkg_name(str(k)) for k in uv_sources}
+                missing_src = sorted(REQUIRED_RUNTIME_PACKAGES - src_keys)
+                if missing_src:
+                    errors.append(f"{plugin_name}: {rel} [tool.uv.sources] missing {missing_src}")
+
+        for rel in req_rels:
+            path = plugin_dir / rel
+            if not path.is_file():
+                continue
+            dep_manifests_found += 1
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except TimeoutError:
+                raise
+            except OSError as exc:
+                errors.append(f"{plugin_name}: {rel} unreadable: {exc}")
+                continue
+            req_pkgs = {pkg for raw in lines if (pkg := _extract_req_pkg_name(raw))}
+            missing = sorted(REQUIRED_RUNTIME_PACKAGES - req_pkgs)
+            if missing:
+                errors.append(f"{plugin_name}: {rel} missing required runtime package(s) {missing}")
+
+        for rel in pc_rels:
+            path = plugin_dir / rel
+            if not path.is_file():
+                continue
+            try:
+                pc = json.loads(path.read_text(encoding="utf-8"))
+            except TimeoutError:
+                raise
+            except (OSError, ValueError) as exc:
+                errors.append(f"{plugin_name}: {rel} invalid JSON: {exc}")
+                continue
+            if not isinstance(pc, Mapping):
+                errors.append(f"{plugin_name}: {rel} must be a JSON object")
+                continue
+            if "components" in pc:
+                if not isinstance(pc["components"], Mapping):
+                    errors.append(f"{plugin_name}: {rel} `components` must be a JSON object, got {type(pc['components']).__name__}")
+                else:
+                    pc_pkgs = {_norm_pkg_name(str(k)) for k, v in pc["components"].items() if str(v or "").strip()}
+                    missing_pc = sorted(REQUIRED_RUNTIME_PACKAGES - pc_pkgs)
+                    if missing_pc:
+                        errors.append(f"{plugin_name}: {rel} components missing {missing_pc}")
+
+        if dep_manifests_found == 0 and (must_have or _parse_repo_semver(plugin_dir) is not None):
+            errors.append(
+                f"{plugin_name}: missing runtime dependency manifest "
+                "(expected pyproject.toml, runtime-requirements.txt, or runtime/active-overrides.txt)"
+            )
+    return errors
+
+
 def verify_flexible_component_compatibility_impl(
     siblings_roots: Sequence[Path],
     *,
@@ -243,11 +385,20 @@ def verify_flexible_component_compatibility_impl(
                 explicit_repos=explicit_repos,
             )
         )
+    errors.extend(
+        verify_host_runtime_dependencies(
+            roots_list,
+            require_siblings=require_siblings,
+            required_repos=required_repos,
+            explicit_repos=explicit_repos,
+        )
+    )
     if not ensure_knowledge_importable(roots_list):
         if require_siblings:
             errors.append("knowledge: mindie_knowledge unavailable for R4 host compatibility verification")
         return errors
     from semantic_version import Version
+    from mindie_knowledge import runtime_inventory
     from mindie_knowledge.component_bindings import COMPONENT_MODULES
     from mindie_knowledge.releases import REPOSITORIES, supports_harness, validate_compatibility
     from mindie_knowledge.runtime_inventory import COMPONENTS
@@ -267,23 +418,19 @@ def verify_flexible_component_compatibility_impl(
     if oc_dir is not None:
         harness_repos["opencode"] = "mindie-agent/mindie-agent-oc"
 
-    required_pkgs = {
-        "mindie-knowledge",
-        "remote-dev",
-        "mindie-diagnostics",
-        "mindie-debugger",
-        "mindie-profiler",
-        "mindie-sim",
-        "npu-top",
-        "mindie-coordinator",
-    }
-    if "mindie-harness" in COMPONENTS:
-        if COMPONENTS["mindie-harness"] != "mindie-agent/harness":
-            errors.append(
-                f"mindie_knowledge.runtime_inventory.COMPONENTS['mindie-harness']={COMPONENTS['mindie-harness']!r} != 'mindie-agent/harness'"
-            )
-    if not required_pkgs.issubset(set(COMPONENTS)):
-        errors.append(f"mindie_knowledge.runtime_inventory.COMPONENTS missing {required_pkgs - set(COMPONENTS)}")
+    required_pkgs = set(REQUIRED_RUNTIME_PACKAGES)
+    runtime_components = getattr(runtime_inventory, "COMPONENTS_V2", None) or COMPONENTS
+    if "mindie-harness" in runtime_components and runtime_components["mindie-harness"] != "mindie-agent/harness":
+        errors.append(
+            f"mindie_knowledge.runtime_inventory['mindie-harness']={runtime_components['mindie-harness']!r} != 'mindie-agent/harness'"
+        )
+    expected_inventory = (
+        required_pkgs
+        if hasattr(runtime_inventory, "COMPONENTS_V2") or "mindie-harness" in COMPONENTS
+        else (required_pkgs - {"mindie-harness"})
+    )
+    if not expected_inventory.issubset(set(runtime_components)):
+        errors.append(f"mindie_knowledge.runtime_inventory.COMPONENTS missing {expected_inventory - set(runtime_components)}")
 
     required_modules = {"profiler", "sim", "coordinator", "diagnostics", "debugger"}
     if not required_modules.issubset(set(COMPONENT_MODULES)):

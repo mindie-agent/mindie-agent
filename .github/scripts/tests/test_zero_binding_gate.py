@@ -436,6 +436,104 @@ class ZeroBindingGateTests(unittest.TestCase):
         self.assertTrue(any("mindie-agent-codex" in error and "require_nonce" in error for error in errors), errors)
         self.assertTrue(any("mindie-agent-oc" in error and "claim_bind" in error for error in errors), errors)
 
+    def test_iron_rule_ast_gate_router_ordering_signature_probing_and_shadow_dispatchers(self) -> None:
+        # 1. Legitimate harness knowledge_rpc.py + mutation-guarded claim_bind after is_readonly_tool_call PASSES
+        self._write(
+            "harness",
+            "mindie_harness/mcp/knowledge_rpc.py",
+            '"""Owns single canonical knowledge RPC surface (never knowledge_unavailable shadow)."""\n'
+            "def dispatch_knowledge():\n    return {'ok': True}\n",
+        )
+        self._write(
+            "harness",
+            "mindie_harness/mcp/router.py",
+            "class MCPRouter:\n"
+            "    def list_tools(self):\n"
+            "        return self._tools\n"
+            "    def call_tool(self, request):\n"
+            "        readonly = is_readonly_tool_call('knowledge_query', {})\n"
+            "        effective_bind_id = request.get('bind_id')\n"
+            "        if effective_bind_id is not None or (not readonly and extracted_session is not None):\n"
+            "            self.binds.claim_bind(bind_id=effective_bind_id)\n"
+            "        return {'isError': False}\n",
+        )
+        self._write(
+            "mindie-agent-codex",
+            "plugins/mindie-agent/scripts/doc_only.py",
+            '"""Docstring mentioning inspect.signature, _call_variants, and knowledge_unavailable."""\n'
+            "VALUE = 1\n",
+        )
+        self.assertEqual(zgate.verify_zero_session_binding_gates([self.root], require_siblings=True), [])
+
+        # 1b. `mutating = not is_readonly_tool_call(...)` and early-return `if readonly: return` both PASS
+        for router_code in (
+            "class MCPRouter:\n"
+            "    def list_tools(self):\n        return []\n"
+            "    def call_tool(self, request):\n"
+            "        mutating = not is_readonly_tool_call('remote_bash', {})\n"
+            "        if mutating:\n"
+            "            self.binds.claim_bind(bind_id='b1')\n"
+            "        return {}\n",
+            "class MCPRouter:\n"
+            "    def list_tools(self):\n        return []\n"
+            "    def call_tool(self, request):\n"
+            "        readonly = is_readonly_tool_call('knowledge_query', {})\n"
+            "        if readonly:\n"
+            "            return {'fast': True}\n"
+            "        self.binds.claim_bind(bind_id='b1')\n"
+            "        return {}\n",
+        ):
+            self._write("harness", "mindie_harness/mcp/router.py", router_code)
+            self.assertEqual(zgate.verify_zero_session_binding_gates([self.root], require_siblings=True), [])
+
+        # 2. Legacy 0.1.4 `if effective_bind_id is not None or extracted_session is not None:` FAILS
+        self._write(
+            "harness",
+            "mindie_harness/mcp/router.py",
+            "class MCPRouter:\n"
+            "    def list_tools(self):\n"
+            "        return self._tools\n"
+            "    def call_tool(self, request):\n"
+            "        if effective_bind_id is not None or extracted_session is not None:\n"
+            "            with self.binds.claim_bind(bind_id='b1'):\n"
+            "                pass\n"
+            "        readonly = is_readonly_tool_call('knowledge_query', {})\n"
+            "        return {'readonly': readonly}\n",
+        )
+        # 3. _call_variants & inspect.signature in harness/plugins FAIL
+        self._write(
+            "harness",
+            "mindie_harness/mcp/prober.py",
+            "import inspect\ndef _call_variants(fn):\n    return inspect.signature(fn)\n",
+        )
+        self._write(
+            "mindie-agent-agy",
+            "plugins/mindie-agent/scripts/sig_probe.py",
+            "from inspect import signature\ndef probe(fn):\n    return signature(fn)\n",
+        )
+        # 4. Plugin-local rpc_knowledge.py / knowledge_transport / knowledge_rpc / "knowledge_unavailable" FAIL
+        self._write(
+            "mindie-agent-wb",
+            "plugins/mindie-agent/scripts/rpc_knowledge.py",
+            "def knowledge_transport():\n    return {'reason': 'knowledge_unavailable'}\n",
+        )
+        self._write(
+            "mindie-agent-dsh",
+            "scripts/shadow_helper.py",
+            "def knowledge_rpc():\n    return {}\n",
+        )
+        errors = zgate.verify_zero_session_binding_gates([self.root], require_siblings=True)
+        self.assertTrue(any("router.py" in e and "before `is_readonly_tool_call`" in e for e in errors), errors)
+        self.assertTrue(any("router.py" in e and "outside a `not readonly`" in e for e in errors), errors)
+        self.assertTrue(any("harness: mindie_harness/mcp/prober.py" in e and "_call_variants" in e for e in errors), errors)
+        self.assertTrue(any("harness: mindie_harness/mcp/prober.py" in e and "inspect.signature" in e for e in errors), errors)
+        self.assertTrue(any("mindie-agent-agy" in e and "inspect.signature" in e for e in errors), errors)
+        self.assertTrue(any("mindie-agent-wb" in e and "rpc_knowledge.py" in e for e in errors), errors)
+        self.assertTrue(any("mindie-agent-wb" in e and "knowledge_transport" in e for e in errors), errors)
+        self.assertTrue(any("mindie-agent-wb" in e and "knowledge_unavailable" in e for e in errors), errors)
+        self.assertTrue(any("mindie-agent-dsh" in e and "knowledge_rpc" in e for e in errors), errors)
+        self.assertFalse(any("harness: mindie_harness/mcp/knowledge_rpc.py" in e for e in errors), errors)
+
 
 if __name__ == "__main__":
     unittest.main()

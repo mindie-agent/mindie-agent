@@ -33,6 +33,10 @@ def _emit(payload, code=0):
 def _run_cmd(argv, *, env, timeout):
     return subprocess.run(argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding="utf-8",
                           errors="replace", timeout=timeout, check=False, env=env, creationflags=_CREATE_NO_WINDOW)
+def _is_winapps_stub(candidate, *, nt=None):
+    if not (os.name == "nt" if nt is None else nt): return False
+    low = str(candidate).replace("/", "\\").lower()
+    return "\\microsoft\\windowsapps\\" in low or ("\\windowsapps\\" in low and candidate.stat().st_size == 0)
 def _which_native(name, env=None, *, platform=None):
     environ, nt = dict(os.environ if env is None else env), (platform or os.name) == "nt"
     for entry in environ.get("PATH", "").split(os.pathsep):
@@ -41,7 +45,7 @@ def _which_native(name, env=None, *, platform=None):
             candidate = Path(entry) / f"{name}{ext}"
             try:
                 if not candidate.is_file() or (not nt and not os.access(candidate, os.X_OK)): continue
-                if nt and "windowsapps" in str(candidate).lower() and candidate.stat().st_size == 0: continue
+                if _is_winapps_stub(candidate, nt=nt): continue
                 if nt or not _posix_shim_rejected(candidate): return str(candidate)
             except TimeoutError: raise
             except OSError: continue
@@ -50,7 +54,8 @@ def _which_native(name, env=None, *, platform=None):
 def _posix_shim_rejected(path):
     if path.suffix.lower() in {".exe", ".cmd", ".bat", ".ps1"}: return True
     if not re.match(r"^/mnt/[A-Za-z](?:/|$)", str(path)): return False
-    try: head = path.read_bytes()[:512]
+    try:
+        with path.open("rb") as fh: head = fh.read(512)
     except TimeoutError: raise
     except OSError: return True
     if head.startswith(b"\x7fELF"): return False
@@ -292,18 +297,63 @@ def _install_from_stage(stage, targets, channel, cfg_root, data_root, run_env, u
         try: payload = json.loads(proc.stdout) if proc.stdout.strip() else {}
         except ValueError: payload = {}
         if proc.returncode == 0 and target in (payload.get("configured_hosts") or []):
-            configured.append(target)
+            host_warns = []
             if payload.get("receipt_unconfirmed") or payload.get("receipt_warning"):
-                warnings[target] = payload.get("receipt_warning") or "child_receipt_unconfirmed"
-            try:
-                _rewrite_channel_ref(cfg_root / f"{target}.json", str(stage), channel)
-                _rewrite_channel_ref(data_root / "state" / target / "channel-cache.json", str(stage), channel)
-            except TimeoutError: raise
-            except OSError as exc: warnings[target] = type(exc).__name__
+                host_warns.append(str(payload.get("receipt_warning") or "child_receipt_unconfirmed"))
+            for rpath in (cfg_root / f"{target}.json", data_root / "state" / target / "channel-cache.json"):
+                try: _rewrite_channel_ref(rpath, str(stage), channel)
+                except TimeoutError: raise
+                except OSError as exc: host_warns.append(type(exc).__name__)
+            bind_err = _ensure_host_knowledge_binding(target, cfg_root / f"{target}.json", run_env)
+            if bind_err is not None:
+                failed[target] = bind_err; continue
+            configured.append(target)
+            if host_warns:
+                warnings[target] = host_warns[0] if len(host_warns) == 1 else "; ".join(host_warns)
         else:
             r = payload.get("reason") or ((payload.get("runtimes") or {}).get(target) or {}).get("reason") or "harness_install_failed"
             failed[target] = {"reason": str(r), "returncode": proc.returncode}
     return configured, failed, warnings
+_CANONICAL_DOMAINS = frozenset({"vllm-ascend", "operators", "xllm", "mindie-sd", "infer-core",
+                                "infer-distributed", "infer-observability", "infer-ops-compat", "agent-engineering"})
+def _ensure_host_knowledge_binding(target, cfg_path, run_env):
+    if not cfg_path.is_file(): return {"reason": "host_config_missing"}
+    try: cfg_doc = json.loads(cfg_path.read_text(encoding="utf-8"))
+    except TimeoutError: raise
+    except (OSError, ValueError): return {"reason": "invalid_host_config"}
+    if not isinstance(cfg_doc, dict): return {"reason": "invalid_host_config"}
+    runtime_py = cfg_doc.get("python")
+    if not isinstance(runtime_py, str) or not runtime_py.strip() or not _path_exists(Path(runtime_py)):
+        return {"reason": "runtime_python_missing"}
+    code = ("import importlib.util as u, json, pathlib, sys\n"
+            "r = u.find_spec('mindie_harness.runtime')\n"
+            "if r is None or r.submodule_search_locations is None or u.find_spec('mindie_harness.runtime.knowledge_binding') is None:\n"
+            "    print(json.dumps({'status': 'legacy'})); raise SystemExit(0)\n"
+            "from mindie_harness.paths import ProfileRef\n"
+            "from mindie_harness.runtime.knowledge_binding import ensure_knowledge_binding\n"
+            "print(json.dumps(ensure_knowledge_binding(ProfileRef.resolve(sys.argv[1], config_path=pathlib.Path(sys.argv[2])))))\n")
+    try: proc = _run_cmd([runtime_py, "-I", "-X", "utf8", "-c", code, target, str(cfg_path)], env=run_env, timeout=120.0)
+    except subprocess.TimeoutExpired: return {"reason": "install_timeout"}
+    except TimeoutError: raise
+    except OSError as exc: return {"reason": "install_io_error", "error_type": type(exc).__name__}
+    if proc.returncode != 0: return {"reason": "knowledge_binding_failed", "returncode": proc.returncode}
+    lines = [ln.strip() for ln in (proc.stdout or "").splitlines() if ln.strip()]
+    try: res = json.loads(lines[-1]) if lines else None
+    except ValueError: res = None
+    if not isinstance(res, dict): return {"reason": "knowledge_binding_failed"}
+    if res.get("status") == "legacy": return None
+    if res.get("status") != "configured":
+        return {"reason": str(res.get("reason") or "knowledge_binding_failed"), "binding_status": str(res.get("status") or "")}
+    try: updated = json.loads(cfg_path.read_text(encoding="utf-8"))
+    except TimeoutError: raise
+    except (OSError, ValueError): return {"reason": "invalid_host_config"}
+    eng = updated.get("engine_config") if isinstance(updated, dict) else None
+    doms = updated.get("domain_configs") if isinstance(updated, dict) else None
+    if (not isinstance(eng, str) or not _path_exists(Path(eng)) or not isinstance(doms, dict)
+            or not (_CANONICAL_DOMAINS <= set(doms))
+            or any(not isinstance(doms[d], str) or not _path_exists(Path(doms[d])) for d in _CANONICAL_DOMAINS)):
+        return {"reason": "knowledge_domains_incomplete"}
+    return None
 def _deepest_existing(path):
     current = path.expanduser()
     while not _path_exists(current) and current != current.parent: current = current.parent
@@ -329,7 +379,7 @@ def _on_drvfs(path):
 def _host_python(env):
     exe = Path(sys.executable)
     try:
-        if exe.is_file() and exe.stat().st_size > 0 and "windowsapps" not in str(exe).lower(): return exe
+        if exe.is_file() and exe.stat().st_size > 0 and not _is_winapps_stub(exe): return exe
     except TimeoutError: raise
     except OSError: pass
     found = _which_native("python3", env) or _which_native("python", env)
@@ -351,11 +401,15 @@ def main(argv=None):
     if lowered.startswith("http://") or ("://" in lowered and not lowered.startswith(("https://", "file://"))):
         return _emit({"schema": SCHEMA, "status": "error", "reason": "insecure_channel_url", "reportable": False}, 1)
     if not lowered.startswith(("https://", "file://")): raw_base = str(Path(raw_base).expanduser().resolve())
-    detected, gh = detect_installed_hosts(environ), probe_gh_status(environ, offline=args.offline)
-    base = _base_payload(detected, gh)
+    detected = detect_installed_hosts(environ)
     targets = detected if requested == "auto" else [HOST_ALIASES[requested]]
-    if args.dry_run: return _emit({**base, "status": "dry_run", "planned_hosts": targets}, 0)
-    if not targets: return _emit({**base, "status": "no_hosts", "planned_hosts": []}, 0)
+    if args.dry_run or not targets:
+        gh_bin = _which_native("gh", environ)
+        st = ("skipped_dry_run" if args.dry_run else "skipped_no_hosts") if gh_bin else "not_installed"
+        base = _base_payload(detected, _gh(bool(gh_bin), False, None, st, "local-only"))
+        return _emit({**base, "status": "dry_run" if args.dry_run else "no_hosts", "planned_hosts": targets}, 0)
+    gh = probe_gh_status(environ, offline=args.offline)
+    base = _base_payload(detected, gh)
     if args.offline and lowered.startswith("https://"): return _fail(base, "offline_remote_channel")
     cfg_root, data_root = _roots(environ)[1:]
     if sys.platform == "linux" and any(_on_drvfs(root) for root in (data_root, cfg_root)): return _fail(base, "drvfs_unsafe_state_root")

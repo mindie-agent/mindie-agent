@@ -28,6 +28,7 @@ from pathlib import Path
 import re
 from typing import Mapping, Sequence
 
+from iron_rule_ast_gate import verify_iron_rule_ast_contracts
 from repo_roots import INDEPENDENT_COMPONENTS, INDEPENDENT_PLUGINS, resolve_repo
 
 GATED_REPOS: tuple[str, ...] = (
@@ -777,4 +778,5 @@ def verify_zero_session_binding_gates(siblings_roots, *, require_siblings=False,
             continue
         _CHECKERS[repo_name](repo_dir, strict_files=strict_files, errors=errors)
     _check_prompt_and_guide_hygiene(siblings_roots, explicit_repos, strict_repos, errors)
+    errors.extend(verify_iron_rule_ast_contracts(siblings_roots, explicit_repos=explicit_repos))
     return errors
