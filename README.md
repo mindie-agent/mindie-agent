@@ -300,7 +300,7 @@ MindIE Agent 的核心交互理念是**开箱即用与渐进式披露（Progress
 | 仓库 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- |
 | **[`mindie-agent`](https://github.com/mindie-agent/mindie-agent)** *(本仓库)* | [`v0.1.18`](https://github.com/mindie-agent/mindie-agent/releases/tag/v0.1.18) | 顶层产品入口、整体架构、工程设计原则、跨组件发布兼容契约与正式发行版记录 |
-| **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.22`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.22) | 独立评测框架与真机基准套件：20 个行为级验证任务（109 项三态与辅助变体对照）、预置准入脚手架（Gate Runner）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、组件级基准、跨任务知识复用及端到端总工程成本校验 |
+| **[`mindie-bench`](https://github.com/mindie-agent/mindie-bench)** | [`v0.4.24`](https://github.com/mindie-agent/mindie-bench/releases/tag/v0.4.24) | 独立评测框架与真机基准套件：20 个行为级验证任务（109 项三态与辅助变体对照）、预置准入脚手架（Gate Runner）、隔离宿主运行（原生知识评测接入与 `zsh` 临时目录隔离）、组件级基准、跨任务知识复用及端到端总工程成本校验 |
 | **[`awesome-mindie-skills`](https://github.com/mindie-agent/awesome-mindie-skills)** | [`main`](https://github.com/mindie-agent/awesome-mindie-skills) | 面向昇腾 NPU AI Infra 全流程的高质量开源 Agent Skills 精选目录（现已覆盖 `vLLM-Ascend`、`AscendC`/`Triton` 算子开发、精度测试与性能调优，持续扩展中） |
 | **[`vllm-ascend-workspace`](https://github.com/mindie-agent/vllm-ascend-workspace)** | [`main`](https://github.com/mindie-agent/vllm-ascend-workspace) | 轻量可定制的 `vLLM` + `vLLM-Ascend` 本地多任务开发工作区，支持独立 Git Worktree 隔离与 MindIE Agent 集成 |
 
