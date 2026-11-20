@@ -202,6 +202,36 @@ flowchart LR
    - 旧服务确认退役（或原本未启动）后，激活器通过 `os.replace` 原子替换唯一安装绑定或当前 Generation 指针文件（如 `codex.json`、`cc.json` 或 `current.json`）。
    - **耗时边界说明**：绑定切换阶段约 `10ms`（Codex `unavailable_seconds`）/ `15ms`（Claude Code `activate_binding.seconds`），不含前置下载与解包，并由 `os.replace` 原子更新绑定配置；而包含前置 wheelhouse 下载、`SHA256SUMS` 校验、解包与候选 API 探针在内的完整流程运行在各自有界的秒级/分钟级超时预算内，**绝不将包含前置准备的全流程承诺为 `< 500ms`**。
 
+### MCP receipt 失配排障与发布契约
+
+MCP 服务在 `initialize` 之前退出并在宿主侧表现为 `connection closed` 时，应优先检查运行时 receipt，而不是先归因于网络或 MCP 协议。宿主适配器必须把运行时 receipt 的产品校验值与候选产品配置、engine 配置中的校验值进行严格比对。失配表示候选运行时未通过完整性或版本一致性门禁，影响 MCP 进程启动和工具可用性，通常不代表底层 MindIE 推理服务已经损坏。
+
+标准排查顺序如下：
+
+1. 从宿主日志确认失败发生在 `initialize` 之前。
+2. 按 `.mcp.json` 还原实际启动链，并在宿主外直接调用入口选择器，保留原始异常。
+3. 对比 `runtime.json`、产品配置和 engine 配置中的校验字段，同时核对 manifest、release、native component 与缓存目录版本。
+4. 查看这些文件的修改时间，识别配置已刷新而 receipt 未刷新的不完整更新。
+
+修复和发布实现必须遵循以下约束：
+
+- 修改前备份 receipt，解析 JSON 后再更新字段，使用 `os.replace` 原子发布，并在写入后重新读取验证。
+- 只有在产品配置与 engine 配置彼此一致时，才允许将运行时 receipt 对齐到已确认的产品校验值。不能凭版本号或文件时间戳猜测正确值。
+- 候选 receipt 校验失败时保留当前活动 Generation，不得让半更新状态覆盖可用运行时。
+- 错误信息必须包含校验失败阶段和相关文件路径，使宿主能够区分启动失败与握手协议失败。
+
+修复验收至少覆盖入口选择、MCP `initialize` 和 `tools/list`。如果宿主缓存了之前的启动失败结果，还必须通过重启宿主或新建会话启动新的 MCP 进程后再验收。
+
+这类问题具有跨宿主、跨版本的通用性，但具体文件名和组件路径由宿主适配器决定。`knowledge_unavailable` 不应直接等同于组件未安装。稳定排障应先确认 Knowledge 包和绑定解释器是否存在，再独立启动该解释器执行只读查询，以区分递归回退保护、配置校验失败和服务进程故障。
+
+Knowledge 运行时配置的最低启动契约包括以下内容：
+
+- `transcript_adapter` 必须是当前 Generation 中存在的绝对路径；
+- public transcript 模式必须配置存在的绝对 `redactor_executable`；
+- engine 与宿主产品配置的 `product_validation` 必须一致；
+- 配置修改必须备份并原子替换，随后重新执行一次只读 `knowledge_query`。
+
+发布或自动刷新流程应在激活前执行这组预检，并在失败时保留旧 Generation，同时输出缺失字段、失效路径和校验阶段。这样可以把一次人工修复转化为可重复的候选运行时门禁。
 ### 2026-10-27 远端参数缺失与自纠正验收
 
 直接 SSH 端点一直要求同时提供 `host` 与 `port`。已安装的 remote-dev `0.10.6` 与 `0.10.7` 对相同漏 port 输入均返回 caller/not_sent；Codex `0.1.0`、`0.1.2`、`0.1.8`、`0.1.9`、`0.1.10` 的工具目录均缺少 host/port 属性说明，适配器又把具体原因压缩为通用错误。此前正确传参验收没有覆盖 Agent 从缺参错误自行纠正的路径；历史调用也曾触发同类失败，因此不能归因于本次版本新增端口规则。

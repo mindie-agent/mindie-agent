@@ -194,6 +194,36 @@ flowchart LR
    - After the old worker is confirmed retired (or absent), the activator atomically replaces the canonical binding or generation pointer file (`codex.json`, `cc.json`, or `current.json`) via `os.replace`.
    - **Latency Boundary Note**: The binding cutover stage takes ~`10ms` on Codex (`unavailable_seconds`) and ~`15ms` on Claude Code (`activate_binding.seconds`), excluding prior download and extraction, and publishes the canonical binding via `os.replace`; the end-to-end pipeline—including prior wheelhouse download, `SHA256SUMS` verification, extraction, and candidate API probing—runs under bounded multi-second / multi-minute budgets and **is never promised as `< 500ms` end to end**.
 
+### MCP Receipt Mismatch Troubleshooting and Release Contract
+
+When an MCP service exits before `initialize` and the host reports `connection closed`, check the runtime receipt before attributing the failure to the network or MCP protocol. A host adapter must strictly compare the runtime receipt's product validation value with the values in the candidate product and engine configurations. A mismatch means that the candidate runtime failed the integrity or version-consistency gate. It prevents the MCP process from starting and makes its tools unavailable, but normally does not indicate that the underlying MindIE inference service is damaged.
+
+Use this diagnostic order:
+
+1. Confirm from the host log that the failure occurs before `initialize`.
+2. Reconstruct the actual launch chain from `.mcp.json` and invoke the entry selector outside the host so the original exception is retained.
+3. Compare the validation fields in `runtime.json`, the product configuration, and the engine configuration. Also compare manifest, release, native-component, and cache-directory versions.
+4. Compare file modification times to detect an incomplete refresh where configuration files were updated but the receipt was not.
+
+Repair and release implementations must follow these constraints:
+
+- Back up the receipt before editing it, parse JSON before changing fields, publish with `os.replace`, and read it back for validation.
+- Align a runtime receipt only after the product and engine configurations agree with each other. Never infer the correct value from a version string or file timestamp alone.
+- If candidate receipt validation fails, retain the active Generation. A partial update must never replace a working runtime.
+- Include the failed validation stage and relevant file paths in the error so the host can distinguish startup failure from a protocol handshake failure.
+
+Acceptance must cover entry selection, MCP `initialize`, and `tools/list`. If the host cached a previous startup failure, restart the host or create a new session so a new MCP process is started before rechecking.
+
+This failure class is reusable across hosts and releases, although file names and component paths are adapter-specific. `knowledge_unavailable` must not be treated as proof that the component is uninstalled. First verify that the Knowledge package and its bound interpreter exist, then run a read-only query through that interpreter in an independent process. This distinguishes recursive fallback protection, configuration validation failure, and a service-process failure.
+
+The minimum startup contract for a Knowledge runtime includes:
+
+- `transcript_adapter` is an existing absolute path inside the current Generation;
+- public-transcript mode has an existing absolute `redactor_executable`;
+- the engine and host product configurations carry the same `product_validation`;
+- configuration changes are backed up and atomically replaced, followed by a read-only `knowledge_query`.
+
+Release and refresh flows should run these preflight checks before activation. On failure they should retain the old Generation and report the missing field, invalid path, and validation stage. This turns a one-off manual repair into a repeatable candidate-runtime gate.
 ### Missing remote arguments and agent correction, 2026-10-27
 
 A direct SSH endpoint has always required both `host` and `port`. Installed remote-dev `0.10.6` and `0.10.7` reject the same missing-port request as caller/not_sent. Codex `0.1.0`, `0.1.2`, `0.1.8`, `0.1.9`, and `0.1.10` all lacked host/port property descriptions, while the adapter reduced the specific cause to a generic error. Earlier successful acceptance supplied the port explicitly and missed the agent-correction path; historical calls also show the same failure. The evidence does not support a newly introduced port requirement.
