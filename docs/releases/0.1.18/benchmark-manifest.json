@@ -1,0 +1,220 @@
+{
+  "schema_version": "mindie-release-manifest/1",
+  "product_version": "0.1.18",
+  "repositories": [
+    {
+      "repository": "mindie-agent/harness",
+      "revision": "99962f4138f1402024a6d7b4b2596baaa36a4b00",
+      "version": "0.1.8",
+      "runner_revision": "36762bfb122bb79bc95df2fae0cdb3886ee3b0b3",
+      "required_cases": [
+        "seed-lock-verify",
+        "mcp-router-dispatch"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/diagnostics",
+      "revision": "7464cbb4381e9dc996871d192eb3f05f61dfdb28",
+      "version": "0.5.17",
+      "runner_revision": "fd47db14bf53b94b5edfa07ac6b60e120d1b129c",
+      "required_cases": [
+        "redaction",
+        "public-event-projection"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/debugger",
+      "revision": "e15c2ed38d8f928db67c5bb1a94269f62207227c",
+      "version": "0.1.4",
+      "runner_revision": "9872e06d4077fb2b5ffe8dee44562eda3a2190ba",
+      "required_cases": [
+        "npu-fault-triage",
+        "aclgraph-capture-triage"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/profiler",
+      "revision": "9eee1bd04d98250c825e65f6084a33a9d40e9c56",
+      "version": "0.5.17",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
+      "required_cases": [
+        "profiler-analysis-and-attribution"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/sim",
+      "revision": "68c8b792afb2517b60039cc28b14b1154a1a7f9f",
+      "version": "0.9.19",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
+      "required_cases": [
+        "causal-pipeline",
+        "causal-serving",
+        "causal-pd-serving"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/npu-top",
+      "revision": "72654fe6047df6ccc67746c242b3ce18bcabc945",
+      "version": "0.3.5",
+      "runner_revision": "9872e06d4077fb2b5ffe8dee44562eda3a2190ba",
+      "required_cases": [
+        "a2-a3-parser",
+        "dcmi-cause-decoding",
+        "dcmi-persisted-fractional-window"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/remote-dev",
+      "revision": "784fc2ca1db172f683889a6d47543c37141b3278",
+      "version": "0.11.15",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
+      "required_cases": [
+        "patch-parser-and-tool-protocol",
+        "record-serialization"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/knowledge",
+      "revision": "9befde292ea0e6c79e9e5f475c266cbcf845d59a",
+      "version": "0.13.25",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
+      "required_cases": [
+        "graded-feed-lifecycle",
+        "technical-tokenization"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/coordinator",
+      "revision": "79df7c373bf35fda2a94907d1f3beb51c6462357",
+      "version": "0.7.14",
+      "runner_revision": "1e4876956d34be36e538df65b135027b468e1beb",
+      "required_cases": [
+        "two-role-placement",
+        "canonical-run-manifest"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-codex",
+      "revision": "1b6c727f79a7abffc409f40ef61c6cbf68fb1267",
+      "version": "0.1.40",
+      "runner_revision": "243b1732702ec7210f0f174203549ff630ce144f",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-cc",
+      "revision": "92ca81a0c74838bfa16a855b04907fbb768a9b5e",
+      "version": "0.1.32",
+      "runner_revision": "239ceada3a1f8721bc9acc97e962ce55653bb062",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-kimi",
+      "revision": "4332b734ae3acc3a71ec1a8c1d824c0852709355",
+      "version": "0.1.33",
+      "runner_revision": "d82c184a768bebf4de219ffadf93ed620e68e9e0",
+      "required_cases": [
+        "public-transcript-parsing"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-dsh",
+      "revision": "0e7b8bc96496d308ee8fbcc25f2b8aa54f89d083",
+      "version": "0.1.28",
+      "runner_revision": "d82c184a768bebf4de219ffadf93ed620e68e9e0",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-agy",
+      "revision": "3c4398aebba9f22a2623afe950e3825abf4af02e",
+      "version": "0.1.22",
+      "runner_revision": "239ceada3a1f8721bc9acc97e962ce55653bb062",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-wb",
+      "revision": "fc7268d616859aba1e98cc23163058b0d230e830",
+      "version": "0.1.20",
+      "runner_revision": "d82c184a768bebf4de219ffadf93ed620e68e9e0",
+      "required_cases": [
+        "public-transcript"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-agent-oc",
+      "revision": "eda3beea46913991785dcb792966003112ba1584",
+      "version": "0.1.12",
+      "runner_revision": "d82c184a768bebf4de219ffadf93ed620e68e9e0",
+      "required_cases": [
+        "opencode-sqlite-v2-public-spool"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    },
+    {
+      "repository": "mindie-agent/mindie-bench",
+      "revision": "243b1732702ec7210f0f174203549ff630ce144f",
+      "version": "0.4.21",
+      "runner_revision": "243b1732702ec7210f0f174203549ff630ce144f",
+      "required_cases": [
+        "retrieval-scoring"
+      ],
+      "platforms": [
+        "linux"
+      ]
+    }
+  ]
+}
