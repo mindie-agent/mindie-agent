@@ -67,7 +67,7 @@ flowchart LR
 | --- | --- | --- |
 | **数据源与范围发现** | `segment.py`, `sources_db.py`, `sources_csv.py`, `sources_trace.py`（新增） | Rank 目录识别、显式时间/Step 窗口解析、只读 SQLite（`mode=ro` + `query_only=ON`）与 `STRING_IDS` 解析、CSV 及流式 JSON Trace 旁路索引 |
 | **区间计量、集群快慢卡与 EP 均衡** | `accounting.py`, `classify.py`, `cross_rank.py`, `events.py` | 整数纳秒区间并集/差集运算、语义块与执行引擎分类、按算子变体（Shape/Dtype/Format）聚合、跨 Rank P50 与最慢 Rank 统计、**集群快慢卡（`slow_rank`）vs 慢链路（`slow_link`）正交归因**及 **MoE EP 负载均衡度（`ep_imbalance_cv` / `eplb_recommended`）** |
-| **渐进查询与报告** | `__main__.py`, `analyze.py`, `report.py`, `correlate.py`（新增） | 提供 `inventory`、`analyze`、`correlate`、`sql` 子命令（配合 `compare` 与 `capture` 共六大入口），输出带源表定位符（Locator）的紧凑结构化 JSON |
+| **渐进查询、报告与结构接入** | `__main__.py`, `analyze.py`, `report.py`, `correlate.py`, `structure_mapping.py`, `sim_structure_ingress.py`, `sim_draft_geometry.py` | 提供 `inventory`、`analyze`、`correlate`、`sql` 子命令（配合 `compare` 与 `capture` 共六大入口），输出带源表定位符（Locator）的紧凑结构化 JSON，并支持双向 `mindie-sim` Case/结构接入与 `draft_prepare=True` 投机预填充草稿缓存 Cohort 对账 |
 | **异常规则、内存取证与理论建模** | `enrichment*.py`, `advisor_rules.py`, `memory_profile.py`, `memory_forensics.py`, `theoretical_model.py`, `tensor_cast_provider.py` | 单实例 `waitNs` / `TASK_PMU_INFO` 绑定、**昇腾 Advisor 异常与可融合算子序列扫描（AICPU 回退、32B/512B 对齐、多流 MTE 争用、流同步与疑似 GC 停顿）**、P0–P4 显存归因、**4 类低效内存分配模式与跨 Step 单调泄漏取证**、单算子 Roofline 下界与可选 `msmodeling`（`tensor_cast`）注入式预测 |
 | **跨 Run 对比与在线控制** | `compare.py`, `cli_compare.py`, `collect.py`, `framework_capture.py` | 按指标判定可比性的 A/B 差异报告；`/start_profile` 与 `/stop_profile` 在线采集控制及 `completed / failed / unknown` 状态对账 |
 | **CANN 9.x 原生稳态采集** | `cann_abi.py`, `native_capture_shm.py`, `native_capture.py`, `cli_capture.py`, `_cann9_capture_shim.c`, `_cann9_capture_mspti.h` | 基于 CANN `>= 9.0` 公开 C 接口（`mspti.h`、`aclrtApiInjectionSetFunc`、`acl_prof.h`）与 `/dev/shm` 多卡控制面的框架无关稳态采集（Gear 1 零 `msprof` 流式热点聚合 + Gear 2 狙击式 `aclprof` + Standby Attach 热挂载） |
@@ -183,7 +183,7 @@ flowchart TB
 | 子命令 | 典型调用场景 | 核心输入参数 | 有界输出内容 |
 | --- | --- | --- | --- |
 | **`inventory`** | 首次拿到目录或文件，快速盘点有什么数据、能否回答当前问题 | `--root <dir_or_file>` | 发现的 Rank 列表、DB/CSV/JSON 路径与大小、可用表清单（含是否有 `PYTORCH_API` / `TASK_PMU_INFO`）、原生 Step/MSTX 窗口列表、采集起止时间跨度 |
-| **`analyze`** | 计算指定窗口的时间线核算、语义块拆解与变体热点 | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel`；可选 `--structure`、`--bindings` | 窗口时间指标（`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`）、6 大语义块占比、带 Shape/Dtype 与源表 Locator 的 Top-K 热点、跨 Rank P50/最慢 Rank、AICPU/PMU 摘要；提供结构时附带 `structure_mapping` |
+| **`analyze`** | 计算指定窗口的时间线核算、语义块拆解与变体热点 | `--root`, `--step-window` / `--window` / `--full-range`, `--rank`, `--top 10`, `--group-by variant\|kernel`；可选 `--structure`、`--sim-case`、`--bindings` | 窗口时间指标（`observed_event_span_ms`, `device_busy_union_ms`, `comm_nonoverlap_ms`, `device_uncovered_ms`）、6 大语义块占比、带 Shape/Dtype 与源表 Locator 的 Top-K 热点、跨 Rank P50/最慢 Rank、AICPU/PMU 摘要；提供结构或 Case 时附带 `structure_mapping`、`subgraph_efficiency_summary` 与 `sim_cohort_comparison` |
 | **`correlate`** | 针对某段设备空隙或热点 Kernel，下钻追查对应的 Host 调用栈与下发关系 | `--root`, `--window START:END`, `--rank`, `--kernel-name <pat>` 或 `--min-gap-ms <val>` | 关联的 `PYTORCH_API` / `MSTX_EVENTS` 同线程父调用栈、`CANN_API` 下发耗时、Host 到 Device 启动延迟及未关联事件比例 |
 | **`compare`** | 优化前后两次 Run 的结构差异与耗时分布 A/B 对比 | `<baseline_report.json> <candidate_report.json>` | 工作负载与环境可比性核查、算子序列/融合/Shape 结构变化、对齐 Step/语义块/算子变体的 P50 差值与置信区间 |
 | **`capture`** | CANN 9.x 原生 NPU 稳态采集（绕过框架 HTTP 延迟与爬坡期污染） | `--gear fast\|deep`, `--prepare-session <id>` / `--attach <id>` / `-- <cmd>`, `--min-warmup-steps`, `--steady-window-steps`, `--steps`, `--max-cv-pct`, `--expected-workers` | `mindie-native-capture/1` 报告：三级 `SteadyStateGate` 审计回执（`transient_contaminated`）、多卡 `/dev/shm` 栅栏偏斜、Gear 1 MSPTI 热点与区间并集核算或 Gear 2 深度 `analyze` 完整报告 |
@@ -207,10 +207,11 @@ flowchart TB
 4. **三值分离的算子理论建模（`theoretical_model.py` & `tensor_cast_provider.py`）**
    - 报告中严格并列区分三个数值：实测设备耗时 **`measured_device_ms`**、基于显式 Shape/Dtype 与硬件规格计算的单算子 Roofline 下界 **`ideal_hardware_lower_bound_ms`**、以及由固定版本外部 Provider（如 `msmodeling` / `tensor_cast`）给出的 **`model_predicted_ms`**。缺少 Shape 或硬件映射时保持 `unmodeled`（`None`），绝不用预测值冒充实测值。
 
-### 6.3 共享模型结构、同构 Cohort 与 Decode 自动切分
+### 6.3 共享模型结构、双向 Case/`draft_prepare` 接入、同构 Cohort 与 Decode 自动切分
 
-1. **结构导出与事件关联（`--structure`）**：
-   - `mindie_sim.structure.export_structure` 通过图 Builder 与实现配方导出无时延的 `mindie-model-structure/1`（独立 `OpSpec` DAG 可通过 `export_op_structure` 导出）；`mindie-profiler analyze --structure FILE` 直接消费该清单，无需导入 `mindie_sim`。
+1. **结构导出、双向 Case 接入与 `draft_prepare=True` 预填充对账（`--structure` / `--sim-case`）**：
+   - `mindie_sim.structure.export_structure` 通过图 Builder 与实现配方导出无时延的 `mindie-model-structure/1`（独立 `OpSpec` DAG 可通过 `export_op_structure` 导出，预填充投机草稿缓存构建通过 `--draft-prepare` / `draft_prepare=True` 导出）；`mindie-profiler analyze --structure FILE` 可在不导入 `mindie_sim` 的情况下直接消费 `mindie-model-structure/1`。
+   - 当传入五键 `mindie-sim` Case（`--sim-case FILE`）或 `mindie-sim.graph/1` 摘要配合 `--sim-case` 时，`mindie_profiler.sim_structure_ingress`（及 `mindie_profiler.sim_draft_geometry`）按需惰性调用 `export_structure` 生成声明结构，并在声明 `draft_prepare=True`（MTP / DSpark / NextN 投机预填充草稿上下文构建）时自动将 `draft_prepare=True` 透传至结构再生与 `compare_cohorts`，确保预填充抓包精确对账所测量的 `draft_prefill.*` / `draft` 子图；若 Case 未声明草稿头或当前已安装的 `mindie-sim` 不支持再生（`UNSUPPORTED_DRAFT_PREPARE_CODES`），则诚实记录 `status="unsupported_geometry"`，绝不掩盖草稿算子内部的真实建模错误。
    - 可选传入 `--bindings FILE`（显式事件/节点关系或 Host/Module 范围）、`--correlation FILE`（Host 调用链）与 `--module-trace FILE`（验证了 DB SHA256 的同步模块记录）。
 2. **证据分级与同构集合（Cohort）统计**：
    - `structure_mapping`（`mindie-profile-structure-mapping/1`）严格区分仅张量匹配的 `candidate` / `ambiguous` 与具备确切调用证据的 `bound`。
@@ -238,5 +239,5 @@ flowchart TB
 
 - **Tier 0（纯内存核心逻辑单测，`< 5s`）**：零子进程、零网络、零 `sleep`。基于 A2（910B）/ A3（910C）/ A5 真机 Golden Capture 最小切片，验证多流区间并集/差集、通算融合算子去重、窗口边界裁剪不污染单次时延分布、同名多 Shape 变体聚合、重复 `globalTaskId` 保护、以及缺表/空窗口返回 `None`。
 - **Tier 1（本地组件契约与进程边界测试，`< 15s`）**：验证真实 SQLite DB / CSV / 双根 JSON 流式解析、旁路索引构建与失效重建、`sql` 子命令只读权限（拒绝写操作与扩展加载）、SQLite 超时中断（Progress Handler），以及 `compare` 跨 Run 可比性门禁。
-- **Tier 2（常备 A2/A3 NPU 真机无损集成测试 `@pytest.mark.live_npu`，`< 25s`）**：直接连接常驻 A2（`173.125.1.2`）与 A3（`192.168.13.165` / `.156` / `.154`）集群的隔离沙箱目录，验证远端容器原地 `inventory` / `analyze` / `correlate`、A3 双 Die 物理设备映射，以及在线采集控制状态对账。
+- **Tier 2（常备 A2/A3/A5 NPU 真机无损集成测试 `@pytest.mark.live_npu`，`< 25s`）**：直接连接常驻 A2（`Ascend910B`）、A3（`Ascend910_93*` 双 Die）与 A5（`Ascend950*`）测试节点的隔离沙箱目录，验证远端容器原地 `inventory` / `analyze` / `correlate`、A3 双 Die 与 A5 物理设备映射，以及在线采集控制状态对账。
 - **Tier 3（端到端宿主 CLI 与实机 Canary 验收，`< 90s`）**：驱动原生宿主通过 `mindie-profiler` 完成“产物盘点 → 瓶颈定位 → 最小验证 → A/B 对比”闭环，确保输出的每一项性能结论均可追溯到具体源表事件与真实运行 ID。
