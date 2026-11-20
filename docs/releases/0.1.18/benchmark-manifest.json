@@ -206,9 +206,9 @@
     },
     {
       "repository": "mindie-agent/mindie-bench",
-      "revision": "243b1732702ec7210f0f174203549ff630ce144f",
-      "version": "0.4.21",
-      "runner_revision": "243b1732702ec7210f0f174203549ff630ce144f",
+      "revision": "482b1da7d3af526315accf7cc1f5f7c5adda7930",
+      "version": "0.4.22",
+      "runner_revision": "482b1da7d3af526315accf7cc1f5f7c5adda7930",
       "required_cases": [
         "retrieval-scoring"
       ],
