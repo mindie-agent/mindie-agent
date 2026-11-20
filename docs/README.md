@@ -13,7 +13,7 @@
 | [系统架构与模块分工](architecture.md) | [Architecture & Module Boundaries](architecture.en.md) | 7 端宿主薄插件、共享宿主底座 `harness`、纯知识引擎、远端执行、集群观测与诊断组件协同 |
 | [知识与经验闭环设计](knowledge-system.md) | [Knowledge & Experience System](knowledge-system.en.md) | `L1–L4` 分级知识检索、按信息缺口精读、脱敏沉淀与社区公共知识库双向流转 |
 | [面向 Agent 的 Profiler 系统设计](profiler-system.md) | [Profiler System Design](profiler-system.en.md) | 昇腾 Profiling 就地只读解析、纳秒区间归因、Host-Device 异步关联、跨 Run 对比与稳态按需采集设计 |
-| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.18` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学，以及跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内多工况校准与 856 例 DSH 集群泛化验证 |
+| [面向 Agent 的通用性能建模系统](simulation-system.md) | — | `mindie-sim v0.9.19` 五层统一因果建模、`compose` Case 合成、`async_scheduling` 显存延迟释放、4D 效率拆解、SLA/PD 分离 Pareto 求解、`skew` 偏斜屏障力学，以及跨 A2/A3/A5 `1,653/1,653 <=10%` 样本内多工况校准与 856 例 DSH 集群泛化验证 |
 | [历史架构、建模与演进方案归档索引](archive/README.md) | [Historical Archive Index](archive/README.md) | 已完成阶段方案、早期设计推演、接口迁移与历史评审快照归档（`docs/archive/**`，非活跃门禁） |
 
 ## 运行机制与工程规范
@@ -33,7 +33,8 @@
 
 | 文档 | English | 核心内容 |
 |---|---|---|
-| [**`0.1.17` 补丁发布说明（当前版本）**](releases/0.1.17.md) | [**`0.1.17` Patch Notes (Current)**](releases/0.1.17.en.md) | 系统性加固 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi` 与 `mindie-agent-dsh` 的 `n-1 -> n` 在线平滑自升级与未重启活跃会话交接兼容桩，并将薄宿主插件代码上限校准为 `<= 1,500` 行 |
+| [**`0.1.18` 补丁发布说明（当前版本）**](releases/0.1.18.md) | [**`0.1.18` Patch Notes (Current)**](releases/0.1.18.en.md) | `mindie-harness v0.1.8` 单一事实源网关与 9 域知识绑定收敛、全部 7 款原生宿主插件协议对齐（修复 Antigravity 15 工具面、Codex 零 Git 领用与 Windows 假桩防护、Kimi 首轮免同步检索、DSH 锁竞态），以及 Hub `R4`/`R7` + `mindie-bench host-accept` 三平台 21 格零 Mock 发版可用性门禁 |
+| [**`0.1.17` 补丁发布说明**](releases/0.1.17.md) | [**`0.1.17` Patch Notes**](releases/0.1.17.en.md) | 系统性加固 `mindie-agent-codex`、`mindie-agent-cc`、`mindie-agent-kimi` 与 `mindie-agent-dsh` 的 `n-1 -> n` 在线平滑自升级与未重启活跃会话交接兼容桩，并将薄宿主插件代码上限校准为 `<= 1,500` 行 |
 | [**`0.1.16` 补丁发布说明**](releases/0.1.16.md) | [**`0.1.16` Patch Notes**](releases/0.1.16.en.md) | 全七端宿主插件大减法收敛至 `mindie-harness` 共享底座、零 Git 预构建 wheelhouse 自动更新与单命令 `install.py`、`gh` 解耦三档隐私模式（`contribute` / `local-only` / `read-only`）、1:1 远端原生工具面与 `remote_auth` 静默配钥及只读 `mindie_doctor` |
 | [**`0.1.15` 补丁发布说明**](releases/0.1.15.md) | [**`0.1.15` Patch Notes**](releases/0.1.15.en.md) | 全七端统一收敛为“启用即全功能静默自启（Silent Default-On）”：移除全部 `/mindie-agent` 口令暴露、`disable-model-invocation` 阻断及 `knowledge_*` 会话绑定门禁，经验采集仅受共享开关与授权目录约束 |
 | [**`0.1.14` 补丁发布说明**](releases/0.1.14.md) | [**`0.1.14` Patch Notes**](releases/0.1.14.en.md) | 彻底剥离全端运行时 `skills/` 中的安装向导至 `docs/install/`，并在 Google Antigravity（`v0.1.19`）率先切换为默认全功能开放 |
