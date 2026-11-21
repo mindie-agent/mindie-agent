@@ -20,65 +20,65 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent 开源仓库与下载统计</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-21 12:39 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">每 12 小时自动更新 · 2026-11-22 02:24 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
-  <text x="38" y="124" class="font kpi-val">108 ★  ·  62 ⑂</text>
-  <text x="38" y="144" class="font kpi-sub">全组织合计 121 Stars · 114 Forks</text>
+  <text x="38" y="124" class="font kpi-val">108 ★  ·  63 ⑂</text>
+  <text x="38" y="144" class="font kpi-sub">全组织合计 122 Stars · 115 Forks</text>
   <rect x="256" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="256" y="72" width="4" height="86" rx="2" fill="#10A37F"/>
   <text x="270" y="95" class="font kpi-label">客户端插件 Clone</text>
-  <text x="270" y="124" class="font kpi-val">30,387</text>
-  <text x="270" y="144" class="font kpi-sub">近 14 天 2,151 个独立环境</text>
+  <text x="270" y="124" class="font kpi-val">31,502</text>
+  <text x="270" y="144" class="font kpi-sub">近 14 天 2,163 个独立环境</text>
   <rect x="488" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="488" y="72" width="4" height="86" rx="2" fill="#2563EB"/>
   <text x="502" y="95" class="font kpi-label">全仓库 Git Clone</text>
-  <text x="502" y="124" class="font kpi-val">120,963</text>
+  <text x="502" y="124" class="font kpi-val">127,060</text>
   <text x="502" y="144" class="font kpi-sub">覆盖 28 个公开仓库</text>
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release 下载量</text>
-  <text x="734" y="124" class="font kpi-val">23,723</text>
-  <text x="734" y="144" class="font kpi-sub">含全部附件共 57,512 次</text>
+  <text x="734" y="124" class="font kpi-val">24,015</text>
+  <text x="734" y="144" class="font kpi-sub">含全部附件共 57,882 次</text>
   <rect x="24" y="174" width="912" height="178" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">客户端插件拉取分布</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
-  <rect x="40.0" y="210" width="409.9" height="12" rx="3" fill="#10A37F"/>
-  <rect x="451.4" y="210" width="127.2" height="12" rx="3" fill="#D97757"/>
-  <rect x="580.1" y="210" width="147.5" height="12" rx="3" fill="#2563EB"/>
-  <rect x="729.1" y="210" width="88.1" height="12" rx="3" fill="#0EA5E9"/>
-  <rect x="818.7" y="210" width="41.4" height="12" rx="3" fill="#4285F4"/>
-  <rect x="861.6" y="210" width="35.0" height="12" rx="3" fill="#0EC8A9"/>
-  <rect x="898.2" y="210" width="20.3" height="12" rx="3" fill="#0F766E"/>
+  <rect x="40.0" y="210" width="408.7" height="12" rx="3" fill="#10A37F"/>
+  <rect x="450.2" y="210" width="125.7" height="12" rx="3" fill="#D97757"/>
+  <rect x="577.4" y="210" width="146.0" height="12" rx="3" fill="#2563EB"/>
+  <rect x="724.9" y="210" width="84.9" height="12" rx="3" fill="#0EA5E9"/>
+  <rect x="811.3" y="210" width="44.1" height="12" rx="3" fill="#4285F4"/>
+  <rect x="856.9" y="210" width="37.5" height="12" rx="3" fill="#0EC8A9"/>
+  <rect x="895.9" y="210" width="22.6" height="12" rx="3" fill="#0F766E"/>
   <circle cx="46" cy="242" r="5" fill="#10A37F"/>
-  <text x="56" y="246" class="font td-repo">OpenAI Codex (46.8%)</text>
+  <text x="56" y="246" class="font td-repo">OpenAI Codex (46.6%)</text>
   <text x="56" y="263" class="mono td-sub">mindie-agent-codex</text>
-  <text x="56" y="279" class="font td-sub">14,206 Clones · 14d 独立 615</text>
+  <text x="56" y="279" class="font td-sub">14,684 Clones · 14d 独立 597</text>
   <circle cx="266" cy="242" r="5" fill="#D97757"/>
-  <text x="276" y="246" class="font td-repo">Claude Code (14.6%)</text>
+  <text x="276" y="246" class="font td-repo">Claude Code (14.5%)</text>
   <text x="276" y="263" class="mono td-sub">mindie-agent-cc</text>
-  <text x="276" y="279" class="font td-sub">4,444 Clones · 14d 独立 368</text>
+  <text x="276" y="279" class="font td-sub">4,554 Clones · 14d 独立 366</text>
   <circle cx="486" cy="242" r="5" fill="#2563EB"/>
-  <text x="496" y="246" class="font td-repo">Kimi Code (16.9%)</text>
+  <text x="496" y="246" class="font td-repo">Kimi Code (16.8%)</text>
   <text x="496" y="263" class="mono td-sub">mindie-agent-kimi</text>
-  <text x="496" y="279" class="font td-sub">5,146 Clones · 14d 独立 248</text>
+  <text x="496" y="279" class="font td-sub">5,281 Clones · 14d 独立 252</text>
   <circle cx="706" cy="242" r="5" fill="#0EA5E9"/>
-  <text x="716" y="246" class="font td-repo">DeepSeek Harness (10.2%)</text>
+  <text x="716" y="246" class="font td-repo">DeepSeek Harness (9.8%)</text>
   <text x="716" y="263" class="mono td-sub">mindie-agent-dsh</text>
   <text x="716" y="279" class="font td-sub">3,093 Clones · 14d 独立 273</text>
   <circle cx="46" cy="296" r="5" fill="#4285F4"/>
-  <text x="56" y="300" class="font td-repo">Google Antigravity (4.9%)</text>
+  <text x="56" y="300" class="font td-repo">Google Antigravity (5.2%)</text>
   <text x="56" y="317" class="mono td-sub">mindie-agent-agy</text>
-  <text x="56" y="333" class="font td-sub">1,483 Clones · 14d 独立 247</text>
+  <text x="56" y="333" class="font td-sub">1,631 Clones · 14d 独立 242</text>
   <circle cx="266" cy="296" r="5" fill="#0EC8A9"/>
-  <text x="276" y="300" class="font td-repo">Tencent WorkBuddy (4.1%)</text>
+  <text x="276" y="300" class="font td-repo">Tencent WorkBuddy (4.4%)</text>
   <text x="276" y="317" class="mono td-sub">mindie-agent-wb</text>
-  <text x="276" y="333" class="font td-sub">1,261 Clones · 14d 独立 212</text>
+  <text x="276" y="333" class="font td-sub">1,395 Clones · 14d 独立 217</text>
   <circle cx="486" cy="296" r="5" fill="#0F766E"/>
-  <text x="496" y="300" class="font td-repo">OpenCode (2.5%)</text>
+  <text x="496" y="300" class="font td-repo">OpenCode (2.7%)</text>
   <text x="496" y="317" class="mono td-sub">mindie-agent-oc</text>
-  <text x="496" y="333" class="font td-sub">754 Clones · 14d 独立 188</text>
+  <text x="496" y="333" class="font td-sub">864 Clones · 14d 独立 216</text>
   <rect x="24" y="368" width="912" height="964" rx="8" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="368" width="912" height="38" rx="8" fill="#F1F5F9"/>
   <line x1="24" y1="406" x2="936" y2="406" stroke="#CBD5E1" stroke-width="1"/>
@@ -93,10 +93,10 @@
   <text x="50" y="427" class="mono td-repo">mindie-agent</text>
   <text x="268" y="427" class="font td-cat">产品入口</text>
   <text x="368" y="427" class="mono td-sub">v0.1.18</text>
-  <text x="545" y="427" text-anchor="end" class="mono td-num">108 / 62</text>
-  <text x="665" y="427" text-anchor="end" class="mono td-bold">4,989</text>
-  <text x="815" y="427" text-anchor="end" class="mono td-num">2,017 (563)</text>
-  <text x="920" y="427" text-anchor="end" class="mono td-num">403</text>
+  <text x="545" y="427" text-anchor="end" class="mono td-num">108 / 63</text>
+  <text x="665" y="427" text-anchor="end" class="mono td-bold">5,539</text>
+  <text x="815" y="427" text-anchor="end" class="mono td-num">2,270 (557)</text>
+  <text x="920" y="427" text-anchor="end" class="mono td-num">433</text>
   <rect x="25" y="439" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="439" x2="936" y2="439" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="456" r="3.5" fill="#0F766E"/>
@@ -104,8 +104,8 @@
   <text x="268" y="460" class="font td-cat">技能目录</text>
   <text x="368" y="460" class="mono td-sub">commit@13619351</text>
   <text x="545" y="460" text-anchor="end" class="mono td-num">5 / 8</text>
-  <text x="665" y="460" text-anchor="end" class="mono td-bold">351</text>
-  <text x="815" y="460" text-anchor="end" class="mono td-num">73 (45)</text>
+  <text x="665" y="460" text-anchor="end" class="mono td-bold">353</text>
+  <text x="815" y="460" text-anchor="end" class="mono td-num">75 (47)</text>
   <text x="920" y="460" text-anchor="end" class="mono td-num">-</text>
   <line x1="24" y1="472" x2="936" y2="472" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="489" r="3.5" fill="#10A37F"/>
@@ -113,9 +113,9 @@
   <text x="268" y="493" class="font td-cat">客户端插件</text>
   <text x="368" y="493" class="mono td-sub">v0.1.40</text>
   <text x="545" y="493" text-anchor="end" class="mono td-num">0 / 5</text>
-  <text x="665" y="493" text-anchor="end" class="mono td-bold">14,206</text>
-  <text x="815" y="493" text-anchor="end" class="mono td-num">8,198 (615)</text>
-  <text x="920" y="493" text-anchor="end" class="mono td-num">13,602</text>
+  <text x="665" y="493" text-anchor="end" class="mono td-bold">14,684</text>
+  <text x="815" y="493" text-anchor="end" class="mono td-num">7,821 (597)</text>
+  <text x="920" y="493" text-anchor="end" class="mono td-num">13,862</text>
   <rect x="25" y="505" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="505" x2="936" y2="505" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="522" r="3.5" fill="#D97757"/>
@@ -123,8 +123,8 @@
   <text x="268" y="526" class="font td-cat">客户端插件</text>
   <text x="368" y="526" class="mono td-sub">v0.1.32</text>
   <text x="545" y="526" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="526" text-anchor="end" class="mono td-bold">4,444</text>
-  <text x="815" y="526" text-anchor="end" class="mono td-num">1,494 (368)</text>
+  <text x="665" y="526" text-anchor="end" class="mono td-bold">4,554</text>
+  <text x="815" y="526" text-anchor="end" class="mono td-num">1,430 (366)</text>
   <text x="920" y="526" text-anchor="end" class="mono td-num">722</text>
   <line x1="24" y1="538" x2="936" y2="538" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="555" r="3.5" fill="#2563EB"/>
@@ -132,8 +132,8 @@
   <text x="268" y="559" class="font td-cat">客户端插件</text>
   <text x="368" y="559" class="mono td-sub">v0.1.33</text>
   <text x="545" y="559" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="559" text-anchor="end" class="mono td-bold">5,146</text>
-  <text x="815" y="559" text-anchor="end" class="mono td-num">1,830 (248)</text>
+  <text x="665" y="559" text-anchor="end" class="mono td-bold">5,281</text>
+  <text x="815" y="559" text-anchor="end" class="mono td-num">1,720 (252)</text>
   <text x="920" y="559" text-anchor="end" class="mono td-num">2,695</text>
   <rect x="25" y="571" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="571" x2="936" y2="571" stroke="#F1F5F9" stroke-width="1"/>
@@ -141,18 +141,18 @@
   <text x="50" y="592" class="mono td-repo">mindie-agent-dsh</text>
   <text x="268" y="592" class="font td-cat">客户端插件</text>
   <text x="368" y="592" class="mono td-sub">v0.1.28</text>
-  <text x="545" y="592" text-anchor="end" class="mono td-num">0 / 0</text>
+  <text x="545" y="592" text-anchor="end" class="mono td-num">1 / 0</text>
   <text x="665" y="592" text-anchor="end" class="mono td-bold">3,093</text>
   <text x="815" y="592" text-anchor="end" class="mono td-num">978 (273)</text>
-  <text x="920" y="592" text-anchor="end" class="mono td-num">367</text>
+  <text x="920" y="592" text-anchor="end" class="mono td-num">369</text>
   <line x1="24" y1="604" x2="936" y2="604" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="621" r="3.5" fill="#4285F4"/>
   <text x="50" y="625" class="mono td-repo">mindie-agent-agy</text>
   <text x="268" y="625" class="font td-cat">客户端插件</text>
   <text x="368" y="625" class="mono td-sub">v0.1.22</text>
   <text x="545" y="625" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="625" text-anchor="end" class="mono td-bold">1,483</text>
-  <text x="815" y="625" text-anchor="end" class="mono td-num">1,159 (247)</text>
+  <text x="665" y="625" text-anchor="end" class="mono td-bold">1,631</text>
+  <text x="815" y="625" text-anchor="end" class="mono td-num">1,169 (242)</text>
   <text x="920" y="625" text-anchor="end" class="mono td-num">279</text>
   <rect x="25" y="637" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="637" x2="936" y2="637" stroke="#F1F5F9" stroke-width="1"/>
@@ -161,8 +161,8 @@
   <text x="268" y="658" class="font td-cat">客户端插件</text>
   <text x="368" y="658" class="mono td-sub">v0.1.20</text>
   <text x="545" y="658" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="658" text-anchor="end" class="mono td-bold">1,261</text>
-  <text x="815" y="658" text-anchor="end" class="mono td-num">1,049 (212)</text>
+  <text x="665" y="658" text-anchor="end" class="mono td-bold">1,395</text>
+  <text x="815" y="658" text-anchor="end" class="mono td-num">1,075 (217)</text>
   <text x="920" y="658" text-anchor="end" class="mono td-num">235</text>
   <line x1="24" y1="670" x2="936" y2="670" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="687" r="3.5" fill="#0F766E"/>
@@ -170,8 +170,8 @@
   <text x="268" y="691" class="font td-cat">客户端插件</text>
   <text x="368" y="691" class="mono td-sub">v0.1.12</text>
   <text x="545" y="691" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="691" text-anchor="end" class="mono td-bold">754</text>
-  <text x="815" y="691" text-anchor="end" class="mono td-num">754 (188)</text>
+  <text x="665" y="691" text-anchor="end" class="mono td-bold">864</text>
+  <text x="815" y="691" text-anchor="end" class="mono td-num">864 (216)</text>
   <text x="920" y="691" text-anchor="end" class="mono td-num">254</text>
   <rect x="25" y="703" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="703" x2="936" y2="703" stroke="#F1F5F9" stroke-width="1"/>
@@ -180,8 +180,8 @@
   <text x="268" y="724" class="font td-cat">宿主底座</text>
   <text x="368" y="724" class="mono td-sub">v0.1.8</text>
   <text x="545" y="724" text-anchor="end" class="mono td-num">0 / 1</text>
-  <text x="665" y="724" text-anchor="end" class="mono td-bold">1,388</text>
-  <text x="815" y="724" text-anchor="end" class="mono td-num">1,388 (794)</text>
+  <text x="665" y="724" text-anchor="end" class="mono td-bold">2,022</text>
+  <text x="815" y="724" text-anchor="end" class="mono td-num">2,022 (1,078)</text>
   <text x="920" y="724" text-anchor="end" class="mono td-num">345</text>
   <line x1="24" y1="736" x2="936" y2="736" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="753" r="3.5" fill="#475569"/>
@@ -189,8 +189,8 @@
   <text x="268" y="757" class="font td-cat">运行时组件</text>
   <text x="368" y="757" class="mono td-sub">v0.13.25</text>
   <text x="545" y="757" text-anchor="end" class="mono td-num">1 / 3</text>
-  <text x="665" y="757" text-anchor="end" class="mono td-bold">15,480</text>
-  <text x="815" y="757" text-anchor="end" class="mono td-num">6,308 (2,697)</text>
+  <text x="665" y="757" text-anchor="end" class="mono td-bold">16,106</text>
+  <text x="815" y="757" text-anchor="end" class="mono td-num">6,424 (2,713)</text>
   <text x="920" y="757" text-anchor="end" class="mono td-num">482</text>
   <rect x="25" y="769" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="769" x2="936" y2="769" stroke="#F1F5F9" stroke-width="1"/>
@@ -199,8 +199,8 @@
   <text x="268" y="790" class="font td-cat">运行时组件</text>
   <text x="368" y="790" class="mono td-sub">v0.11.15</text>
   <text x="545" y="790" text-anchor="end" class="mono td-num">1 / 2</text>
-  <text x="665" y="790" text-anchor="end" class="mono td-bold">10,351</text>
-  <text x="815" y="790" text-anchor="end" class="mono td-num">4,335 (2,857)</text>
+  <text x="665" y="790" text-anchor="end" class="mono td-bold">10,779</text>
+  <text x="815" y="790" text-anchor="end" class="mono td-num">4,220 (2,756)</text>
   <text x="920" y="790" text-anchor="end" class="mono td-num">449</text>
   <line x1="24" y1="802" x2="936" y2="802" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="819" r="3.5" fill="#475569"/>
@@ -208,8 +208,8 @@
   <text x="268" y="823" class="font td-cat">运行时组件</text>
   <text x="368" y="823" class="mono td-sub">v0.7.14</text>
   <text x="545" y="823" text-anchor="end" class="mono td-num">0 / 2</text>
-  <text x="665" y="823" text-anchor="end" class="mono td-bold">6,138</text>
-  <text x="815" y="823" text-anchor="end" class="mono td-num">4,191 (2,549)</text>
+  <text x="665" y="823" text-anchor="end" class="mono td-bold">6,518</text>
+  <text x="815" y="823" text-anchor="end" class="mono td-num">4,034 (2,455)</text>
   <text x="920" y="823" text-anchor="end" class="mono td-num">399</text>
   <rect x="25" y="835" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="835" x2="936" y2="835" stroke="#F1F5F9" stroke-width="1"/>
@@ -218,8 +218,8 @@
   <text x="268" y="856" class="font td-cat">运行时组件</text>
   <text x="368" y="856" class="mono td-sub">v0.5.17</text>
   <text x="545" y="856" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="856" text-anchor="end" class="mono td-bold">6,291</text>
-  <text x="815" y="856" text-anchor="end" class="mono td-num">5,042 (2,691)</text>
+  <text x="665" y="856" text-anchor="end" class="mono td-bold">6,735</text>
+  <text x="815" y="856" text-anchor="end" class="mono td-num">4,775 (2,600)</text>
   <text x="920" y="856" text-anchor="end" class="mono td-num">383</text>
   <line x1="24" y1="868" x2="936" y2="868" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="885" r="3.5" fill="#475569"/>
@@ -227,8 +227,8 @@
   <text x="268" y="889" class="font td-cat">运行时组件</text>
   <text x="368" y="889" class="mono td-sub">v0.9.19</text>
   <text x="545" y="889" text-anchor="end" class="mono td-num">3 / 2</text>
-  <text x="665" y="889" text-anchor="end" class="mono td-bold">7,265</text>
-  <text x="815" y="889" text-anchor="end" class="mono td-num">5,385 (2,860)</text>
+  <text x="665" y="889" text-anchor="end" class="mono td-bold">7,709</text>
+  <text x="815" y="889" text-anchor="end" class="mono td-num">5,163 (2,747)</text>
   <text x="920" y="889" text-anchor="end" class="mono td-num">440</text>
   <rect x="25" y="901" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="901" x2="936" y2="901" stroke="#F1F5F9" stroke-width="1"/>
@@ -237,8 +237,8 @@
   <text x="268" y="922" class="font td-cat">NPU 监控</text>
   <text x="368" y="922" class="mono td-sub">v0.3.5</text>
   <text x="545" y="922" text-anchor="end" class="mono td-num">2 / 3</text>
-  <text x="665" y="922" text-anchor="end" class="mono td-bold">2,509</text>
-  <text x="815" y="922" text-anchor="end" class="mono td-num">1,507 (1,001)</text>
+  <text x="665" y="922" text-anchor="end" class="mono td-bold">2,853</text>
+  <text x="815" y="922" text-anchor="end" class="mono td-num">1,788 (1,189)</text>
   <text x="920" y="922" text-anchor="end" class="mono td-num">919</text>
   <line x1="24" y1="934" x2="936" y2="934" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="951" r="3.5" fill="#475569"/>
@@ -256,8 +256,8 @@
   <text x="268" y="988" class="font td-cat">运行时组件</text>
   <text x="368" y="988" class="mono td-sub">v0.1.4</text>
   <text x="545" y="988" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="988" text-anchor="end" class="mono td-bold">3,671</text>
-  <text x="815" y="988" text-anchor="end" class="mono td-num">3,301 (2,482)</text>
+  <text x="665" y="988" text-anchor="end" class="mono td-bold">4,017</text>
+  <text x="815" y="988" text-anchor="end" class="mono td-num">3,286 (2,420)</text>
   <text x="920" y="988" text-anchor="end" class="mono td-num">253</text>
   <line x1="24" y1="1000" x2="936" y2="1000" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="1017" r="3.5" fill="#64748B"/>
@@ -265,8 +265,8 @@
   <text x="268" y="1021" class="font td-cat">评测工具</text>
   <text x="368" y="1021" class="mono td-sub">v0.4.24</text>
   <text x="545" y="1021" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1021" text-anchor="end" class="mono td-bold">4,295</text>
-  <text x="815" y="1021" text-anchor="end" class="mono td-num">2,611 (242)</text>
+  <text x="665" y="1021" text-anchor="end" class="mono td-bold">5,052</text>
+  <text x="815" y="1021" text-anchor="end" class="mono td-num">3,321 (270)</text>
   <text x="920" y="1021" text-anchor="end" class="mono td-num">426</text>
   <rect x="25" y="1033" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="1033" x2="936" y2="1033" stroke="#F1F5F9" stroke-width="1"/>
@@ -284,8 +284,8 @@
   <text x="268" y="1087" class="font td-cat">领域知识库</text>
   <text x="368" y="1087" class="mono td-sub">commit@23b7b063</text>
   <text x="545" y="1087" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1087" text-anchor="end" class="mono td-bold">51</text>
-  <text x="815" y="1087" text-anchor="end" class="mono td-num">16 (13)</text>
+  <text x="665" y="1087" text-anchor="end" class="mono td-bold">54</text>
+  <text x="815" y="1087" text-anchor="end" class="mono td-num">19 (16)</text>
   <text x="920" y="1087" text-anchor="end" class="mono td-num">-</text>
   <rect x="25" y="1099" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="1099" x2="936" y2="1099" stroke="#F1F5F9" stroke-width="1"/>
@@ -294,8 +294,8 @@
   <text x="268" y="1120" class="font td-cat">领域知识库</text>
   <text x="368" y="1120" class="mono td-sub">commit@c23ba64a</text>
   <text x="545" y="1120" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1120" text-anchor="end" class="mono td-bold">48</text>
-  <text x="815" y="1120" text-anchor="end" class="mono td-num">17 (14)</text>
+  <text x="665" y="1120" text-anchor="end" class="mono td-bold">51</text>
+  <text x="815" y="1120" text-anchor="end" class="mono td-num">20 (17)</text>
   <text x="920" y="1120" text-anchor="end" class="mono td-num">-</text>
   <line x1="24" y1="1132" x2="936" y2="1132" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="1149" r="3.5" fill="#0D9488"/>
@@ -303,8 +303,8 @@
   <text x="268" y="1153" class="font td-cat">领域知识库</text>
   <text x="368" y="1153" class="mono td-sub">commit@57c823f6</text>
   <text x="545" y="1153" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1153" text-anchor="end" class="mono td-bold">413</text>
-  <text x="815" y="1153" text-anchor="end" class="mono td-num">66 (44)</text>
+  <text x="665" y="1153" text-anchor="end" class="mono td-bold">419</text>
+  <text x="815" y="1153" text-anchor="end" class="mono td-num">67 (47)</text>
   <text x="920" y="1153" text-anchor="end" class="mono td-num">-</text>
   <rect x="25" y="1165" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="1165" x2="936" y2="1165" stroke="#F1F5F9" stroke-width="1"/>
@@ -313,8 +313,8 @@
   <text x="268" y="1186" class="font td-cat">领域知识库</text>
   <text x="368" y="1186" class="mono td-sub">commit@f0d8e7cf</text>
   <text x="545" y="1186" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1186" text-anchor="end" class="mono td-bold">258</text>
-  <text x="815" y="1186" text-anchor="end" class="mono td-num">24 (19)</text>
+  <text x="665" y="1186" text-anchor="end" class="mono td-bold">261</text>
+  <text x="815" y="1186" text-anchor="end" class="mono td-num">27 (22)</text>
   <text x="920" y="1186" text-anchor="end" class="mono td-num">-</text>
   <line x1="24" y1="1198" x2="936" y2="1198" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="1215" r="3.5" fill="#0D9488"/>
@@ -322,8 +322,8 @@
   <text x="268" y="1219" class="font td-cat">领域知识库</text>
   <text x="368" y="1219" class="mono td-sub">commit@8dd96914</text>
   <text x="545" y="1219" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1219" text-anchor="end" class="mono td-bold">263</text>
-  <text x="815" y="1219" text-anchor="end" class="mono td-num">42 (25)</text>
+  <text x="665" y="1219" text-anchor="end" class="mono td-bold">266</text>
+  <text x="815" y="1219" text-anchor="end" class="mono td-num">45 (28)</text>
   <text x="920" y="1219" text-anchor="end" class="mono td-num">-</text>
   <rect x="25" y="1231" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="1231" x2="936" y2="1231" stroke="#F1F5F9" stroke-width="1"/>
@@ -332,8 +332,8 @@
   <text x="268" y="1252" class="font td-cat">领域知识库</text>
   <text x="368" y="1252" class="mono td-sub">commit@9288cbb1</text>
   <text x="545" y="1252" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1252" text-anchor="end" class="mono td-bold">263</text>
-  <text x="815" y="1252" text-anchor="end" class="mono td-num">43 (27)</text>
+  <text x="665" y="1252" text-anchor="end" class="mono td-bold">266</text>
+  <text x="815" y="1252" text-anchor="end" class="mono td-num">46 (30)</text>
   <text x="920" y="1252" text-anchor="end" class="mono td-num">-</text>
   <line x1="24" y1="1264" x2="936" y2="1264" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="1281" r="3.5" fill="#0D9488"/>
@@ -341,8 +341,8 @@
   <text x="268" y="1285" class="font td-cat">领域知识库</text>
   <text x="368" y="1285" class="mono td-sub">commit@c37c9c0f</text>
   <text x="545" y="1285" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1285" text-anchor="end" class="mono td-bold">205</text>
-  <text x="815" y="1285" text-anchor="end" class="mono td-num">23 (18)</text>
+  <text x="665" y="1285" text-anchor="end" class="mono td-bold">208</text>
+  <text x="815" y="1285" text-anchor="end" class="mono td-num">26 (21)</text>
   <text x="920" y="1285" text-anchor="end" class="mono td-num">-</text>
   <rect x="25" y="1297" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="1297" x2="936" y2="1297" stroke="#F1F5F9" stroke-width="1"/>
@@ -351,8 +351,8 @@
   <text x="268" y="1318" class="font td-cat">领域知识库</text>
   <text x="368" y="1318" class="mono td-sub">commit@3cf3f10c</text>
   <text x="545" y="1318" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1318" text-anchor="end" class="mono td-bold">226</text>
-  <text x="815" y="1318" text-anchor="end" class="mono td-num">22 (17)</text>
+  <text x="665" y="1318" text-anchor="end" class="mono td-bold">229</text>
+  <text x="815" y="1318" text-anchor="end" class="mono td-num">25 (20)</text>
   <text x="920" y="1318" text-anchor="end" class="mono td-num">-</text>
   <text x="24" y="1357" class="font footer">数据来源：GitHub REST API · Star / Fork 与 Release 下载为历史累计值，Git Clone 按日自动归档累加（括号内为近 14 天去重数）</text>
 </svg>
