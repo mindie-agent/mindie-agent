@@ -20,7 +20,7 @@
   <rect x="1" y="1" width="958" height="56" rx="12" fill="#F8FAFC"/>
   <line x1="1" y1="57" x2="959" y2="57" stroke="#E2E8F0" stroke-width="1"/>
   <text x="24" y="35" class="font title">MindIE Agent Repository &amp; Download Statistics</text>
-  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-25 05:40 (UTC+8)</text>
+  <text x="936" y="35" text-anchor="end" class="font sync">Updated every 12h · 2026-11-25 13:56 (UTC+8)</text>
   <rect x="24" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="24" y="72" width="4" height="86" rx="2" fill="#7045F5"/>
   <text x="38" y="95" class="font kpi-label">Stars / Forks</text>
@@ -34,13 +34,13 @@
   <rect x="488" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="488" y="72" width="4" height="86" rx="2" fill="#2563EB"/>
   <text x="502" y="95" class="font kpi-label">Total Git Clones</text>
-  <text x="502" y="124" class="font kpi-val">129,556</text>
+  <text x="502" y="124" class="font kpi-val">129,569</text>
   <text x="502" y="144" class="font kpi-sub">Across 28 public repositories</text>
   <rect x="720" y="72" width="216" height="86" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <rect x="720" y="72" width="4" height="86" rx="2" fill="#0F766E"/>
   <text x="734" y="95" class="font kpi-label">Release Downloads</text>
-  <text x="734" y="124" class="font kpi-val">25,703</text>
-  <text x="734" y="144" class="font kpi-sub">60,075 total asset downloads</text>
+  <text x="734" y="124" class="font kpi-val">25,883</text>
+  <text x="734" y="144" class="font kpi-sub">60,344 total asset downloads</text>
   <rect x="24" y="174" width="912" height="178" rx="8" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1"/>
   <text x="40" y="198" class="font sec-title">Client Plugin Distribution</text>
   <rect x="40" y="210" width="880" height="12" rx="6" fill="#E2E8F0"/>
@@ -96,7 +96,7 @@
   <text x="545" y="427" text-anchor="end" class="mono td-num">111 / 64</text>
   <text x="665" y="427" text-anchor="end" class="mono td-bold">5,808</text>
   <text x="815" y="427" text-anchor="end" class="mono td-num">2,172 (560)</text>
-  <text x="920" y="427" text-anchor="end" class="mono td-num">712</text>
+  <text x="920" y="427" text-anchor="end" class="mono td-num">748</text>
   <rect x="25" y="439" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="439" x2="936" y2="439" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="456" r="3.5" fill="#0F766E"/>
@@ -115,7 +115,7 @@
   <text x="545" y="493" text-anchor="end" class="mono td-num">0 / 5</text>
   <text x="665" y="493" text-anchor="end" class="mono td-bold">15,396</text>
   <text x="815" y="493" text-anchor="end" class="mono td-num">7,938 (568)</text>
-  <text x="920" y="493" text-anchor="end" class="mono td-num">15,238</text>
+  <text x="920" y="493" text-anchor="end" class="mono td-num">15,381</text>
   <rect x="25" y="505" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="505" x2="936" y2="505" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="522" r="3.5" fill="#D97757"/>
@@ -208,8 +208,8 @@
   <text x="268" y="823" class="font td-cat">Core Runtime</text>
   <text x="368" y="823" class="mono td-sub">v0.7.14</text>
   <text x="545" y="823" text-anchor="end" class="mono td-num">0 / 2</text>
-  <text x="665" y="823" text-anchor="end" class="mono td-bold">6,564</text>
-  <text x="815" y="823" text-anchor="end" class="mono td-num">3,706 (2,289)</text>
+  <text x="665" y="823" text-anchor="end" class="mono td-bold">6,569</text>
+  <text x="815" y="823" text-anchor="end" class="mono td-num">3,460 (2,126)</text>
   <text x="920" y="823" text-anchor="end" class="mono td-num">400</text>
   <rect x="25" y="835" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="835" x2="936" y2="835" stroke="#F1F5F9" stroke-width="1"/>
@@ -239,15 +239,15 @@
   <text x="545" y="922" text-anchor="end" class="mono td-num">2 / 3</text>
   <text x="665" y="922" text-anchor="end" class="mono td-bold">2,887</text>
   <text x="815" y="922" text-anchor="end" class="mono td-num">1,661 (1,126)</text>
-  <text x="920" y="922" text-anchor="end" class="mono td-num">923</text>
+  <text x="920" y="922" text-anchor="end" class="mono td-num">924</text>
   <line x1="24" y1="934" x2="936" y2="934" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="951" r="3.5" fill="#475569"/>
   <text x="50" y="955" class="mono td-repo">diagnostics</text>
   <text x="268" y="955" class="font td-cat">Core Runtime</text>
   <text x="368" y="955" class="mono td-sub">v0.5.17</text>
   <text x="545" y="955" text-anchor="end" class="mono td-num">0 / 1</text>
-  <text x="665" y="955" text-anchor="end" class="mono td-bold">16,050</text>
-  <text x="815" y="955" text-anchor="end" class="mono td-num">5,090 (3,014)</text>
+  <text x="665" y="955" text-anchor="end" class="mono td-bold">16,055</text>
+  <text x="815" y="955" text-anchor="end" class="mono td-num">4,693 (2,812)</text>
   <text x="920" y="955" text-anchor="end" class="mono td-num">442</text>
   <rect x="25" y="967" width="910" height="33" fill="#F8FAFC"/>
   <line x1="24" y1="967" x2="936" y2="967" stroke="#F1F5F9" stroke-width="1"/>
@@ -294,8 +294,8 @@
   <text x="268" y="1120" class="font td-cat">Knowledge Repo</text>
   <text x="368" y="1120" class="mono td-sub">commit@c23ba64a</text>
   <text x="545" y="1120" text-anchor="end" class="mono td-num">0 / 0</text>
-  <text x="665" y="1120" text-anchor="end" class="mono td-bold">53</text>
-  <text x="815" y="1120" text-anchor="end" class="mono td-num">21 (18)</text>
+  <text x="665" y="1120" text-anchor="end" class="mono td-bold">56</text>
+  <text x="815" y="1120" text-anchor="end" class="mono td-num">23 (20)</text>
   <text x="920" y="1120" text-anchor="end" class="mono td-num">-</text>
   <line x1="24" y1="1132" x2="936" y2="1132" stroke="#F1F5F9" stroke-width="1"/>
   <circle cx="40" cy="1149" r="3.5" fill="#0D9488"/>
