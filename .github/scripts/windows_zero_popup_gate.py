@@ -30,6 +30,7 @@ WINDOWS_NO_WINDOW_REQUIRED_FILES: tuple[tuple[str, str | tuple[str, ...]], ...] 
     ("mindie-agent-agy", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mindie_launch.py", "plugins/mindie-agent/scripts/bridge.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
     ("mindie-agent-wb", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/component_update.py", "plugins/mindie-agent/scripts/mindie_launch.py", "plugins/mindie-agent/scripts/bridge.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
     ("mindie-agent-oc", ("any", ("plugins/mindie-agent/scripts/bounded.py", "plugins/mindie-agent/scripts/mindie_launch.py", "plugins/mindie-agent/scripts/bridge.py", "plugins/mindie-agent/scripts/entry.py", "plugins/mindie-agent/scripts/host_adapter.py", "plugins/mindie-agent/scripts/setup.py"))),
+    ("mindie-agent-omp", ("any", ("scripts/setup.py",))),
     ("mindie-bench", ("src/mindie_bench/runner/host_platform.py", "src/mindie_bench/runner/process.py")), ("knowledge", "mindie_knowledge/windows_process.py"),
     ("diagnostics", "mindie_diagnostics/platform_service.py"), ("remote-dev", "remote_dev/core/local_process.py"),
     ("diagnostics", ("mindie_diagnostics/github_transport.py", "mindie_diagnostics/reporter.py")), ("coordinator", "mindie_coordinator/service_client.py"),
@@ -42,7 +43,7 @@ _FLAG_SCOPES: tuple[tuple[str, str], ...] = (
     ("harness", "mindie_harness"), ("debugger", "mindie_debugger"), ("npu-top", "npu_top"), ("knowledge", "mindie_knowledge"), ("diagnostics", "mindie_diagnostics"),
     ("remote-dev", "remote_dev"), ("coordinator", "mindie_coordinator"), ("mindie-bench", "src/mindie_bench"), ("mindie-agent-codex", "plugins/mindie-agent/scripts"),
     ("mindie-agent-cc", "scripts"), ("mindie-agent-kimi", "scripts"), ("mindie-agent-dsh", "scripts"), ("mindie-agent-agy", "plugins/mindie-agent/scripts"),
-    ("mindie-agent-wb", "plugins/mindie-agent/scripts"), ("mindie-agent-oc", "plugins/mindie-agent/scripts"),
+    ("mindie-agent-wb", "plugins/mindie-agent/scripts"), ("mindie-agent-oc", "plugins/mindie-agent/scripts"), ("mindie-agent-omp", "scripts"),
 )
 INDEPENDENT_ONLY_GATED_REPOS: frozenset[str] = frozenset({*INDEPENDENT_COMPONENTS, *INDEPENDENT_PLUGINS})
 _PY_SPAWN_ATTRS: frozenset[str] = frozenset({"Popen", "run", "call", "check_call", "check_output"})

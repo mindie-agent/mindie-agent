@@ -401,13 +401,23 @@ class InstallScriptTests(unittest.TestCase):
         code, payload = self._run(["--host", "auto", "--channel-base-url", str(channel), "--offline"])
         self.assertEqual(code, 0, payload)
         self.assertEqual(payload["configured_hosts"], ["codex", "omp"])
-        for cfg, data in ((self.cfg / "codex.json", self.data),
-                          (self.cfg / "omp/harness.json", self.data / "omp/runtime")):
-            config = json.loads(cfg.read_text(encoding="utf-8"))
-            cache = json.loads((data / "state/codex/channel-cache.json").read_text(encoding="utf-8"))
-            self.assertEqual(config["host"], "codex")
+        for host in ("codex", "omp"):
+            config = json.loads((self.cfg / f"{host}.json").read_text(encoding="utf-8"))
+            cache = json.loads((self.data / "state" / host / "channel-cache.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["host"], host)
             self.assertEqual(config["channel_base_url"], str(channel))
             self.assertEqual(cache["channel_base_url"], str(channel))
+
+    def test_omp_install_preserves_inherited_codex_config(self) -> None:
+        channel = self._write_channel()
+        codex_config = self._write(self.cfg / "codex.json", '{"host":"codex","user_setting":true}')
+        previous = codex_config.read_bytes()
+        with patch.dict(os.environ, {"MINDIE_AGENT_CONFIG": str(codex_config)}):
+            code, payload = self._run(["--host", "omp", "--channel-base-url", str(channel), "--offline"])
+        self.assertEqual(code, 0, payload)
+        self.assertEqual(payload["configured_hosts"], ["omp"])
+        self.assertEqual(codex_config.read_bytes(), previous)
+        self.assertEqual(json.loads((self.cfg / "omp.json").read_text(encoding="utf-8"))["host"], "omp")
 
     def test_real_install_py_passes_storage_and_windows_static_gates(self) -> None:
         self.assertEqual(storage_lifecycle_gate.verify_storage_lifecycle_hygiene([], main_repo=REPO_ROOT), [])

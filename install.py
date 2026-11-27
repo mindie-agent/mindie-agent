@@ -86,7 +86,7 @@ def detect_installed_hosts(env=None):
         "agy": [Path("/Applications/Antigravity.app"), home / "Applications/Antigravity.app", home / ".gemini/antigravity", cfg / "agy.json"],
         "wb": [Path("/Applications/WorkBuddy.app"), home / "Applications/WorkBuddy.app", home / ".workbuddy", cfg / "wb.json"],
         "oc": [home / ".config/opencode", home / ".opencode", cfg / "oc.json"],
-        "omp": [home / ".omp", cfg / "omp" / "harness.json"],
+        "omp": [home / ".omp", cfg / "omp.json"],
     }
     found.update(host for host, candidates in paths.items() if any(_path_exists(path) for path in candidates))
     return [host for host in HOSTS if host in found]
@@ -287,17 +287,9 @@ def _install_from_stage(stage, targets, channel, cfg_root, data_root, run_env, u
     (stage / "SHA256SUMS").write_text("".join(f"{d}  {n}\n" for n, d in sorted(sums.items())), encoding="utf-8")
     boot_py = _bootstrap(stage, _extract_bundle(stage / "mindie-wheels-bundle.tar.gz", stage / "wheels")[-1], uv_bin, host_py, run_env, offline)
     for target in targets:
-        runtime_host, config_path = target, cfg_root / f"{target}.json"
-        profile_data, host_env = data_root, run_env
-        if target == "omp":
-            # The OMP launcher uses the Codex harness ABI with its own standalone profile.
-            runtime_host, config_path = "codex", cfg_root / "omp" / "harness.json"
-            profile_data = data_root / "omp" / "runtime"
-            host_env = {**run_env, "MINDIE_AGENT_CONFIG": str(config_path), "MINDIE_CONFIG_HOME": str(config_path.parent),
-                        "MINDIE_DATA_HOME": str(profile_data)}
         try:
-            proc = _run_cmd([str(boot_py), "-I", "-X", "utf8", "-m", "mindie_harness.cli", "install", "--host", runtime_host,
-                             "--channel-base-url", str(stage), *(["--offline"] if offline else [])], env=host_env, timeout=300.0)
+            proc = _run_cmd([str(boot_py), "-I", "-X", "utf8", "-m", "mindie_harness.cli", "install", "--host", target,
+                             "--channel-base-url", str(stage), *(["--offline"] if offline else [])], env=run_env, timeout=300.0)
         except subprocess.TimeoutExpired:
             failed[target] = {"reason": "install_timeout"}; continue
         except TimeoutError: raise
@@ -305,27 +297,27 @@ def _install_from_stage(stage, targets, channel, cfg_root, data_root, run_env, u
             failed[target] = {"reason": "install_io_error", "error_type": type(exc).__name__}; continue
         try: payload = json.loads(proc.stdout) if proc.stdout.strip() else {}
         except ValueError: payload = {}
-        if proc.returncode == 0 and runtime_host in (payload.get("configured_hosts") or []):
+        if proc.returncode == 0 and target in (payload.get("configured_hosts") or []):
             host_warns = []
             if payload.get("receipt_unconfirmed") or payload.get("receipt_warning"):
                 host_warns.append(str(payload.get("receipt_warning") or "child_receipt_unconfirmed"))
-            for rpath in (config_path, profile_data / "state" / runtime_host / "channel-cache.json"):
+            for rpath in (cfg_root / f"{target}.json", data_root / "state" / target / "channel-cache.json"):
                 try: _rewrite_channel_ref(rpath, str(stage), channel)
                 except TimeoutError: raise
                 except OSError as exc: host_warns.append(type(exc).__name__)
-            bind_err = _ensure_host_knowledge_binding(runtime_host, config_path, host_env, include_default_feed=target == "omp")
+            bind_err = _ensure_host_knowledge_binding(target, cfg_root / f"{target}.json", run_env)
             if bind_err is not None:
                 failed[target] = bind_err; continue
             configured.append(target)
             if host_warns:
                 warnings[target] = host_warns[0] if len(host_warns) == 1 else "; ".join(host_warns)
         else:
-            r = payload.get("reason") or ((payload.get("runtimes") or {}).get(runtime_host) or {}).get("reason") or "harness_install_failed"
+            r = payload.get("reason") or ((payload.get("runtimes") or {}).get(target) or {}).get("reason") or "harness_install_failed"
             failed[target] = {"reason": str(r), "returncode": proc.returncode}
     return configured, failed, warnings
 _CANONICAL_DOMAINS = frozenset({"vllm-ascend", "operators", "xllm", "mindie-sd", "infer-core",
                                 "infer-distributed", "infer-observability", "infer-ops-compat", "agent-engineering"})
-def _ensure_host_knowledge_binding(target, cfg_path, run_env, *, include_default_feed=False):
+def _ensure_host_knowledge_binding(target, cfg_path, run_env):
     if not cfg_path.is_file(): return {"reason": "host_config_missing"}
     try: cfg_doc = json.loads(cfg_path.read_text(encoding="utf-8"))
     except TimeoutError: raise
@@ -340,10 +332,8 @@ def _ensure_host_knowledge_binding(target, cfg_path, run_env, *, include_default
             "    print(json.dumps({'status': 'legacy'})); raise SystemExit(0)\n"
             "from mindie_harness.paths import ProfileRef\n"
             "from mindie_harness.runtime.knowledge_binding import ensure_knowledge_binding\n"
-            "profile = ProfileRef.resolve(sys.argv[1], config_path=pathlib.Path(sys.argv[2]))\n"
-            "options = {'include_default_feed': True} if sys.argv[3] == '1' else {}\n"
-            "print(json.dumps(ensure_knowledge_binding(profile, **options)))\n")
-    try: proc = _run_cmd([runtime_py, "-I", "-X", "utf8", "-c", code, target, str(cfg_path), str(int(include_default_feed))], env=run_env, timeout=120.0)
+            "print(json.dumps(ensure_knowledge_binding(ProfileRef.resolve(sys.argv[1], config_path=pathlib.Path(sys.argv[2])))))\n")
+    try: proc = _run_cmd([runtime_py, "-I", "-X", "utf8", "-c", code, target, str(cfg_path)], env=run_env, timeout=120.0)
     except subprocess.TimeoutExpired: return {"reason": "install_timeout"}
     except TimeoutError: raise
     except OSError as exc: return {"reason": "install_io_error", "error_type": type(exc).__name__}
@@ -429,6 +419,8 @@ def main(argv=None):
     except TimeoutError: raise
     except OSError: return _fail(base, "insufficient_disk_space")
     run_env = dict(environ)
+    # Bootstrap provisions canonical per-host configs, independent of the caller's active profile.
+    run_env.pop("MINDIE_AGENT_CONFIG", None)
     if not environ.get("UV_CACHE_DIR") or not _same_volume(Path(environ["UV_CACHE_DIR"]), data_root):
         run_env["UV_CACHE_DIR"] = str(data_root / ".uv-cache")
     uv_bin = _which_native("uv", run_env)

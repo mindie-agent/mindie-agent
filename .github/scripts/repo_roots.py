@@ -57,7 +57,7 @@ CHANNEL_PLUGINS: tuple[str, ...] = (
     "mindie-agent-agy",
     "mindie-agent-wb",
 )
-INDEPENDENT_PLUGINS: tuple[str, ...] = ("mindie-agent-oc",)
+INDEPENDENT_PLUGINS: tuple[str, ...] = ("mindie-agent-oc", "mindie-agent-omp")
 ALL_PLUGINS: tuple[str, ...] = (*CHANNEL_PLUGINS, *INDEPENDENT_PLUGINS)
 EXPECTED_CORPORA: tuple[str, ...] = (
     "knowledge-infer-core",

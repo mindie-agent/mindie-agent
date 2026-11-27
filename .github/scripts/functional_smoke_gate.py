@@ -51,7 +51,8 @@ RUNTIME_COMPONENT_REPOS: tuple[str, ...] = FIRST_PARTY_REPOS[:9]
 FULLSTACK_TRIGGER_REPOS: frozenset[str] = frozenset({"harness", "knowledge", "remote-dev", "mindie-bench"})
 PLUGIN_BY_HOST: dict[str, str] = {
     "codex": "mindie-agent-codex", "cc": "mindie-agent-cc", "kimi": "mindie-agent-kimi",
-    "dsh": "mindie-agent-dsh", "agy": "mindie-agent-agy", "wb": "mindie-agent-wb", "oc": "mindie-agent-oc",
+    "dsh": "mindie-agent-dsh", "agy": "mindie-agent-agy", "wb": "mindie-agent-wb",
+    "oc": "mindie-agent-oc", "omp": "mindie-agent-omp",
 }
 HOST_BY_PLUGIN: dict[str, str] = {v: k for k, v in PLUGIN_BY_HOST.items()}
 ALL_HOSTS: tuple[str, ...] = tuple(PLUGIN_BY_HOST.keys())

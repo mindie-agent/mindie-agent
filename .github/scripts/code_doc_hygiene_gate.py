@@ -37,6 +37,7 @@ CODE_DOC_HYGIENE_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
     "mindie-agent-cc": (0, 1, 32), "mindie-agent-kimi": (0, 1, 33),
     "mindie-agent-dsh": (0, 1, 28), "mindie-agent-agy": (0, 1, 22),
     "mindie-agent-wb": (0, 1, 20), "mindie-agent-oc": (0, 1, 12),
+    "mindie-agent-omp": (1, 3, 0),
 }
 _INDEPENDENT_EXEMPT = frozenset({*INDEPENDENT_COMPONENTS, *INDEPENDENT_PLUGINS})
 _LEGACY_STEM_RE = re.compile(r"^(.+)_(?:legacy|old|backup|fallback)$")
