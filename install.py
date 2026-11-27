@@ -17,12 +17,12 @@ every Windows subprocess passes `creationflags=_CREATE_NO_WINDOW`.
 from __future__ import annotations
 import argparse, hashlib, json, os, re, shutil, subprocess, sys, tarfile, tempfile, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
-SCHEMA, DEFAULT_CHANNEL, HOSTS = "mindie-install/1", "https://github.com/mindie-agent/mindie-agent/releases/latest/download", ("codex", "cc", "kimi", "dsh", "agy", "wb", "oc")
-HOST_ALIASES = {"codex": "codex", "cc": "cc", "claude": "cc", "kimi": "kimi", "dsh": "dsh", "agy": "agy", "antigravity": "agy", "wb": "wb", "workbuddy": "wb", "codebuddy": "wb", "oc": "oc", "opencode": "oc"}
+SCHEMA, DEFAULT_CHANNEL, HOSTS = "mindie-install/1", "https://github.com/mindie-agent/mindie-agent/releases/latest/download", ("codex", "cc", "kimi", "dsh", "agy", "wb", "oc", "omp")
+HOST_ALIASES = {"codex": "codex", "cc": "cc", "claude": "cc", "kimi": "kimi", "dsh": "dsh", "agy": "agy", "antigravity": "agy", "wb": "wb", "workbuddy": "wb", "codebuddy": "wb", "oc": "oc", "opencode": "oc", "omp": "omp", "oh-my-pi": "omp"}
 MIN_FREE_BYTES, MAX_BUNDLE_BYTES, MAX_RELEASE_BYTES, MAX_SUMS_BYTES = 2_684_354_560, 16 * 1024 * 1024, 1024 * 1024, 256 * 1024
 MAX_MEMBERS, MAX_UNPACKED_BYTES, _CHUNK, _CREATE_NO_WINDOW = 64, 32 * 1024 * 1024, 64 * 1024, (0x08000000 if os.name == "nt" else 0)
-_MARKERS = {"CODEX_THREAD_ID": "codex", "CODEX_CI": "codex", "CLAUDECODE": "cc", "KIMI_CODE_HOME": "kimi", "DSH_PROFILE": "dsh", "DSH_HOME": "dsh", "AGY_CONVERSATION_ID": "agy", "AGY_APP_DATA_DIR": "agy", "WORKBUDDY_CONFIG_DIR": "wb", "CODEBUDDY_CONFIG_DIR": "wb", "MINDIE_WB_BIN": "wb", "OPENCODE_SESSION_ID": "oc"}
-_BINARIES = {"codex": ("codex",), "cc": ("claude",), "kimi": ("kimi",), "dsh": ("dsh",), "agy": ("agy", "antigravity"), "wb": ("wb", "workbuddy", "codebuddy"), "oc": ("opencode",)}
+_MARKERS = {"CODEX_THREAD_ID": "codex", "CODEX_CI": "codex", "CLAUDECODE": "cc", "KIMI_CODE_HOME": "kimi", "DSH_PROFILE": "dsh", "DSH_HOME": "dsh", "AGY_CONVERSATION_ID": "agy", "AGY_APP_DATA_DIR": "agy", "WORKBUDDY_CONFIG_DIR": "wb", "CODEBUDDY_CONFIG_DIR": "wb", "MINDIE_WB_BIN": "wb", "OPENCODE_SESSION_ID": "oc", "PI_SESSION_ID": "omp"}
+_BINARIES = {"codex": ("codex",), "cc": ("claude",), "kimi": ("kimi",), "dsh": ("dsh",), "agy": ("agy", "antigravity"), "wb": ("wb", "workbuddy", "codebuddy"), "oc": ("opencode",), "omp": ("omp",)}
 class _ChannelError(Exception):
     def __init__(self, reason): super().__init__(reason); self.reason = reason
 def _emit(payload, code=0):
@@ -86,6 +86,7 @@ def detect_installed_hosts(env=None):
         "agy": [Path("/Applications/Antigravity.app"), home / "Applications/Antigravity.app", home / ".gemini/antigravity", cfg / "agy.json"],
         "wb": [Path("/Applications/WorkBuddy.app"), home / "Applications/WorkBuddy.app", home / ".workbuddy", cfg / "wb.json"],
         "oc": [home / ".config/opencode", home / ".opencode", cfg / "oc.json"],
+        "omp": [home / ".omp", cfg / "omp" / "harness.json"],
     }
     found.update(host for host, candidates in paths.items() if any(_path_exists(path) for path in candidates))
     return [host for host in HOSTS if host in found]
@@ -286,9 +287,17 @@ def _install_from_stage(stage, targets, channel, cfg_root, data_root, run_env, u
     (stage / "SHA256SUMS").write_text("".join(f"{d}  {n}\n" for n, d in sorted(sums.items())), encoding="utf-8")
     boot_py = _bootstrap(stage, _extract_bundle(stage / "mindie-wheels-bundle.tar.gz", stage / "wheels")[-1], uv_bin, host_py, run_env, offline)
     for target in targets:
+        runtime_host, config_path = target, cfg_root / f"{target}.json"
+        profile_data, host_env = data_root, run_env
+        if target == "omp":
+            # The OMP launcher uses the Codex harness ABI with its own standalone profile.
+            runtime_host, config_path = "codex", cfg_root / "omp" / "harness.json"
+            profile_data = data_root / "omp" / "runtime"
+            host_env = {**run_env, "MINDIE_AGENT_CONFIG": str(config_path), "MINDIE_CONFIG_HOME": str(config_path.parent),
+                        "MINDIE_DATA_HOME": str(profile_data)}
         try:
-            proc = _run_cmd([str(boot_py), "-I", "-X", "utf8", "-m", "mindie_harness.cli", "install", "--host", target,
-                             "--channel-base-url", str(stage), *(["--offline"] if offline else [])], env=run_env, timeout=300.0)
+            proc = _run_cmd([str(boot_py), "-I", "-X", "utf8", "-m", "mindie_harness.cli", "install", "--host", runtime_host,
+                             "--channel-base-url", str(stage), *(["--offline"] if offline else [])], env=host_env, timeout=300.0)
         except subprocess.TimeoutExpired:
             failed[target] = {"reason": "install_timeout"}; continue
         except TimeoutError: raise
@@ -296,27 +305,27 @@ def _install_from_stage(stage, targets, channel, cfg_root, data_root, run_env, u
             failed[target] = {"reason": "install_io_error", "error_type": type(exc).__name__}; continue
         try: payload = json.loads(proc.stdout) if proc.stdout.strip() else {}
         except ValueError: payload = {}
-        if proc.returncode == 0 and target in (payload.get("configured_hosts") or []):
+        if proc.returncode == 0 and runtime_host in (payload.get("configured_hosts") or []):
             host_warns = []
             if payload.get("receipt_unconfirmed") or payload.get("receipt_warning"):
                 host_warns.append(str(payload.get("receipt_warning") or "child_receipt_unconfirmed"))
-            for rpath in (cfg_root / f"{target}.json", data_root / "state" / target / "channel-cache.json"):
+            for rpath in (config_path, profile_data / "state" / runtime_host / "channel-cache.json"):
                 try: _rewrite_channel_ref(rpath, str(stage), channel)
                 except TimeoutError: raise
                 except OSError as exc: host_warns.append(type(exc).__name__)
-            bind_err = _ensure_host_knowledge_binding(target, cfg_root / f"{target}.json", run_env)
+            bind_err = _ensure_host_knowledge_binding(runtime_host, config_path, host_env, include_default_feed=target == "omp")
             if bind_err is not None:
                 failed[target] = bind_err; continue
             configured.append(target)
             if host_warns:
                 warnings[target] = host_warns[0] if len(host_warns) == 1 else "; ".join(host_warns)
         else:
-            r = payload.get("reason") or ((payload.get("runtimes") or {}).get(target) or {}).get("reason") or "harness_install_failed"
+            r = payload.get("reason") or ((payload.get("runtimes") or {}).get(runtime_host) or {}).get("reason") or "harness_install_failed"
             failed[target] = {"reason": str(r), "returncode": proc.returncode}
     return configured, failed, warnings
 _CANONICAL_DOMAINS = frozenset({"vllm-ascend", "operators", "xllm", "mindie-sd", "infer-core",
                                 "infer-distributed", "infer-observability", "infer-ops-compat", "agent-engineering"})
-def _ensure_host_knowledge_binding(target, cfg_path, run_env):
+def _ensure_host_knowledge_binding(target, cfg_path, run_env, *, include_default_feed=False):
     if not cfg_path.is_file(): return {"reason": "host_config_missing"}
     try: cfg_doc = json.loads(cfg_path.read_text(encoding="utf-8"))
     except TimeoutError: raise
@@ -331,8 +340,10 @@ def _ensure_host_knowledge_binding(target, cfg_path, run_env):
             "    print(json.dumps({'status': 'legacy'})); raise SystemExit(0)\n"
             "from mindie_harness.paths import ProfileRef\n"
             "from mindie_harness.runtime.knowledge_binding import ensure_knowledge_binding\n"
-            "print(json.dumps(ensure_knowledge_binding(ProfileRef.resolve(sys.argv[1], config_path=pathlib.Path(sys.argv[2])))))\n")
-    try: proc = _run_cmd([runtime_py, "-I", "-X", "utf8", "-c", code, target, str(cfg_path)], env=run_env, timeout=120.0)
+            "profile = ProfileRef.resolve(sys.argv[1], config_path=pathlib.Path(sys.argv[2]))\n"
+            "options = {'include_default_feed': True} if sys.argv[3] == '1' else {}\n"
+            "print(json.dumps(ensure_knowledge_binding(profile, **options)))\n")
+    try: proc = _run_cmd([runtime_py, "-I", "-X", "utf8", "-c", code, target, str(cfg_path), str(int(include_default_feed))], env=run_env, timeout=120.0)
     except subprocess.TimeoutExpired: return {"reason": "install_timeout"}
     except TimeoutError: raise
     except OSError as exc: return {"reason": "install_io_error", "error_type": type(exc).__name__}
@@ -388,7 +399,7 @@ def _host_python(env):
 def main(argv=None):
     environ = dict(os.environ)
     parser = argparse.ArgumentParser(prog="install.py", description="Install MindIE Agent into detected hosts.")
-    parser.add_argument("--host", default="auto"); parser.add_argument("--channel-base-url", default=None)
+    parser.add_argument("--host", default="auto", help=f"auto, {', '.join(HOSTS)}, or a host alias"); parser.add_argument("--channel-base-url", default=None)
     parser.add_argument("--offline", action="store_true"); parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)

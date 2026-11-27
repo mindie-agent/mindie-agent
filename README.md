@@ -47,7 +47,7 @@
 
 别自己敲终端命令，也别去背繁琐的安装参数——既然这是给 AI 编程 Agent 用的昇腾能力底座，**安装这件体力活当然也只接受交给你的 Agent 来干**。
 
-打开你正在使用的 **Claude Code**、**OpenAI Codex CLI**、**Kimi Code**、**DeepSeek Harness**、**Google Antigravity**、**Tencent WorkBuddy** 或 **OpenCode**，直接把下面这句话甩给它：
+打开你正在使用的 **Claude Code**、**OpenAI Codex CLI**、**Kimi Code**、**DeepSeek Harness**、**Google Antigravity**、**Tencent WorkBuddy**、**OpenCode** 或 **oh-my-pi**，直接把下面这句话甩给它：
 
 ```text
 帮我安装一下这个 https://github.com/mindie-agent/mindie-agent
@@ -86,7 +86,7 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/install.py --host auto --json
 > ```
 > 它会：
-> - 探测活跃/已安装宿主（`codex | cc | kimi | dsh | agy | wb | oc`；也可显式传入 `--host <宿主>` 仅预置当前会话宿主）；
+> - 探测活跃/已安装宿主（`codex | cc | kimi | dsh | agy | wb | oc | omp`；也可显式传入 `--host <宿主>` 仅预置当前会话宿主）；
 > - 校验 `release-channel.json` 与约 `5.6 MiB`（`install.py` 下载上限 `MAX_BUNDLE_BYTES = 16 MiB`）预构建 `mindie-wheels-bundle.tar.gz` 的 `SHA256SUMS`（**零 `git clone`**）；
 > - 在共享数据目录预置 `mindie-harness` 运行时（后续只做代际切换，不重复安装）；
 > - 在一次性 `GH_CONFIG_DIR` 副本中探测 `gh`，绝不修改或污染用户全局 `~/.config/gh`；
@@ -105,6 +105,7 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > | **Google Antigravity**（`~/.gemini/antigravity*` / `AGY_APP_DATA_DIR`） | [mindie-agent-agy 快速开始](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.22/README.md#快速开始交给-agent-一句话自动安装)；检出钉住的 `v0.1.22` tag 并执行安装页的 `setup.py init` | `mindie-agent-agy v0.1.22` |
 > | **Tencent WorkBuddy / CodeBuddy**（应用包 + `~/.workbuddy`） | [mindie-agent-wb 快速安装与验证](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.20/README.md#3-快速安装与验证)；`setup.py init --install-wb` + `codebuddy plugin validate` | `mindie-agent-wb v0.1.20` |
 > | **OpenCode**（`OPENCODE_SESSION_ID`） | [mindie-agent-oc 安装、升级与初始化](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.12/README.md#3-安装升级与初始化)；双通道 `opencode plugin add` 或 npm 包 `@mindie-agent/oc@0.1.12` | `mindie-agent-oc v0.1.12` |
+> | **oh-my-pi**（`omp`） | [mindie-agent-omp 安装](https://github.com/mindie-agent/mindie-agent-omp/blob/9ac1b00e5a69e4e6e52950a6ac8d2b3e8222725e/README.md#安装) | `mindie-agent-omp 1.2.0`（`9ac1b00`） |
 > | **Cursor / 通用 MCP 客户端**（仅远端底座） | [remote-dev README](https://github.com/mindie-agent/remote-dev/blob/v0.11.15/README.md) 注册 stdio 服务 | `remote-dev@v0.11.15` |
 >
 > 当前插件版本为 Codex `v0.1.40`、Claude Code `v0.1.32`、Kimi Code `v0.1.33`、DSH `v0.1.28`、Google Antigravity `v0.1.22`、Tencent WorkBuddy `v0.1.20` 与 OpenCode `v0.1.12`，与 [`channels/0.1.json`](./channels/0.1.json) 及各宿主安装页锁定的正式 Release tag 一致。共享运行时组件由 `install.py` 统一预置，无需逐仓 clone。

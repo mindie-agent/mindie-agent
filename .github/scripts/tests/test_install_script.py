@@ -65,12 +65,13 @@ def main():
     install.add_argument("--channel-base-url", required=True)
     install.add_argument("--offline", action="store_true")
     args = parser.parse_args()
-    cfg = Path(os.environ.get("MINDIE_CONFIG_HOME") or (Path.home() / ".config/mindie-agent"))
+    cfg_root = Path(os.environ.get("MINDIE_CONFIG_HOME") or (Path.home() / ".config/mindie-agent"))
+    cfg = Path(os.environ.get("MINDIE_AGENT_CONFIG") or cfg_root / f"{args.host}.json")
     data = Path(os.environ.get("MINDIE_DATA_HOME") or (Path.home() / ".local/share/mindie-agent"))
     banner = runtime.main()
-    cfg.mkdir(parents=True, exist_ok=True)
+    cfg.parent.mkdir(parents=True, exist_ok=True)
     py_val = "" if os.environ.get("MINDIE_TEST_OMIT_PYTHON") == "1" else sys.executable
-    (cfg / f"{args.host}.json").write_text(
+    cfg.write_text(
         json.dumps({"host": args.host, "python": py_val, "channel_base_url": args.channel_base_url, "runtime": banner}), encoding="utf-8"
     )
     cache = data / "state" / args.host
@@ -180,7 +181,7 @@ class InstallScriptTests(unittest.TestCase):
                     "PATH": os.pathsep.join([str(self.tools_path), str(self.bin)]),
                     "GH_CONFIG_DIR": str(self.root / "real-gh"), "MINDIE_CHANNEL_BASE_URL": ""})
         self.env = env
-        environment = patch.dict(os.environ, env)
+        environment = patch.dict(os.environ, env, clear=True)
         environment.start()
         self.addCleanup(environment.stop)
         tempdir = patch.object(tempfile, "tempdir", str(self.tmpdir))
@@ -251,7 +252,7 @@ class InstallScriptTests(unittest.TestCase):
 
     def test_detect_hosts_from_path_binaries_config_dirs_and_app_bundles(self) -> None:
         ext = ".cmd" if os.name == "nt" else ""
-        for name in ("codex", "claude", "kimi", "dsh", "agy", "wb", "opencode"):
+        for name in ("codex", "claude", "kimi", "dsh", "agy", "wb", "opencode", "omp"):
             self._write(self.bin / f"{name}{ext}", "@echo off\n", executable=True)
         self.assertEqual(install.detect_installed_hosts(self.env), list(install.HOSTS))
 
@@ -265,6 +266,7 @@ class InstallScriptTests(unittest.TestCase):
             "agy": self.home / ".gemini/antigravity",
             "wb": self.home / ".workbuddy",
             "oc": self.home / ".config/opencode",
+            "omp": self.home / ".omp",
         }
         for path in dirs.values():
             path.mkdir(parents=True)
@@ -309,7 +311,7 @@ class InstallScriptTests(unittest.TestCase):
             self.assertIsNone(install._which_native("codex", {"PATH": "/mnt/c"}, platform="posix"))
 
     def test_host_aliases_normalize_in_dry_run(self) -> None:
-        for alias, canonical in (("claude", "cc"), ("antigravity", "agy"), ("workbuddy", "wb"), ("opencode", "oc")):
+        for alias, canonical in (("claude", "cc"), ("antigravity", "agy"), ("workbuddy", "wb"), ("opencode", "oc"), ("oh-my-pi", "omp")):
             with self.subTest(alias=alias):
                 code, payload = self._run(["--host", alias, "--dry-run", "--json"])
                 self.assertEqual(code, 0)
@@ -335,6 +337,11 @@ class InstallScriptTests(unittest.TestCase):
         self.assertEqual(probe["recommended_tier"], "contribute")
         self.assertEqual((real_gh / "hosts.yml").read_bytes(), before)
         self.assertEqual(list(self.tmpdir.glob("mindie-gh-cfg-*")), [])
+
+    def test_auto_detects_an_omp_session_without_the_cli_on_path(self) -> None:
+        with patch.dict(os.environ, {"PI_SESSION_ID": "test-session"}):
+            code, payload = self._run(["--host", "auto", "--dry-run"])
+        self.assertEqual((code, payload["detected_hosts"], payload["planned_hosts"]), (0, ["omp"], ["omp"]))
 
     def test_dry_run_and_empty_auto_create_no_state_directories(self) -> None:
         gh_marker = self.root / "gh-should-not-run"
@@ -385,6 +392,22 @@ class InstallScriptTests(unittest.TestCase):
         self.assertEqual(configured["runtime"]["runtime"], "mindie-harness")
         cached = json.loads((self.data / "state/codex/channel-cache.json").read_text(encoding="utf-8"))
         self.assertEqual(cached["channel_base_url"], str(channel))
+
+    def test_auto_provisions_codex_and_omp_in_separate_profiles(self) -> None:
+        channel = self._write_channel()
+        ext = ".cmd" if os.name == "nt" else ""
+        for name in ("codex", "omp"):
+            self._write(self.bin / f"{name}{ext}", "@echo off\n", executable=True)
+        code, payload = self._run(["--host", "auto", "--channel-base-url", str(channel), "--offline"])
+        self.assertEqual(code, 0, payload)
+        self.assertEqual(payload["configured_hosts"], ["codex", "omp"])
+        for cfg, data in ((self.cfg / "codex.json", self.data),
+                          (self.cfg / "omp/harness.json", self.data / "omp/runtime")):
+            config = json.loads(cfg.read_text(encoding="utf-8"))
+            cache = json.loads((data / "state/codex/channel-cache.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["host"], "codex")
+            self.assertEqual(config["channel_base_url"], str(channel))
+            self.assertEqual(cache["channel_base_url"], str(channel))
 
     def test_real_install_py_passes_storage_and_windows_static_gates(self) -> None:
         self.assertEqual(storage_lifecycle_gate.verify_storage_lifecycle_hygiene([], main_repo=REPO_ROOT), [])
