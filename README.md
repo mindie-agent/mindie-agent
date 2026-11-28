@@ -108,7 +108,7 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > | **oh-my-pi**（`omp`） | [mindie-agent-omp 安装](https://github.com/mindie-agent/mindie-agent-omp/releases) | `mindie-agent-omp v1.3.0` |
 > | **Cursor / 通用 MCP 客户端**（仅远端底座） | [remote-dev README](https://github.com/mindie-agent/remote-dev/blob/v0.11.15/README.md) 注册 stdio 服务 | `remote-dev@v0.11.15` |
 >
-> 当前插件版本为 Codex `v0.1.40`、Claude Code `v0.1.32`、Kimi Code `v0.1.33`、DSH `v0.1.28`、Google Antigravity `v0.1.22`、Tencent WorkBuddy `v0.1.20`、OpenCode `v0.1.12` 与 oh-my-pi `v1.3.0`。共享运行时组件由 `install.py` 统一预置，无需逐仓 clone。
+> 当前插件版本为 Codex `v0.1.40`、Claude Code `v0.1.32`、Kimi Code `v0.1.33`、DSH `v0.1.28`、Google Antigravity `v0.1.22`、Tencent WorkBuddy `v0.1.20` 与 OpenCode `v0.1.12`。oh-my-pi 插件版本为 `v1.3.0`，详见上方宿主表。
 
 > #### 第三步：弹出宿主原生三问（`ask_question` / `question` / `AskUserQuestion` / `request_user_input`）
 >
@@ -316,13 +316,12 @@ MindIE Agent 的核心交互理念是**开箱即用与渐进式披露（Progress
 | **[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)** | **Google Antigravity** | [`v0.1.22`](https://github.com/mindie-agent/mindie-agent-agy/releases/tag/v0.1.22) | Google Antigravity 原生插件：默认静默开放全功能（知识检索与共享组件 MCP）、原生远端工具别名与授权范围内的 Brain Transcript 脱敏采集 |
 | **[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)** | **Tencent WorkBuddy** | [`v0.1.20`](https://github.com/mindie-agent/mindie-agent-wb/releases/tag/v0.1.20) | Tencent WorkBuddy / CodeBuddy 原生插件：双入口挂接（WorkBuddy Connector + CodeBuddy 原生插件）、全功能静默自启与共享组件 MCP 桥接 |
 | **[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc)** | **OpenCode** | [`v0.1.12`](https://github.com/mindie-agent/mindie-agent-oc/releases/tag/v0.1.12) | OpenCode 原生插件：双通道分发（`github:mindie-agent/mindie-agent-oc` + `@mindie-agent/oc`）、全功能静默自启、共享组件 MCP 桥接与 SQLite `session_v2` 脱敏采集 |
-| **[`mindie-agent-omp`](https://github.com/mindie-agent/mindie-agent-omp)** | **oh-my-pi** | [`v1.3.0`](https://github.com/mindie-agent/mindie-agent-omp/releases) | oh-my-pi 原生扩展：标准 MCP 运行时桥接、本地会话采集与独立 `omp` 宿主配置 |
 
 ### 3. 共享宿主底座与运行时组件（Shared Harness Substrate & Runtime Components）
 
 | 仓库 | Python 包 / 入口 | 当前版本 | 定位与核心职责 |
 | --- | --- | --- | --- |
-| **[`harness`](https://github.com/mindie-agent/harness)** | `mindie-harness` / `mindie_harness` | [`v0.1.9`](https://github.com/mindie-agent/harness/releases/tag/v0.1.9) | 原生宿主插件共享底座：跨平台无窗进程与嵌套 Win32 Job 监管、确定性冷启动 Seed、单活双代（`Active + Rollback`）`.inuse` 租约原子更新、长驻并发零绑定 MCP 网关与单状态源 `ExperimentLedger` RSI 优化闭环 |
+| **[`harness`](https://github.com/mindie-agent/harness)** | `mindie-harness` / `mindie_harness` | [`v0.1.8`](https://github.com/mindie-agent/harness/releases/tag/v0.1.8) | 7 大原生宿主插件共享底座：跨平台无窗进程与嵌套 Win32 Job 监管、确定性冷启动 Seed、单活双代（`Active + Rollback`）`.inuse` 租约原子更新、长驻并发零绑定 MCP 网关与单状态源 `ExperimentLedger` RSI 优化闭环 |
 | **[`knowledge`](https://github.com/mindie-agent/knowledge)** | `mindie-knowledge` | [`v0.13.25`](https://github.com/mindie-agent/knowledge/releases/tag/v0.13.25) | 结构化分级知识单元（L1–L4）管理、按信息缺口条件检索、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、双层脱敏采集与社区 PR 发布 |
 | **[`remote-dev`](https://github.com/mindie-agent/remote-dev)** | `remote-dev` | [`v0.11.15`](https://github.com/mindie-agent/remote-dev/releases/tag/v0.11.15) | SSH 远端文件读写与命令执行、共享用户私有 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁、Docker 容器直连、跨连接句柄后台长作业与产物同步 |
 | **[`coordinator`](https://github.com/mindie-agent/coordinator)** | `mindie-coordinator` | [`v0.7.14`](https://github.com/mindie-agent/coordinator/releases/tag/v0.7.14) | 远端昇腾环境与多 Agent 资源协调器：SSH 主机/多机互通配置、容器开通与绑定、NPU 拓扑探测（兼容 A2/A3 双 Die/A5）、`HostQueue` 物理卡显存租约预算与并发编译槽位控制及端口防冲突 |
