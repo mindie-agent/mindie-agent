@@ -47,7 +47,7 @@ No architecture diagrams or internal schemas yet—here is what MindIE Agent act
 
 Put down the terminal—don't memorize CLI flags or copy-paste setup scripts by hand. Since MindIE Agent is built for AI coding Agents, **we only accept installation by your Agent**.
 
-Open **Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**, **Google Antigravity**, **Tencent WorkBuddy**, or **OpenCode**, and toss this single sentence into your chat:
+Open **Claude Code**, **OpenAI Codex CLI**, **Kimi Code**, **DeepSeek Harness**, **Google Antigravity**, **Tencent WorkBuddy**, **OpenCode**, or **oh-my-pi**, and toss this single sentence into your chat:
 
 ```text
 Please install MindIE Agent for me: https://github.com/mindie-agent/mindie-agent
@@ -86,7 +86,7 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/install.py --host auto --json
 > ```
 > It will:
-> - probe active/installed hosts (`codex | cc | kimi | dsh | agy | wb | oc`; or pass `--host <host>` to target only the active session host);
+> - probe active/installed hosts (`codex | cc | kimi | dsh | agy | wb | oc | omp`; or pass `--host <host>` to target only the active session host);
 > - verify `release-channel.json` and the ~`5.6 MiB` prebuilt `mindie-wheels-bundle.tar.gz` (`MAX_BUNDLE_BYTES = 16 MiB` download ceiling in `install.py`) against `SHA256SUMS` (**zero `git clone`**);
 > - provision the shared `mindie-harness` runtime in the shared data directory (later updates only cut over generations, never reinstall);
 > - probe `gh` inside a disposable `GH_CONFIG_DIR` copy, never mutating or polluting the user's global `~/.config/gh`;
@@ -105,9 +105,10 @@ uv run https://github.com/mindie-agent/mindie-agent/releases/latest/download/ins
 > | **Google Antigravity** (`~/.gemini/antigravity*` / `AGY_APP_DATA_DIR`) | [mindie-agent-agy Quick Start](https://github.com/mindie-agent/mindie-agent-agy/blob/v0.1.22/README.en.md#quick-start-one-sentence-agent-install); Clone the pinned `v0.1.22` tag and run the install page's `setup.py init` | `mindie-agent-agy v0.1.22` |
 > | **Tencent WorkBuddy / CodeBuddy** (app bundle + `~/.workbuddy`) | [mindie-agent-wb Installation](https://github.com/mindie-agent/mindie-agent-wb/blob/v0.1.20/README.en.md#installation); `setup.py init --install-wb` + `codebuddy plugin validate` | `mindie-agent-wb v0.1.20` |
 > | **OpenCode** (`OPENCODE_SESSION_ID`) | [mindie-agent-oc Installation & Upgrades](https://github.com/mindie-agent/mindie-agent-oc/blob/v0.1.12/README.en.md#2-installation--upgrades); dual-channel `opencode plugin add` or npm package `@mindie-agent/oc@0.1.12` | `mindie-agent-oc v0.1.12` |
+> | **oh-my-pi** (`omp`) | [mindie-agent-omp installation](https://github.com/mindie-agent/mindie-agent-omp/releases) | `mindie-agent-omp v1.3.0` |
 > | **Cursor / generic MCP client** (remote substrate only) | Register the stdio server per the [remote-dev README](https://github.com/mindie-agent/remote-dev/blob/v0.11.15/README.md) | `remote-dev@v0.11.15` |
 >
-> The current plugin versions are Codex `v0.1.40`, Claude Code `v0.1.32`, Kimi Code `v0.1.33`, DSH `v0.1.28`, Google Antigravity `v0.1.22`, Tencent WorkBuddy `v0.1.20`, and OpenCode `v0.1.12`, matching [`channels/0.1.json`](./channels/0.1.json) and the formal Release tags on each host's install page. `install.py` provisions shared runtime components in one pass—no per-repo clone required.
+> The current plugin versions are Codex `v0.1.40`, Claude Code `v0.1.32`, Kimi Code `v0.1.33`, DSH `v0.1.28`, Google Antigravity `v0.1.22`, Tencent WorkBuddy `v0.1.20`, and OpenCode `v0.1.12`. The oh-my-pi plugin is `v1.3.0`, as listed in the host table above.
 
 > #### Step 3: Pop Up the 3 Native Interactive Questions (`ask_question` / `question` / `AskUserQuestion` / `request_user_input`)
 >
@@ -259,7 +260,7 @@ sequenceDiagram
 MindIE Agent is built around **zero-ceremony usability and progressive disclosure**—once installed and enabled, **there are NO slash commands to memorize or type**. Simply talk to your coding Agent in natural language; both main agents and subagents invoke tools and load graded domain context silently on demand.
 
 - **🛟 Non-blocking task continuity is a hard rule**: every MindIE tool (`remote-dev`, `coordinator`, `knowledge`, `profiler`, `sim`, `debugger`, `mindie_doctor`) is an **accelerator, never a roadblock**. If any helper errors out or hits an environment mismatch, the Agent logs the original error honestly in one line (reconciling read-only first when an external write is uncertain) and immediately continues the user's task via native `ssh`/`scp` or task-local scripts—**without stopping to ask the user to debug the plugin**.
-- **🩺 Unified health check**: `mindie_doctor` is the single read-only health check across all 7 hosts, reporting runtime generation, privacy tier, default remote NPU, and `gh` channel status in one card; it creates zero directories/SQLite databases on empty installs and is always safe to call.
+ - **🩺 Unified health check**: `mindie_doctor` is the single read-only health check across all 8 hosts, reporting runtime generation, privacy tier, default remote NPU, and `gh` channel status in one card; it creates zero directories/SQLite databases on empty installs and is always safe to call.
 
 | Capability Module | Trigger Mode | How It Works |
 | --- | --- | --- |

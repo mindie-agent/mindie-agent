@@ -2,7 +2,7 @@
 
 [English](architecture.en.md) · [返回文档中心](README.md)
 
-MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy、OpenCode）提供昇腾领域知识检索、远端容器开发、多卡资源协调、目标负载调试与性能剖析能力。当前版本覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 框架开发与昇腾算子开发**，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查与精度调试**三类日常研发场景。
+MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Code、DeepSeek Harness、Google Antigravity、Tencent WorkBuddy、OpenCode、oh-my-pi）提供昇腾领域知识检索、远端容器开发、多卡资源协调、目标负载调试与性能剖析能力。当前版本覆盖 **`vLLM-Ascend`、`xLLM`、`MindIE-SD` 框架开发与昇腾算子开发**，重点服务于**新模型适配（0-day Bring-up）、模型与算子性能调优、运行时故障排查与精度调试**三类日常研发场景。
 
 本文介绍各组件的职责边界与协同方式。正式发布版本与实测数据见[版本发布记录](README.md)，知识组织与检索机制见[知识与经验系统](knowledge-system.md)，宿主会话与授权管理见[宿主边界与任务生命周期](harness-boundary-and-lifecycle.md)，工程准则见[设计原则](design-principles.md)。
 
@@ -10,7 +10,7 @@ MindIE Agent 为主流 AI 编程客户端（Claude Code、OpenAI Codex、Kimi Co
 
 ```mermaid
 flowchart TB
-    H["Codex / Claude Code / Kimi Code / DSH / Antigravity / WorkBuddy / OpenCode"] --> P["7 端轻量原生插件适配层"]
+    H["Codex / Claude Code / Kimi Code / DSH / Antigravity / WorkBuddy / OpenCode / oh-my-pi"] --> P["8 端轻量原生插件适配层"]
     P --> HS["harness (mindie-harness)：无窗进程/Job 监管 · 双代原子更新 · 并发 MCP 网关 · RSI 探索闭环"]
     HS --> K["knowledge：纯领域知识路由、条件检索与经验提炼"]
     HS --> R["remote-dev：远端文件编辑、命令与跨连接句柄后台作业"]
@@ -28,20 +28,21 @@ flowchart TB
     B --> H
 ```
 
-七个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
+八个插件直接复用各宿主的原生会话、工具调用和生命周期机制：
 - **领域知识与 Skill 静默按需就绪**：无需输入任何斜杠唤醒命令，主代理与子代理在遇到昇腾领域任务时按语义静默按需加载运行时 `SKILL.md` 与 `L1–L4` 知识检索。
-- **全工具面开箱即用**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试、`diagnostics` 本地诊断以及 `knowledge_*` 知识工具通过标准零绑定 MCP 在七端宿主中统一默认暴露；`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
+- **全工具面开箱即用**：`remote-dev`、`coordinator` 资源协调与探测、`profiler` 采集解析、`sim` 性能建模、`debugger` 目标 NPU 负载故障分诊与精度调试、`diagnostics` 本地诊断以及 `knowledge_*` 知识工具通过标准零绑定 MCP 在八端宿主中统一默认暴露；`npu-top` 则作为面向开发者的 Web 监控看板独立运行（并在各宿主中支持只读观测调用）。
 - **经验沉淀严格受授权开关与目录范围约束**：仅当用户开启本地贡献授权且当前目录命中显式授权的 `project_roots` 范围时，宿主回合结束事件才会触发脱敏会话采集与经验提炼（非授权目录 `< 100ms` 直接跳过）。
 
-默认插件依赖共享宿主底座 `harness`（`mindie-harness`）以及 `knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`coordinator`（Antigravity / WorkBuddy / OpenCode 默认亦包含 `npu-top`）；各组件也可按团队环境独立安装或组合使用。
+默认插件依赖共享宿主底座 `harness`（`mindie-harness`）以及 `knowledge`、`remote-dev`、`diagnostics`、`debugger`、`profiler`、`sim`、`coordinator`（Antigravity / WorkBuddy / OpenCode / oh-my-pi 默认亦包含 `npu-top`）；各组件也可按团队环境独立安装或组合使用。
 
 ## 2. 仓库职责划分
 
 | 仓库 | 负责内容 |
 | --- | --- |
 | [`mindie-agent`](https://github.com/mindie-agent/mindie-agent) | 产品架构、领域边界、入口文档、跨仓规范与发布记录；不包含运行时代码或 MCP 服务 |
+| [`mindie-agent-omp`](https://github.com/mindie-agent/mindie-agent-omp) | oh-my-pi 的原生扩展：标准 MCP 运行时桥接、独立 `omp` 宿主配置与本地授权会话采集 |
 | [`mindie-agent-codex`](https://github.com/mindie-agent/mindie-agent-codex)、[`mindie-agent-cc`](https://github.com/mindie-agent/mindie-agent-cc)、[`mindie-agent-kimi`](https://github.com/mindie-agent/mindie-agent-kimi)、[`mindie-agent-dsh`](https://github.com/mindie-agent/mindie-agent-dsh)、[`mindie-agent-agy`](https://github.com/mindie-agent/mindie-agent-agy)、[`mindie-agent-wb`](https://github.com/mindie-agent/mindie-agent-wb)、[`mindie-agent-oc`](https://github.com/mindie-agent/mindie-agent-oc) | 各宿主客户端的薄原生插件：宿主协议清单、生命周期 Hook 转发、宿主专属会话记录脱敏提取与组件版本锁定，运行时与 MCP 分发统一委托给 `harness` |
-| [`harness`](https://github.com/mindie-agent/harness) | **7 端宿主共享底座（`mindie-harness` / `mindie_harness`）**：跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子更新、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）以及单状态源 `ExperimentLedger` 的 `rsi` 优化探索闭环 |
+| [`harness`](https://github.com/mindie-agent/harness) | **8 端宿主共享底座（`mindie-harness` / `mindie_harness`）**：跨平台无窗子进程与嵌套 Win32 Job 监管、确定性冷启动 Seed（`mindie-harness-seed.pyz`）、`Active + Rollback`（`<= 2`）`.inuse` 租约原子更新、长驻并发零绑定 MCP 网关（`P2.7` / `P2.8`）以及单状态源 `ExperimentLedger` 的 `rsi` 优化探索闭环 |
 | [`knowledge`](https://github.com/mindie-agent/knowledge) | **纯知识引擎（`mindie-knowledge`）**：`L1–L4` 分级单元管理、适用条件匹配、批量 `refs` 精读与共享 `known_refs` / `token_budget` 预算、负面尝试历史（`rejected_history`）与受影响组件（`affected_components`）溯源、脱敏任务切片、经验提炼校验与社区 PR 投递 |
 | [`knowledge-vllm-ascend`](https://github.com/mindie-agent/knowledge-vllm-ascend)、[`knowledge-xllm`](https://github.com/mindie-agent/knowledge-xllm)、[`knowledge-mindie-sd`](https://github.com/mindie-agent/knowledge-mindie-sd)、[`knowledge-operators`](https://github.com/mindie-agent/knowledge-operators)、[`knowledge-infer-core`](https://github.com/mindie-agent/knowledge-infer-core)、[`knowledge-infer-distributed`](https://github.com/mindie-agent/knowledge-infer-distributed)、[`knowledge-infer-observability`](https://github.com/mindie-agent/knowledge-infer-observability)、[`knowledge-infer-ops-compat`](https://github.com/mindie-agent/knowledge-infer-ops-compat)、[`knowledge-agent-engineering`](https://github.com/mindie-agent/knowledge-agent-engineering) | 面向 `vLLM-Ascend`、`xLLM`、`MindIE-SD`、昇腾算子、推理核心架构、分布式通信（含 `DP/TP/EP/PP/DCP/DSA-CP/PCP`）、可观测性、图编译/算子兼容与 Agent 工程治理的 9 大结构化分级知识库（`L1–L4`） |
 | [`remote-dev`](https://github.com/mindie-agent/remote-dev) | 统一 SSH 认证、共享 `~/.mindie/ssh/id_ed25519` 凭据回退与公钥维护、破坏性命令安全拦截门禁；远端文件读写、增量编辑、代码搜索、补丁同步、容器内命令执行与后台长任务管理 |

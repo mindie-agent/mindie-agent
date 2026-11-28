@@ -64,6 +64,7 @@ STORAGE_LIFECYCLE_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
     "mindie-agent-agy": (0, 1, 16),
     "mindie-agent-wb": (0, 1, 14),
     "mindie-agent-oc": (0, 1, 7),
+    "mindie-agent-omp": (1, 3, 0),
 }
 
 PRODUCTION_PYTHON_SCOPES: dict[str, tuple[str, ...]] = {
@@ -84,6 +85,7 @@ PRODUCTION_PYTHON_SCOPES: dict[str, tuple[str, ...]] = {
     "mindie-agent-agy": ("plugins/mindie-agent/scripts",),
     "mindie-agent-wb": ("plugins/mindie-agent/scripts",),
     "mindie-agent-oc": ("plugins/mindie-agent/scripts",),
+    "mindie-agent-omp": ("scripts",),
 }
 
 THIN_HOST_PLUGIN_MAX_LOC = 1500
@@ -95,6 +97,7 @@ THIN_HOST_PLUGIN_FLOOR_VERSIONS: dict[str, tuple[int, int, int]] = {
     "mindie-agent-agy": (0, 1, 21),
     "mindie-agent-wb": (0, 1, 19),
     "mindie-agent-oc": (0, 1, 11),
+    "mindie-agent-omp": (1, 3, 0),
 }
 
 REQUIRED_STORAGE_WIRING: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...], frozenset[str]], ...] = (

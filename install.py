@@ -17,12 +17,12 @@ every Windows subprocess passes `creationflags=_CREATE_NO_WINDOW`.
 from __future__ import annotations
 import argparse, hashlib, json, os, re, shutil, subprocess, sys, tarfile, tempfile, urllib.error, urllib.parse, urllib.request
 from pathlib import Path
-SCHEMA, DEFAULT_CHANNEL, HOSTS = "mindie-install/1", "https://github.com/mindie-agent/mindie-agent/releases/latest/download", ("codex", "cc", "kimi", "dsh", "agy", "wb", "oc")
-HOST_ALIASES = {"codex": "codex", "cc": "cc", "claude": "cc", "kimi": "kimi", "dsh": "dsh", "agy": "agy", "antigravity": "agy", "wb": "wb", "workbuddy": "wb", "codebuddy": "wb", "oc": "oc", "opencode": "oc"}
+SCHEMA, DEFAULT_CHANNEL, HOSTS = "mindie-install/1", "https://github.com/mindie-agent/mindie-agent/releases/latest/download", ("codex", "cc", "kimi", "dsh", "agy", "wb", "oc", "omp")
+HOST_ALIASES = {"codex": "codex", "cc": "cc", "claude": "cc", "kimi": "kimi", "dsh": "dsh", "agy": "agy", "antigravity": "agy", "wb": "wb", "workbuddy": "wb", "codebuddy": "wb", "oc": "oc", "opencode": "oc", "omp": "omp", "oh-my-pi": "omp"}
 MIN_FREE_BYTES, MAX_BUNDLE_BYTES, MAX_RELEASE_BYTES, MAX_SUMS_BYTES = 2_684_354_560, 16 * 1024 * 1024, 1024 * 1024, 256 * 1024
 MAX_MEMBERS, MAX_UNPACKED_BYTES, _CHUNK, _CREATE_NO_WINDOW = 64, 32 * 1024 * 1024, 64 * 1024, (0x08000000 if os.name == "nt" else 0)
-_MARKERS = {"CODEX_THREAD_ID": "codex", "CODEX_CI": "codex", "CLAUDECODE": "cc", "KIMI_CODE_HOME": "kimi", "DSH_PROFILE": "dsh", "DSH_HOME": "dsh", "AGY_CONVERSATION_ID": "agy", "AGY_APP_DATA_DIR": "agy", "WORKBUDDY_CONFIG_DIR": "wb", "CODEBUDDY_CONFIG_DIR": "wb", "MINDIE_WB_BIN": "wb", "OPENCODE_SESSION_ID": "oc"}
-_BINARIES = {"codex": ("codex",), "cc": ("claude",), "kimi": ("kimi",), "dsh": ("dsh",), "agy": ("agy", "antigravity"), "wb": ("wb", "workbuddy", "codebuddy"), "oc": ("opencode",)}
+_MARKERS = {"CODEX_THREAD_ID": "codex", "CODEX_CI": "codex", "CLAUDECODE": "cc", "KIMI_CODE_HOME": "kimi", "DSH_PROFILE": "dsh", "DSH_HOME": "dsh", "AGY_CONVERSATION_ID": "agy", "AGY_APP_DATA_DIR": "agy", "WORKBUDDY_CONFIG_DIR": "wb", "CODEBUDDY_CONFIG_DIR": "wb", "MINDIE_WB_BIN": "wb", "OPENCODE_SESSION_ID": "oc", "PI_SESSION_ID": "omp"}
+_BINARIES = {"codex": ("codex",), "cc": ("claude",), "kimi": ("kimi",), "dsh": ("dsh",), "agy": ("agy", "antigravity"), "wb": ("wb", "workbuddy", "codebuddy"), "oc": ("opencode",), "omp": ("omp",)}
 class _ChannelError(Exception):
     def __init__(self, reason): super().__init__(reason); self.reason = reason
 def _emit(payload, code=0):
@@ -86,6 +86,7 @@ def detect_installed_hosts(env=None):
         "agy": [Path("/Applications/Antigravity.app"), home / "Applications/Antigravity.app", home / ".gemini/antigravity", cfg / "agy.json"],
         "wb": [Path("/Applications/WorkBuddy.app"), home / "Applications/WorkBuddy.app", home / ".workbuddy", cfg / "wb.json"],
         "oc": [home / ".config/opencode", home / ".opencode", cfg / "oc.json"],
+        "omp": [home / ".omp", cfg / "omp.json"],
     }
     found.update(host for host, candidates in paths.items() if any(_path_exists(path) for path in candidates))
     return [host for host in HOSTS if host in found]
@@ -388,7 +389,7 @@ def _host_python(env):
 def main(argv=None):
     environ = dict(os.environ)
     parser = argparse.ArgumentParser(prog="install.py", description="Install MindIE Agent into detected hosts.")
-    parser.add_argument("--host", default="auto"); parser.add_argument("--channel-base-url", default=None)
+    parser.add_argument("--host", default="auto", help=f"auto, {', '.join(HOSTS)}, or a host alias"); parser.add_argument("--channel-base-url", default=None)
     parser.add_argument("--offline", action="store_true"); parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -418,6 +419,8 @@ def main(argv=None):
     except TimeoutError: raise
     except OSError: return _fail(base, "insufficient_disk_space")
     run_env = dict(environ)
+    # Bootstrap provisions canonical per-host configs, independent of the caller's active profile.
+    run_env.pop("MINDIE_AGENT_CONFIG", None)
     if not environ.get("UV_CACHE_DIR") or not _same_volume(Path(environ["UV_CACHE_DIR"]), data_root):
         run_env["UV_CACHE_DIR"] = str(data_root / ".uv-cache")
     uv_bin = _which_native("uv", run_env)
